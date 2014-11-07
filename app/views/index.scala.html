@@ -1,7 +1,17 @@
 @(message: String)
 
-@main("Welcome to Play") {
-
-    @play20.welcome(message, style = "Java")
-
+@main("Welcome to WebPViz") {
+    <div class="container">
+        <form role="form">
+            <div class="form-group">
+                <label for="pvizURL">*.pviz URL</label>
+                <input type="text" class="form-control" id="pvizURL" placeholder="*.pviz URL">
+            </div>
+            <div class="form-group">
+                <label for="pvizFile">*.pviz File</label>
+                <input type="file" class="form-control" id="pvizFile" placeholder="*.pziv File">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+    </div>
 }
