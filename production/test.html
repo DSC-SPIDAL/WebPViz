@@ -21,6 +21,7 @@
 <script src="js/Detector.js"></script>
 <script src="js/stats.min.js"></script>
 <script src="js/randomColor.js"></script>
+<script src="js/plot.js"></script>
 <script>
     if (!Detector.webgl) Detector.addGetWebGLMessage();
     var container, stats;
@@ -38,15 +39,15 @@
     function init() {
         container = document.body;
 
-        var checkboxes = window.parent.document.getElementsByName('table_records');
-        var vals = "";
-        for (var i=0, n=checkboxes.length;i<n;i++) {
-            if (checkboxes[i].checked)
-            {
-                vals += ","+checkboxes[i].value;
-            }
-        }
-        if (vals) vals = val.substring(1);
+//        var checkboxes = window.parent.document.getElementsByName('table_records');
+//        var vals = "";
+//        for (var i=0, n=checkboxes.length;i<n;i++) {
+//            if (checkboxes[i].checked)
+//            {
+//                vals += ","+checkboxes[i].value;
+//            }
+//        }
+//        if (vals) vals = val.substring(1);
         camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 100);
         camera.position.z = 6;
         scene = new THREE.Scene();
@@ -92,7 +93,7 @@
                     colors[i] = new THREE.Color(0xffffff);
                     colors[i].setHSL(hsl[0], hsl[1], hsl[2]);
                 }
-
+                window.parent.document.getElementById("x_content").innerHTML =
                 geometry.colors = colors;
                 material = new THREE.PointCloudMaterial({ size: 0.05, map: sprite, vertexColors: THREE.VertexColors, transparent: true });
                 material.color.setHSL(1.0, 1, 1);
@@ -123,6 +124,7 @@
                 //
 
                 window.addEventListener('resize', onWindowResize, false);
+                /* This part will generate the check lists for the clusteres */
 
                 animate();
             }
