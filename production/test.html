@@ -1,0 +1,143 @@
+
+<html>
+<head>
+    <title>JS Point Cloud</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #ffffff;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
+<body>
+<script src="js/papaparse.min2.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/TrackballControls.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/randomColor.js"></script>
+<script>
+    if (!Detector.webgl) Detector.addGetWebGLMessage();
+    var container, stats;
+    var camera, scene, renderer, sprite, colors = [], particles, material, controls, light;
+    var mesh;
+    var particleSystem;
+    var colorMap = {};
+
+    var mouseX = 10, mouseY = 10;
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    init();
+
+    function init() {
+        container = document.body;
+        //
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 100);
+        camera.position.z = 6;
+        scene = new THREE.Scene();
+        //scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+
+        //scene.fog = new THREE.Fog(0x050505, 9, 9);
+
+        controls = new THREE.TrackballControls(camera);
+        controls.rotateSpeed = 1.0;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
+        controls.noZoom = false;
+        controls.noPan = false;
+        controls.staticMoving = true;
+        controls.dynamicDampingFactor = 0.3;
+        controls.keys = [ 65, 83, 68 ];
+        controls.addEventListener('change', render);
+
+        var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
+
+        Papa.parse("data/AMF_Phylo_Seqs_599Nts_Apr17MAFFT_seqs_swgms_pid_1821_smacof_points_w_orig_pnum.csv", {
+            download: true,
+            complete: function (results) {
+
+                var geometry = new THREE.Geometry();
+                var colors = [];
+//                sprite = THREE.ImageUtils.loadTexture("textures/ball.png");
+
+                for (var i in results.data) {
+                    var row = results.data[i];
+
+                    var hsl;
+
+                    hsl = [heus[row[4]], 1, 0.8];
+
+                    var vertex = new THREE.Vector3();
+                    vertex.x = row[1] * 10;
+                    vertex.y = row[2] * 10;
+                    vertex.z = row[3] * 10;
+
+                    geometry.vertices.push(vertex);
+
+                    colors[i] = new THREE.Color(0xffffff);
+                    colors[i].setHSL(hsl[0], hsl[1], hsl[2]);
+                }
+
+                geometry.colors = colors;
+                material = new THREE.PointCloudMaterial({ size: 0.05, map: sprite, vertexColors: THREE.VertexColors, transparent: true });
+                material.color.setHSL(1.0, 1, 1);
+                particles = new THREE.PointCloud(geometry, material);
+                particles.sortParticles = true;
+                scene.add(particles);
+
+//                light = new THREE.DirectionalLight(0xffffff);
+//                light.position.set(1, 1, 1);
+//                scene.add(light);
+//                light = new THREE.DirectionalLight(0x002288);
+//                light.position.set(-1, -1, -1);
+//                scene.add(light);
+//                light = new THREE.AmbientLight(0x222222);
+//                scene.add(light);
+
+                //
+                renderer = new THREE.WebGLRenderer({clearAlpha: 1, antialias: true});
+                //renderer.setClearColor( 0x, 1);
+                //renderer.setClearColor( scene.fog.color, 1 );
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(renderer.domElement);
+                //
+                stats = new Stats();
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.top = '0px';
+                container.appendChild(stats.domElement);
+                //
+
+                window.addEventListener('resize', onWindowResize, false);
+
+                animate();
+            }
+        });
+    }
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        controls.handleResize();
+        render();
+    }
+    //
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        render();
+    }
+
+
+    function render() {
+        renderer.render(scene, camera);
+        stats.update();
+    }
+</script>
+</body>
+</html>
