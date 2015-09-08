@@ -22,6 +22,7 @@
 <script src="js/stats.min.js"></script>
 <script src="js/randomColor.js"></script>
 <script src="js/plot.js"></script>
+<script src="js/custom.js"></script>
 <script>
     if (!Detector.webgl) Detector.addGetWebGLMessage();
     var container, stats;
@@ -33,12 +34,12 @@
     var mouseX = 10, mouseY = 10;
     var windowHalfX = window.innerWidth / 2;
     var windowHalfY = window.innerHeight / 2;
+    var removeclusters = [];
+    init(removeclusters);
 
-    init();
-
-    function init() {
+    function init(removeclusters) {
         container = document.body;
-
+    alert("a");
 //        var checkboxes = window.parent.document.getElementsByName('table_records');
 //        var vals = "";
 //        for (var i=0, n=checkboxes.length;i<n;i++) {
@@ -74,26 +75,33 @@
 
                 var geometry = new THREE.Geometry();
                 var colors = [];
+                var sections = [];
 //                sprite = THREE.ImageUtils.loadTexture("textures/ball.png");
 
                 for (var i in results.data) {
                     var row = results.data[i];
+                    if(removeclusters.indexOf(row[4]) == -1) {
+                        var hsl;
 
-                    var hsl;
+                        hsl = [heus[row[4]], 1, 0.8];
+                        if (sections.indexOf(row[4]) == -1)
+                            sections.push(row[4]);
 
-                    hsl = [heus[row[4]], 1, 0.8];
+                        var vertex = new THREE.Vector3();
+                        vertex.x = row[1] * 10;
+                        vertex.y = row[2] * 10;
+                        vertex.z = row[3] * 10;
 
-                    var vertex = new THREE.Vector3();
-                    vertex.x = row[1] * 10;
-                    vertex.y = row[2] * 10;
-                    vertex.z = row[3] * 10;
+                        geometry.vertices.push(vertex);
 
-                    geometry.vertices.push(vertex);
+                        colors[i] = new THREE.Color(0xffffff);
+                        colors[i].setHSL(hsl[0], hsl[1], hsl[2]);
+                    }
 
-                    colors[i] = new THREE.Color(0xffffff);
-                    colors[i].setHSL(hsl[0], hsl[1], hsl[2]);
                 }
-                window.parent.document.getElementById("x_content").innerHTML =
+               //alert(generateCheckList(sections))
+                window.parent.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections)
+
                 geometry.colors = colors;
                 material = new THREE.PointCloudMaterial({ size: 0.05, map: sprite, vertexColors: THREE.VertexColors, transparent: true });
                 material.color.setHSL(1.0, 1, 1);

@@ -6,15 +6,15 @@
 
 /** ******  left menu  *********************** **/
 $(function () {
-    $('#sidebar-menu li ul').slideUp();
+    $('#sidebar-menu li ul').first().slideDown();
     $('#sidebar-menu li').removeClass('active');
 
     $('#sidebar-menu li').click(function () {
         if ($(this).is('.active')) {
-            $(this).removeClass('active');
-            $('ul', this).slideUp();
-            $(this).removeClass('nv');
-            $(this).addClass('vn');
+            //$(this).removeClass('active');
+            //$('ul', this).slideUp();
+            //$(this).removeClass('nv');
+            //$(this).addClass('vn');
         } else {
             $('#sidebar-menu li ul').slideUp();
             $(this).removeClass('vn');
@@ -48,6 +48,16 @@ $(function () {
             }
         }
     });
+});
+
+$(function () {
+    $('#cluster_table_div').on('click','input[type="checkbox"]',function() {
+        var rm = $(this).val();
+        var removeclusters = [];
+        removeclusters.push(rm);
+        init(removeclusters);
+    });
+
 });
 
 /* Sidebar Menu active class */
