@@ -50,15 +50,15 @@ $(function () {
     });
 });
 
-$(function () {
-    $('#cluster_table_div').on('click','input[type="checkbox"]',function() {
-        var rm = $(this).val();
-        var removeclusters = [];
-        removeclusters.push(rm);
-        init(removeclusters);
-    });
-
-});
+//$(function () {
+//    $('#cluster_table_div').on('click','input[type="checkbox"]',function() {
+//        var rm = $(this).val();
+//        var removeclusters = [];
+//        removeclusters.push(rm);
+//        init(removeclusters);
+//    });
+//
+//});
 
 /* Sidebar Menu active class */
 $(function () {
