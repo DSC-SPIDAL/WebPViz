@@ -54,8 +54,7 @@ $(function () {
     $('#cluster_table_div').on('click','input[type="checkbox"]',function() {
         var rm = $(this).val();
         var removeclusters = [];
-        removeclusters.push(rm.toString());
-        generateGraph(removeclusters);
+        removeSection(rm);
     });
 
 });
