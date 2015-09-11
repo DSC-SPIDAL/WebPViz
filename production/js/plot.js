@@ -32,7 +32,7 @@ function generateCheckList(list) {
 }
 
 var container, stats;
-var camera, scene, renderer, sprite, colors = [], particles, material, controls, light;
+var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light;
 var mesh;
 var particleSystem;
 var colorMap = {};
@@ -45,7 +45,6 @@ var windowHalfY = window.innerHeight / 2;
 var removeclusters = [];
 var scene3d;
 var colors = [];
-var particales1;
 
 function initScene() {
 
@@ -107,44 +106,33 @@ function generateGraph(removeclusters) {
     // new THREE.TrackballControls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-    var geometry = new THREE.Geometry();
-    var geometry1 = new THREE.Geometry();
-
+    var geometry = [];
+    var hsl;
     var sections = [];
-
+    //TODO try to make the loop here not dependent on the fact that row[4] starts from 0
     for (var i in resultData.data) {
         var row = resultData.data[i];
 
-        if (removeclusters.indexOf(row[4]) == -1) {
-            var hsl;
-            hsl = [heus[row[4]], 1, 0.8];
+        if(geometry.length == row[4]){
+            geometry.push(new THREE.Geometry());
+            colors.push(new Array());
+        }
+        hsl = [heus[row[4]], 1, 0.8];
             var vertex = new THREE.Vector3();
             vertex.x = row[1] * 10;
             vertex.y = row[2] * 10;
             vertex.z = row[3] * 10;
 
-            geometry.vertices.push(vertex);
+            geometry[row[4]].vertices.push(vertex);
 
             if (sections.indexOf(row[4]) == -1)
                 sections.push(row[4]);
 
-
-        }else{
-            var hsl;
-            hsl = [heus[row[4]], 1, 0.8];
-            var vertex = new THREE.Vector3();
-            vertex.x = row[1] * 10;
-            vertex.y = row[2] * 10;
-            vertex.z = row[3] * 10;
-
-            geometry1.vertices.push(vertex);
-        }
-        colors[i] = new THREE.Color(0xffffff);
-        colors[i].setHSL(hsl[0], hsl[1], hsl[2]);
+        //TODO work on this
+        colors[row[4]][i] = new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]);
     }
     window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections)
-    geometry.colors = colors;
-    geometry.__dirtyVertices = true;
+
     material = new THREE.PointCloudMaterial({
         size: 0.005,
         map: sprite,
@@ -152,11 +140,12 @@ function generateGraph(removeclusters) {
         transparent: true
     });
     material.color.setHSL(1.0, 1, 1);
-    particles = new THREE.PointCloud(geometry, material);
-    particales1 = new THREE.PointCloud(geometry1, material);
-    scene3d.add(particles);
-    scene3d.add(particales1);
+    for(var i in geometry){
+        geometry[i].colors = colors[i];
+        particles.push( new THREE.PointCloud(geometry[i], material));
+        scene3d.add(particles[i]);
 
+    }
     stats.domElement.style.position = 'absolute';
     document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
@@ -166,8 +155,8 @@ function generateGraph(removeclusters) {
 }
 
 function removeSection(id){
-    scene3d.remove(particales1);
-    
+  //  scene3d.remove(particales1);
+
     render();
     animate();
 }
