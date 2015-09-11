@@ -24,7 +24,43 @@
     <link href="css/floatexamples.css" rel="stylesheet" type="text/css" />
     <script src="js/jquery.min.js"></script>
     <script src="js/nprogress.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 
+    <!-- gauge js -->
+    <script type="text/javascript" src="js/gauge/gauge.min.js"></script>
+    <script type="text/javascript" src="js/gauge/gauge_demo.js"></script>
+    <!-- chart js -->
+    <script src="js/chartjs/chart.min.js"></script>
+    <!-- bootstrap progress js -->
+    <script src="js/progressbar/bootstrap-progressbar.min.js"></script>
+    <script src="js/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- icheck -->
+    <script src="js/icheck/icheck.min.js"></script>
+    <!-- daterangepicker -->
+    <script type="text/javascript" src="js/moment.min.js"></script>
+    <script type="text/javascript" src="js/datepicker/daterangepicker.js"></script>
+
+    <script src="js/custom.js"></script>
+
+    <!-- flot js -->
+    <!--[if lte IE 8]><script type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
+    <script type="text/javascript" src="js/flot/jquery.flot.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.orderBars.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.time.min.js"></script>
+    <script type="text/javascript" src="js/flot/date.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.spline.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.stack.js"></script>
+    <script type="text/javascript" src="js/flot/curvedLines.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.resize.js"></script>
+    <!-- Script to polt the graphs -->
+    <script src="js/papaparse.min2.js"></script>
+    <script src="js/three.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/stats.min.js"></script>
+    <script src="js/randomColor.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/plot.js"></script>
     <script>
         NProgress.start();
     </script>
@@ -155,100 +191,8 @@
                     <nav class="" role="navigation">
                        <ul class="nav navbar-nav navbar-right">
                             <li class="">
-                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <img src="images/img.jpg" alt="">John Doe
-                                    <span class=" fa fa-angle-down"></span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-right">
-                                    <li><a href="javascript:;">  Profile</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:;">
-                                            <span class="badge bg-red pull-right">50%</span>
-                                            <span>Settings</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:;">Help</a>
-                                    </li>
-                                    <li><a href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
-                                    </li>
-                                </ul>
+                                <div id="stats" class="stats-div"></div>
                             </li>
-
-                            <li role="presentation" class="dropdown">
-                                <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa fa-envelope-o"></i>
-                                    <span class="badge bg-green">6</span>
-                                </a>
-                                <ul id="menu1" class="dropdown-menu list-unstyled msg_list animated fadeInDown" role="menu">
-                                    <li>
-                                        <a>
-                                            <span class="image">
-                                        <img src="images/img.jpg" alt="Profile Image" />
-                                    </span>
-                                            <span>
-                                        <span>John Smith</span>
-                                            <span class="time">3 mins ago</span>
-                                            </span>
-                                            <span class="message">
-                                        Film festivals used to be do-or-die moments for movie makers. They were where... 
-                                    </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a>
-                                            <span class="image">
-                                        <img src="images/img.jpg" alt="Profile Image" />
-                                    </span>
-                                            <span>
-                                        <span>John Smith</span>
-                                            <span class="time">3 mins ago</span>
-                                            </span>
-                                            <span class="message">
-                                        Film festivals used to be do-or-die moments for movie makers. They were where... 
-                                    </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a>
-                                            <span class="image">
-                                        <img src="images/img.jpg" alt="Profile Image" />
-                                    </span>
-                                            <span>
-                                        <span>John Smith</span>
-                                            <span class="time">3 mins ago</span>
-                                            </span>
-                                            <span class="message">
-                                        Film festivals used to be do-or-die moments for movie makers. They were where... 
-                                    </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a>
-                                            <span class="image">
-                                        <img src="images/img.jpg" alt="Profile Image" />
-                                    </span>
-                                            <span>
-                                        <span>John Smith</span>
-                                            <span class="time">3 mins ago</span>
-                                            </span>
-                                            <span class="message">
-                                        Film festivals used to be do-or-die moments for movie makers. They were where... 
-                                    </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <div class="text-center">
-                                            <a>
-                                                <strong><a href="inbox.html">See All Alerts</strong>
-                                                <i class="fa fa-angle-right"></i>
-                                            </a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-
                         </ul>
                     </nav>
                 </div>
@@ -260,7 +204,6 @@
             <!-- page content -->
             <div class="right_col" role="main">
                 <canvas id="canvas3d" style="position: relative; min-height: 1000px; width: 100%;"></canvas>
-                <div id="stas"></div>
 
                 <!-- top tiles -->
 
@@ -291,43 +234,7 @@
         <div id="notif-group" class="tabbed_notifications"></div>
     </div>
 
-    <script src="js/bootstrap.min.js"></script>
 
-    <!-- gauge js -->
-    <script type="text/javascript" src="js/gauge/gauge.min.js"></script>
-    <script type="text/javascript" src="js/gauge/gauge_demo.js"></script>
-    <!-- chart js -->
-    <script src="js/chartjs/chart.min.js"></script>
-    <!-- bootstrap progress js -->
-    <script src="js/progressbar/bootstrap-progressbar.min.js"></script>
-    <script src="js/nicescroll/jquery.nicescroll.min.js"></script>
-    <!-- icheck -->
-    <script src="js/icheck/icheck.min.js"></script>
-    <!-- daterangepicker -->
-    <script type="text/javascript" src="js/moment.min.js"></script>
-    <script type="text/javascript" src="js/datepicker/daterangepicker.js"></script>
-
-    <script src="js/custom.js"></script>
-
-    <!-- flot js -->
-    <!--[if lte IE 8]><script type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
-    <script type="text/javascript" src="js/flot/jquery.flot.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.orderBars.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.time.min.js"></script>
-    <script type="text/javascript" src="js/flot/date.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.spline.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.stack.js"></script>
-    <script type="text/javascript" src="js/flot/curvedLines.js"></script>
-    <script type="text/javascript" src="js/flot/jquery.flot.resize.js"></script>
-    <!-- Script to polt the graphs -->
-    <script src="js/papaparse.min2.js"></script>
-    <script src="js/three.min.js"></script>
-    <script src="js/TrackballControls.js"></script>
-    <script src="js/Detector.js"></script>
-    <script src="js/stats.min.js"></script>
-    <script src="js/randomColor.js"></script>
-    <script src="js/plot.js"></script>
     <script>
         $(document).ready(function () {
             if (!Detector.webgl) Detector.addGetWebGLMessage();

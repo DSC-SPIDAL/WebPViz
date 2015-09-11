@@ -1995,6 +1995,15 @@ a.user-profile {
     color: #5E6974 !important;
 }
 
+
+.stats-div {
+    width: 100px;
+    height: 60px;
+    alignment: right;
+    padding-top: 5px;
+
+}
+
 .user-profile img {
     width: 29px;
     height: 29px;
