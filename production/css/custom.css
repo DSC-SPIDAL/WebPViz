@@ -2430,6 +2430,11 @@ button,
     position: relative;
 }
 
+#flat, #color-box-label, #color-pic1
+{
+    display:inline;
+}
+
 .ln_solid {
     border-top: 1px solid #e5e5e5;
     color: #ffffff;
@@ -3122,10 +3127,11 @@ select.parsley-error {
 
 .color-box-label {
     position: relative;
-    margin-left: 5px;
-    top: 3px;
+    margin-left: 15px;
+    top: -3px;
+    width: 15px;
+    height: 15px;
 }
-
 .xdisplay_input {
     width: 240px;
     overflow: hidden;

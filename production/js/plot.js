@@ -17,7 +17,7 @@ function generateCheckList(list) {
     for (i = 0; i < list.length; i++) {
         tablerows += "<tr class='even pointer'>"
             + "<td class='a-center'>"
-            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='input-group color-pic1' style='width: 15px;height: 15px;'><input value='#e60045' class='form-control' type='hidden'><span class='input-group-addon'><i style='background-color: rgb(230, 0, 69);'></i></span></div>"
+            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'><input class='form-control' type='hidden'><span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span></div>"
             + "</td>"
             + "<td class=' '>C12</span></td>"
             + "<td class=' '>121</td>"
@@ -139,6 +139,7 @@ function generateGraph(removeclusters) {
     });
     material.color.setHSL(1.0, 1, 1);
     for(var i in geometry){
+        alert(colors[i][1].getHex() )
         geometry[i].colors = colors[i];
         particles.push( new THREE.PointCloud(geometry[i], material));
         scene3d.add(particles[i]);
