@@ -1,4 +1,4 @@
-function generateCheckList(list) {
+function generateCheckList(list, initcolors) {
 
     var tabletop = "<table class='table table-striped' id='cluster_table' style='background-color: #EAEAEA; padding-top: 0px'>"
         + "<thead>"
@@ -17,7 +17,12 @@ function generateCheckList(list) {
     for (i = 0; i < list.length; i++) {
         tablerows += "<tr class='even pointer'>"
             + "<td class='a-center'>"
-            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'><input class='form-control' type='hidden'><span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span></div>"
+            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'>"
+            + "<label class='color-box-label'>" + i + "</label> "
+            + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
+            + "<input value='" + initcolors[i] + "' class='form-control' type='hidden' id='"+ i + "'>"
+            + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
+            + "</div>"
             + "</td>"
             + "<td class=' '>C12</span></td>"
             + "<td class=' '>121</td>"
@@ -45,6 +50,7 @@ var windowHalfY = window.innerHeight / 2;
 var removeclusters = [];
 var scene3d;
 var colors = [];
+var colorlist = [];
 
 function initScene() {
 
@@ -129,7 +135,7 @@ function generateGraph(removeclusters) {
 
         colors[row[4]].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
     }
-    window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections)
+
 
     material = new THREE.PointCloudMaterial({
         size: 0.005,
@@ -139,12 +145,13 @@ function generateGraph(removeclusters) {
     });
     material.color.setHSL(1.0, 1, 1);
     for(var i in geometry){
-        alert(colors[i][1].getHex() )
+        colorlist.push(colors[i][0].getHexString());
         geometry[i].colors = colors[i];
         particles.push( new THREE.PointCloud(geometry[i], material));
         scene3d.add(particles[i]);
 
     }
+    window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections,colorlist);
     stats.domElement.style.position = 'absolute';
     document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
@@ -165,16 +172,16 @@ function addSection(id){
     render();
    // animate();
 }
-/*
- <thead>
- <tr class="headings">
- <th>
- <input type="checkbox" id="check-all" disabled="true" class="flat"> Cluster
- </th>
- <th class="column-title">Label</th>
- <th class="column-title">Size</th>
- </th>
- </tr>
- </thead>
 
- */
+function recolorSection(id, color){
+    scene3d.remove(particles[id]);
+    colorlist[id] = color;
+    for(var i in colors[id]){
+        colors[id][i] = color;
+    }
+    particles[id].geometry.colors = colors[id];
+    particles[id].geometry.verticesNeedUpdate = true;
+    scene3d.add(particles[id]);
+    render();
+
+}
