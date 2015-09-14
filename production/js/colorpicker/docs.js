@@ -1,6 +1,6 @@
 $(function () {
     $('.demo1').colorpicker();
-    $('.demo2').colorpicker();
+    $('.color-pic').colorpicker();
     
     // Horizontal mode
         $('#demo_forceformat').colorpicker({

@@ -22,6 +22,7 @@
     <link rel="stylesheet" type="text/css" href="css/maps/jquery-jvectormap-2.0.1.css" />
     <link href="css/icheck/flat/green.css" rel="stylesheet" />
     <link href="css/floatexamples.css" rel="stylesheet" type="text/css" />
+
     <script src="js/jquery.min.js"></script>
     <script src="js/nprogress.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -39,7 +40,8 @@
     <!-- daterangepicker -->
     <script type="text/javascript" src="js/moment.min.js"></script>
     <script type="text/javascript" src="js/datepicker/daterangepicker.js"></script>
-
+    <!-- colorpicker -->
+    <link href="css/colorpicker/bootstrap-colorpicker.min.css" rel="stylesheet">
     <script src="js/custom.js"></script>
 
     <!-- flot js -->
@@ -54,13 +56,16 @@
     <script type="text/javascript" src="js/flot/curvedLines.js"></script>
     <script type="text/javascript" src="js/flot/jquery.flot.resize.js"></script>
     <!-- Script to polt the graphs -->
-    <script src="js/papaparse.min2.js"></script>
+    <script src="js/papaparse.min.js"></script>
     <script src="js/three.min.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/randomColor.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/plot.js"></script>
+    <!-- color picker -->
+    <script src="js/colorpicker/bootstrap-colorpicker.js"></script>
+    <script src="js/colorpicker/docs.js"></script>
     <script>
         NProgress.start();
     </script>
@@ -94,14 +99,8 @@
                     <div class="clearfix"></div>
 
                     <!-- menu prile quick info -->
-                    <div class="profile">
-                        <div class="profile_pic">
-                            <img src="images/img.jpg" alt="..." class="img-circle profile_img">
-                        </div>
-                        <div class="profile_info">
-                            <span>Welcome,</span>
-                            <h2>Anthony Fernando</h2>
-                        </div>
+                    <div>
+
                     </div>
                     <!-- /menu prile quick info -->
 
@@ -117,7 +116,6 @@
                                     <ul class="nav child_menu" style="display: none">
 
                                         <div class="x_content" id="cluster_table_div"></div>
-
                                     </ul>
                                 </li>
                                 <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
@@ -239,12 +237,7 @@
         $(document).ready(function () {
             if (!Detector.webgl) Detector.addGetWebGLMessage();
             initScene();
-            $('#cluster_table_div').on('click', 'input[type="checkbox"]', function () {
-                //var rm = $(this).val();
-               // var removeclusters = [];
-               // removeclusters.push(rm);
-               // generateGraph(removeclusters);
-            })
+
         });
     </script>
     <script>
@@ -307,10 +300,6 @@
             }
         });
     </script>
-
-
-
-
 
     <script>
         NProgress.done();

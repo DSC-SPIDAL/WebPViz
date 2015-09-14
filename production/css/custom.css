@@ -2425,6 +2425,11 @@ button,
     margin-bottom: 10px;
 }
 
+.input-group-addon {
+    padding: 0px 0px;
+    position: relative;
+}
+
 .ln_solid {
     border-top: 1px solid #e5e5e5;
     color: #ffffff;

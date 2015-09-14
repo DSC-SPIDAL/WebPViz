@@ -17,9 +17,9 @@ function generateCheckList(list) {
     for (i = 0; i < list.length; i++) {
         tablerows += "<tr class='even pointer'>"
             + "<td class='a-center'>"
-            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='color-box' style='background-color: #FF850A;'></div>"
+            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='input-group color-pic1' style='width: 15px;height: 15px;'><input value='#e60045' class='form-control' type='hidden'><span class='input-group-addon'><i style='background-color: rgb(230, 0, 69);'></i></span></div>"
             + "</td>"
-            + "<td class=' '>C2</td>"
+            + "<td class=' '>C12</span></td>"
             + "<td class=' '>121</td>"
             + "</tr>"
     }
@@ -71,7 +71,7 @@ function render() {
     renderer.render(scene3d, camera);
     stats.update();
 }
-
+//TODO WInodow rezise does not work yet need to fix
 function onWindowResize() {
     var width = $('#canvas3d').width();
     var height = $('#canvas3d').height();
@@ -79,7 +79,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
     controls.handleResize();
-
     render();
 }
 
@@ -148,6 +147,7 @@ function generateGraph(removeclusters) {
     stats.domElement.style.position = 'absolute';
     document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
+    $('.color-pic1').colorpicker();
     render();
     animate();
 
