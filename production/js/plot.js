@@ -17,7 +17,7 @@ function generateCheckList(list) {
     for (i = 0; i < list.length; i++) {
         tablerows += "<tr class='even pointer'>"
             + "<td class='a-center'>"
-            + "<input type='checkbox' class='flat' name='table_records' value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='color-box' style='background-color: #FF850A;'></div>"
+            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'><label class='color-box-label'>" + i + "</label> <div class='color-box' style='background-color: #FF850A;'></div>"
             + "</td>"
             + "<td class=' '>C2</td>"
             + "<td class=' '>121</td>"
@@ -128,8 +128,7 @@ function generateGraph(removeclusters) {
             if (sections.indexOf(row[4]) == -1)
                 sections.push(row[4]);
 
-        //TODO work on this
-        colors[row[4]][i] = new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]);
+        colors[row[4]].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
     }
     window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections)
 
@@ -155,10 +154,15 @@ function generateGraph(removeclusters) {
 }
 
 function removeSection(id){
-  //  scene3d.remove(particales1);
-
+    scene3d.remove(particles[id]);
     render();
-    animate();
+   // animate();
+}
+
+function addSection(id){
+    scene3d.add(particles[id]);
+    render();
+   // animate();
 }
 /*
  <thead>
