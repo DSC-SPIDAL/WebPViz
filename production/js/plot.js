@@ -174,14 +174,11 @@ function addSection(id){
 }
 
 function recolorSection(id, color){
-    scene3d.remove(particles[id]);
     colorlist[id] = color;
     for(var i in colors[id]){
-        colors[id][i] = color;
+        colors[id][i] = new THREE.Color(color);
     }
     particles[id].geometry.colors = colors[id];
-    particles[id].geometry.verticesNeedUpdate = true;
-    scene3d.add(particles[id]);
+    particles[id].geometry.colorsNeedUpdate = true;
     render();
-
 }
