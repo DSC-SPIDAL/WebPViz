@@ -24,7 +24,7 @@ function generateCheckList(list, initcolors) {
             + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
             + "</div>"
             + "</td>"
-            + "<td class=' '>C12</span></td>"
+            + "<td class=' '>C" + i + "</span></td>"
             + "<td class=' '>121</td>"
             + "</tr>"
     }
@@ -138,7 +138,7 @@ function generateGraph(removeclusters) {
 
 
     material = new THREE.PointCloudMaterial({
-        size: 0.005,
+        size: 0.003,
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true
