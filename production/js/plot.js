@@ -52,10 +52,8 @@ var scene3d;
 var colors = [];
 var colorlist = [];
 
-function initScene() {
-
-    removeclusters.push("1");
-    Papa.parse("data/nucleotide/sammon.points.txt", {
+function initScene(file) {
+    Papa.parse(file, {
         download: true,
         complete: function (results) {
             resultData = results

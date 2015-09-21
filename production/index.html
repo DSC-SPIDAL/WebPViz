@@ -69,7 +69,6 @@
     <script>
         NProgress.start();
     </script>
-    
     <!--[if lt IE 9]>
         <script src="../assets/js/ie8-responsive-file-warning.js"></script>
         <![endif]-->
@@ -150,9 +149,26 @@
             <!-- top navigation -->
             <div class="top_nav">
 
+
                 <div class="nav_menu">
                     <nav class="" role="navigation">
-                       <ul class="nav navbar-nav navbar-right">
+                        <ul class="nav navbar-nav navbar-left">
+                            <li class="">
+                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <span class="glyphicon glyphicon-level-up" aria-hidden="true"></span>
+                                    <span class="glyphicon-class">File</span>
+                                    <span class=" fa fa-angle-down"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-left">
+                                    <li><a href="#/folder-open"><i class="fa fa-folder-open"></i> <fieldset>
+                                        <legend>Upload File</legend>
+                                        <input type="file" name="File Upload" id="txtFileUpload"/>
+                                    </fieldset></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
                             <li class="">
                                 <div id="stats" class="stats-div"></div>
                             </li>

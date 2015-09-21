@@ -636,7 +636,7 @@ a:focus {
 }
 
 .top_nav .dropdown-menu {
-    min-width: 220px;
+    min-width: 150px;
 }
 
 .top_nav .dropdown-menu li {
