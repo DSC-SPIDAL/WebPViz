@@ -87,6 +87,10 @@ function onWindowResize() {
 }
 
 function generateGraph(removeclusters) {
+    renderer = null;
+    particles = [];
+    colors = [];
+    controls = null;
 
     var canvasWidth = $('#canvas3d').width();
     var canvasHeight = $('#canvas3d').height();
@@ -108,6 +112,7 @@ function generateGraph(removeclusters) {
     //removeclusters.push("1")
     // new THREE.TrackballControls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
+    var cluster
 
     var geometry = [];
     var hsl;
