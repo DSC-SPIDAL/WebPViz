@@ -1,0 +1,168 @@
+@(user: User, timeSeries: TimeSeries)
+
+@main(timeSeries.name, user){
+    <style>
+    .viz {
+    margin-top: -21px;
+    padding : 0px;
+    }
+
+    #viz-container{
+    padding: 0px;
+    }
+    </style>
+    <body class="nav-md">
+
+        <div class="container body">
+
+
+            <div class="main_container">
+
+                <div class="col-md-3 left_col">
+                    <div class="left_col scroll-view">
+
+                        <div class="navbar nav_title" style="border: 0;">
+                            <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>PlotViz Web</span></a>
+                        </div>
+                        <div class="clearfix"></div>
+
+                            <!-- menu prile quick info -->
+                        <div>
+
+                        </div>
+                            <!-- /menu prile quick info -->
+
+                        <br />
+
+                            <!-- sidebar menu -->
+                        <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+
+                            <div class="menu_section">
+                                <ul class="nav side-menu">
+                                    <li><a><i class="fa fa-home"></i> Layers <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" style="display: none">
+
+                                            <div class="x_content" id="cluster_table_div"></div>
+                                        </ul>
+                                    </li>
+                                    <li><a><i class="fa fa-edit"></i> Details <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" style="display: none">
+
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                            <!-- /sidebar menu -->
+
+                            <!-- /menu footer buttons -->
+                        <div class="sidebar-footer hidden-small">
+                            <a data-toggle="tooltip" data-placement="top" title="Reset">
+                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                            </a>
+                            <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                                <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                            </a>
+                            <a data-toggle="tooltip" data-placement="top" title="Lock">
+                                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                            </a>
+                            <a data-toggle="tooltip" data-placement="top" title="Logout">
+                                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                            </a>
+                        </div>
+                            <!-- /menu footer buttons -->
+                    </div>
+                </div>
+
+                    <!-- top navigation -->
+                <div class="top_nav">
+
+
+                    <div class="nav_menu">
+                        <nav class="" role="navigation">
+                            <ul class="nav navbar-nav navbar-left">
+                                <li class="">
+                                    <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="glyphicon glyphicon-level-up" aria-hidden="true"></span>
+                                        <span class="glyphicon-class">File</span>
+                                        <span class=" fa fa-angle-down"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="">
+                                    <div id="stats" class="stats-div"></div>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                </div>
+                    <!-- /top navigation -->
+
+
+                    <!-- page content -->
+                <div class="right_col" role="main">
+                    <canvas id="canvas3d" style="position: relative; min-height: 1000px; width: 100%;"></canvas>
+                    <p>
+                        <label for="amount">Value:</label>
+                        <input type="text" id="amount"  value="0" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                    </p>
+                    <div id="slider"></div>
+                    <div id="slider-controls" class="slider-controls"> <a id="slider-play-a" href="#"><i id="slider-play" class="fa fa-play-circle"></i></a></div>
+                    <footer>
+                        <div class="">
+                            <p class="pull-right">PlotViz<a></a>. |
+                                <span class="lead"> <i class="fa fa-paw"></i> University Of Indiana</span>
+                            </p>
+                        </div>
+                        <div class="clearfix"></div>
+                    </footer>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="custom_notifications" class="custom-notifications dsp_none">
+            <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
+            </ul>
+            <div class="clearfix"></div>
+            <div id="notif-group" class="tabbed_notifications"></div>
+        </div>
+    </body>
+
+
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/docs.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/bootstrap-colorpicker.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/OrbitControls.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/stats.min.js")"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
+    <script>
+        $(function() {
+            $( "#slider" ).slider({
+                min: 0,
+                max: 100,
+                value: 0,
+                animate:"slow",
+                orientation: "horizontal",
+                slide: function( event, ui ) {
+                  updatePlot(event, ui)
+                }
+            });
+            $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
+        });
+    </script>
+    <script type="text/javascript">
+        $.getJSON("@routes.Application.timeseries(timeSeries.id)", function (data) {
+            var resultSetUrl = "@routes.Application.timeseries(timeSeries.id)";
+            visualizeTimeSeries(resultSetUrl, data, @timeSeries.id);
+        });
+    </script>
+}

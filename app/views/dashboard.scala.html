@@ -1,0 +1,103 @@
+@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries])
+@import helper._
+
+@main("Dashboard", user){
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="well bs-component">
+                @form(routes.Application.upload(), 'class -> "form-inline", 'enctype -> "multipart/form-data"){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <div class="form-group">
+                        <label class="sr-only" for="visName">Name</label>
+                        <input type="text" class="form-control" style="width:200px;" name="name" id="visName" placeholder="Enter name">
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only" for="file">Result File</label>
+                        <input type="file" name="file" style="width:250px;" class="form-control" id="file" placeholder="Result">
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only" for="desc">Description</label>
+                        <input type="text" class="form-control" style="width:530px;" name="desc" id="desc" placeholder="Enter description">
+                    </div>
+                    <button type="submit" class="btn btn-default pull-right">Upload</button>
+                }
+            </div>
+
+            <div class="well bs-component">
+            @form(routes.Application.uploadFiles(), 'class -> "form-inline", 'enctype -> "multipart/form-data"){
+                @if(hasError){
+                    <p class="text-danger">@error</p>
+                }
+                <div class="form-group">
+                    <label class="sr-only" for="visName">TimeSeries Name</label>
+                    <input type="text" class="form-control" style="width:200px;" name="name" id="visName" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="file">Result File</label>
+                    <input type="file" name="file" style="width:250px;" class="form-control" multiple="multiple" id="file" placeholder="Result">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="desc">Description</label>
+                    <input type="text" class="form-control" style="width:530px;" name="desc" id="desc" placeholder="Enter description">
+                </div>
+                <button type="submit" class="btn btn-default pull-right">Upload</button>
+            }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1 id="tables">Results</h1>
+            </div>
+            <table class="table table-striped table-hover ">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>User</th>
+                        <th>Created At</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(r <- resultSets){
+                        <tr>
+                            <td>@r.name</td>
+                            <td>@r.description</td>
+                            <td>@User.findById(r.uploaderId).email</td>
+                            <td>@r.dateCreation</td>
+                            <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+
+            <table class="table table-striped table-hover ">
+                <thead>
+                    <tr>
+                        <th>Time Series Name</th>
+                        <th>Description</th>
+                        <th>User</th>
+                        <th>Created At</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for(r <- timeSeries){
+                    <tr>
+                        <td>@r.name</td>
+                        <td>@r.description</td>
+                        <td>@User.findById(r.uploaderId).email</td>
+                        <td>@r.dateCreation</td>
+                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

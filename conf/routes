@@ -1,0 +1,45 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                                   controllers.Application.index()
+
+# Admin Dashboard
+GET         /dashboard                          controllers.Application.dashboard()
+
+# Log in
+GET         /login                              controllers.Application.login()
+POST        /authenticate                       controllers.Application.authenticate()
+GET         /authenticate                       controllers.Application.authenticateGet()
+
+#plot
+GET         /plot                               controllers.Application.visualize(id: Long)
+
+# Log out
+GET         /logout                             controllers.Application.logout()
+
+# Upload
+POST        /upload                             controllers.Application.upload()
+POST        /uploadFiles                        controllers.Application.uploadFiles()
+GET         /upload                             controllers.Application.uploadGet()
+
+# Visualize
+GET         /resultsets/:id                     controllers.Application.visualize(id: Long)
+GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Long)
+
+# ResultSet data
+GET         /resultset/:id                      controllers.Application.resultset(id: Long)
+
+GET         /resultset/:rid/cluster/:cid        controllers.Application.cluster(rid: Long, cid: Integer)
+
+
+GET         /resultssetall/:id                  controllers.Application.resultssetall(id: Long)
+
+#time series
+GET         /timeseries/:id                     controllers.Application.timeseries(id: Long)
+
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                       controllers.Assets.at(path="/public", file)

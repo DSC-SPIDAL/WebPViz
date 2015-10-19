@@ -1,0 +1,30 @@
+@(user: User, resultSet: ResultSet)
+
+@main(resultSet.name, user){
+    <style>
+    .viz {
+    margin-top: -21px;
+    padding : 0px;
+    }
+
+    #viz-container{
+    padding: 0px;
+    }
+    </style>
+    <div class="row">
+        <div class="col-sm-12" id="viz-container">
+        </div>
+    </div>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/stats.min.js")"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/pviz.js")"></script>
+    <script type="text/javascript">
+        $.getJSON("@routes.Application.resultset(resultSet.id)", function (data) {
+            var resultSetUrl = "@routes.Application.resultset(resultSet.id)";
+            visualize(resultSetUrl, data);
+        });
+    </script>
+}
