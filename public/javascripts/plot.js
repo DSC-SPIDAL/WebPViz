@@ -23,6 +23,12 @@ var isPlaying = false;
 var isPaused = false;
 var resultSets;
 var removedclusters = [];
+var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
+
+//Constants
+var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
+var MAX_PLOTS_STORED = 20;
+var LOAD_SIZE = 5;
 
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
@@ -74,6 +80,7 @@ function visualize(resultSetUrl, resultSet, id) {
 
 function visualizeTimeSeries(resultSetUrl, timeSeries, id) {
     resultSets = timeSeries.resultsets;
+    timeSeriesLength = resultSets.length;
     generateTimeSeries(resultSets);
 }
 
@@ -135,11 +142,26 @@ function generateGraph() {
 
 function generateTimeSeries(resultSets) {
     setupThreeJs();
+    currentLoadedStart = 0;
+
+    if(timeSeriesLength > MAX_PLOTS_STORED){
+        loadPlotData(0,MAX_PLOTS_STORED)
+        currentLoadedEnd = MAX_PLOTS_STORED
+    }else{
+        loadPlotData(0,timeSeriesLength)
+        currentLoadedEnd = timeSeriesLength
+    }
+    setupMatrial();
+    initBufferAndLoad();
+
+}
+
+function loadPlotData(start,end){
     var cluster;
     var geometry = [];
     var hsl;
 
-    for (var i = 0; i < resultSets.length; i++) {
+    for (var i = start; i < end; i++) {
 
         clusterUrl = "/resultssetall/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
@@ -187,9 +209,6 @@ function generateTimeSeries(resultSets) {
         });
 
     }
-    setupMatrial();
-    initBufferAndLoad();
-
 }
 
 
@@ -212,10 +231,10 @@ function initPlotData(){
 function initBufferAndLoad(){
 
     setTimeout(function () {
-        if(Object.keys(particleSets).length < resultSets.length && Object.keys(particleSets).length < 20 ){
+        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
             initBufferAndLoad();
         }else{
-            if ("0" in particleSets) {
+            if (currentLoadedStart in particleSets) {
                 initPlotData();
                 render();
                 animate();
@@ -272,10 +291,9 @@ function updatePlot(event, ui) {
             }
         }
         // window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        stats.domElement.style.position = 'absolute';
-        document.getElementById("stats").appendChild(stats.domElement);
+        //stats.domElement.style.position = 'absolute';
+        //document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
-        $('.color-pic1').colorpicker();
         render();
         animate();
     }
@@ -350,18 +368,20 @@ function playLoop() {
             }
         }
         //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        stats.domElement.style.position = 'absolute';
-        document.getElementById("stats").appendChild(stats.domElement);
+        //stats.domElement.style.position = 'absolute';
+        //document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
-        $('.color-pic1').colorpicker();
         $("#amount").val(currentValue + 1);
         render();
         if (maxValue > currentValue + 1 && !isPaused) {
             playLoop();
         }
-    }, 300);
+    }, TIME_BETWEEN_PLOTS_IN_MILLS);
 }
 
+function updateData(){
+
+}
 function  animateTimeSeriesPause(){
     isPaused = true
 }
