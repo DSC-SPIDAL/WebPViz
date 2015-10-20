@@ -27,8 +27,8 @@ var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
-var MAX_PLOTS_STORED = 20;
-var LOAD_SIZE = 5;
+var MAX_PLOTS_STORED = 4;
+var LOAD_SIZE = 2;
 
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
@@ -215,16 +215,13 @@ function loadPlotData(start,end){
 //Util functions
 
 function initPlotData(){
-    $("#slider").slider("option", "max", Object.keys(particleSets).length-1);
+    $("#slider").slider("option", "max", timeSeriesLength-1);
     $("#slider").slider("option", "value", $("#slider").slider("value"));
     currentParticles = particleSets["0"];
     for (var i = 0; i < currentParticles.length; i++) {
         scene3d.add(currentParticles[i]);
     }
     window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-    stats.domElement.style.position = 'absolute';
-    document.getElementById("stats").appendChild(stats.domElement);
-    window.addEventListener('resize', onWindowResize, false);
     $('.color-pic1').colorpicker();
 }
 
@@ -267,6 +264,10 @@ function setupThreeJs(){
     camera.position.set(1, 1, 1);
     scene3d.add(camera);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
+    stats.domElement.style.position = 'absolute';
+    document.getElementById("stats").appendChild(stats.domElement);
+    window.addEventListener('resize', onWindowResize, false);
+
 }
 
 function setupMatrial(){
@@ -290,9 +291,6 @@ function updatePlot(event, ui) {
                 scene3d.add(currentParticles[i]);
             }
         }
-        // window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        //stats.domElement.style.position = 'absolute';
-        //document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
         render();
         animate();
@@ -314,13 +312,13 @@ function render() {
 }
 //TODO WInodow rezise does not work yet need to fix
 function onWindowResize() {
-    var width = $('#canvas3d').width();
-    var height = $('#canvas3d').height();
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-    controls.handleResize();
-    render();
+    //var width = $('#canvas3d').width();
+    //var height = $('#canvas3d').height();
+    //camera.aspect = width / height;
+    //camera.updateProjectionMatrix();
+    //renderer.setSize(width, height);
+    //controls.handleResize();
+    //render();
 }
 
 function removeSection(id) {
@@ -356,7 +354,8 @@ function animateTimeSeriesPlay(){
 
 function playLoop() {
     var currentValue = $("#slider").slider("value");
-    var maxValue = $("#slider").slider("option", "max");
+    var maxValue = currentLoadedEnd-1;
+    checkAndBufferData(currentValue+1)
     setTimeout(function () {
         scene3d = new THREE.Scene();
         scene3d.add(camera);
@@ -367,9 +366,6 @@ function playLoop() {
                 scene3d.add(currentParticles[i]);
             }
         }
-        //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        //stats.domElement.style.position = 'absolute';
-        //document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
         $("#amount").val(currentValue + 1);
         render();
@@ -379,9 +375,32 @@ function playLoop() {
     }, TIME_BETWEEN_PLOTS_IN_MILLS);
 }
 
-function updateData(){
 
+function checkAndBufferData(currentval){
+    if(currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))){
+        var loadend = timeSeriesLength
+        if(timeSeriesLength > currentLoadedEnd + LOAD_SIZE){
+            loadend = currentLoadedEnd + LOAD_SIZE;
+        }
+        loadPlotData(currentLoadedEnd,loadend)
+        for(var i =0; i < (loadend - currentLoadedEnd); i++){
+            delete particleSets[currentLoadedStart+i];
+            checkIfBuffered();
+        }
+    }
 }
+
+function checkIfBuffered(){
+    setTimeout(function () {
+        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
+            checkIfBuffered();
+        }else{
+            currentLoadedStart += LOAD_SIZE;
+            currentLoadedEnd += LOAD_SIZE;
+        }
+    }, 1000);
+}
+
 function  animateTimeSeriesPause(){
     isPaused = true
 }
