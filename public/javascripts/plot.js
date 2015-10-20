@@ -1,7 +1,7 @@
 /* varibles*/
 
 //Three js global varibles
-var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light;
+var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light, currentParticles = [];
 var container, stats;
 var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
 var scene3d;
@@ -21,6 +21,8 @@ var particleSets = {};
 var timeSeriesData = [];
 var isPlaying = false;
 var isPaused = false;
+var resultSets;
+var removedclusters = [];
 
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
@@ -71,8 +73,7 @@ function visualize(resultSetUrl, resultSet, id) {
 }
 
 function visualizeTimeSeries(resultSetUrl, timeSeries, id) {
-    var resultSets = timeSeries.resultsets;
-    particleSets = new Array(resultSets.length);
+    resultSets = timeSeries.resultsets;
     generateTimeSeries(resultSets);
 }
 
@@ -187,31 +188,40 @@ function generateTimeSeries(resultSets) {
 
     }
     setupMatrial();
+    initBufferAndLoad();
 
-    setTimeout(function () {
-        if ("0" in particleSets) {
-            updatePlotData();
-            render();
-            animate();
-        }
-    }, 15000);
 }
 
 
 //Util functions
 
-function updatePlotData(){
+function initPlotData(){
     $("#slider").slider("option", "max", Object.keys(particleSets).length-1);
     $("#slider").slider("option", "value", $("#slider").slider("value"));
-    var currentparticles = particleSets["0"];
-    for (var i = 0; i < currentparticles.length; i++) {
-        scene3d.add(currentparticles[i]);
+    currentParticles = particleSets["0"];
+    for (var i = 0; i < currentParticles.length; i++) {
+        scene3d.add(currentParticles[i]);
     }
     window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
     stats.domElement.style.position = 'absolute';
     document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
     $('.color-pic1').colorpicker();
+}
+
+function initBufferAndLoad(){
+
+    setTimeout(function () {
+        if(Object.keys(particleSets).length < resultSets.length && Object.keys(particleSets).length < 20 ){
+            initBufferAndLoad();
+        }else{
+            if ("0" in particleSets) {
+                initPlotData();
+                render();
+                animate();
+            }
+        }
+    }, 1000);
 }
 
 function setupThreeJs(){
@@ -255,11 +265,13 @@ function updatePlot(event, ui) {
         scene3d = new THREE.Scene();
         scene3d.add(camera);
         $("#slider").slider("option", "value", $("#slider").slider("value"));
-        var currentparticles = particleSets[ui.value];
-        for (var i = 0; i < currentparticles.length; i++) {
-            scene3d.add(currentparticles[i]);
+        currentParticles = particleSets[ui.value];
+        for (var i = 0; i < currentParticles.length; i++) {
+            if(!(removedclusters.hasOwnProperty(i))){
+                scene3d.add(currentParticles[i]);
+            }
         }
-        window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        // window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
         stats.domElement.style.position = 'absolute';
         document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
@@ -294,11 +306,13 @@ function onWindowResize() {
 }
 
 function removeSection(id) {
-    scene3d.remove(particles[id]);
+    scene3d.remove(currentParticles[id]);
+    removedclusters[id] = id;
 }
 
 function addSection(id) {
-    scene3d.add(particles[id]);
+    scene3d.add(currentParticles[id]);
+    delete removedclusters[id];
 }
 
 function recolorSection(id, color) {
@@ -306,8 +320,14 @@ function recolorSection(id, color) {
     for (var i in colors[id]) {
         colors[id][i] = new THREE.Color(color);
     }
-    particles[id].geometry.colors = colors[id];
-    particles[id].geometry.colorsNeedUpdate = true;
+    currentParticles[id].geometry.colors = colors[id];
+    currentParticles[id].geometry.colorsNeedUpdate = true;
+    for (var i = 0; i < Object.keys(particleSets).length; i++) {
+        var particles = particleSets[i];
+        particles[id].geometry.colors = colors[id];
+        particles[id].geometry.colorsNeedUpdate = true;
+
+    }
 }
 
 function animateTimeSeriesPlay(){
@@ -323,11 +343,13 @@ function playLoop() {
         scene3d = new THREE.Scene();
         scene3d.add(camera);
         $("#slider").slider("option", "value", currentValue + 1);
-        var currentparticles = particleSets[currentValue + 1];
-        for (var i = 0; i < currentparticles.length; i++) {
-            scene3d.add(currentparticles[i]);
+        currentParticles= particleSets[currentValue + 1];
+        for (var i = 0; i < currentParticles.length; i++) {
+            if(!(removedclusters.hasOwnProperty(i))){
+                scene3d.add(currentParticles[i]);
+            }
         }
-        window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
         stats.domElement.style.position = 'absolute';
         document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, false);
