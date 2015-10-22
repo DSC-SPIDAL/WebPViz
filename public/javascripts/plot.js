@@ -1,5 +1,6 @@
 /* varibles*/
-
+//TODO color changes not applied to data loaded later
+//TODO need to add reply option to make the slider go back to the start and reload data from the start
 //Three js global varibles
 var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light, currentParticles = [];
 var container, stats;
@@ -23,6 +24,7 @@ var isPlaying = false;
 var isPaused = false;
 var resultSets;
 var removedclusters = [];
+var recoloredclusters = [];
 var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
 
 //Constants
@@ -240,6 +242,21 @@ function initBufferAndLoad(){
     }, 1000);
 }
 
+function gotoBufferAndLoad(event, ui){
+
+    setTimeout(function () {
+        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
+            gotoBufferAndLoad(event, ui);
+        }else{
+            if (currentLoadedStart in particleSets) {
+                updatePlot(event, ui)
+                render();
+                animate();
+            }
+        }
+    }, 1000);
+}
+
 function setupThreeJs(){
     renderer = null;
     particles = [];
@@ -281,22 +298,36 @@ function setupMatrial(){
 }
 
 function updatePlot(event, ui) {
-    if (ui.value in particleSets) {
-        scene3d = new THREE.Scene();
-        scene3d.add(camera);
-        $("#slider").slider("option", "value", $("#slider").slider("value"));
-        currentParticles = particleSets[ui.value];
-        for (var i = 0; i < currentParticles.length; i++) {
-            if(!(removedclusters.hasOwnProperty(i))){
-                scene3d.add(currentParticles[i]);
+    var sliderValue = ui.value;
+    if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
+        if (sliderValue in particleSets) {
+            scene3d = new THREE.Scene();
+            scene3d.add(camera);
+            $("#slider").slider("option", "value", $("#slider").slider("value"));
+            currentParticles = particleSets[sliderValue];
+            for (var i = 0; i < currentParticles.length; i++) {
+                if (!(removedclusters.hasOwnProperty(i))) {
+                    scene3d.add(currentParticles[i]);
+                }
             }
+            window.addEventListener('resize', onWindowResize, false);
+            render();
+            animate();
+            $("#amount").val(sliderValue);
         }
-        window.addEventListener('resize', onWindowResize, false);
-        render();
-        animate();
+    }else {
+        for(var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++){
+            delete particleSets[currentLoadedStart + k];
+        }
+        currentLoadedStart = sliderValue;
+        currentLoadedEnd = timeSeriesLength
+        if(timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)){
+            currentLoadedEnd = currentLoadedStart + MAX_PLOTS_STORED;
+        }
+        //TODO check if this might fail in edge cases
+        loadPlotData(currentLoadedStart, currentLoadedEnd)
+        gotoBufferAndLoad(event, ui);
     }
-    $("#amount").val(ui.value);
-
 }
 
 function animate() {
@@ -333,6 +364,7 @@ function addSection(id) {
 
 function recolorSection(id, color) {
     colorlist[id] = color;
+    recoloredclusters[id] = id;
     for (var i in colors[id]) {
         colors[id][i] = new THREE.Color(color);
     }
@@ -356,6 +388,10 @@ function playLoop() {
     var currentValue = $("#slider").slider("value");
     var maxValue = currentLoadedEnd-1;
     checkAndBufferData(currentValue+1)
+    if(currentValue == maxValue){
+        $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
+        return
+    }
     if(isBufferNeeded(currentValue)){
         isPaused = true;
         isPlaying = false;
@@ -369,16 +405,25 @@ function playLoop() {
                 if (!(removedclusters.hasOwnProperty(i))) {
                     scene3d.add(currentParticles[i]);
                 }
+                if (recoloredclusters.hasOwnProperty(i)) {
+                    currentParticles[i].geometry.colors = colors[i];
+                    currentParticles[i].geometry.colorsNeedUpdate = true;
+                }
             }
             window.addEventListener('resize', onWindowResize, false);
             $("#amount").val(currentValue + 1);
             render();
             if (maxValue > currentValue + 1 && !isPaused) {
                 playLoop();
+            }else{
+                isPaused = true;
+                isPlaying = false;
+                $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
             }
         }, TIME_BETWEEN_PLOTS_IN_MILLS);
     }
 }
+
 
 function isBufferNeeded(currentval){
     if(currentLoadedEnd == timeSeriesLength){
@@ -407,6 +452,9 @@ function checkIfBuffered(){
         }else{
             currentLoadedStart += LOAD_SIZE;
             currentLoadedEnd += LOAD_SIZE;
+            if(currentLoadedEnd > timeSeriesLength){
+                currentLoadedEnd = timeSeriesLength
+            }
             if(isPaused){
                 isPaused = false;
                 isPlaying = true;
