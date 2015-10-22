@@ -356,28 +356,38 @@ function playLoop() {
     var currentValue = $("#slider").slider("value");
     var maxValue = currentLoadedEnd-1;
     checkAndBufferData(currentValue+1)
-    setTimeout(function () {
-        scene3d = new THREE.Scene();
-        scene3d.add(camera);
-        $("#slider").slider("option", "value", currentValue + 1);
-        currentParticles= particleSets[currentValue + 1];
-        for (var i = 0; i < currentParticles.length; i++) {
-            if(!(removedclusters.hasOwnProperty(i))){
-                scene3d.add(currentParticles[i]);
+    if(isBufferNeeded(currentValue)){
+        isPaused = true;
+        isPlaying = false;
+    }else {
+        setTimeout(function () {
+            scene3d = new THREE.Scene();
+            scene3d.add(camera);
+            $("#slider").slider("option", "value", currentValue + 1);
+            currentParticles = particleSets[currentValue + 1];
+            for (var i = 0; i < currentParticles.length; i++) {
+                if (!(removedclusters.hasOwnProperty(i))) {
+                    scene3d.add(currentParticles[i]);
+                }
             }
-        }
-        window.addEventListener('resize', onWindowResize, false);
-        $("#amount").val(currentValue + 1);
-        render();
-        if (maxValue > currentValue + 1 && !isPaused) {
-            playLoop();
-        }
-    }, TIME_BETWEEN_PLOTS_IN_MILLS);
+            window.addEventListener('resize', onWindowResize, false);
+            $("#amount").val(currentValue + 1);
+            render();
+            if (maxValue > currentValue + 1 && !isPaused) {
+                playLoop();
+            }
+        }, TIME_BETWEEN_PLOTS_IN_MILLS);
+    }
 }
 
-
+function isBufferNeeded(currentval){
+    if(currentLoadedEnd == timeSeriesLength){
+        return false;
+    }
+    return (currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))) ?  true : false;
+}
 function checkAndBufferData(currentval){
-    if(currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))){
+    if(isBufferNeeded(currentval)){
         var loadend = timeSeriesLength
         if(timeSeriesLength > currentLoadedEnd + LOAD_SIZE){
             loadend = currentLoadedEnd + LOAD_SIZE;
@@ -385,8 +395,8 @@ function checkAndBufferData(currentval){
         loadPlotData(currentLoadedEnd,loadend)
         for(var i =0; i < (loadend - currentLoadedEnd); i++){
             delete particleSets[currentLoadedStart+i];
-            checkIfBuffered();
         }
+        checkIfBuffered();
     }
 }
 
@@ -397,6 +407,12 @@ function checkIfBuffered(){
         }else{
             currentLoadedStart += LOAD_SIZE;
             currentLoadedEnd += LOAD_SIZE;
+            if(isPaused){
+                isPaused = false;
+                isPlaying = true;
+                playLoop();
+
+            }
         }
     }, 1000);
 }
