@@ -1,6 +1,9 @@
 /* varibles*/
 //TODO color changes not applied to data loaded later
 //TODO need to add reply option to make the slider go back to the start and reload data from the start
+//TODO Colors in the single view dont seem to work
+//TODO the loop should not depend on the cluster sort
+
 //Three js global varibles
 var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light, currentParticles = [];
 var container, stats;
@@ -111,7 +114,7 @@ function generateGraph() {
                 var p = clusterdata.points[k];
 
                 //var hsl = [heus[data.cid], 1, 0.8];
-                var vertex = new THREE.Vector3(p.x * 10, p.y * 10, p.z * 10);
+                var vertex = new THREE.Vector3(p.x , p.y , p.z);
                 geometry[clusterid].vertices.push(vertex);
 
                 //TODO can cchange this
@@ -185,7 +188,7 @@ function loadPlotData(start,end){
                     var p = clusterdata.points[k];
 
                     //var hsl = [heus[data.cid], 1, 0.8];
-                    var vertex = new THREE.Vector3(p.x * 10, p.y * 10, p.z * 10);
+                    var vertex = new THREE.Vector3(p.x, p.y, p.z);
                     geometry[clusterid].vertices.push(vertex);
 
                     //TODO can change this
@@ -364,18 +367,13 @@ function addSection(id) {
 
 function recolorSection(id, color) {
     colorlist[id] = color;
-    recoloredclusters[id] = id;
+
     for (var i in colors[id]) {
         colors[id][i] = new THREE.Color(color);
     }
+    recoloredclusters[id] = colors[id];
     currentParticles[id].geometry.colors = colors[id];
     currentParticles[id].geometry.colorsNeedUpdate = true;
-    for (var i = 0; i < Object.keys(particleSets).length; i++) {
-        var particles = particleSets[i];
-        particles[id].geometry.colors = colors[id];
-        particles[id].geometry.colorsNeedUpdate = true;
-
-    }
 }
 
 function animateTimeSeriesPlay(){
@@ -402,13 +400,14 @@ function playLoop() {
             $("#slider").slider("option", "value", currentValue + 1);
             currentParticles = particleSets[currentValue + 1];
             for (var i = 0; i < currentParticles.length; i++) {
+                if (recoloredclusters.hasOwnProperty(i)) {
+                    currentParticles[i].geometry.colors = recoloredclusters[i];
+                    currentParticles[i].geometry.colorsNeedUpdate = true;
+                }
                 if (!(removedclusters.hasOwnProperty(i))) {
                     scene3d.add(currentParticles[i]);
                 }
-                if (recoloredclusters.hasOwnProperty(i)) {
-                    currentParticles[i].geometry.colors = colors[i];
-                    currentParticles[i].geometry.colorsNeedUpdate = true;
-                }
+
             }
             window.addEventListener('resize', onWindowResize, false);
             $("#amount").val(currentValue + 1);
