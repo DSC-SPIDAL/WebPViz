@@ -87,7 +87,8 @@ public class ResultSet extends Model {
 
     public static ResultSet createFromFile(String name, String description, User uploader, File file) throws IOException {
         ResultSet r = create(name, description, uploader);
-        CSVReader reader = new CSVReader(new FileReader(file), ',');
+        CSVReader reader = new CSVReader(new FileReader(file), '\t');
+
         String[] record;
         while ((record = reader.readNext()) != null) {
             Integer clusterId = Integer.valueOf(record[4].trim());
@@ -109,7 +110,7 @@ public class ResultSet extends Model {
 
     public static ResultSet createFromFile(String name, String description, User uploader, File file, TimeSeries timeSeries, Long sequenceNumber) throws IOException {
         ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
-        CSVReader reader = new CSVReader(new FileReader(file), ',');
+        CSVReader reader = new CSVReader(new FileReader(file), '\t');
         String[] record;
         while ((record = reader.readNext()) != null) {
             Integer clusterId = Integer.valueOf(record[4].trim());
