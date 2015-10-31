@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.*;
 import models.utils.AppException;
+import org.apache.commons.io.FilenameUtils;
 import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints;
@@ -14,9 +15,11 @@ import play.mvc.Security;
 import views.html.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import static play.data.Form.form;
 
@@ -68,14 +71,24 @@ public class Application extends Controller {
 
         if (resultSet != null) {
             File file = resultSet.getFile();
+            String ext = FilenameUtils.getExtension(file.getName());
             Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name[0]));
-            ResultSet.createFromFile(name[0], description, loggedInUser, file);
+            boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
+            if (isZipped) {
+                try {
+                    TimeSeries.createFromZip(name[0], description, loggedInUser, file);
+                } catch (Exception e) {
+                    Logger.error("Failed to create time series from zip", e);
+                    return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
+                }
+            } else {
+                ResultSet.createFromFile(name[0], description, loggedInUser, file);
+            }
             return GO_DASHBOARD;
         } else {
             return badRequest(dashboard.render(loggedInUser, true, "Missing file.", ResultSet.all(), TimeSeries.all()));
         }
     }
-
 
     @Security.Authenticated(Secured.class)
     public static Result uploadFiles() throws IOException {

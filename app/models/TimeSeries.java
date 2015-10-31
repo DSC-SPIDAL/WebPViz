@@ -1,6 +1,7 @@
 package models;
 
 import com.opencsv.CSVReader;
+import org.apache.commons.io.FilenameUtils;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -9,11 +10,11 @@ import play.mvc.Http;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import java.io.*;
+import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Created by pulasthiiu on 10/14/15.
@@ -62,6 +63,62 @@ public class TimeSeries extends Model {
             ResultSet.createFromFile(resultSetName, description, uploader, file, timeSeries, (long)i);
 
         }
+        return timeSeries;
+    }
+
+    /**
+     * Create the timeseries from the zip file. The zip file should include a text file with the extension pviz,
+     * that contains the file names in the time series order.
+     * @param pvizName name of the upload
+     * @param description description provided
+     * @param uploader user
+     * @param fileName the file
+     * @return the created TimeSeries
+     * @throws IOException
+     */
+    public static TimeSeries createFromZip(String pvizName, String description, User uploader, File fileName) throws Exception {
+        TimeSeries timeSeries = create(pvizName, description, uploader);
+        ZipFile zipFile = new ZipFile(fileName);
+        Enumeration<?> enu = zipFile.entries();
+        List<String> filesInOrder = new ArrayList<String>();
+        Map<String, ZipEntry> fileMap = new HashMap<String, ZipEntry>();
+        int i = 0;
+        while (enu.hasMoreElements()) {
+            ZipEntry zipEntry = (ZipEntry) enu.nextElement();
+            String name = zipEntry.getName();
+            String ext = FilenameUtils.getExtension(name);
+            String realFileName = FilenameUtils.getName(name);
+
+            File file = new File(name);
+            if (name.endsWith("/")) {
+                file.mkdirs();
+                continue;
+            }
+
+            File parent = file.getParentFile();
+            if (parent != null) {
+                parent.mkdirs();
+            }
+
+            if (ext != null && ext.equals("index")) {
+                BufferedReader bufRead = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry)));
+                String inputLine;
+                int index = 0;
+                while ((inputLine = bufRead.readLine()) != null) {
+                    filesInOrder.add(inputLine);
+                }
+                continue;
+            }
+
+            fileMap.put(realFileName, zipEntry);
+        }
+
+        for (String f : filesInOrder) {
+            String resultSetName = "timeseries_" + f + "_" + i;
+            ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i);
+            i++;
+        }
+        zipFile.close();
         return timeSeries;
     }
 

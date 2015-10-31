@@ -19,6 +19,9 @@
 package models;
 
 import com.opencsv.CSVReader;
+import models.xml.PVizPoint;
+import models.xml.Plotviz;
+import models.xml.XMLLoader;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -27,16 +30,12 @@ import scala.Int;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 public class ResultSet extends Model {
-
     @Id
     public Long id;
 
@@ -125,6 +124,24 @@ public class ResultSet extends Model {
             Float z = Float.valueOf(record[3]);
 
             Point.create(x, y, z, c, r);
+        }
+
+        return r;
+    }
+
+    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file, TimeSeries timeSeries, Long sequenceNumber) throws Exception {
+        ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
+        Plotviz plotviz = XMLLoader.load(file);
+
+        List<PVizPoint> points = plotviz.getPoints();
+        for (int i = 0; i < points.size(); i++) {
+            PVizPoint point = points.get(i);
+            int clusterkey = point.getClusterkey();
+            Cluster c = Cluster.findByClusterId(r.id, clusterkey);
+            if (c == null) {
+                c = Cluster.create(clusterkey, r);
+            }
+            Point.create(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(), c, r);
         }
 
         return r;
