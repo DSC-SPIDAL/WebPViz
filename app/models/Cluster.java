@@ -40,6 +40,16 @@ public class Cluster extends Model {
     @Formats.NonEmpty
     public Long resultSet;
 
+    public int size;
+
+    public Color color;
+
+    public String shape;
+
+    public int visible;
+
+    public String label;
+
     public static Model.Finder<Long, Cluster> find = new Model.Finder<Long, Cluster>(Long.class, Cluster.class);
 
 

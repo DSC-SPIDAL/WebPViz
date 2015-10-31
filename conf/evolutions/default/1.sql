@@ -7,7 +7,18 @@ create table cluster (
   id                        bigint not null,
   cluster                   integer,
   result_set                bigint,
+  size                      integer,
+  shape                     varchar(255),
+  visible                   integer,
+  label                     varchar(255),
   constraint pk_cluster primary key (id))
+;
+
+create table color (
+  a                         integer,
+  b                         integer,
+  g                         integer,
+  r                         integer)
 ;
 
 create table point (
@@ -71,6 +82,8 @@ create sequence user_seq;
 SET REFERENTIAL_INTEGRITY FALSE;
 
 drop table if exists cluster;
+
+drop table if exists color;
 
 drop table if exists point;
 

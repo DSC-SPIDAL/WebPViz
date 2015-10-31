@@ -132,6 +132,20 @@ public class ResultSet extends Model {
     public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file, TimeSeries timeSeries, Long sequenceNumber) throws Exception {
         ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
         Plotviz plotviz = XMLLoader.load(file);
+        List<models.xml.Cluster> clusters = plotviz.getClusters();
+        for (models.xml.Cluster cl : clusters) {
+            Cluster c = Cluster.findByClusterId(r.id, cl.getKey());
+            if (c == null) {
+                c = Cluster.create(cl.getKey(), r);
+            }
+            c.color = new Color(cl.getColor().getA(), cl.getColor().getB(), cl.getColor().getG(), cl.getColor().getR());
+            c.label = cl.getLabel();
+            c.size = cl.getSize();
+            c.visible = cl.getVisible();
+            c.shape = cl.getShape();
+
+            c.save();
+        }
 
         List<PVizPoint> points = plotviz.getPoints();
         for (int i = 0; i < points.size(); i++) {
