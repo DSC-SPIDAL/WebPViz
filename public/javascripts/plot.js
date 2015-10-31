@@ -10,7 +10,7 @@ var container, stats;
 var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
 var scene3d;
 var colors = [];
-var colorlist = [];
+var colorlist = {};
 var sections = [];
 
 
@@ -52,19 +52,21 @@ function generateCheckList(list, initcolors) {
 
     var tablerows = "";
 
-    for (i = 0; i < list.length; i++) {
-        tablerows += "<tr class='even pointer'>"
-            + "<td class='a-center'>"
-            + "<input type='checkbox' class='flat' name='table_records' checked value='" + i + "'>"
-            + "<label class='color-box-label'>" + i + "</label> "
-            + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
-            + "<input value='" + initcolors[i] + "' class='form-control' type='hidden' id='" + i + "'>"
-            + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
-            + "</div>"
-            + "</td>"
-            + "<td class=' '>C" + i + "</span></td>"
-            + "<td class=' '>121</td>"
-            + "</tr>"
+    for (var key in list) {
+        if (list.hasOwnProperty(key)) {
+            tablerows += "<tr class='even pointer'>"
+                + "<td class='a-center'>"
+                + "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>"
+                + "<label class='color-box-label'>" + key + "</label> "
+                + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
+                + "<input value='" + initcolors[key] + "' class='form-control' type='hidden' id='" + key + "'>"
+                + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
+                + "</div>"
+                + "</td>"
+                + "<td class=' '>C" + key + "</span></td>"
+                + "<td class=' '>" + list[key] + "</td>"
+                + "</tr>"
+        }
     }
 
     var tableend = "</tbody>"
@@ -95,42 +97,42 @@ function generateGraph() {
     setupThreeJs();
 
     var cluster;
-    var geometry = [];
-    for (var i = 0; i < clusters.length; i++) {
-        geometry.push(new THREE.Geometry());
-        colors.push(new Array());
-        particles.push(new Array());
-    }
+    var geometry = {};
     var hsl;
-    var sections = [];
+    var sections = {};
     $.getJSON(clusterUrl, function (data) {
         for (var i = 0; i < clusters.length; i++) {
             var clusterdata = data.clusters[i];
             var clusterid = clusterdata.clusterid;
 
-            hsl = [heus[clusterid], 1, 0.8];
+            hsl = [heus[clusterdata.clusterid], 1, 0.8];
+
+            if (!sections.hasOwnProperty(clusterdata.clusterid))
+                sections[clusterdata.clusterid] = clusterdata.points.length
 
             for (var k in clusterdata.points) {
                 var p = clusterdata.points[k];
 
                 //var hsl = [heus[data.cid], 1, 0.8];
                 var vertex = new THREE.Vector3(p.x , p.y , p.z);
-                geometry[clusterid].vertices.push(vertex);
-
-                //TODO can cchange this
-                if (sections.indexOf(clusterid) == -1)
-                    sections.push(clusterid);
-
-                colors[clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
+                if(!geometry.hasOwnProperty(clusterdata.clusterid)){
+                    geometry[clusterdata.clusterid] = new THREE.Geometry();
+                    colors[clusterdata.clusterid] = new Array();
+                    currentParticles[clusterdata.clusterid] = new Array();
+                }
+                geometry[clusterdata.clusterid].vertices.push(vertex);
+                colors[clusterdata.clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
 
             }
         }
-        for (var i in geometry) {
-            colorlist.push(colors[i][0].getHexString());
-            geometry[i].colors = colors[i];
-            particles[i] = new THREE.PointCloud(geometry[i], material);
-            scene3d.add(particles[i]);
+        for (var key in geometry) {
+            if (geometry.hasOwnProperty(key)) {
+                colorlist[key] = colors[key][0].getHexString();
+                geometry[key].colors = colors[key];
+                currentParticles[key] = new THREE.PointCloud(geometry[key], material);
+                scene3d.add(currentParticles[key]);
 
+            }
         }
         window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
         stats.domElement.style.position = 'absolute';
