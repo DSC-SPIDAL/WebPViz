@@ -173,6 +173,11 @@ public class Application extends Controller {
         for (int i = 0; i < clusters.size(); i++) {
             ObjectNode cluster = Json.newObject();
             cluster.put("clusterid", clusters.get(i).cluster);
+            cluster.put("color", Json.toJson(clusters.get(i).color));
+            cluster.put("shape", clusters.get(i).shape);
+            cluster.put("visible", clusters.get(i).visible);
+            cluster.put("size", clusters.get(i).size);
+
             cluster.put("points", Json.toJson(Point.findByCluster(id, clusters.get(i).id)));
             clusterjsons.add(cluster);
         }

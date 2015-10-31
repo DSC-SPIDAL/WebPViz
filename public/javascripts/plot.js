@@ -106,21 +106,29 @@ function generateGraph() {
             var clusterid = clusterdata.clusterid;
 
             hsl = [heus[clusterdata.clusterid], 1, 0.8];
+            var clustercolor = clusterdata.color
 
             if (!sections.hasOwnProperty(clusterdata.clusterid))
                 sections[clusterdata.clusterid] = clusterdata.points.length
+
+            if(!geometry.hasOwnProperty(clusterdata.clusterid)){
+                geometry[clusterdata.clusterid] = new THREE.Geometry();
+                colors[clusterdata.clusterid] = new Array();
+                currentParticles[clusterdata.clusterid] = new Array();
+            }
+            colors[clusterdata.clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
 
             for (var k in clusterdata.points) {
                 var p = clusterdata.points[k];
 
                 //var hsl = [heus[data.cid], 1, 0.8];
                 var vertex = new THREE.Vector3(p.x , p.y , p.z);
-                if(!geometry.hasOwnProperty(clusterdata.clusterid)){
-                    geometry[clusterdata.clusterid] = new THREE.Geometry();
-                    colors[clusterdata.clusterid] = new Array();
-                    currentParticles[clusterdata.clusterid] = new Array();
-                }
+
                 geometry[clusterdata.clusterid].vertices.push(vertex);
+
+                if(k==0)
+                    continue
+
                 colors[clusterdata.clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
 
             }
@@ -177,17 +185,20 @@ function loadPlotData(start,end){
             geometry = {};
             //sections = [];
             clusters = data.clusters;
+
             for (var i = 0; i < clusters.length; i++) {
 
                 var clusterdata = data.clusters[i];
                 var clusterid = clusterdata.clusterid;
+                hsl = [heus[clusterid], 1, 0.8];
                 if(!geometry.hasOwnProperty(clusterdata.clusterid)){
                     geometry[clusterdata.clusterid] = new THREE.Geometry();
                     colors[clusterdata.clusterid] = new Array();
                     particles[clusterdata.clusterid] = new Array();
                 }
+                colors[clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
 
-                hsl = [heus[clusterid], 1, 0.8];
+
                 if (!sections.hasOwnProperty(clusterdata.clusterid))
                     sections[clusterdata.clusterid] = clusterdata.points.length
 
@@ -201,6 +212,8 @@ function loadPlotData(start,end){
                     //TODO can change this
                     //if (sections.indexOf(clusterid) == -1)
                     //    sections.push(clusterid);
+                    if(k == 0)
+                        continue
 
                     colors[clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
 
