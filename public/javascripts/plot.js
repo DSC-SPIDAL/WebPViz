@@ -1,11 +1,9 @@
 /* varibles*/
-//TODO color changes not applied to data loaded later
 //TODO need to add reply option to make the slider go back to the start and reload data from the start
-//TODO Colors in the single view dont seem to work
-//TODO the loop should not depend on the cluster sort
+//TODO try to remove all other collections possible and work with sections object
 
 //Three js global varibles
-var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light, currentParticles = [];
+var camera, scene, renderer, sprite, colors = [], particles = [], controls, light, currentParticles = [];
 var container, stats;
 var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
 var scene3d;
@@ -119,6 +117,8 @@ function generateGraph() {
                 currentParticles[clusterdata.clusterid] = new Array();
             }
             colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")"));
+
+            if(clusterdata)
             for (var k in clusterdata.points) {
                 var p = clusterdata.points[k];
 
@@ -135,7 +135,7 @@ function generateGraph() {
             if (geometry.hasOwnProperty(key)) {
                 colorlist[key] = colors[key][0].getHexString();
                 geometry[key].colors = colors[key];
-                currentParticles[key] = new THREE.PointCloud(geometry[key], material);
+                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
 
             }
@@ -148,7 +148,7 @@ function generateGraph() {
         render();
         animate();
     });
-    setupMatrial()
+
     animate();
 
 }
@@ -164,7 +164,6 @@ function generateTimeSeries(resultSets) {
         loadPlotData(0,timeSeriesLength)
         currentLoadedEnd = timeSeriesLength
     }
-    setupMatrial();
     initBufferAndLoad();
 
 }
@@ -224,7 +223,7 @@ function loadPlotData(start,end){
                 if (geometry.hasOwnProperty(key)) {
                     colorlist[key] = colors[key][0].getHexString();
                     geometry[key].colors = colors[key];
-                    particles[key] = new THREE.PointCloud(geometry[key], material);
+                    particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 }
             }
 
@@ -307,17 +306,32 @@ function setupThreeJs(){
     stats.domElement.style.position = 'absolute';
     document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
-
 }
 
-function setupMatrial(){
-    material = new THREE.PointCloudMaterial({
-        size: 0.003,
+function loadMatrial(size, shape, isglyph){
+
+    if(!isglyph){
+        sprite = null;
+    }else{
+        sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    }
+
+    //if(size>10){
+    //    sprite = THREE.ImageUtils.loadTexture(ImageEnum.RED);
+    //}
+
+    var material = new THREE.PointCloudMaterial({
+        size: size/200,
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true
     });
-   // material.color.setRGB(255,0, 0);
+    return material;
+}
+
+ImageEnum = {
+    BALL : "/assets/images/textures/ball.png",
+    CUBE : "/assets/images/textures/ball.png",
 }
 
 function updatePlot(event, ui) {
