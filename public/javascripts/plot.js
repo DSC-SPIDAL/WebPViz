@@ -7,7 +7,7 @@
 //Three js global varibles
 var camera, scene, renderer, sprite, colors = [], particles = [], material, controls, light, currentParticles = [];
 var container, stats;
-var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
+var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
 var scene3d;
 var colors = [];
 var colorlist = {};
@@ -116,12 +116,10 @@ function generateGraph() {
                 colors[clusterdata.clusterid] = new Array();
                 currentParticles[clusterdata.clusterid] = new Array();
             }
-            colors[clusterdata.clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
-
+            colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")"));
             for (var k in clusterdata.points) {
                 var p = clusterdata.points[k];
 
-                //var hsl = [heus[data.cid], 1, 0.8];
                 var vertex = new THREE.Vector3(p.x , p.y , p.z);
 
                 geometry[clusterdata.clusterid].vertices.push(vertex);
@@ -129,8 +127,7 @@ function generateGraph() {
                 if(k==0)
                     continue
 
-                colors[clusterdata.clusterid].push(new THREE.Color(0xffffff).setHSL(hsl[0], hsl[1], hsl[2]));
-
+                colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.b + "," + clustercolor.g + ")"));
             }
         }
         for (var key in geometry) {
@@ -316,7 +313,7 @@ function setupMatrial(){
         vertexColors: THREE.VertexColors,
         transparent: true
     });
-    material.color.setHSL(1.0, 1, 1);
+   // material.color.setRGB(255,0, 0);
 }
 
 function updatePlot(event, ui) {
