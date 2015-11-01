@@ -177,6 +177,7 @@ public class Application extends Controller {
             cluster.put("shape", clusters.get(i).shape);
             cluster.put("visible", clusters.get(i).visible);
             cluster.put("size", clusters.get(i).size);
+            cluster.put("label", clusters.get(i).label);
 
             cluster.put("points", Json.toJson(Point.findByCluster(id, clusters.get(i).id)));
             clusterjsons.add(cluster);

@@ -63,8 +63,8 @@ function generateCheckList(list, initcolors) {
                 + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
                 + "</div>"
                 + "</td>"
-                + "<td class=' '>C" + key + "</span></td>"
-                + "<td class=' '>" + list[key] + "</td>"
+                + "<td class=' '>" +  list[key].label + "</span></td>"
+                + "<td class=' '>" + list[key].length + "</td>"
                 + "</tr>"
         }
     }
@@ -110,7 +110,8 @@ function generateGraph() {
                 clustercolor = {"a":randomRBG(),"b":randomRBG(),"g":randomRBG(),"r":randomRBG()}
 
             if (!sections.hasOwnProperty(clusterdata.clusterid))
-                sections[clusterdata.clusterid] = clusterdata.points.length
+                sections[clusterdata.clusterid] = {"length":clusterdata.points.length, "size":clusterdata.size,
+                    "shape":clusterdata.shape, "visible":clusterdata.visible, "color": clustercolor, "label":clusterdata.label}
 
             if(!geometry.hasOwnProperty(clusterdata.clusterid)){
                 geometry[clusterdata.clusterid] = new THREE.Geometry();
@@ -203,7 +204,8 @@ function loadPlotData(start,end){
                 colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")"));
 
                 if (!sections.hasOwnProperty(clusterdata.clusterid))
-                    sections[clusterdata.clusterid] = clusterdata.points.length
+                    sections[clusterdata.clusterid] = {"length":clusterdata.points.length, "size":clusterdata.size,
+                        "shape":clusterdata.shape, "visible":clusterdata.visible, "color": clustercolor, "label":clusterdata.label}
 
                 for (var k in clusterdata.points) {
                     var p = clusterdata.points[k];
