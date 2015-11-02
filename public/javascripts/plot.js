@@ -463,7 +463,9 @@ function playLoop() {
             }else{
                 isPaused = true;
                 isPlaying = false;
-                $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
+                if(maxValue == currentValue + 1){
+                    $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-history");
+                }
             }
         }, TIME_BETWEEN_PLOTS_IN_MILLS);
     }
@@ -516,4 +518,12 @@ function  animateTimeSeriesPause(){
 
 function resetView(){
     controls.reset();
+}
+
+function resetSlider(){
+    isPaused = true;
+    isPlaying = false;
+    $("#slider").slider("option", "value", 0);
+    var value ={"value":0}
+    updatePlot(null,value);
 }
