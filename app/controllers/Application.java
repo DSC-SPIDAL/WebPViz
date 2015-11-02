@@ -133,8 +133,11 @@ public class Application extends Controller {
     public static Result visualize(Long resultSetId) {
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = ResultSet.findById(resultSetId);
-
-        return ok(resultset.render(loggedInUser, r));
+        if (r != null) {
+            return ok(resultset.render(loggedInUser, r));
+        } else {
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
+        }
     }
 
     public static Result visualizeTimeSeries(Long timeSeriesId) {
