@@ -135,7 +135,7 @@ function generateGraph() {
             if (geometry.hasOwnProperty(key)) {
                 colorlist[key] = colors[key][0].getHexString();
                 geometry[key].colors = colors[key];
-                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(1,2, false));
                 scene3d.add(currentParticles[key]);
 
             }
@@ -143,7 +143,7 @@ function generateGraph() {
         window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
         stats.domElement.style.position = 'absolute';
         document.getElementById("stats").appendChild(stats.domElement);
-        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('resize', onWindowResize, true);
         $('.color-pic1').colorpicker();
         render();
         animate();
@@ -166,6 +166,17 @@ function generateTimeSeries(resultSets) {
     }
     initBufferAndLoad();
 
+}
+
+//TODO WInodow rezise does not work yet need to fix
+function onWindowResize() {
+    var width = window.innerWidth
+    var height = window.innerHeight - 57 - 40 - 40 - 10;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width *0.9, height);
+    controls.handleResize();
+    render();
 }
 
 function randomRBG(){
@@ -284,6 +295,9 @@ function setupThreeJs(){
     particles = [];
     colors = [];
     controls = null;
+    var height = window.innerHeight - 57 - 40 - 40 - 10;
+    $('#canvas3d').width(window.innerWidth*0.9);
+    $('#canvas3d').height(height);
     var canvasWidth = $('#canvas3d').width();
     var canvasHeight = $('#canvas3d').height();
 
@@ -303,8 +317,8 @@ function setupThreeJs(){
     camera.position.set(1, 1, 1);
     scene3d.add(camera);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    stats.domElement.style.position = 'absolute';
-    document.getElementById("stats").appendChild(stats.domElement);
+   // stats.domElement.style.position = 'absolute';
+    //document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
 }
 
@@ -384,16 +398,6 @@ function animate() {
 function render() {
     var camera = scene3d.getObjectByName('camera');
     renderer.render(scene3d, camera);
-}
-//TODO WInodow rezise does not work yet need to fix
-function onWindowResize() {
-    //var width = $('#canvas3d').width();
-    //var height = $('#canvas3d').height();
-    //camera.aspect = width / height;
-    //camera.updateProjectionMatrix();
-    //renderer.setSize(width, height);
-    //controls.handleResize();
-    //render();
 }
 
 function removeSection(id) {
