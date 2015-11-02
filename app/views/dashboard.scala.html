@@ -2,9 +2,24 @@
 @import helper._
 
 @main("Dashboard", user){
+
+    <div class="clearfix"></div>
     <div class="row">
+
+        <div class="clearfix"></div>
+
         <div class="col-sm-12">
             <div class="well bs-component">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>
+                            Upload Files
+                            <small>
+                                Zip Files or individual point files
+                            </small>
+                        </h3>
+                    </div>
+                </div>
                 @form(routes.Application.upload(), 'class -> "form-inline", 'enctype -> "multipart/form-data"){
                     @if(hasError){
                         <p class="text-danger">@error</p>
@@ -26,57 +41,72 @@
             </div>
         </div>
     </div>
+    @*<div class="page-title">*@
+        @*<div class="title_left">*@
+            @*<h3 id="tables">PlotViz Files</h3>*@
+        @*</div>*@
+    @*</div>*@
+    <div class="clearfix"></div>
     <div class="row">
         <div class="col-sm-12">
-            <div class="page-header">
-                <h1 id="tables">PlotViz Files</h1>
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Time Series Files</h2>
+
+                    <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                        <thead>
+                            <tr>
+                                <th>Time Series Name</th>
+                                <th>Description</th>
+                                <th>User</th>
+                                <th>Created At</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for(r <- timeSeries) {
+                            <tr>
+                                <td>@r.name</td>
+                                <td>@r.description</td>
+                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.dateCreation</td>
+                                <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <table class="table table-striped responsive-utilities jambo_table bulk_action">
-                <thead>
-                    <tr>
-                        <th>Single Plot Name</th>
-                        <th>Description</th>
-                        <th>User</th>
-                        <th>Created At</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(r <- resultSets){
-                        <tr>
-                            <td>@r.name</td>
-                            <td>@r.description</td>
-                            <td>@User.findById(r.uploaderId).email</td>
-                            <td>@r.dateCreation</td>
-                            <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-
-            <table class="table table-striped responsive-utilities jambo_table bulk_action">
-                <thead>
-                    <tr>
-                        <th>Time Series Name</th>
-                        <th>Description</th>
-                        <th>User</th>
-                        <th>Created At</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @for(r <- timeSeries){
-                    <tr>
-                        <td>@r.name</td>
-                        <td>@r.description</td>
-                        <td>@User.findById(r.uploaderId).email</td>
-                        <td>@r.dateCreation</td>
-                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
         </div>
+        <div class="clearfix"></div>
+        <div class="col-sm-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Individual Files</h2>
+                    <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                        <thead>
+                            <tr>
+                                <th>Single Plot Name</th>
+                                <th>Description</th>
+                                <th>User</th>
+                                <th>Created At</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for(r <- resultSets) {
+                            <tr>
+                                <td>@r.name</td>
+                                <td>@r.description</td>
+                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.dateCreation</td>
+                                <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div></div>
+        </div>
+        <div class="clearfix"></div>
     </div>
 }
