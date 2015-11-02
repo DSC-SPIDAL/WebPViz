@@ -513,3 +513,7 @@ function checkIfBuffered(){
 function  animateTimeSeriesPause(){
     isPaused = true
 }
+
+function resetView(){
+    controls.reset();
+}

@@ -20,6 +20,12 @@ $(function () {
             $this.removeClass("fa fa-pause").addClass("fa fa-play-circle");
         }
     });
+
+    $('#sidebar-footer a').click(function () {
+        var $this = $(this);
+        resetView();
+    });
+
     $('#sidebar-menu li').click(function () {
         if ($(this).is('.active')) {
             //$(this).removeClass('active');
