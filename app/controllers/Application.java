@@ -76,7 +76,6 @@ public class Application extends Controller {
 
         if (resultSet != null) {
             File file = resultSet.getFile();
-            String ext = FilenameUtils.getExtension(file.getName());
             Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name[0]));
             boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
             if (isZipped) {

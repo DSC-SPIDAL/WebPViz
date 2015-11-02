@@ -85,29 +85,41 @@ public class ResultSet extends Model {
     }
 
     public static ResultSet createFromFile(String name, String description, User uploader, File file) throws IOException {
-        ResultSet r = create(name, description, uploader);
-        CSVReader reader = new CSVReader(new FileReader(file), '\t');
-
-        String[] record;
-        while ((record = reader.readNext()) != null) {
-            Integer clusterId = Integer.valueOf(record[4].trim());
-            Cluster c = Cluster.findByClusterId(r.id, clusterId);
-            if (c == null) {
-                c = Cluster.create(clusterId, r);
-            }
-
-            Long pId = Long.valueOf(record[0]);
-            Float x = Float.valueOf(record[1]);
-            Float y = Float.valueOf(record[2]);
-            Float z = Float.valueOf(record[3]);
-
-            Point.create(x, y, z, c, r);
+        // first lets try to load as XML
+        try {
+            XMLLoader.load(new FileInputStream(file));
+            return createFromXMLFile(name, description, uploader, new FileInputStream(file));
+        } catch (Exception ignore) {
         }
 
-        return r;
+        // now lets try CSV format
+        try {
+            ResultSet r = create(name, description, uploader);
+            CSVReader reader = new CSVReader(new FileReader(file), '\t');
+
+            String[] record;
+            while ((record = reader.readNext()) != null) {
+                Integer clusterId = Integer.valueOf(record[4].trim());
+                Cluster c = Cluster.findByClusterId(r.id, clusterId);
+                if (c == null) {
+                    c = Cluster.create(clusterId, r);
+                }
+
+                Long pId = Long.valueOf(record[0]);
+                Float x = Float.valueOf(record[1]);
+                Float y = Float.valueOf(record[2]);
+                Float z = Float.valueOf(record[3]);
+
+                Point.create(x, y, z, c, r);
+            }
+            return r;
+        } catch (IOException e) {
+            throw new IOException("Failed to load file", e);
+        }
     }
 
-    public static ResultSet createFromFile(String name, String description, User uploader, File file, TimeSeries timeSeries, Long sequenceNumber) throws IOException {
+    public static ResultSet createFromFile(String name, String description, User uploader, File file,
+                                           TimeSeries timeSeries, Long sequenceNumber) throws IOException {
         ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
         CSVReader reader = new CSVReader(new FileReader(file), '\t');
         String[] record;
@@ -129,8 +141,18 @@ public class ResultSet extends Model {
         return r;
     }
 
-    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file, TimeSeries timeSeries, Long sequenceNumber) throws Exception {
-        ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
+    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file) throws Exception {
+        return createFromXMLFile(name, description, uploader, file, null, null);
+    }
+
+    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file,
+                                              TimeSeries timeSeries, Long sequenceNumber) throws Exception {
+        ResultSet r;
+        if (timeSeries != null) {
+            r = create(name, description, uploader, timeSeries, sequenceNumber);
+        } else {
+            r = create(name, description, uploader);
+        }
         Plotviz plotviz = XMLLoader.load(file);
         List<models.xml.Cluster> clusters = plotviz.getClusters();
         for (models.xml.Cluster cl : clusters) {
