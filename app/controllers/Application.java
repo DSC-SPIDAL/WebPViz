@@ -49,6 +49,11 @@ public class Application extends Controller {
         return ok(dashboard.render(loggedInUser, false, null, ResultSet.all(), TimeSeries.all()));
     }
 
+    public static Result about() {
+        User loggedInUser = User.findByEmail(request().username());
+        return ok(about.render(loggedInUser));
+    }
+
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
         User loggedInUser = User.findByEmail(request().username());
@@ -71,7 +76,6 @@ public class Application extends Controller {
 
         if (resultSet != null) {
             File file = resultSet.getFile();
-            String ext = FilenameUtils.getExtension(file.getName());
             Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name[0]));
             boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
             if (isZipped) {
@@ -129,8 +133,11 @@ public class Application extends Controller {
     public static Result visualize(Long resultSetId) {
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = ResultSet.findById(resultSetId);
-
-        return ok(resultset.render(loggedInUser, r));
+        if (r != null) {
+            return ok(resultset.render(loggedInUser, r));
+        } else {
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
+        }
     }
 
     public static Result visualizeTimeSeries(Long timeSeriesId) {
