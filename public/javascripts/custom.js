@@ -15,7 +15,10 @@ $(function () {
         if ($this.hasClass("fa fa-play-circle") || $this.hasClass("fa-play-circle fa")) {
             animateTimeSeriesPlay();
             $this.removeClass("fa fa-play-circle").addClass("fa fa-pause");
-        }else {
+        }else if($this.hasClass("fa fa-history") || $this.hasClass("fa-history fa")){
+            resetSlider();
+            $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
+        }else{
             animateTimeSeriesPause();
             $this.removeClass("fa fa-pause").addClass("fa fa-play-circle");
         }
