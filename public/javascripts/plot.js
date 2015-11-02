@@ -175,7 +175,7 @@ function onWindowResize() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width *0.9, height);
-    controls.handleResize();
+    //controls.handleResize();
     render();
 }
 
