@@ -49,6 +49,11 @@ public class Application extends Controller {
         return ok(dashboard.render(loggedInUser, false, null, ResultSet.all(), TimeSeries.all()));
     }
 
+    public static Result about() {
+        User loggedInUser = User.findByEmail(request().username());
+        return ok(about.render(loggedInUser));
+    }
+
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
         User loggedInUser = User.findByEmail(request().username());

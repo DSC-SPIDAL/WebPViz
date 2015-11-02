@@ -8,6 +8,9 @@ GET         /                                   controllers.Application.index()
 # Admin Dashboard
 GET         /dashboard                          controllers.Application.dashboard()
 
+# about page
+GET         /about                              controllers.Application.about()
+
 # Log in
 GET         /login                              controllers.Application.login()
 POST        /authenticate                       controllers.Application.authenticate()

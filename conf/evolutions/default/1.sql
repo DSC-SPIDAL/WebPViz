@@ -8,6 +8,7 @@ create table cluster (
   cluster                   integer,
   result_set                bigint,
   size                      integer,
+  color_id                  bigint,
   shape                     varchar(255),
   visible                   integer,
   label                     varchar(255),
@@ -15,10 +16,12 @@ create table cluster (
 ;
 
 create table color (
+  id                        bigint not null,
   a                         integer,
   b                         integer,
   g                         integer,
-  r                         integer)
+  r                         integer,
+  constraint pk_color primary key (id))
 ;
 
 create table point (
@@ -66,6 +69,8 @@ create table user (
 
 create sequence cluster_seq;
 
+create sequence color_seq;
+
 create sequence point_seq;
 
 create sequence result_set_seq;
@@ -74,6 +79,8 @@ create sequence time_series_seq;
 
 create sequence user_seq;
 
+alter table cluster add constraint fk_cluster_color_1 foreign key (color_id) references color (id) on delete restrict on update restrict;
+create index ix_cluster_color_1 on cluster (color_id);
 
 
 
@@ -96,6 +103,8 @@ drop table if exists user;
 SET REFERENTIAL_INTEGRITY TRUE;
 
 drop sequence if exists cluster_seq;
+
+drop sequence if exists color_seq;
 
 drop sequence if exists point_seq;
 
