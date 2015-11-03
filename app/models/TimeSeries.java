@@ -2,6 +2,7 @@ package models;
 
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FilenameUtils;
+import play.Logger;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -17,7 +18,6 @@ import java.util.zip.ZipFile;
 
 @Entity
 public class TimeSeries extends Model {
-
     @Id
     public Long id;
 
@@ -109,9 +109,12 @@ public class TimeSeries extends Model {
         }
 
         for (String f : filesInOrder) {
-            String resultSetName = "timeseries_" + f + "_" + i;
-            ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i, f);
-            i++;
+            if (fileMap.get(f) != null) {
+                String resultSetName = "timeseries_" + f + "_" + i;
+                Logger.info("Processing XML File: " + fileMap.get(f));
+                ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i, f);
+                i++;
+            }
         }
         zipFile.close();
         return timeSeries;
