@@ -138,14 +138,14 @@ function generateGraph() {
             if (geometry.hasOwnProperty(key)) {
                 colorlist[key] = colors[key][0].getHexString();
                 geometry[key].colors = colors[key];
-                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(1,2, false));
+                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
 
             }
         }
         window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        stats.domElement.style.position = 'absolute';
-        document.getElementById("stats").appendChild(stats.domElement);
+       // stats.domElement.style.position = 'absolute';
+       // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
         $('.color-pic1').colorpicker();
         render();
@@ -337,15 +337,16 @@ function loadMatrial(size, shape, isglyph){
         sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
     }
 
-    //if(size>10){
-    //    sprite = THREE.ImageUtils.loadTexture(ImageEnum.RED);
-    //}
+    if(size>1){
+       sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    }
 
     var material = new THREE.PointCloudMaterial({
         size: size/200,
         map: sprite,
         vertexColors: THREE.VertexColors,
-        transparent: true
+        transparent: true,
+        opacity:0.9
     });
     return material;
 }
