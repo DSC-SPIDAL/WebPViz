@@ -13,6 +13,10 @@ $(function () {
         $('#file').click();
     });
 
+    $('#file').change(function(){
+        $('#browseFile').val($(this).val())
+    });
+
     $('#slider-play').click(function () {
         var $this = $(this);
 
