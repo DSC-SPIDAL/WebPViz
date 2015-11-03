@@ -24,23 +24,32 @@
                     @if(hasError){
                         <p class="text-danger">@error</p>
                     }
+                    <button type="submit" class="btn btn-success pull-left">Upload</button>
                     <div class="form-group">
-                        <label class="sr-only" for="visName">Name</label>
-                        <input type="text" class="form-control" style="width:200px;" name="name" id="visName" placeholder="Enter name">
-                    </div>
-                    <div class="form-group">
-                        <label class="sr-only" for="file">Result File</label>
-                        <input type="file" name="file" style="width:250px;" class="form-control" id="file" placeholder="Result">
+                        <input type="file" name="file" style="display: none"  id="file">
+                        <div class="input-group">
+                            <input type="text" id="browseFile" class="form-control">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-primary" id="browseTrigger">Browse</button>
+                            </span>
+                        </div>
+                        @*<div class="input-group">*@
+                            @*<input type="file" name="file" style="display: none"  id="file">*@
+                            @*<span class="input-group-btn">*@
+                                @*<button type="button" class="btn btn-primary">Go!</button>*@
+                            @*</span>*@
+                        @*</div>*@
                     </div>
                     <div class="form-group">
                         <label class="sr-only" for="desc">Description</label>
                         <input type="text" class="form-control" style="width:530px;" name="desc" id="desc" placeholder="Enter description">
                     </div>
-                    <button type="submit" class="btn btn-default pull-right">Upload</button>
+
                 }
             </div>
         </div>
     </div>
+
     @*<div class="page-title">*@
         @*<div class="title_left">*@
             @*<h3 id="tables">PlotViz Files</h3>*@
@@ -109,4 +118,5 @@
         </div>
         <div class="clearfix"></div>
     </div>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
 }

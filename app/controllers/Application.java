@@ -60,34 +60,29 @@ public class Application extends Controller {
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart resultSet = body.getFile("file");
         String originalFileName = resultSet.getFilename();
-        String[] name = body.asFormUrlEncoded().get("name");
+        String name = resultSet.getFile().getName();
         String[] desc = body.asFormUrlEncoded().get("desc");
         String description = "No description";
-        if (name.length < 1 || name[0].isEmpty() || name[0].equalsIgnoreCase(" ")) {
-            return badRequest(dashboard.render(loggedInUser, true, "Empty or blank name.", ResultSet.all(), TimeSeries.all()));
-        }
-
-        if (ResultSet.findByName(name[0]) != null) {
+        if (ResultSet.findByName(name) != null) {
             return badRequest(dashboard.render(loggedInUser, true, "Result set with same name exists.", ResultSet.all(), TimeSeries.all()));
         }
-
         if (desc.length >= 1) {
             description = desc[0];
         }
 
         if (resultSet != null) {
             File file = resultSet.getFile();
-            Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name[0]));
+            Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name));
             boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
             if (isZipped) {
                 try {
-                    TimeSeries.createFromZip(name[0], description, loggedInUser, file);
+                    TimeSeries.createFromZip(name, description, loggedInUser, file);
                 } catch (Exception e) {
                     Logger.error("Failed to create time series from zip", e);
                     return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
                 }
             } else {
-                ResultSet.createFromFile(name[0], description, loggedInUser, file, originalFileName);
+                ResultSet.createFromFile(name, description, loggedInUser, file, originalFileName);
             }
             return GO_DASHBOARD;
         } else {

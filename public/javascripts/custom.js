@@ -9,6 +9,10 @@ $(function () {
     $('#sidebar-menu li ul').first().slideDown();
     $('#sidebar-menu li').removeClass('active');
 
+    $('#browseTrigger').click(function(){
+        $('#file').click();
+    });
+
     $('#slider-play').click(function () {
         var $this = $(this);
 
