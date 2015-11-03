@@ -20,6 +20,7 @@ var resultData;
 
 //Time Series Vars
 var particleSets = {};
+var fileNames = {};
 var timeSeriesData = [];
 var isPlaying = false;
 var isPaused = false;
@@ -99,6 +100,8 @@ function generateGraph() {
     var hsl;
     var sections = {};
     $.getJSON(clusterUrl, function (data) {
+        fileName = data.fileName;
+        $( "#amount" ).val(fileName)
         for (var i = 0; i < clusters.length; i++) {
             var clusterdata = data.clusters[i];
             var clusterid = clusterdata.clusterid;
@@ -196,6 +199,8 @@ function loadPlotData(start,end){
             colors = {};
             geometry = {};
             clusters = data.clusters;
+            fileName = data.fileName;
+
 
             for (var i = 0; i < clusters.length; i++) {
 
@@ -239,6 +244,8 @@ function loadPlotData(start,end){
             }
 
             particleSets[data.timeSeriesSeqNumber] = particles;
+            fileNames[data.timeSeriesSeqNumber] = data.fileName;
+            console.log(data.fileName)
         });
 
     }
@@ -371,7 +378,7 @@ function updatePlot(event, ui) {
             window.addEventListener('resize', onWindowResize, false);
             render();
             animate();
-            $("#amount").val(sliderValue);
+            $("#amount").val(fileNames[sliderValue]);
         }
     }else {
         for(var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++){
@@ -456,7 +463,7 @@ function playLoop() {
                 }
             }
             window.addEventListener('resize', onWindowResize, false);
-            $("#amount").val(currentValue + 1);
+            $("#amount").val(fileNames[currentValue + 1]);
             render();
             if (maxValue > currentValue + 1 && !isPaused) {
                 playLoop();

@@ -107,8 +107,8 @@
                 <div class="right_col" role="main">
                     <canvas id="canvas3d" style="position: relative;"></canvas>
                     <p>
-                        <label for="amount">Value:</label>
-                        <input type="text" id="amount"  value="0" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                        <label for="amount">PViZ File</label>
+                        <input type="text" id="amount"  value="" readonly style="border:0; color:#f6931f; font-weight:bold;">
                     </p>
                     <div id="slider"></div>
                     <div id="slider-controls" class="slider-controls"> <a id="slider-play-a" href="#"><i id="slider-play" class="fa fa-play-circle"></i></a></div>
@@ -157,7 +157,7 @@
                   updatePlot(event, ui)
                 }
             });
-            $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
+//            $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
         });
     </script>
     <script type="text/javascript">

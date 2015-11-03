@@ -42,6 +42,7 @@ create table result_set (
   uploader_id               bigint,
   time_series_id            bigint,
   time_series_seq_number    bigint,
+  file_name                 varchar(255),
   constraint pk_result_set primary key (id))
 ;
 

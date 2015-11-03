@@ -59,6 +59,7 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart resultSet = body.getFile("file");
+        String originalFileName = resultSet.getFilename();
         String[] name = body.asFormUrlEncoded().get("name");
         String[] desc = body.asFormUrlEncoded().get("desc");
         String description = "No description";
@@ -86,7 +87,7 @@ public class Application extends Controller {
                     return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
                 }
             } else {
-                ResultSet.createFromFile(name[0], description, loggedInUser, file);
+                ResultSet.createFromFile(name[0], description, loggedInUser, file, originalFileName);
             }
             return GO_DASHBOARD;
         } else {
@@ -171,6 +172,7 @@ public class Application extends Controller {
         result.put("name", r.name);
         result.put("desc", r.description);
         result.put("uploaded", User.findById(r.uploaderId).email);
+        result.put("fileName", r.fileName);
         if(r.timeSeriesId != null){
             result.put("timeSeriesId", r.timeSeriesId);
             result.put("timeSeriesSeqNumber", r.timeSeriesSeqNumber);
@@ -214,6 +216,7 @@ public class Application extends Controller {
         result.put("name", r.name);
         result.put("desc", r.description);
         result.put("uploaded", User.findById(r.uploaderId).email);
+        result.put("fileName", r.fileName);
 
         List<Cluster> clusters = Cluster.findByResultSet(r.id);
 

@@ -12,13 +12,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.*;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-/**
- * Created by pulasthiiu on 10/14/15.
- */
 @Entity
 public class TimeSeries extends Model {
 
@@ -59,9 +55,9 @@ public class TimeSeries extends Model {
         String resultSetName =  "";
         for (int i = 0; i < fileParts.size(); i++) {
             File file = fileParts.get(i).getFile();
+            String originalFileName = fileParts.get(i).getFilename();
             resultSetName = "timeseries_" + name + "_" + i;
-            ResultSet.createFromFile(resultSetName, description, uploader, file, timeSeries, (long)i);
-
+            ResultSet.createFromFile(resultSetName, description, uploader, file, timeSeries, (long)i, originalFileName);
         }
         return timeSeries;
     }
@@ -103,7 +99,6 @@ public class TimeSeries extends Model {
             if (ext != null && ext.equals("index")) {
                 BufferedReader bufRead = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry)));
                 String inputLine;
-                int index = 0;
                 while ((inputLine = bufRead.readLine()) != null) {
                     filesInOrder.add(inputLine);
                 }
@@ -115,7 +110,7 @@ public class TimeSeries extends Model {
 
         for (String f : filesInOrder) {
             String resultSetName = "timeseries_" + f + "_" + i;
-            ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i);
+            ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i, f);
             i++;
         }
         zipFile.close();

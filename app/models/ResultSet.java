@@ -25,9 +25,7 @@ import models.xml.XMLLoader;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
-import scala.Int;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.*;
@@ -56,21 +54,24 @@ public class ResultSet extends Model {
 
     public Long timeSeriesSeqNumber;
 
+    public String fileName;
+
     public static Model.Finder<Long, ResultSet> find = new Model.Finder<Long, ResultSet>(Long.class, ResultSet.class);
 
-    public static ResultSet create(String name, String description, User uploader) {
+    public static ResultSet create(String name, String description, User uploader, String fileName) {
         ResultSet r = new ResultSet();
         r.name = name;
         r.description = description;
         r.uploaderId = uploader.id;
         r.dateCreation = new Date();
+        r.fileName = fileName;
 
         r.save();
 
         return r;
     }
 
-    public static ResultSet create(String name, String description, User uploader, TimeSeries timeSeries, Long sequenceNumber) {
+    public static ResultSet create(String name, String description, User uploader, TimeSeries timeSeries, Long sequenceNumber, String fileName) {
         ResultSet r = new ResultSet();
         r.name = name;
         r.description = description;
@@ -78,23 +79,24 @@ public class ResultSet extends Model {
         r.dateCreation = new Date();
         r.timeSeriesId =  timeSeries.id;
         r.timeSeriesSeqNumber =  sequenceNumber;
+        r.fileName = fileName;
 
         r.save();
 
         return r;
     }
 
-    public static ResultSet createFromFile(String name, String description, User uploader, File file) throws IOException {
+    public static ResultSet createFromFile(String name, String description, User uploader, File file, String originalFileName) throws IOException {
         // first lets try to load as XML
         try {
             XMLLoader.load(new FileInputStream(file));
-            return createFromXMLFile(name, description, uploader, new FileInputStream(file));
+            return createFromXMLFile(name, description, uploader, new FileInputStream(file), originalFileName);
         } catch (Exception ignore) {
         }
 
         // now lets try CSV format
         try {
-            ResultSet r = create(name, description, uploader);
+            ResultSet r = create(name, description, uploader, originalFileName);
             CSVReader reader = new CSVReader(new FileReader(file), '\t');
 
             String[] record;
@@ -119,8 +121,8 @@ public class ResultSet extends Model {
     }
 
     public static ResultSet createFromFile(String name, String description, User uploader, File file,
-                                           TimeSeries timeSeries, Long sequenceNumber) throws IOException {
-        ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber);
+                                           TimeSeries timeSeries, Long sequenceNumber, String originalFileName) throws IOException {
+        ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber, originalFileName);
         CSVReader reader = new CSVReader(new FileReader(file), '\t');
         String[] record;
         while ((record = reader.readNext()) != null) {
@@ -141,17 +143,17 @@ public class ResultSet extends Model {
         return r;
     }
 
-    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file) throws Exception {
-        return createFromXMLFile(name, description, uploader, file, null, null);
+    public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file, String originalFileName) throws Exception {
+        return createFromXMLFile(name, description, uploader, file, null, null, null);
     }
 
     public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file,
-                                              TimeSeries timeSeries, Long sequenceNumber) throws Exception {
+                                              TimeSeries timeSeries, Long sequenceNumber, String originalFileName) throws Exception {
         ResultSet r;
         if (timeSeries != null) {
-            r = create(name, description, uploader, timeSeries, sequenceNumber);
+            r = create(name, description, uploader, timeSeries, sequenceNumber, originalFileName);
         } else {
-            r = create(name, description, uploader);
+            r = create(name, description, uploader, originalFileName);
         }
         Plotviz plotviz = XMLLoader.load(file);
         List<models.xml.Cluster> clusters = plotviz.getClusters();
