@@ -41,7 +41,6 @@
                 }
             </div>
         </div>
-    </div>
 
     @*<div class="page-title">*@
         @*<div class="title_left">*@
@@ -55,7 +54,7 @@
                 <div class="x_title">
                     <h2>Time Series Files</h2>
                     @if(timeSeries.length != 0) {
-                        <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                        <table id="timeseriesfiles" class="table table-striped responsive-utilities jambo_table bulk_action">
                             <thead>
                                 <tr>
                                     <th>Time Series Name</th>
@@ -78,7 +77,6 @@
                             </tbody>
                         </table>
 
-                <div class="dataTables_info" id="example_info">Showing 37 to 40 of 40 entries</div>
                     }else{
                     </div>
                         <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Time Series Files to Display</div>
@@ -92,7 +90,7 @@
                 <div class="x_title">
                     <h2>Individual Files</h2>
                     @if(resultSets.length != 0) {
-                        <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                        <table id="individualfiles" class="table table-striped responsive-utilities jambo_table bulk_action">
                             <thead>
                                 <tr>
                                     <th>Single Plot Name</th>
@@ -114,27 +112,84 @@
                             }
                             </tbody>
                         </table>
-                    </div> <div class="dataTables_info" id="example_info">Showing 37 to 40 of 40 entries</div>
                     }else{
                     </div>
                     <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>
                     }
-
-
-                <div class="dataTables_paginate paging_full_numbers" id="example_paginate">
-                    <a tabindex="0" class="first paginate_button" id="example_first">First</a>
-                    <a tabindex="0" class="previous paginate_button" id="example_previous">Previous</a>
-                    <span><a tabindex="0" class="paginate_button">1</a>
-                        <a tabindex="0" class="paginate_button">2</a>
-                        <a tabindex="0" class="paginate_button">3</a>
-                        <a tabindex="0" class="paginate_active">4</a>
-                    </span>
-                    <a tabindex="0" class="next paginate_button paginate_button_disabled" id="example_next">Next</a>
-                    <a tabindex="0" class="last paginate_button paginate_button_disabled" id="example_last">Last</a>
-                </div>
             </div>
         </div>
         <div class="clearfix"></div>
-    </div>
+        </div>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/js/jquery.dataTables.js")"></script>
+
+    @* can be used if table tools are needed such as save as pdf, print<script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/tools/js/dataTables.tableTools.js")"></script>*@
+    <script>
+            var asInitVals = new Array();
+            $(document).ready(function () {
+                var oTable = $('#individualfiles').dataTable({
+                    "oLanguage": {
+                        "sSearch": "Search all columns:"
+                    },
+                    'iDisplayLength': 10,
+                    "sPaginationType": "full_numbers",
+                    "dom": 'T<"clear">lfrtip',
+                    "tableTools": {
+
+                    }
+                });
+                $("tfoot input").keyup(function () {
+                    /* Filter on the column based on the index of this element's parent <th> */
+                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+                });
+                $("tfoot input").each(function (i) {
+                    asInitVals[i] = this.value;
+                });
+                $("tfoot input").focus(function () {
+                    if (this.className == "search_init") {
+                        this.className = "";
+                        this.value = "";
+                    }
+                });
+                $("tfoot input").blur(function (i) {
+                    if (this.value == "") {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("tfoot input").index(this)];
+                    }
+                });
+            });
+
+             $(document).ready(function () {
+                var oTable = $('#timeseriesfiles').dataTable({
+                    "oLanguage": {
+                        "sSearch": "Search all columns:"
+                    },
+                    'iDisplayLength': 10,
+                    "sPaginationType": "full_numbers",
+                    "dom": 'T<"clear">lfrtip',
+                    "tableTools": {
+
+                    }
+                });
+                $("tfoot input").keyup(function () {
+                    /* Filter on the column based on the index of this element's parent <th> */
+                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+                });
+                $("tfoot input").each(function (i) {
+                    asInitVals[i] = this.value;
+                });
+                $("tfoot input").focus(function () {
+                    if (this.className == "search_init") {
+                        this.className = "";
+                        this.value = "";
+                    }
+                });
+                $("tfoot input").blur(function (i) {
+                    if (this.value == "") {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("tfoot input").index(this)];
+                    }
+                });
+            });
+        </script>
 }
