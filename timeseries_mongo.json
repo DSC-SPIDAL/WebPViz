@@ -1,0 +1,129 @@
+{
+  "_id": -2071429729,
+  "id": -2071429729,
+  "name": "aaa",
+  "desc": "aaa",
+  "uploaded": 1,
+  "resultsets": [
+    {
+      "id": 0,
+      "name": "timeseries_20040101_20050101.pviz_0",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 0,
+      "fileName": "20040101_20050101.pviz"
+    },
+    {
+      "id": 1,
+      "name": "timeseries_20040108_20050108.pviz_1",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 1,
+      "fileName": "20040108_20050108.pviz"
+    },
+    {
+      "id": 2,
+      "name": "timeseries_20040101_20050101.pviz_2",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 2,
+      "fileName": "20040101_20050101.pviz"
+    },
+    {
+      "id": 3,
+      "name": "timeseries_20040108_20050108.pviz_3",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 3,
+      "fileName": "20040108_20050108.pviz"
+    },
+    {
+      "id": 4,
+      "name": "timeseries_20040115_20050115.pviz_4",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 4,
+      "fileName": "20040115_20050115.pviz"
+    },
+    {
+      "id": 5,
+      "name": "timeseries_20040122_20050122.pviz_5",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 5,
+      "fileName": "20040122_20050122.pviz"
+    },
+    {
+      "id": 6,
+      "name": "timeseries_20040129_20050129.pviz_6",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 6,
+      "fileName": "20040129_20050129.pviz"
+    },
+    {
+      "id": 7,
+      "name": "timeseries_20040205_20050205.pviz_7",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 7,
+      "fileName": "20040205_20050205.pviz"
+    },
+    {
+      "id": 8,
+      "name": "timeseries_20040212_20050212.pviz_8",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 8,
+      "fileName": "20040212_20050212.pviz"
+    },
+    {
+      "id": 9,
+      "name": "timeseries_20040219_20050219.pviz_9",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 9,
+      "fileName": "20040219_20050219.pviz"
+    },
+    {
+      "id": 10,
+      "name": "timeseries_20040226_20050226.pviz_10",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 10,
+      "fileName": "20040226_20050226.pviz"
+    },
+    {
+      "id": 11,
+      "name": "timeseries_20040304_20050304.pviz_11",
+      "description": "aaa",
+      "dateCreation": "2015-11-04 11:01:00",
+      "uploaderId": 1,
+      "timeSeriesId": -2071429729,
+      "timeSeriesSeqNumber": 11,
+      "fileName": "20040304_20050304.pviz"
+    }
+  ]
+}

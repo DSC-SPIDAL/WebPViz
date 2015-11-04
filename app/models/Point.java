@@ -29,7 +29,7 @@ import java.util.List;
 public class Point extends Model{
 
     @Id
-    public Long id;
+    public Integer id;
 
     @Constraints.Required
     public Float x;
@@ -41,12 +41,12 @@ public class Point extends Model{
     public Float z;
 
     @Constraints.Required
-    public Long cluster;
+    public Integer cluster;
 
     @Constraints.Required
-    public Long resultSet;
+    public Integer resultSet;
 
-    public static Model.Finder<Long, Point> find = new Model.Finder<Long, Point>(Long.class, Point.class);
+    public static Model.Finder<Integer, Point> find = new Model.Finder<Integer, Point>(Integer.class, Point.class);
 
     public static Point create( Float x, Float y, Float z, Cluster cluster, ResultSet resultSet){
         Point p = new Point();
@@ -61,7 +61,7 @@ public class Point extends Model{
         return p;
     }
 
-    public static List<Point> findByCluster(Long rid, Long cid){
+    public static List<Point> findByCluster(Integer rid, Integer cid){
         return find.where().eq("resultSet", rid).eq("cluster", cid).findList();
     }
 }

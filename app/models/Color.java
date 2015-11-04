@@ -8,7 +8,7 @@ import javax.persistence.Id;
 @Entity
 public class Color extends Model {
     @Id
-    public Long id;
+    public Integer id;
 
     public int a;
     public int b;

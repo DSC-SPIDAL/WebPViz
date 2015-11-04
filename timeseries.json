@@ -1,0 +1,678 @@
+{
+  "id": 1,
+  "name": "multipartBody7242503348388242333asTemporaryFile",
+  "desc": "SADASDASD",
+  "uploaded": "admin",
+  "resultsets": [
+    {
+      "id": 1,
+      "name": "timeseries_20040101_20050101.pviz_0",
+      "description": "SADASDASD",
+      "dateCreation": 1446596434375,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 0,
+      "fileName": "20040101_20050101.pviz"
+    },
+    {
+      "id": 2,
+      "name": "timeseries_20040108_20050108.pviz_1",
+      "description": "SADASDASD",
+      "dateCreation": 1446596437097,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 1,
+      "fileName": "20040108_20050108.pviz"
+    },
+    {
+      "id": 3,
+      "name": "timeseries_20040115_20050115.pviz_2",
+      "description": "SADASDASD",
+      "dateCreation": 1446596438512,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 2,
+      "fileName": "20040115_20050115.pviz"
+    },
+    {
+      "id": 4,
+      "name": "timeseries_20040122_20050122.pviz_3",
+      "description": "SADASDASD",
+      "dateCreation": 1446596439724,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 3,
+      "fileName": "20040122_20050122.pviz"
+    },
+    {
+      "id": 5,
+      "name": "timeseries_20040129_20050129.pviz_4",
+      "description": "SADASDASD",
+      "dateCreation": 1446596441047,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 4,
+      "fileName": "20040129_20050129.pviz"
+    },
+    {
+      "id": 6,
+      "name": "timeseries_20040205_20050205.pviz_5",
+      "description": "SADASDASD",
+      "dateCreation": 1446596442595,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 5,
+      "fileName": "20040205_20050205.pviz"
+    },
+    {
+      "id": 7,
+      "name": "timeseries_20040212_20050212.pviz_6",
+      "description": "SADASDASD",
+      "dateCreation": 1446596443908,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 6,
+      "fileName": "20040212_20050212.pviz"
+    },
+    {
+      "id": 8,
+      "name": "timeseries_20040219_20050219.pviz_7",
+      "description": "SADASDASD",
+      "dateCreation": 1446596444579,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 7,
+      "fileName": "20040219_20050219.pviz"
+    },
+    {
+      "id": 9,
+      "name": "timeseries_20040226_20050226.pviz_8",
+      "description": "SADASDASD",
+      "dateCreation": 1446596445263,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 8,
+      "fileName": "20040226_20050226.pviz"
+    },
+    {
+      "id": 10,
+      "name": "timeseries_20040304_20050304.pviz_9",
+      "description": "SADASDASD",
+      "dateCreation": 1446596445936,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 9,
+      "fileName": "20040304_20050304.pviz"
+    },
+    {
+      "id": 11,
+      "name": "timeseries_20040311_20050311.pviz_10",
+      "description": "SADASDASD",
+      "dateCreation": 1446596446644,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 10,
+      "fileName": "20040311_20050311.pviz"
+    },
+    {
+      "id": 12,
+      "name": "timeseries_20040318_20050318.pviz_11",
+      "description": "SADASDASD",
+      "dateCreation": 1446596447313,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 11,
+      "fileName": "20040318_20050318.pviz"
+    },
+    {
+      "id": 13,
+      "name": "timeseries_20040325_20050325.pviz_12",
+      "description": "SADASDASD",
+      "dateCreation": 1446596448024,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 12,
+      "fileName": "20040325_20050325.pviz"
+    },
+    {
+      "id": 14,
+      "name": "timeseries_20040401_20050401.pviz_13",
+      "description": "SADASDASD",
+      "dateCreation": 1446596448731,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 13,
+      "fileName": "20040401_20050401.pviz"
+    },
+    {
+      "id": 15,
+      "name": "timeseries_20040408_20050408.pviz_14",
+      "description": "SADASDASD",
+      "dateCreation": 1446596449482,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 14,
+      "fileName": "20040408_20050408.pviz"
+    },
+    {
+      "id": 16,
+      "name": "timeseries_20040415_20050415.pviz_15",
+      "description": "SADASDASD",
+      "dateCreation": 1446596450177,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 15,
+      "fileName": "20040415_20050415.pviz"
+    },
+    {
+      "id": 17,
+      "name": "timeseries_20040422_20050422.pviz_16",
+      "description": "SADASDASD",
+      "dateCreation": 1446596450893,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 16,
+      "fileName": "20040422_20050422.pviz"
+    },
+    {
+      "id": 18,
+      "name": "timeseries_20040429_20050429.pviz_17",
+      "description": "SADASDASD",
+      "dateCreation": 1446596451626,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 17,
+      "fileName": "20040429_20050429.pviz"
+    },
+    {
+      "id": 19,
+      "name": "timeseries_20040506_20050506.pviz_18",
+      "description": "SADASDASD",
+      "dateCreation": 1446596452392,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 18,
+      "fileName": "20040506_20050506.pviz"
+    },
+    {
+      "id": 20,
+      "name": "timeseries_20040513_20050513.pviz_19",
+      "description": "SADASDASD",
+      "dateCreation": 1446596453127,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 19,
+      "fileName": "20040513_20050513.pviz"
+    },
+    {
+      "id": 33,
+      "name": "timeseries_20040520_20050520.pviz_20",
+      "description": "SADASDASD",
+      "dateCreation": 1446596453873,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 20,
+      "fileName": "20040520_20050520.pviz"
+    },
+    {
+      "id": 34,
+      "name": "timeseries_20040527_20050527.pviz_21",
+      "description": "SADASDASD",
+      "dateCreation": 1446596454610,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 21,
+      "fileName": "20040527_20050527.pviz"
+    },
+    {
+      "id": 35,
+      "name": "timeseries_20040603_20050603.pviz_22",
+      "description": "SADASDASD",
+      "dateCreation": 1446596455392,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 22,
+      "fileName": "20040603_20050603.pviz"
+    },
+    {
+      "id": 36,
+      "name": "timeseries_20040610_20050610.pviz_23",
+      "description": "SADASDASD",
+      "dateCreation": 1446596456158,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 23,
+      "fileName": "20040610_20050610.pviz"
+    },
+    {
+      "id": 37,
+      "name": "timeseries_20040617_20050617.pviz_24",
+      "description": "SADASDASD",
+      "dateCreation": 1446596456909,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 24,
+      "fileName": "20040617_20050617.pviz"
+    },
+    {
+      "id": 38,
+      "name": "timeseries_20040624_20050624.pviz_25",
+      "description": "SADASDASD",
+      "dateCreation": 1446596457667,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 25,
+      "fileName": "20040624_20050624.pviz"
+    },
+    {
+      "id": 39,
+      "name": "timeseries_20040701_20050701.pviz_26",
+      "description": "SADASDASD",
+      "dateCreation": 1446596458492,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 26,
+      "fileName": "20040701_20050701.pviz"
+    },
+    {
+      "id": 40,
+      "name": "timeseries_20040708_20050708.pviz_27",
+      "description": "SADASDASD",
+      "dateCreation": 1446596459273,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 27,
+      "fileName": "20040708_20050708.pviz"
+    },
+    {
+      "id": 21,
+      "name": "timeseries_20040715_20050715.pviz_28",
+      "description": "SADASDASD",
+      "dateCreation": 1446596460147,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 28,
+      "fileName": "20040715_20050715.pviz"
+    },
+    {
+      "id": 22,
+      "name": "timeseries_20040722_20050722.pviz_29",
+      "description": "SADASDASD",
+      "dateCreation": 1446596460936,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 29,
+      "fileName": "20040722_20050722.pviz"
+    },
+    {
+      "id": 23,
+      "name": "timeseries_20040729_20050729.pviz_30",
+      "description": "SADASDASD",
+      "dateCreation": 1446596461756,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 30,
+      "fileName": "20040729_20050729.pviz"
+    },
+    {
+      "id": 24,
+      "name": "timeseries_20040805_20050805.pviz_31",
+      "description": "SADASDASD",
+      "dateCreation": 1446596462566,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 31,
+      "fileName": "20040805_20050805.pviz"
+    },
+    {
+      "id": 25,
+      "name": "timeseries_20040812_20050812.pviz_32",
+      "description": "SADASDASD",
+      "dateCreation": 1446596463372,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 32,
+      "fileName": "20040812_20050812.pviz"
+    },
+    {
+      "id": 26,
+      "name": "timeseries_20040819_20050819.pviz_33",
+      "description": "SADASDASD",
+      "dateCreation": 1446596464201,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 33,
+      "fileName": "20040819_20050819.pviz"
+    },
+    {
+      "id": 27,
+      "name": "timeseries_20040826_20050826.pviz_34",
+      "description": "SADASDASD",
+      "dateCreation": 1446596465013,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 34,
+      "fileName": "20040826_20050826.pviz"
+    },
+    {
+      "id": 28,
+      "name": "timeseries_20040902_20050902.pviz_35",
+      "description": "SADASDASD",
+      "dateCreation": 1446596465831,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 35,
+      "fileName": "20040902_20050902.pviz"
+    },
+    {
+      "id": 29,
+      "name": "timeseries_20040909_20050909.pviz_36",
+      "description": "SADASDASD",
+      "dateCreation": 1446596466700,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 36,
+      "fileName": "20040909_20050909.pviz"
+    },
+    {
+      "id": 30,
+      "name": "timeseries_20040916_20050916.pviz_37",
+      "description": "SADASDASD",
+      "dateCreation": 1446596467541,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 37,
+      "fileName": "20040916_20050916.pviz"
+    },
+    {
+      "id": 31,
+      "name": "timeseries_20040923_20050923.pviz_38",
+      "description": "SADASDASD",
+      "dateCreation": 1446596468385,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 38,
+      "fileName": "20040923_20050923.pviz"
+    },
+    {
+      "id": 32,
+      "name": "timeseries_20040930_20050930.pviz_39",
+      "description": "SADASDASD",
+      "dateCreation": 1446596469243,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 39,
+      "fileName": "20040930_20050930.pviz"
+    },
+    {
+      "id": 41,
+      "name": "timeseries_20041007_20051007.pviz_40",
+      "description": "SADASDASD",
+      "dateCreation": 1446596470083,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 40,
+      "fileName": "20041007_20051007.pviz"
+    },
+    {
+      "id": 42,
+      "name": "timeseries_20041014_20051014.pviz_41",
+      "description": "SADASDASD",
+      "dateCreation": 1446596470925,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 41,
+      "fileName": "20041014_20051014.pviz"
+    },
+    {
+      "id": 43,
+      "name": "timeseries_20041021_20051021.pviz_42",
+      "description": "SADASDASD",
+      "dateCreation": 1446596471784,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 42,
+      "fileName": "20041021_20051021.pviz"
+    },
+    {
+      "id": 44,
+      "name": "timeseries_20041028_20051028.pviz_43",
+      "description": "SADASDASD",
+      "dateCreation": 1446596472668,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 43,
+      "fileName": "20041028_20051028.pviz"
+    },
+    {
+      "id": 45,
+      "name": "timeseries_20041104_20051104.pviz_44",
+      "description": "SADASDASD",
+      "dateCreation": 1446596473534,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 44,
+      "fileName": "20041104_20051104.pviz"
+    },
+    {
+      "id": 46,
+      "name": "timeseries_20041111_20051111.pviz_45",
+      "description": "SADASDASD",
+      "dateCreation": 1446596474400,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 45,
+      "fileName": "20041111_20051111.pviz"
+    },
+    {
+      "id": 47,
+      "name": "timeseries_20041118_20051118.pviz_46",
+      "description": "SADASDASD",
+      "dateCreation": 1446596475285,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 46,
+      "fileName": "20041118_20051118.pviz"
+    },
+    {
+      "id": 48,
+      "name": "timeseries_20041125_20051125.pviz_47",
+      "description": "SADASDASD",
+      "dateCreation": 1446596476153,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 47,
+      "fileName": "20041125_20051125.pviz"
+    },
+    {
+      "id": 49,
+      "name": "timeseries_20041202_20051202.pviz_48",
+      "description": "SADASDASD",
+      "dateCreation": 1446596477067,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 48,
+      "fileName": "20041202_20051202.pviz"
+    },
+    {
+      "id": 50,
+      "name": "timeseries_20041209_20051209.pviz_49",
+      "description": "SADASDASD",
+      "dateCreation": 1446596477953,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 49,
+      "fileName": "20041209_20051209.pviz"
+    },
+    {
+      "id": 51,
+      "name": "timeseries_20041216_20051216.pviz_50",
+      "description": "SADASDASD",
+      "dateCreation": 1446596478864,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 50,
+      "fileName": "20041216_20051216.pviz"
+    },
+    {
+      "id": 52,
+      "name": "timeseries_20041223_20051223.pviz_51",
+      "description": "SADASDASD",
+      "dateCreation": 1446596479783,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 51,
+      "fileName": "20041223_20051223.pviz"
+    },
+    {
+      "id": 53,
+      "name": "timeseries_20041230_20051230.pviz_52",
+      "description": "SADASDASD",
+      "dateCreation": 1446596480682,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 52,
+      "fileName": "20041230_20051230.pviz"
+    },
+    {
+      "id": 54,
+      "name": "timeseries_20050106_20060106.pviz_53",
+      "description": "SADASDASD",
+      "dateCreation": 1446596481635,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 53,
+      "fileName": "20050106_20060106.pviz"
+    },
+    {
+      "id": 55,
+      "name": "timeseries_20050113_20060113.pviz_54",
+      "description": "SADASDASD",
+      "dateCreation": 1446596482564,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 54,
+      "fileName": "20050113_20060113.pviz"
+    },
+    {
+      "id": 56,
+      "name": "timeseries_20050120_20060120.pviz_55",
+      "description": "SADASDASD",
+      "dateCreation": 1446596483485,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 55,
+      "fileName": "20050120_20060120.pviz"
+    },
+    {
+      "id": 57,
+      "name": "timeseries_20050127_20060127.pviz_56",
+      "description": "SADASDASD",
+      "dateCreation": 1446596484420,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 56,
+      "fileName": "20050127_20060127.pviz"
+    },
+    {
+      "id": 58,
+      "name": "timeseries_20050203_20060203.pviz_57",
+      "description": "SADASDASD",
+      "dateCreation": 1446596485385,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 57,
+      "fileName": "20050203_20060203.pviz"
+    },
+    {
+      "id": 59,
+      "name": "timeseries_20050210_20060210.pviz_58",
+      "description": "SADASDASD",
+      "dateCreation": 1446596486349,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 58,
+      "fileName": "20050210_20060210.pviz"
+    },
+    {
+      "id": 60,
+      "name": "timeseries_20050217_20060217.pviz_59",
+      "description": "SADASDASD",
+      "dateCreation": 1446596487326,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 59,
+      "fileName": "20050217_20060217.pviz"
+    },
+    {
+      "id": 65,
+      "name": "timeseries_20050224_20060224.pviz_60",
+      "description": "SADASDASD",
+      "dateCreation": 1446596488274,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 60,
+      "fileName": "20050224_20060224.pviz"
+    },
+    {
+      "id": 66,
+      "name": "timeseries_20050303_20060303.pviz_61",
+      "description": "SADASDASD",
+      "dateCreation": 1446596489243,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 61,
+      "fileName": "20050303_20060303.pviz"
+    },
+    {
+      "id": 67,
+      "name": "timeseries_20050310_20060310.pviz_62",
+      "description": "SADASDASD",
+      "dateCreation": 1446596490236,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 62,
+      "fileName": "20050310_20060310.pviz"
+    },
+    {
+      "id": 68,
+      "name": "timeseries_20050317_20060317.pviz_63",
+      "description": "SADASDASD",
+      "dateCreation": 1446596491198,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 63,
+      "fileName": "20050317_20060317.pviz"
+    },
+    {
+      "id": 69,
+      "name": "timeseries_20050324_20060324.pviz_64",
+      "description": "SADASDASD",
+      "dateCreation": 1446596492171,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 64,
+      "fileName": "20050324_20060324.pviz"
+    },
+    {
+      "id": 70,
+      "name": "timeseries_20050331_20060331.pviz_65",
+      "description": "SADASDASD",
+      "dateCreation": 1446596493166,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 65,
+      "fileName": "20050331_20060331.pviz"
+    },
+    {
+      "id": 71,
+      "name": "timeseries_20050407_20060407.pviz_66",
+      "description": "SADASDASD",
+      "dateCreation": 1446596494137,
+      "uploaderId": 1,
+      "timeSeriesId": 1,
+      "timeSeriesSeqNumber": 66,
+      "fileName": "20050407_20060407.pviz"
+    }
+  ]
+}

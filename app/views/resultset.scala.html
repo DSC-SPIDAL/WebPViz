@@ -1,6 +1,6 @@
-@(user: User, resultSet: ResultSet)
+@(user: User, resultSetId: Integer, resultSetName: String)
 
-@main(resultSet.name, user){
+@main(resultSetName, user){
     <style>
     .viz {
     margin-top: -21px;
@@ -150,9 +150,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
 
     <script type="text/javascript">
-        $.getJSON("@routes.Application.resultset(resultSet.id)", function (data) {
-            var resultSetUrl = "@routes.Application.resultssetall(resultSet.id)";
-            visualize(resultSetUrl, data, @resultSet.id);
+        $.getJSON("@routes.Application.resultset(resultSetId)", function (data) {
+            var resultSetUrl = "@routes.Application.resultssetall(resultSetId)";
+            visualize(resultSetUrl, data, @resultSetId);
         });
     </script>
 }
