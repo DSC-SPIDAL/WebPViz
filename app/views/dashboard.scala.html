@@ -54,30 +54,36 @@
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Time Series Files</h2>
+                    @if(timeSeries.length != 0) {
+                        <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                            <thead>
+                                <tr>
+                                    <th>Time Series Name</th>
+                                    <th>Description</th>
+                                    <th>User</th>
+                                    <th>Created At</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @for(r <- timeSeries) {
+                                <tr>
+                                    <td>@r.name</td>
+                                    <td>@r.description</td>
+                                    <td>@User.findById(r.uploaderId).email</td>
+                                    <td>@r.dateCreation</td>
+                                    <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
 
-                    <table class="table table-striped responsive-utilities jambo_table bulk_action">
-                        <thead>
-                            <tr>
-                                <th>Time Series Name</th>
-                                <th>Description</th>
-                                <th>User</th>
-                                <th>Created At</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @for(r <- timeSeries) {
-                            <tr>
-                                <td>@r.name</td>
-                                <td>@r.description</td>
-                                <td>@User.findById(r.uploaderId).email</td>
-                                <td>@r.dateCreation</td>
-                                <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
+                <div class="dataTables_info" id="example_info">Showing 37 to 40 of 40 entries</div>
+                    }else{
+                    </div>
+                        <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Time Series Files to Display</div>
+                    }
+
             </div>
         </div>
         <div class="clearfix"></div>
@@ -85,29 +91,48 @@
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Individual Files</h2>
-                    <table class="table table-striped responsive-utilities jambo_table bulk_action">
-                        <thead>
-                            <tr>
-                                <th>Single Plot Name</th>
-                                <th>Description</th>
-                                <th>User</th>
-                                <th>Created At</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @for(r <- resultSets) {
-                            <tr>
-                                <td>@r.name</td>
-                                <td>@r.description</td>
-                                <td>@User.findById(r.uploaderId).email</td>
-                                <td>@r.dateCreation</td>
-                                <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div></div>
+                    @if(resultSets.length != 0) {
+                        <table class="table table-striped responsive-utilities jambo_table bulk_action">
+                            <thead>
+                                <tr>
+                                    <th>Single Plot Name</th>
+                                    <th>Description</th>
+                                    <th>User</th>
+                                    <th>Created At</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @for(r <- resultSets) {
+                                <tr>
+                                    <td>@r.name</td>
+                                    <td>@r.description</td>
+                                    <td>@User.findById(r.uploaderId).email</td>
+                                    <td>@r.dateCreation</td>
+                                    <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div> <div class="dataTables_info" id="example_info">Showing 37 to 40 of 40 entries</div>
+                    }else{
+                    </div>
+                    <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>
+                    }
+
+
+                <div class="dataTables_paginate paging_full_numbers" id="example_paginate">
+                    <a tabindex="0" class="first paginate_button" id="example_first">First</a>
+                    <a tabindex="0" class="previous paginate_button" id="example_previous">Previous</a>
+                    <span><a tabindex="0" class="paginate_button">1</a>
+                        <a tabindex="0" class="paginate_button">2</a>
+                        <a tabindex="0" class="paginate_button">3</a>
+                        <a tabindex="0" class="paginate_active">4</a>
+                    </span>
+                    <a tabindex="0" class="next paginate_button paginate_button_disabled" id="example_next">Next</a>
+                    <a tabindex="0" class="last paginate_button paginate_button_disabled" id="example_last">Last</a>
+                </div>
+            </div>
         </div>
         <div class="clearfix"></div>
     </div>
