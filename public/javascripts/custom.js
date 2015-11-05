@@ -14,7 +14,7 @@ $(function () {
     });
 
     $('#file').change(function(){
-        $('#browseFile').val($(this).val())
+        $('#browseFile').val($(this).val().substring($(this).val().lastIndexOf('\\')+1))
     });
 
     $('#slider-play').click(function () {
