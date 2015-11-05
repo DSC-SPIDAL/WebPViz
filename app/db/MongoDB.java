@@ -135,6 +135,7 @@ public class MongoDB {
         Map<Integer, Document> clusterDBObjects = new HashMap<Integer, Document>();
         for (models.xml.Cluster cl : clusters) {
             Document c = new Document();
+            c.put("clusterid", cl.getKey());
             c.put("color", new Document().append("a", cl.getColor().getA()).append("b", cl.getColor().getB()).append("g", cl.getColor().getG()).append("r", cl.getColor().getR()));
             c.put("label", cl.getLabel());
             c.put("size", cl.getSize());
@@ -244,12 +245,15 @@ public class MongoDB {
                 for (Object c : (List)clusterObjects) {
                     Document clusterDocument = (Document) c;
                     Cluster cluster = new Cluster();
+                    cluster.resultSet = fid;
+                    cluster.id = (Integer) clusterDocument.get("id");
                     cluster.cluster = (Integer) clusterDocument.get("clusterid");
                     cluster.shape = (String) clusterDocument.get("shape");
                     cluster.visible = (int) clusterDocument.get("visible");
                     cluster.size = (int) clusterDocument.get("size");
                     cluster.label = (String) clusterDocument.get("label");
                     cluster.color = createColor((Document) clusterDocument.get("color"));
+                    Logger.info(JSON.serialize(clusterDocument));
                     clusters.add(cluster);
                 }
             }
