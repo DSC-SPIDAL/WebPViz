@@ -62,6 +62,12 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    public static Result delete(int timeSeriesId){
+        //TODO delete time series
+
+        return GO_DASHBOARD;
+    }
+    @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());

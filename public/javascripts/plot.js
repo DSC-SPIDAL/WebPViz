@@ -253,7 +253,6 @@ function loadPlotData(start,end){
 
 
 //Util functions
-
 function initPlotData(){
     $("#slider").slider("option", "max", timeSeriesLength-1);
     $("#slider").slider("option", "value", $("#slider").slider("value"));
