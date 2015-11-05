@@ -93,8 +93,8 @@ public class MongoDB {
         mainDoc.append("uploaded", uploader);
         mainDoc.append("dateCreation", dateString);
         mainDoc.append("status", "pending");
-        List<Document> resultSets = new ArrayList<Document>();
-        mainDoc.append("resultsets", resultSets);
+        List<Document> emptyResultSets = new ArrayList<Document>();
+        mainDoc.append("resultsets", emptyResultSets);
         filesCollection.insertOne(mainDoc);
 
         Thread t = new Thread(new Runnable() {
@@ -145,12 +145,12 @@ public class MongoDB {
 
                         }
                     }
+                    mainDoc.append("resultsets", resultSets);
                     zipFile.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 mainDoc.append("status", "active");
-                mainDoc.append("resultsets", resultSets);
 
                 filesCollection.replaceOne(new Document("id", timeSeriesId), mainDoc);
             }
@@ -391,6 +391,7 @@ public class MongoDB {
             timeSeries.name = (String) document.get("name");
             timeSeries.description = (String) document.get("desc");
             timeSeries.uploaderId = (Integer) document.get("uploaded");
+            timeSeries.status = (String) document.get("status");
             timeSeriesList.add(timeSeries);
         }
         return timeSeriesList;
