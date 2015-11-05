@@ -193,7 +193,7 @@ function loadPlotData(start,end){
 
     for (var i = start; i < end; i++) {
 
-        clusterUrl = "/resultssetall/" + resultSets[i].id;
+        clusterUrl = "/resultssetall/" + resultSets[i].timeSeriesId + "/file/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};

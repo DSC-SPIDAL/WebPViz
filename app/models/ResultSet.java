@@ -50,6 +50,7 @@ public class ResultSet extends Model {
     @Formats.NonEmpty
     public Integer uploaderId;
 
+    @Constraints.Required
     public Integer timeSeriesId;
 
     public Integer timeSeriesSeqNumber;

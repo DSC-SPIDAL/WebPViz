@@ -5,6 +5,9 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
+import models.Cluster;
+import models.Color;
+import models.ResultSet;
 import models.TimeSeries;
 import models.xml.PVizPoint;
 import models.xml.Plotviz;
@@ -222,6 +225,107 @@ public class MongoDB {
         return null;
     }
 
+    public String queryFile(int tid, int fid) {
+        Document query = new Document("id", fid).append("timeSeriesId", tid);
+        FindIterable<Document> iterable = clustersCollection.find(query);
+        for (Document d : iterable) {
+            return JSON.serialize(d);
+        }
+        return null;
+    }
+
+    public List<Cluster> getClusters(int tid, int fid) {
+        Document query = new Document("id", fid).append("timeSeriesId", tid);
+        FindIterable<Document> iterable = clustersCollection.find(query);
+        List<Cluster> clusters = new ArrayList<Cluster>();
+        for (Document d : iterable) {
+            Object clusterObjects = d.get("clusters");
+            if (clusterObjects instanceof List) {
+                for (Object c : (List)clusterObjects) {
+                    Document clusterDocument = (Document) c;
+                    Cluster cluster = new Cluster();
+                    cluster.cluster = (Integer) clusterDocument.get("clusterid");
+                    cluster.shape = (String) clusterDocument.get("shape");
+                    cluster.visible = (int) clusterDocument.get("visible");
+                    cluster.size = (int) clusterDocument.get("size");
+                    cluster.label = (String) clusterDocument.get("label");
+                    cluster.color = createColor((Document) clusterDocument.get("color"));
+                    clusters.add(cluster);
+                }
+            }
+        }
+        return clusters;
+    }
+
+    private Color createColor(Document document) {
+        Color color = new Color();
+        color.a = (int) document.get("a");
+        color.b = (int) document.get("b");
+        color.g = (int) document.get("g");
+        color.r = (int) document.get("r");
+        return color;
+    }
+
+    public ResultSet queryResultSetProsById(int timeSeriesId, int fileId) {
+        Document query = new Document("id", timeSeriesId);
+
+        FindIterable<Document> iterable = filesCollection.find(query);
+        for (Document document : iterable) {
+            Object resultSetsObject = document.get("resultsets");
+            if (resultSetsObject instanceof List) {
+                for (Object documentObject : (List)resultSetsObject) {
+                    Document resultDocument = (Document) documentObject;
+                    int fId = (Integer) resultDocument.get("id");
+                    if (fId == fileId) {
+                        ResultSet resultSet = new ResultSet();
+                        try {
+                            resultSet.dateCreation = format.parse((String) resultDocument.get("dateCreation"));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        resultSet.id = (Integer) resultDocument.get("id");
+                        resultSet.name = (String) resultDocument.get("name");
+                        resultSet.description = (String) resultDocument.get("description");
+                        resultSet.uploaderId = (Integer) resultDocument.get("uploaderId");
+                        resultSet.fileName = (String) resultDocument.get("fileName");
+                        resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get("timeSeriesSeqNumber");
+                        resultSet.timeSeriesId = (Integer) resultDocument.get("timeSeriesId");
+                        return resultSet;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<ResultSet> getAllResultSet() {
+        FindIterable<Document> iterable = filesCollection.find();
+        List<ResultSet> resultSetList = new ArrayList<ResultSet>();
+        for (Document document : iterable) {
+            Object resultSetsObject = document.get("resultsets");
+            if (resultSetsObject instanceof List) {
+                for (Object documentObject : (List)resultSetsObject) {
+                    Document resultDocument = (Document) documentObject;
+                    ResultSet resultSet = new ResultSet();
+                    try {
+                        resultSet.dateCreation = format.parse((String) resultDocument.get("dateCreation"));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    resultSet.id = (Integer) resultDocument.get("id");
+                    resultSet.name = (String) resultDocument.get("name");
+                    resultSet.description = (String) resultDocument.get("description");
+                    resultSet.uploaderId = (Integer) resultDocument.get("uploaderId");
+                    resultSet.fileName = (String) resultDocument.get("fileName");
+                    resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get("timeSeriesSeqNumber");
+                    resultSet.timeSeriesId = (Integer) resultDocument.get("timeSeriesId");
+                    resultSetList.add(resultSet);
+                }
+            }
+        }
+        return resultSetList;
+    }
+
     public List<TimeSeries> getAllTimeSeries() {
         FindIterable<Document> iterable = filesCollection.find();
         List<TimeSeries> timeSeriesList = new ArrayList<TimeSeries>();
@@ -241,13 +345,13 @@ public class MongoDB {
         return timeSeriesList;
     }
 
-    public Map<String, Object> queryTimeSeriesProperties(int id) {
+    public TimeSeries queryTimeSeriesProperties(int id) {
         FindIterable<Document> iterable = filesCollection.find(new Document("id", id));
         for (Document d : iterable) {
-            Map<String, Object> props = new HashMap<String, Object>();
-            props.put("id", d.get("id"));
-            props.put("name", d.get("name"));
-            return props;
+            TimeSeries timeSeries = new TimeSeries();
+            timeSeries.id = (Integer) d.get("id");
+            timeSeries.name = (String) d.get("name");
+            return timeSeries;
         }
         return null;
     }

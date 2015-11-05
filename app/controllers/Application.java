@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.MongoDB;
 import models.*;
 import models.utils.AppException;
-import org.apache.commons.io.FilenameUtils;
 import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints;
@@ -20,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
@@ -51,7 +51,7 @@ public class Application extends Controller {
         MongoDB db = MongoDB.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, ResultSet.all(), db.getAllTimeSeries()));
+        return ok(dashboard.render(loggedInUser, false, null, db.getAllResultSet(), db.getAllTimeSeries()));
     }
 
     public static Result about() {
@@ -97,11 +97,12 @@ public class Application extends Controller {
         }
     }
 
-    public static Result visualize(int resultSetId) {
+    public static Result visualize(int resultSetId, int timeSeriesId) {
+        MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
-        ResultSet r = ResultSet.findById(resultSetId);
+        ResultSet r = db.queryResultSetProsById(timeSeriesId, resultSetId);
         if (r != null) {
-            return ok(resultset.render(loggedInUser, r.id, r.name));
+            return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
         } else {
             return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
         }
@@ -111,11 +112,12 @@ public class Application extends Controller {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
-        Map<String, Object> timeSeriesProps = db.queryTimeSeriesProperties(timeSeriesId);
-        int id = (int) timeSeriesProps.get("id");
-        String name = (String) timeSeriesProps.get("name");
+        TimeSeries timeSeriesProps = db.queryTimeSeriesProperties(timeSeriesId);
+        int id = timeSeriesProps.id;
+        String name = timeSeriesProps.name;
         return ok(timeseries.render(loggedInUser, id, name));
     }
+
     public static Result uploadGet() {
         return redirect(controllers.routes.Application.dashboard());
     }
@@ -134,9 +136,9 @@ public class Application extends Controller {
         }
     }
 
-    public static Result resultssetall(int id) {
+    public static Result resultssetall(int tid, int rid) {
         MongoDB db = MongoDB.getInstance();
-        String r = db.queryTimeSeriesAll(id);
+        String r = db.queryFile(tid, rid);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
@@ -148,23 +150,23 @@ public class Application extends Controller {
         return ok(result);
     }
 
-    public static Result resultset(Integer id) {
-        ResultSet r = ResultSet.findById(id);
+    public static Result resultset(Integer rid, Integer tid) {
+        MongoDB db = MongoDB.getInstance();
+        ResultSet r = db.queryResultSetProsById(tid, rid);
         ObjectNode result = Json.newObject();
-        result.put("id", id);
+        result.put("id", rid);
         result.put("name", r.name);
         result.put("desc", r.description);
         result.put("uploaded", User.findById(r.uploaderId).email);
         result.put("fileName", r.fileName);
 
-        List<Cluster> clusters = Cluster.findByResultSet(r.id);
-
+        List<Cluster> clusters = db.getClusters(tid, rid);
         result.put("clusters", Json.toJson(clusters));
 
         return ok(result);
     }
 
-    public static Result cluster(Integer rid, Integer cid) {
+    public static Result cluster(Integer rid, Integer cid, Iterator tid) {
         Cluster c = Cluster.findByClusterId(rid, cid);
         ObjectNode result = Json.newObject();
         result.put("id", c.id);

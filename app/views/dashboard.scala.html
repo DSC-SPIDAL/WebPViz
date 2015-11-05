@@ -102,7 +102,7 @@
                                 <td>@r.description</td>
                                 <td>@User.findById(r.uploaderId).email</td>
                                 <td>@r.dateCreation</td>
-                                <td><a href="@routes.Application.visualize(r.id)">View</a> </td>
+                                <td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>
                             </tr>
                         }
                         </tbody>

@@ -1,4 +1,4 @@
-@(user: User, resultSetId: Integer, resultSetName: String)
+@(user: User, resultSetId: Integer, timeSerisId: Integer, resultSetName: String)
 
 @main(resultSetName, user){
     <style>
@@ -150,8 +150,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
 
     <script type="text/javascript">
-        $.getJSON("@routes.Application.resultset(resultSetId)", function (data) {
-            var resultSetUrl = "@routes.Application.resultssetall(resultSetId)";
+        $.getJSON("@routes.Application.resultset(resultSetId, timeSerisId)", function (data) {
+            var resultSetUrl = "@routes.Application.resultssetall(timeSerisId, resultSetId)";
             visualize(resultSetUrl, data, @resultSetId);
         });
     </script>

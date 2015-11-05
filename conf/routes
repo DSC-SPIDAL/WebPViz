@@ -17,7 +17,7 @@ POST        /authenticate                       controllers.Application.authenti
 GET         /authenticate                       controllers.Application.authenticateGet()
 
 #plot
-GET         /plot                               controllers.Application.visualize(id: Integer)
+GET         /plot                               controllers.Application.visualize(rid: Integer, tid: Integer)
 
 # Log out
 GET         /logout                             controllers.Application.logout()
@@ -27,16 +27,16 @@ POST        /upload                             controllers.Application.upload()
 GET         /upload                             controllers.Application.uploadGet()
 
 # Visualize
-GET         /resultsets/:id                     controllers.Application.visualize(id: Integer)
+GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
 GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Integer)
 
 # ResultSet data
-GET         /resultset/:id                      controllers.Application.resultset(id: Integer)
+GET         /resultset/:tid/file/:rid           controllers.Application.resultset(rid: Integer, tid: Integer)
 
-GET         /resultset/:rid/cluster/:cid        controllers.Application.cluster(rid: Integer, cid: Integer)
+#GET         /resultset/:tid/file/:rid/cluster/:cid      controllers.Application.cluster(rid: Integer, cid: Integer, tid: Integer)
 
 
-GET         /resultssetall/:id                  controllers.Application.resultssetall(id: Integer)
+GET         /resultssetall/:tid/file/:rid       controllers.Application.resultssetall(tid: Integer, rid: Integer)
 
 #time series
 GET         /timeseries/:id                     controllers.Application.timeseries(id: Integer)
