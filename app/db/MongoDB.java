@@ -5,6 +5,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import models.Cluster;
 import models.Color;
 import models.ResultSet;
@@ -17,7 +19,6 @@ import org.bson.Document;
 import play.Logger;
 
 import java.io.*;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,7 +36,18 @@ public class MongoDB {
     }
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private MongoDB() {
-        MongoClient mongoClient = new MongoClient("localhost", 27017);
+        Config conf = ConfigFactory.load();
+        String mongoHost = conf.getString("mongo.host");
+        int mongoPort = conf.getInt("mongo.port");
+
+        MongoClient mongoClient;
+        if (mongoHost != null) {
+            Logger.info("Using mongo DB " + mongoHost + ":" + mongoPort);
+            mongoClient = new MongoClient(mongoHost, mongoPort);
+        } else {
+            Logger.info("Using local mongo DB " + "localhost:27017");
+            mongoClient = new MongoClient("localhost", 27017);
+        }
 
         MongoDatabase db = mongoClient.getDatabase("pviz");
 
