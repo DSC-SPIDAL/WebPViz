@@ -52,6 +52,7 @@ create table time_series (
   description               varchar(255),
   date_creation             timestamp,
   uploader_id               integer,
+  status                    varchar(255),
   constraint uq_time_series_name unique (name),
   constraint pk_time_series primary key (id))
 ;
