@@ -66,6 +66,7 @@ public class MongoDB {
         mainDoc.append("desc", description);
         mainDoc.append("uploaded", uploader);
         mainDoc.append("dateCreation", dateString);
+        mainDoc.append("status", "active");
 
         List<Document> resultSets = new ArrayList<Document>();
 
