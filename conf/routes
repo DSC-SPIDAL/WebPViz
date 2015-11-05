@@ -17,30 +17,29 @@ POST        /authenticate                       controllers.Application.authenti
 GET         /authenticate                       controllers.Application.authenticateGet()
 
 #plot
-GET         /plot                               controllers.Application.visualize(id: Long)
+GET         /plot                               controllers.Application.visualize(rid: Integer, tid: Integer)
 
 # Log out
 GET         /logout                             controllers.Application.logout()
 
 # Upload
 POST        /upload                             controllers.Application.upload()
-POST        /uploadFiles                        controllers.Application.uploadFiles()
 GET         /upload                             controllers.Application.uploadGet()
 
 # Visualize
-GET         /resultsets/:id                     controllers.Application.visualize(id: Long)
-GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Long)
+GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
+GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Integer)
 
 # ResultSet data
-GET         /resultset/:id                      controllers.Application.resultset(id: Long)
+GET         /resultset/:tid/file/:rid           controllers.Application.resultset(rid: Integer, tid: Integer)
 
-GET         /resultset/:rid/cluster/:cid        controllers.Application.cluster(rid: Long, cid: Integer)
+#GET         /resultset/:tid/file/:rid/cluster/:cid      controllers.Application.cluster(rid: Integer, cid: Integer, tid: Integer)
 
 
-GET         /resultssetall/:id                  controllers.Application.resultssetall(id: Long)
+GET         /resultssetall/:tid/file/:rid       controllers.Application.resultssetall(tid: Integer, rid: Integer)
 
 #time series
-GET         /timeseries/:id                     controllers.Application.timeseries(id: Long)
+GET         /timeseries/:id                     controllers.Application.timeseries(id: Integer)
 
 
 

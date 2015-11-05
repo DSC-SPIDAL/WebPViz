@@ -34,7 +34,7 @@ import java.util.Locale;
 public class User extends Model {
 
     @Id
-    public Long id;
+    public int id;
 
     @Constraints.Required
     @Formats.NonEmpty
@@ -57,9 +57,9 @@ public class User extends Model {
     public Boolean validated = false;
 
     // -- Queries (long id, user.class)
-    public static Model.Finder<Long, User> find = new Model.Finder<Long, User>(Long.class, User.class);
+    public static Model.Finder<Integer, User> find = new Model.Finder<Integer, User>(Integer.class, User.class);
 
-    public static User findById(Long id){
+    public static User findById(Integer id){
         return find.byId(id);
     }
     /**

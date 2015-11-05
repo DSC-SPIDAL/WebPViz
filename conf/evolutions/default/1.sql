@@ -4,11 +4,11 @@
 # --- !Ups
 
 create table cluster (
-  id                        bigint not null,
+  id                        integer not null,
   cluster                   integer,
-  result_set                bigint,
+  result_set                integer,
   size                      integer,
-  color_id                  bigint,
+  color_id                  integer,
   shape                     varchar(255),
   visible                   integer,
   label                     varchar(255),
@@ -16,7 +16,7 @@ create table cluster (
 ;
 
 create table color (
-  id                        bigint not null,
+  id                        integer not null,
   a                         integer,
   b                         integer,
   g                         integer,
@@ -25,39 +25,39 @@ create table color (
 ;
 
 create table point (
-  id                        bigint not null,
+  id                        integer not null,
   x                         float,
   y                         float,
   z                         float,
-  cluster                   bigint,
-  result_set                bigint,
+  cluster                   integer,
+  result_set                integer,
   constraint pk_point primary key (id))
 ;
 
 create table result_set (
-  id                        bigint not null,
+  id                        integer not null,
   name                      varchar(255),
   description               varchar(255),
   date_creation             timestamp,
-  uploader_id               bigint,
-  time_series_id            bigint,
-  time_series_seq_number    bigint,
+  uploader_id               integer,
+  time_series_id            integer,
+  time_series_seq_number    integer,
   file_name                 varchar(255),
   constraint pk_result_set primary key (id))
 ;
 
 create table time_series (
-  id                        bigint not null,
+  id                        integer not null,
   name                      varchar(255),
   description               varchar(255),
   date_creation             timestamp,
-  uploader_id               bigint,
+  uploader_id               integer,
   constraint uq_time_series_name unique (name),
   constraint pk_time_series primary key (id))
 ;
 
 create table user (
-  id                        bigint not null,
+  id                        integer not null,
   email                     varchar(255),
   fullname                  varchar(255),
   password_hash             varchar(255),

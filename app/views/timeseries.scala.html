@@ -1,7 +1,7 @@
-@(user: User, timeSeries: TimeSeries)
+@(user: User, timeSeriesId: Integer, timeSeriesName: String)
 @import helper._
 
-@main(timeSeries.name, user){
+@main(timeSeriesName, user){
     <style>
     .viz {
     margin-top: -21px;
@@ -153,9 +153,9 @@
         });
     </script>
     <script type="text/javascript">
-        $.getJSON("@routes.Application.timeseries(timeSeries.id)", function (data) {
-            var resultSetUrl = "@routes.Application.timeseries(timeSeries.id)";
-            visualizeTimeSeries(resultSetUrl, data, @timeSeries.id);
+        $.getJSON("@routes.Application.timeseries(timeSeriesId)", function (data) {
+            var resultSetUrl = "@routes.Application.timeseries(timeSeriesId)";
+            visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
         });
     </script>
 }

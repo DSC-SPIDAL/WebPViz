@@ -35,7 +35,7 @@ import java.util.List;
 @Entity
 public class ResultSet extends Model {
     @Id
-    public Long id;
+    public Integer id;
 
     @Constraints.Required
     public String name;
@@ -48,15 +48,16 @@ public class ResultSet extends Model {
 
     @Constraints.Required
     @Formats.NonEmpty
-    public Long uploaderId;
+    public Integer uploaderId;
 
-    public Long timeSeriesId;
+    @Constraints.Required
+    public Integer timeSeriesId;
 
-    public Long timeSeriesSeqNumber;
+    public Integer timeSeriesSeqNumber;
 
     public String fileName;
 
-    public static Model.Finder<Long, ResultSet> find = new Model.Finder<Long, ResultSet>(Long.class, ResultSet.class);
+    public static Model.Finder<Integer, ResultSet> find = new Model.Finder<Integer, ResultSet>(Integer.class, ResultSet.class);
 
     public static ResultSet create(String name, String description, User uploader, String fileName) {
         ResultSet r = new ResultSet();
@@ -71,7 +72,7 @@ public class ResultSet extends Model {
         return r;
     }
 
-    public static ResultSet create(String name, String description, User uploader, TimeSeries timeSeries, Long sequenceNumber, String fileName) {
+    public static ResultSet create(String name, String description, User uploader, TimeSeries timeSeries, Integer sequenceNumber, String fileName) {
         ResultSet r = new ResultSet();
         r.name = name;
         r.description = description;
@@ -121,7 +122,7 @@ public class ResultSet extends Model {
     }
 
     public static ResultSet createFromFile(String name, String description, User uploader, File file,
-                                           TimeSeries timeSeries, Long sequenceNumber, String originalFileName) throws IOException {
+                                           TimeSeries timeSeries, Integer sequenceNumber, String originalFileName) throws IOException {
         ResultSet r = create(name, description, uploader, timeSeries,sequenceNumber, originalFileName);
         CSVReader reader = new CSVReader(new FileReader(file), '\t');
         String[] record;
@@ -148,7 +149,7 @@ public class ResultSet extends Model {
     }
 
     public static ResultSet createFromXMLFile(String name, String description, User uploader, InputStream file,
-                                              TimeSeries timeSeries, Long sequenceNumber, String originalFileName) throws Exception {
+                                              TimeSeries timeSeries, Integer sequenceNumber, String originalFileName) throws Exception {
         ResultSet r;
         if (timeSeries != null) {
             r = create(name, description, uploader, timeSeries, sequenceNumber, originalFileName);
@@ -185,7 +186,7 @@ public class ResultSet extends Model {
         return r;
     }
 
-    public static ResultSet findById(Long id) {
+    public static ResultSet findById(int id) {
         return find.byId(id);
     }
 

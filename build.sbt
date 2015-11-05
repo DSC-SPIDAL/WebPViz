@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.mindrot" % "jbcrypt" % "0.3m",
   "com.opencsv" % "opencsv" % "3.3",
   "commons-io" % "commons-io" % "2.4",
+  "org.mongodb" % "mongo-java-driver" % "3.0.4",
   javaWs
 )
 

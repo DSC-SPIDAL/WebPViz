@@ -19,7 +19,7 @@ import java.util.zip.ZipFile;
 @Entity
 public class TimeSeries extends Model {
     @Id
-    public Long id;
+    public Integer id;
 
     @Constraints.Required
     @Column(unique = true)
@@ -33,9 +33,9 @@ public class TimeSeries extends Model {
 
     @Constraints.Required
     @Formats.NonEmpty
-    public Long uploaderId;
+    public Integer uploaderId;
 
-    public static Model.Finder<Long, TimeSeries> find = new Model.Finder<Long, TimeSeries>(Long.class, TimeSeries.class);
+    public static Model.Finder<Integer, TimeSeries> find = new Model.Finder<Integer, TimeSeries>(Integer.class, TimeSeries.class);
 
     public static TimeSeries create(String name, String description, User uploader) {
         TimeSeries timeSeries = new TimeSeries();
@@ -57,7 +57,7 @@ public class TimeSeries extends Model {
             File file = fileParts.get(i).getFile();
             String originalFileName = fileParts.get(i).getFilename();
             resultSetName = "timeseries_" + name + "_" + i;
-            ResultSet.createFromFile(resultSetName, description, uploader, file, timeSeries, (long)i, originalFileName);
+            ResultSet.createFromFile(resultSetName, description, uploader, file, timeSeries, i, originalFileName);
         }
         return timeSeries;
     }
@@ -112,7 +112,7 @@ public class TimeSeries extends Model {
             if (fileMap.get(f) != null) {
                 String resultSetName = "timeseries_" + f + "_" + i;
                 Logger.info("Processing XML File: " + fileMap.get(f));
-                ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, (long) i, f);
+                ResultSet.createFromXMLFile(resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeries, i, f);
                 i++;
             }
         }
@@ -120,7 +120,7 @@ public class TimeSeries extends Model {
         return timeSeries;
     }
 
-    public static TimeSeries findById(Long id) {
+    public static TimeSeries findById(Integer id) {
         return find.byId(id);
     }
 

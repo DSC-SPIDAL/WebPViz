@@ -29,14 +29,14 @@ import java.util.List;
 public class Cluster extends Model {
 
     @Id
-    public Long id;
+    public Integer id;
 
     @Constraints.Required
     public Integer cluster;
 
     @Constraints.Required
     @Formats.NonEmpty
-    public Long resultSet;
+    public Integer resultSet;
 
     public int size;
 
@@ -49,7 +49,7 @@ public class Cluster extends Model {
 
     public String label;
 
-    public static Model.Finder<Long, Cluster> find = new Model.Finder<Long, Cluster>(Long.class, Cluster.class);
+    public static Model.Finder<Integer, Cluster> find = new Model.Finder<Integer, Cluster>(Integer.class, Cluster.class);
 
 
     public static Cluster create(Integer cluster, ResultSet resultSet) {
@@ -62,11 +62,11 @@ public class Cluster extends Model {
         return c;
     }
 
-    public static Cluster findByClusterId(Long rId, Integer cluster) {
+    public static Cluster findByClusterId(Integer rId, Integer cluster) {
         return find.where().eq("cluster", cluster).eq("resultSet", rId).findUnique();
     }
 
-    public static List<Cluster> findByResultSet(Long id) {
+    public static List<Cluster> findByResultSet(Integer id) {
         return find.where().eq("resultSet", id).findList();
     }
 }
