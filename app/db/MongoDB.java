@@ -16,10 +16,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.bson.Document;
 import play.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,6 +41,28 @@ public class MongoDB {
 
         filesCollection = db.getCollection("files");
         clustersCollection = db.getCollection("clusters");
+    }
+
+    public void insertSingleFile(String pvizName, String description, int uploader, File fileName) throws Exception {
+        String dateString = format.format(new Date());
+        int timeSeriesId = Math.abs(new Random().nextInt());
+        Document mainDoc = new Document();
+        mainDoc.append("id", timeSeriesId);
+        mainDoc.append("_id", timeSeriesId);
+        mainDoc.append("name", pvizName);
+        mainDoc.append("desc", description);
+        mainDoc.append("uploaded", uploader);
+        mainDoc.append("dateCreation", dateString);
+
+        List<Document> resultSets = new ArrayList<Document>();
+
+        String resultSetName = "timeseries_" + pvizName + "_" + 0;
+        insertXMLFile(0, resultSetName, description, uploader, new FileInputStream(fileName), timeSeriesId, 0L, pvizName);
+        Document resultSet = createResultSet(0, resultSetName, description, dateString, uploader, timeSeriesId, 0, pvizName);
+        resultSets.add(resultSet);
+
+        mainDoc.append("resultsets", resultSets);
+        filesCollection.insertOne(mainDoc);
     }
 
     public void insertZipFile(String pvizName, String description, int uploader, File fileName) throws Exception {

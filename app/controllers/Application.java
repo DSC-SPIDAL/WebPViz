@@ -77,24 +77,20 @@ public class Application extends Controller {
             description = desc[0];
         }
 
-        if (resultSet != null) {
-            File file = resultSet.getFile();
-            Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, name));
-            boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
+        File file = resultSet.getFile();
+        Logger.info(String.format("User %s uploaded a new result of name %s", loggedInUser.id, originalFileName));
+        boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
+        try {
             if (isZipped) {
-                try {
-                    db.insertZipFile(originalFileName, description, loggedInUser.id, file);
-                } catch (Exception e) {
-                    Logger.error("Failed to create time series from zip", e);
-                    return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
-                }
+                db.insertZipFile(originalFileName, description, loggedInUser.id, file);
             } else {
-                // ResultSet.createFromFile(name, description, loggedInUser, file, originalFileName);
+                db.insertSingleFile(originalFileName, description, loggedInUser.id, file);
             }
-            return GO_DASHBOARD;
-        } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Missing file.", ResultSet.all(), TimeSeries.all()));
+        } catch (Exception e) {
+            Logger.error("Failed to create time series from zip", e);
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
         }
+        return GO_DASHBOARD;
     }
 
     public static Result visualize(int resultSetId, int timeSeriesId) {
