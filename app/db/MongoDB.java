@@ -22,7 +22,6 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -77,6 +76,12 @@ public class MongoDB {
 
         mainDoc.append("resultsets", resultSets);
         filesCollection.insertOne(mainDoc);
+    }
+
+    public boolean deleteTimeSeries(int timeSeriesId) {
+        filesCollection.deleteOne(new Document("id", timeSeriesId));
+        clustersCollection.deleteMany(new Document("timeSeriesId", timeSeriesId));
+        return true;
     }
 
     public void insertZipFile(String pvizName, String description, int uploader, File fileName) throws Exception {

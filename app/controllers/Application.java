@@ -64,7 +64,8 @@ public class Application extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result delete(int timeSeriesId){
         //TODO delete time series
-
+        MongoDB db = MongoDB.getInstance();
+        db.deleteTimeSeries(timeSeriesId);
         return GO_DASHBOARD;
     }
     @Security.Authenticated(Secured.class)
