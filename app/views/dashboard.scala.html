@@ -2,7 +2,18 @@
 @import helper._
 
 @main("Dashboard", user){
+    <script type="text/javascript">
+        var isPending = false;
+        function refreshIfPending(){
+            if(!isPending){
+            isPending = true;
+                setTimeout(function() {
+                    window.location.replace("@routes.Application.dashboard()");
+                 }, 10000);
 
+            }
+        }
+    </script>
     <div class="clearfix"></div>
     <div class="row">
 
@@ -71,7 +82,14 @@
                                     <td>@r.description</td>
                                     <td>@User.findById(r.uploaderId).email</td>
                                     <td>@r.dateCreation</td>
+                                    @if("pending".equals(r.status)){
+                                        <script type="text/javascript">
+                                             refreshIfPending();
+                                        </script>
+                                    <td>Pending...</td>
+                                     }else {
                                     <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                    }
                                 </tr>
                             }
                             </tbody>
