@@ -22,6 +22,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -78,39 +79,7 @@ public class MongoDB {
     }
 
     public void insertZipFile(String pvizName, String description, int uploader, File fileName) throws Exception {
-        ZipFile zipFile = new ZipFile(fileName);
-        Enumeration<?> enu = zipFile.entries();
-        List<String> filesInOrder = new ArrayList<String>();
-        Map<String, ZipEntry> fileMap = new HashMap<String, ZipEntry>();
-        int i = 0;
-        while (enu.hasMoreElements()) {
-            ZipEntry zipEntry = (ZipEntry) enu.nextElement();
-            String name = zipEntry.getName();
-            String ext = FilenameUtils.getExtension(name);
-            String realFileName = FilenameUtils.getName(name);
 
-            File file = new File(name);
-            if (name.endsWith("/")) {
-                file.mkdirs();
-                continue;
-            }
-
-            File parent = file.getParentFile();
-            if (parent != null) {
-                parent.mkdirs();
-            }
-
-            if (ext != null && ext.equals("index")) {
-                BufferedReader bufRead = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry)));
-                String inputLine;
-                while ((inputLine = bufRead.readLine()) != null) {
-                    filesInOrder.add(inputLine);
-                }
-                continue;
-            }
-
-            fileMap.put(realFileName, zipEntry);
-        }
 
 
         String dateString = format.format(new Date());
@@ -123,23 +92,70 @@ public class MongoDB {
         mainDoc.append("desc", description);
         mainDoc.append("uploaded", uploader);
         mainDoc.append("dateCreation", dateString);
-
+        mainDoc.append("status", "pending");
         List<Document> resultSets = new ArrayList<Document>();
-
-        for (String f : filesInOrder) {
-            if (fileMap.get(f) != null) {
-                String resultSetName = "timeseries_" + f + "_" + i;
-                insertXMLFile(i, resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeriesId, (long) i, f);
-                Document resultSet = createResultSet(i, resultSetName, description, dateString, uploader, timeSeriesId, i, f);
-                resultSets.add(resultSet);
-                i++;
-            }
-        }
-
         mainDoc.append("resultsets", resultSets);
         filesCollection.insertOne(mainDoc);
 
-        zipFile.close();
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ZipFile zipFile = new ZipFile(fileName);
+                    Enumeration<?> enu = zipFile.entries();
+                    List<String> filesInOrder = new ArrayList<String>();
+                    Map<String, ZipEntry> fileMap = new HashMap<String, ZipEntry>();
+                    while (enu.hasMoreElements()) {
+                        ZipEntry zipEntry = (ZipEntry) enu.nextElement();
+                        String name = zipEntry.getName();
+                        String ext = FilenameUtils.getExtension(name);
+                        String realFileName = FilenameUtils.getName(name);
+
+                        File file = new File(name);
+                        if (name.endsWith("/")) {
+                            file.mkdirs();
+                            continue;
+                        }
+
+                        File parent = file.getParentFile();
+                        if (parent != null) {
+                            parent.mkdirs();
+                        }
+
+                        if (ext != null && ext.equals("index")) {
+                            BufferedReader bufRead = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry)));
+                            String inputLine;
+                            while ((inputLine = bufRead.readLine()) != null) {
+                                filesInOrder.add(inputLine);
+                            }
+                            continue;
+                        }
+                        fileMap.put(realFileName, zipEntry);
+                    }
+
+                    int i = 0;
+                    List<Document> resultSets = new ArrayList<Document>();
+                    for (String f : filesInOrder) {
+                        if (fileMap.get(f) != null) {
+                            String resultSetName = "timeseries_" + f + "_" + i;
+                            insertXMLFile(i, resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeriesId, (long) i, f);
+                            Document resultSet = createResultSet(i, resultSetName, description, dateString, uploader, timeSeriesId, i, f);
+                            resultSets.add(resultSet);
+                            i++;
+
+                        }
+                    }
+                    zipFile.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                mainDoc.append("status", "active");
+                mainDoc.append("resultsets", resultSets);
+
+                filesCollection.replaceOne(new Document("id", timeSeriesId), mainDoc);
+            }
+        });
+        t.start();
     }
 
     public Document createResultSet(int id, String name, String description, String dateCreation, int uploaderId, int timeSeriesId, int timeSeriesSeqNumber, String originalFileName) {
