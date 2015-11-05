@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "com.opencsv" % "opencsv" % "3.3",
   "commons-io" % "commons-io" % "2.4",
   "org.mongodb" % "mongo-java-driver" % "3.0.4",
+  "mysql" % "mysql-connector-java" % "5.1.21",
   javaWs
 )
 
