@@ -443,7 +443,7 @@ function playLoop() {
         $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
         return
     }
-    if(isBufferNeeded(currentValue)){
+    if(currentValue > currentLoadedEnd){
         isPaused = true;
         isPlaying = false;
     }else {
