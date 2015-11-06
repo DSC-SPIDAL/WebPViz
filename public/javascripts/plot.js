@@ -116,7 +116,6 @@ function generateGraph() {
 
             if(!geometry.hasOwnProperty(clusterdata.clusterid)){
                 geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
-
                 currentParticles[clusterdata.clusterid] = new Array();
             }
             colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
@@ -137,8 +136,6 @@ function generateGraph() {
                     colorarray[ k*3 + 1 ] = tempcolor.g;
                     colorarray[ k*3 + 2 ] = tempcolor.b;
 
-                if(k==0)
-                    continue
             }
             geometry[clusterdata.clusterid].addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
             geometry[clusterdata.clusterid].addAttribute( 'color', new THREE.BufferAttribute( colorarray, 3 ) );
@@ -218,33 +215,39 @@ function loadPlotData(start,end){
 
                 hsl = [heus[clusterid], 1, 0.8];
                 if(!geometry.hasOwnProperty(clusterdata.clusterid)){
-                    geometry[clusterdata.clusterid] = new THREE.Geometry();
-                    colors[clusterdata.clusterid] = new Array();
+                    geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
                     particles[clusterdata.clusterid] = new Array();
                 }
-                colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")"));
+
+                colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
                 if (!sections.hasOwnProperty(clusterdata.clusterid))
                     sections[clusterdata.clusterid] = {"length":clusterdata.points.length, "size":clusterdata.size,
                         "shape":clusterdata.shape, "visible":clusterdata.visible, "color": clustercolor, "label":clusterdata.label}
 
-                for (var k in clusterdata.points) {
+                var positions = new Float32Array( clusterdata.points.length * 3 );
+                var colorarray = new Float32Array( clusterdata.points.length * 3 );
+                var sizes = new Float32Array( clusterdata.points.length );
+
+                for ( var k = 0; k < clusterdata.points.length; k++ ){
                     var p = clusterdata.points[k];
 
-                    //var hsl = [heus[data.cid], 1, 0.8];
-                    var vertex = new THREE.Vector3(p.x, p.y, p.z);
-                    geometry[clusterid].vertices.push(vertex);
+                    positions[ k*3 + 0 ] = p.x;
+                    positions[ k*3 + 1 ] = p.y;
+                    positions[ k*3 + 2 ] = p.z;
 
-                    if(k == 0)
-                        continue
-                    colors[clusterdata.clusterid].push(new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")"));
+                    var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
+                    colorarray[ k*3 + 0 ] = tempcolor.r;
+                    colorarray[ k*3 + 1 ] = tempcolor.g;
+                    colorarray[ k*3 + 2 ] = tempcolor.b;
 
                 }
+                geometry[clusterdata.clusterid].addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+                geometry[clusterdata.clusterid].addAttribute( 'color', new THREE.BufferAttribute( colorarray, 3 ) );
             }
+
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                    colorlist[key] = colors[key][0].getHexString();
-                    geometry[key].colors = colors[key];
                     particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 }
             }
@@ -373,7 +376,15 @@ function updatePlot(event, ui) {
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     if (recoloredclusters.hasOwnProperty(key)) {
-                        currentParticles[key].geometry.colors = recoloredclusters[key];
+                        var tempcolor = recoloredclusters[key]
+                        var colorattri = currentParticles[key].geometry.getAttribute('color');
+                        var colorsd = new Float32Array( colorattri.length);
+                        for ( var k = 0; k < colorattri.length/3; k++ ){
+                            colorsd[ k*3 + 0 ] = tempcolor.r;
+                            colorsd[ k*3 + 1 ] = tempcolor.g;
+                            colorsd[ k*3 + 2 ] = tempcolor.b;
+                        }
+                        currentParticles[key].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
                     if (!(removedclusters.hasOwnProperty(key))) {
@@ -425,21 +436,19 @@ function addSection(id) {
 
 function recolorSection(id, color) {
     colorlist[id] = color;
-    var cp = new THREE.Color(color);
+    var tempcolor = new THREE.Color(color);
     var colorattri = currentParticles[id].geometry.getAttribute('color');
     var colorsd = new Float32Array( colorattri.length);
     for ( var k = 0; k < colorattri.length/3; k++ ){
-        colorsd[ k*3 + 0 ] = cp.r;
-        colorsd[ k*3 + 1 ] = cp.g;
-        colorsd[ k*3 + 2 ] = cp.b;
+        colorsd[ k*3 + 0 ] = tempcolor.r;
+        colorsd[ k*3 + 1 ] = tempcolor.g;
+        colorsd[ k*3 + 2 ] = tempcolor.b;
     }
     currentParticles[id].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
-
-
-    for (var i in colors[id]) {
-        colors[id][i] = new THREE.Color(color);
-    }
-    recoloredclusters[id] = colors[id];
+    //for (var i in colors[id]) {
+    //    colors[id][i] = new THREE.Color(color);
+    //}
+    recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].geometry.colorsNeedUpdate = true;
 }
 
@@ -469,7 +478,15 @@ function playLoop() {
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     if (recoloredclusters.hasOwnProperty(key)) {
-                        currentParticles[key].geometry.colors = recoloredclusters[key];
+                        var tempcolor = recoloredclusters[key]
+                        var colorattri = currentParticles[key].geometry.getAttribute('color');
+                        var colorsd = new Float32Array( colorattri.length);
+                        for ( var k = 0; k < colorattri.length/3; k++ ){
+                            colorsd[ k*3 + 0 ] = tempcolor.r;
+                            colorsd[ k*3 + 1 ] = tempcolor.g;
+                            colorsd[ k*3 + 2 ] = tempcolor.b;
+                        }
+                        currentParticles[key].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
                     if (!(removedclusters.hasOwnProperty(key))) {
