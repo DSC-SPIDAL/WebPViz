@@ -466,9 +466,8 @@ function playLoop() {
         $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
         return
     }
-    if(currentValue > currentLoadedEnd){
+    if((currentValue + 1) > currentLoadedEnd){
         isPaused = true;
-        isPlaying = false;
     }else {
         setTimeout(function () {
             scene3d = new THREE.Scene();
@@ -541,11 +540,9 @@ function checkIfBuffered(){
             if(currentLoadedEnd > timeSeriesLength){
                 currentLoadedEnd = timeSeriesLength
             }
-            if(isPaused){
+            if(isPlaying){
                 isPaused = false;
-                isPlaying = true;
                 playLoop();
-
             }
         }
     }, 1000);
@@ -553,6 +550,7 @@ function checkIfBuffered(){
 
 function  animateTimeSeriesPause(){
     isPaused = true
+    isPlaying = false
 }
 
 function resetView(){
