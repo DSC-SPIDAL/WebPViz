@@ -28,6 +28,7 @@ var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
 var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
+var precurrentLoadedStart, precurrentLoadedEnd;
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -162,13 +163,16 @@ function generateGraph() {
 function generateTimeSeries(resultSets) {
     setupThreeJs();
     currentLoadedStart = 0;
+    precurrentLoadedStart = 0;
 
     if(timeSeriesLength > MAX_PLOTS_STORED){
         loadPlotData(0,MAX_PLOTS_STORED)
         currentLoadedEnd = MAX_PLOTS_STORED
+        precurrentLoadedEnd = MAX_PLOTS_STORED
     }else{
         loadPlotData(0,timeSeriesLength)
         currentLoadedEnd = timeSeriesLength
+        precurrentLoadedEnd = timeSeriesLength
     }
     initBufferAndLoad();
 
@@ -195,7 +199,6 @@ function loadPlotData(start,end){
     var hsl;
 
     for (var i = start; i < end; i++) {
-
         clusterUrl = "/resultssetall/" + resultSets[i].timeSeriesId + "/file/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
@@ -405,9 +408,12 @@ function updatePlot(event, ui) {
             delete particleSets[currentLoadedStart + k];
         }
         currentLoadedStart = sliderValue;
+        precurrentLoadedStart = sliderValue;
         currentLoadedEnd = timeSeriesLength
+        precurrentLoadedEnd = timeSeriesLength
         if(timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)){
             currentLoadedEnd = currentLoadedStart + MAX_PLOTS_STORED;
+            precurrentLoadedEnd = precurrentLoadedStart + MAX_PLOTS_STORED;
         }
         //TODO check if this might fail in edge cases
         loadPlotData(currentLoadedStart, currentLoadedEnd)
@@ -462,14 +468,17 @@ function animateTimeSeriesPlay(){
 }
 
 function playLoop() {
+
     var currentValue = $("#slider").slider("value");
+    console.log("playLoop.....currentval"+currentValue+".....currentLoadedStart:"+currentLoadedStart+"........currentLoadedEnd"+currentLoadedEnd)
+
     var maxValue = timeSeriesLength - 1;
     checkAndBufferData(currentValue+1)
     if(currentValue == maxValue){
         $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
         return
     }
-    if((currentValue + 1) > currentLoadedEnd){
+    if((currentValue + 1) >= currentLoadedEnd){
         isPaused = true;
     }else {
         setTimeout(function () {
@@ -517,20 +526,33 @@ function isBufferNeeded(currentval){
     if(currentLoadedEnd == timeSeriesLength){
         return false;
     }
-    return (currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))) ?  true : false;
+    return (currentval == (precurrentLoadedStart + Math.floor((precurrentLoadedEnd - precurrentLoadedStart)/2))) ?  true : false;
 }
 function checkAndBufferData(currentval){
     if(isBufferNeeded(currentval)){
-        var loadend = timeSeriesLength
-        if(timeSeriesLength > currentLoadedEnd + LOAD_SIZE){
-            loadend = currentLoadedEnd + LOAD_SIZE;
-        }
-        loadPlotData(currentLoadedEnd,loadend)
-        for(var i =0; i < (loadend - currentLoadedEnd); i++){
-            delete particleSets[currentLoadedStart+i];
-        }
-        checkIfBuffered();
+        console.log("checkAndBufferData.....currentval"+currentval+".....currentLoadedStart:"+currentLoadedStart+"........currentLoadedEnd"+currentLoadedEnd)
+        console.log("current data:" + Object.keys(particleSets).toString())
+
+        bufferData();
     }
+}
+
+
+function bufferData(){
+    var loadend = timeSeriesLength
+    if(timeSeriesLength > precurrentLoadedEnd + LOAD_SIZE){
+        loadend = precurrentLoadedEnd + LOAD_SIZE;
+    }
+    loadPlotData(precurrentLoadedEnd,loadend)
+    for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
+        delete particleSets[precurrentLoadedStart+i];
+    }
+    precurrentLoadedStart += LOAD_SIZE;
+    precurrentLoadedEnd += LOAD_SIZE;
+    if(precurrentLoadedEnd > timeSeriesLength){
+        precurrentLoadedEnd = timeSeriesLength
+    }
+    checkIfBuffered();
 }
 
 function checkIfBuffered(){
@@ -542,6 +564,10 @@ function checkIfBuffered(){
             currentLoadedEnd += LOAD_SIZE;
             if(currentLoadedEnd > timeSeriesLength){
                 currentLoadedEnd = timeSeriesLength
+            }
+            var currentValue = $("#slider").slider("value");
+            if(currentValue + 1 > (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))){
+                bufferData();
             }
             if(isPlaying && isPaused){
                 isPaused = false;
