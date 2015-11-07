@@ -142,7 +142,7 @@ function generateGraph() {
         }
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
             }
         }
@@ -248,7 +248,7 @@ function loadPlotData(start,end){
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                    particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+                    particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 }
             }
 
@@ -366,6 +366,9 @@ ImageEnum = {
 
 function updatePlot(event, ui) {
     var sliderValue = ui.value;
+    if($('#slider-play').hasClass("fa fa-history")){
+        $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
+    }
     if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
         if (sliderValue in particleSets) {
             scene3d = new THREE.Scene();
@@ -460,7 +463,7 @@ function animateTimeSeriesPlay(){
 
 function playLoop() {
     var currentValue = $("#slider").slider("value");
-    var maxValue = currentLoadedEnd-1;
+    var maxValue = timeSeriesLength - 1;
     checkAndBufferData(currentValue+1)
     if(currentValue == maxValue){
         $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
@@ -540,9 +543,10 @@ function checkIfBuffered(){
             if(currentLoadedEnd > timeSeriesLength){
                 currentLoadedEnd = timeSeriesLength
             }
-            if(isPlaying){
+            if(isPlaying && isPaused){
                 isPaused = false;
                 playLoop();
+
             }
         }
     }, 1000);
