@@ -470,8 +470,6 @@ function animateTimeSeriesPlay(){
 function playLoop() {
 
     var currentValue = $("#slider").slider("value");
-    console.log("playLoop.....currentval"+currentValue+".....currentLoadedStart:"+currentLoadedStart+"........currentLoadedEnd"+currentLoadedEnd)
-
     var maxValue = timeSeriesLength - 1;
     checkAndBufferData(currentValue+1)
     if(currentValue == maxValue){
@@ -530,9 +528,6 @@ function isBufferNeeded(currentval){
 }
 function checkAndBufferData(currentval){
     if(isBufferNeeded(currentval)){
-        console.log("checkAndBufferData.....currentval"+currentval+".....currentLoadedStart:"+currentLoadedStart+"........currentLoadedEnd"+currentLoadedEnd)
-        console.log("current data:" + Object.keys(particleSets).toString())
-
         bufferData();
     }
 }
