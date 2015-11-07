@@ -345,11 +345,11 @@ function loadMatrial(size, shape, isglyph){
     if(!isglyph){
         sprite = null;
     }else{
-        sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+        sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     }
 
     if(size>1){
-       sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+       sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
     }
 
     var material = new THREE.PointsMaterial({
@@ -364,7 +364,12 @@ function loadMatrial(size, shape, isglyph){
 
 ImageEnum = {
     BALL : "/assets/images/textures/ball.png",
-    CUBE : "/assets/images/textures/ball.png",
+    CUBE : "/assets/images/textures/cube.png",
+    DISC : "/assets/images/textures/disc.png",
+    STAR : "/assets/images/textures/star.png",
+    PYRAMID : "/assets/images/textures/pyramid.png",
+    CONE : "/assets/images/textures/cone.png",
+    CYLINDER : "/assets/images/textures/cylinder.png",
 }
 
 function updatePlot(event, ui) {
