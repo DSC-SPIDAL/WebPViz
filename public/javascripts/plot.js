@@ -350,6 +350,23 @@ function loadMatrial(size, shape, isglyph){
 
     if(size>1){
        sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
+        switch (parseInt(shape)){
+            case 0: sprite = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
+                    break;
+            case 1: sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+                    break;
+            case 2: sprite = THREE.ImageUtils.loadTexture(ImageEnum.STAR);
+                    break;
+            case 3: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CUBE);
+                    break;
+            case 4: sprite = THREE.ImageUtils.loadTexture(ImageEnum.PYRAMID);
+                    break;
+            case 5: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
+                    break;
+            case 6: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
+                    break;
+            default : sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+        }
     }
 
     var material = new THREE.PointsMaterial({
