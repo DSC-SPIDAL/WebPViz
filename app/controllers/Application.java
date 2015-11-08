@@ -56,6 +56,7 @@ public class Application extends Controller {
         return ok(dashboard.render(loggedInUser, false, null, db.getAllResultSet(), db.getAllTimeSeries()));
     }
 
+    @Security.Authenticated(Secured.class)
     public static Result about() {
         User loggedInUser = User.findByEmail(request().username());
         return ok(about.render(loggedInUser));

@@ -34,6 +34,22 @@ var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
 var MAX_PLOTS_STORED = 20;
 var LOAD_SIZE = 5;
 
+var plotRangeSlider = {};
+
+$(function () {
+    $("#plot-slider").ionRangeSlider({
+        min: 0,
+        max: 100,
+        from: 0,
+        hide_min_max: true,
+        hide_from_to: true,
+        onChange: function (data) {
+            updatePlot(data.from);
+        }
+    });
+    plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
+});
+
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
 
@@ -62,7 +78,7 @@ function generateCheckList(list, initcolors) {
                 + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
                 + "</div>"
                 + "</td>"
-                + "<td class=' '>" +  list[key].label + "</span></td>"
+                + "<td class=' '>" + list[key].label + "</span></td>"
                 + "<td class=' '>" + list[key].length + "</td>"
                 + "</tr>"
         }
@@ -101,54 +117,60 @@ function generateGraph() {
     var sections = {};
     $.getJSON(clusterUrl, function (data) {
         fileName = data.fileName;
-        $( "#amount" ).val(fileName)
+        $("#plot-title").text(data.fileName)
         for (var i = 0; i < clusters.length; i++) {
             var clusterdata = data.clusters[i];
             var clusterid = clusterdata.clusterid;
 
             var clustercolor = clusterdata.color
-            if(clustercolor == null)
-                clustercolor = {"a":randomRBG(),"b":randomRBG(),"g":randomRBG(),"r":randomRBG()}
+            if (clustercolor == null)
+                clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()}
 
             if (!sections.hasOwnProperty(clusterdata.clusterid))
-                sections[clusterdata.clusterid] = {"length":clusterdata.points.length, "size":clusterdata.size,
-                    "shape":clusterdata.shape, "visible":clusterdata.visible, "color": clustercolor, "label":clusterdata.label}
+                sections[clusterdata.clusterid] = {
+                    "length": clusterdata.points.length,
+                    "size": clusterdata.size,
+                    "shape": clusterdata.shape,
+                    "visible": clusterdata.visible,
+                    "color": clustercolor,
+                    "label": clusterdata.label
+                }
 
-            if(!geometry.hasOwnProperty(clusterdata.clusterid)){
+            if (!geometry.hasOwnProperty(clusterdata.clusterid)) {
                 geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
                 currentParticles[clusterdata.clusterid] = new Array();
             }
             colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
-                var positions = new Float32Array( clusterdata.points.length * 3 );
-                var colorarray = new Float32Array( clusterdata.points.length * 3 );
-                var sizes = new Float32Array( clusterdata.points.length );
+            var positions = new Float32Array(clusterdata.points.length * 3);
+            var colorarray = new Float32Array(clusterdata.points.length * 3);
+            var sizes = new Float32Array(clusterdata.points.length);
 
-                for ( var k = 0; k < clusterdata.points.length; k++ ){
-                    var p = clusterdata.points[k];
+            for (var k = 0; k < clusterdata.points.length; k++) {
+                var p = clusterdata.points[k];
 
-                    positions[ k*3 + 0 ] = p.x;
-                    positions[ k*3 + 1 ] = p.y;
-                    positions[ k*3 + 2 ] = p.z;
+                positions[k * 3 + 0] = p.x;
+                positions[k * 3 + 1] = p.y;
+                positions[k * 3 + 2] = p.z;
 
-                    var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
-                    colorarray[ k*3 + 0 ] = tempcolor.r;
-                    colorarray[ k*3 + 1 ] = tempcolor.g;
-                    colorarray[ k*3 + 2 ] = tempcolor.b;
+                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
+                colorarray[k * 3 + 0] = tempcolor.r;
+                colorarray[k * 3 + 1] = tempcolor.g;
+                colorarray[k * 3 + 2] = tempcolor.b;
 
             }
-            geometry[clusterdata.clusterid].addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-            geometry[clusterdata.clusterid].addAttribute( 'color', new THREE.BufferAttribute( colorarray, 3 ) );
+            geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
         }
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
             }
         }
-        window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-       // stats.domElement.style.position = 'absolute';
-       // document.getElementById("stats").appendChild(stats.domElement);
+        //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        // stats.domElement.style.position = 'absolute';
+        // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
         $('.color-pic1').colorpicker();
         render();
@@ -163,11 +185,11 @@ function generateTimeSeries(resultSets) {
     setupThreeJs();
     currentLoadedStart = 0;
 
-    if(timeSeriesLength > MAX_PLOTS_STORED){
-        loadPlotData(0,MAX_PLOTS_STORED)
+    if (timeSeriesLength > MAX_PLOTS_STORED) {
+        loadPlotData(0, MAX_PLOTS_STORED)
         currentLoadedEnd = MAX_PLOTS_STORED
-    }else{
-        loadPlotData(0,timeSeriesLength)
+    } else {
+        loadPlotData(0, timeSeriesLength)
         currentLoadedEnd = timeSeriesLength
     }
     initBufferAndLoad();
@@ -180,16 +202,16 @@ function onWindowResize() {
     var height = window.innerHeight - 57 - 40 - 40 - 10;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(width *0.9, height);
+    renderer.setSize(width - 45, height);
     //controls.handleResize();
     render();
 }
 
-function randomRBG(){
+function randomRBG() {
     return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
 }
 
-function loadPlotData(start,end){
+function loadPlotData(start, end) {
     var cluster;
     var geometry = [];
     var hsl;
@@ -210,11 +232,11 @@ function loadPlotData(start,end){
                 var clusterdata = data.clusters[i];
                 var clusterid = clusterdata.clusterid;
                 var clustercolor = clusterdata.color
-                if(clustercolor == null)
-                    clustercolor = {"a":randomRBG(),"b":randomRBG(),"g":randomRBG(),"r":randomRBG()}
+                if (clustercolor == null)
+                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()}
 
                 hsl = [heus[clusterid], 1, 0.8];
-                if(!geometry.hasOwnProperty(clusterdata.clusterid)){
+                if (!geometry.hasOwnProperty(clusterdata.clusterid)) {
                     geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
                     particles[clusterdata.clusterid] = new Array();
                 }
@@ -222,33 +244,39 @@ function loadPlotData(start,end){
                 colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
                 if (!sections.hasOwnProperty(clusterdata.clusterid))
-                    sections[clusterdata.clusterid] = {"length":clusterdata.points.length, "size":clusterdata.size,
-                        "shape":clusterdata.shape, "visible":clusterdata.visible, "color": clustercolor, "label":clusterdata.label}
+                    sections[clusterdata.clusterid] = {
+                        "length": clusterdata.points.length,
+                        "size": clusterdata.size,
+                        "shape": clusterdata.shape,
+                        "visible": clusterdata.visible,
+                        "color": clustercolor,
+                        "label": clusterdata.label
+                    }
 
-                var positions = new Float32Array( clusterdata.points.length * 3 );
-                var colorarray = new Float32Array( clusterdata.points.length * 3 );
-                var sizes = new Float32Array( clusterdata.points.length );
+                var positions = new Float32Array(clusterdata.points.length * 3);
+                var colorarray = new Float32Array(clusterdata.points.length * 3);
+                var sizes = new Float32Array(clusterdata.points.length);
 
-                for ( var k = 0; k < clusterdata.points.length; k++ ){
+                for (var k = 0; k < clusterdata.points.length; k++) {
                     var p = clusterdata.points[k];
 
-                    positions[ k*3 + 0 ] = p.x;
-                    positions[ k*3 + 1 ] = p.y;
-                    positions[ k*3 + 2 ] = p.z;
+                    positions[k * 3 + 0] = p.x;
+                    positions[k * 3 + 1] = p.y;
+                    positions[k * 3 + 2] = p.z;
 
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
-                    colorarray[ k*3 + 0 ] = tempcolor.r;
-                    colorarray[ k*3 + 1 ] = tempcolor.g;
-                    colorarray[ k*3 + 2 ] = tempcolor.b;
+                    colorarray[k * 3 + 0] = tempcolor.r;
+                    colorarray[k * 3 + 1] = tempcolor.g;
+                    colorarray[k * 3 + 2] = tempcolor.b;
 
                 }
-                geometry[clusterdata.clusterid].addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-                geometry[clusterdata.clusterid].addAttribute( 'color', new THREE.BufferAttribute( colorarray, 3 ) );
+                geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                    particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+                    particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
                 }
             }
 
@@ -262,25 +290,26 @@ function loadPlotData(start,end){
 
 
 //Util functions
-function initPlotData(){
-    $("#slider").slider("option", "max", timeSeriesLength-1);
-    $("#slider").slider("option", "value", $("#slider").slider("value"));
+function initPlotData() {
+    plotRangeSlider.update({max: timeSeriesLength - 1, min: 0, from: 0});
+    //$("#plot-slider").attr("max", timeSeriesLength - 1);
+    //$("#plot-slider").attr("value", 0);
     currentParticles = particleSets["0"];
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
         }
     }
-    window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+    //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
     $('.color-pic1').colorpicker();
 }
 
-function initBufferAndLoad(){
+function initBufferAndLoad() {
 
     setTimeout(function () {
-        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
             initBufferAndLoad();
-        }else{
+        } else {
             if (currentLoadedStart in particleSets) {
                 initPlotData();
                 render();
@@ -290,14 +319,14 @@ function initBufferAndLoad(){
     }, 1000);
 }
 
-function gotoBufferAndLoad(event, ui){
+function gotoBufferAndLoad(sliderValue) {
 
     setTimeout(function () {
-        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
-            gotoBufferAndLoad(event, ui);
-        }else{
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
+            gotoBufferAndLoad(sliderValue);
+        } else {
             if (currentLoadedStart in particleSets) {
-                updatePlot(event, ui)
+                updatePlot(sliderValue)
                 render();
                 animate();
             }
@@ -305,13 +334,13 @@ function gotoBufferAndLoad(event, ui){
     }, 1000);
 }
 
-function setupThreeJs(){
+function setupThreeJs() {
     renderer = null;
     particles = [];
     colors = [];
     controls = null;
     var height = window.innerHeight - 57 - 40 - 40 - 10;
-    $('#canvas3d').width(window.innerWidth*0.9);
+    $('#canvas3d').width(window.innerWidth - 45);
     $('#canvas3d').height(height);
     var canvasWidth = $('#canvas3d').width();
     var canvasHeight = $('#canvas3d').height();
@@ -332,45 +361,45 @@ function setupThreeJs(){
     camera.position.set(1, 1, 1);
     scene3d.add(camera);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-   // stats.domElement.style.position = 'absolute';
+    // stats.domElement.style.position = 'absolute';
     //document.getElementById("stats").appendChild(stats.domElement);
     window.addEventListener('resize', onWindowResize, false);
 }
 
-function loadMatrial(size, shape, isglyph){
+function loadMatrial(size, shape, isglyph) {
 
-    if(!isglyph){
+    if (!isglyph) {
         sprite = null;
-    }else{
+    } else {
         sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
     }
 
-    if(size>1){
-       sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    if (size > 1) {
+        sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
     }
 
     var material = new THREE.PointsMaterial({
-        size: size/200,
+        size: size / 200,
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true,
-        opacity:0.9
+        opacity: 0.9
     });
     return material;
 }
 
 ImageEnum = {
-    BALL : "/assets/images/textures/ball.png",
-    CUBE : "/assets/images/textures/ball.png",
+    BALL: "/assets/images/textures/ball.png",
+    CUBE: "/assets/images/textures/ball.png",
 }
 
-function updatePlot(event, ui) {
-    var sliderValue = ui.value;
-    if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
+function updatePlot(sliderValue) {
+    if (sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd) {
         if (sliderValue in particleSets) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
-            $("#slider").slider("option", "value", $("#slider").slider("value"));
+            //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
+
             currentParticles = particleSets[sliderValue];
 
             for (var key in currentParticles) {
@@ -378,13 +407,13 @@ function updatePlot(event, ui) {
                     if (recoloredclusters.hasOwnProperty(key)) {
                         var tempcolor = recoloredclusters[key]
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
-                        var colorsd = new Float32Array( colorattri.length);
-                        for ( var k = 0; k < colorattri.length/3; k++ ){
-                            colorsd[ k*3 + 0 ] = tempcolor.r;
-                            colorsd[ k*3 + 1 ] = tempcolor.g;
-                            colorsd[ k*3 + 2 ] = tempcolor.b;
+                        var colorsd = new Float32Array(colorattri.length);
+                        for (var k = 0; k < colorattri.length / 3; k++) {
+                            colorsd[k * 3 + 0] = tempcolor.r;
+                            colorsd[k * 3 + 1] = tempcolor.g;
+                            colorsd[k * 3 + 2] = tempcolor.b;
                         }
-                        currentParticles[key].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
+                        currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
                     if (!(removedclusters.hasOwnProperty(key))) {
@@ -395,20 +424,20 @@ function updatePlot(event, ui) {
             window.addEventListener('resize', onWindowResize, false);
             render();
             animate();
-            $("#amount").val(fileNames[sliderValue]);
+            $("#plot-title").text(fileNames[sliderValue]);
         }
-    }else {
-        for(var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++){
+    } else {
+        for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
             delete particleSets[currentLoadedStart + k];
         }
         currentLoadedStart = sliderValue;
         currentLoadedEnd = timeSeriesLength
-        if(timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)){
+        if (timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)) {
             currentLoadedEnd = currentLoadedStart + MAX_PLOTS_STORED;
         }
         //TODO check if this might fail in edge cases
         loadPlotData(currentLoadedStart, currentLoadedEnd)
-        gotoBufferAndLoad(event, ui);
+        gotoBufferAndLoad(sliderValue);
     }
 }
 
@@ -438,13 +467,13 @@ function recolorSection(id, color) {
     colorlist[id] = color;
     var tempcolor = new THREE.Color(color);
     var colorattri = currentParticles[id].geometry.getAttribute('color');
-    var colorsd = new Float32Array( colorattri.length);
-    for ( var k = 0; k < colorattri.length/3; k++ ){
-        colorsd[ k*3 + 0 ] = tempcolor.r;
-        colorsd[ k*3 + 1 ] = tempcolor.g;
-        colorsd[ k*3 + 2 ] = tempcolor.b;
+    var colorsd = new Float32Array(colorattri.length);
+    for (var k = 0; k < colorattri.length / 3; k++) {
+        colorsd[k * 3 + 0] = tempcolor.r;
+        colorsd[k * 3 + 1] = tempcolor.g;
+        colorsd[k * 3 + 2] = tempcolor.b;
     }
-    currentParticles[id].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
+    currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
     //for (var i in colors[id]) {
     //    colors[id][i] = new THREE.Color(color);
     //}
@@ -452,40 +481,41 @@ function recolorSection(id, color) {
     currentParticles[id].geometry.colorsNeedUpdate = true;
 }
 
-function animateTimeSeriesPlay(){
+function animateTimeSeriesPlay() {
     isPlaying = true;
     isPaused = false;
     playLoop();
 }
 
 function playLoop() {
-    var currentValue = $("#slider").slider("value");
-    var maxValue = currentLoadedEnd-1;
-    checkAndBufferData(currentValue+1)
-    if(currentValue == maxValue){
-        $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
+    var currentValue = parseInt($("#plot-slider").prop("value"));
+    var maxValue = currentLoadedEnd - 1;
+    checkAndBufferData(currentValue + 1);
+    if (currentValue == maxValue) {
+        $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-play");
         return
     }
-    if((currentValue + 1) > currentLoadedEnd){
+    if ((currentValue + 1) > currentLoadedEnd) {
         isPaused = true;
-    }else {
+    } else {
         setTimeout(function () {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
-            $("#slider").slider("option", "value", currentValue + 1);
+            //$("#plot-slider").attr("value", currentValue + 1);
+            plotRangeSlider.update({from: currentValue + 1});
             currentParticles = particleSets[currentValue + 1];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     if (recoloredclusters.hasOwnProperty(key)) {
                         var tempcolor = recoloredclusters[key]
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
-                        var colorsd = new Float32Array( colorattri.length);
-                        for ( var k = 0; k < colorattri.length/3; k++ ){
-                            colorsd[ k*3 + 0 ] = tempcolor.r;
-                            colorsd[ k*3 + 1 ] = tempcolor.g;
-                            colorsd[ k*3 + 2 ] = tempcolor.b;
+                        var colorsd = new Float32Array(colorattri.length);
+                        for (var k = 0; k < colorattri.length / 3; k++) {
+                            colorsd[k * 3 + 0] = tempcolor.r;
+                            colorsd[k * 3 + 1] = tempcolor.g;
+                            colorsd[k * 3 + 2] = tempcolor.b;
                         }
-                        currentParticles[key].geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsd, 3 ) );
+                        currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
                     if (!(removedclusters.hasOwnProperty(key))) {
@@ -494,15 +524,15 @@ function playLoop() {
                 }
             }
             window.addEventListener('resize', onWindowResize, false);
-            $("#amount").val(fileNames[currentValue + 1]);
+            $("#plot-title").text(fileNames[currentValue + 1]);
             render();
             if (maxValue > currentValue + 1 && !isPaused) {
                 playLoop();
-            }else{
+            } else {
                 isPaused = true;
                 isPlaying = false;
-                if(maxValue == currentValue + 1){
-                    $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-history");
+                if (maxValue == currentValue + 1) {
+                    $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
                 }
             }
         }, TIME_BETWEEN_PLOTS_IN_MILLS);
@@ -510,37 +540,37 @@ function playLoop() {
 }
 
 
-function isBufferNeeded(currentval){
-    if(currentLoadedEnd == timeSeriesLength){
+function isBufferNeeded(currentval) {
+    if (currentLoadedEnd == timeSeriesLength) {
         return false;
     }
-    return (currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))) ?  true : false;
+    return (currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart) / 2))) ? true : false;
 }
-function checkAndBufferData(currentval){
-    if(isBufferNeeded(currentval)){
+function checkAndBufferData(currentval) {
+    if (isBufferNeeded(currentval)) {
         var loadend = timeSeriesLength
-        if(timeSeriesLength > currentLoadedEnd + LOAD_SIZE){
+        if (timeSeriesLength > currentLoadedEnd + LOAD_SIZE) {
             loadend = currentLoadedEnd + LOAD_SIZE;
         }
-        loadPlotData(currentLoadedEnd,loadend)
-        for(var i =0; i < (loadend - currentLoadedEnd); i++){
-            delete particleSets[currentLoadedStart+i];
+        loadPlotData(currentLoadedEnd, loadend)
+        for (var i = 0; i < (loadend - currentLoadedEnd); i++) {
+            delete particleSets[currentLoadedStart + i];
         }
         checkIfBuffered();
     }
 }
 
-function checkIfBuffered(){
+function checkIfBuffered() {
     setTimeout(function () {
-        if(Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED){
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
             checkIfBuffered();
-        }else{
+        } else {
             currentLoadedStart += LOAD_SIZE;
             currentLoadedEnd += LOAD_SIZE;
-            if(currentLoadedEnd > timeSeriesLength){
+            if (currentLoadedEnd > timeSeriesLength) {
                 currentLoadedEnd = timeSeriesLength
             }
-            if(isPlaying){
+            if (isPlaying) {
                 isPaused = false;
                 playLoop();
             }
@@ -548,19 +578,19 @@ function checkIfBuffered(){
     }, 1000);
 }
 
-function  animateTimeSeriesPause(){
+function animateTimeSeriesPause() {
     isPaused = true
     isPlaying = false
 }
 
-function resetView(){
+function resetView() {
     controls.reset();
 }
 
-function resetSlider(){
+function resetSlider() {
     isPaused = true;
     isPlaying = false;
-    $("#slider").slider("option", "value", 0);
-    var value ={"value":0}
-    updatePlot(null,value);
+    //$("#plot-slider").attr("value", 0);
+    plotRangeSlider.update({from: 0});
+    updatePlot(0);
 }

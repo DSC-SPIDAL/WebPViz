@@ -21,6 +21,7 @@ package controllers;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Security;
+import views.html.about;
 
 public class Secured extends Security.Authenticator{
 
@@ -31,6 +32,10 @@ public class Secured extends Security.Authenticator{
 
     @Override
     public Result onUnauthorized(Http.Context context) {
+        if(context.request().path().equals("/about")){
+            return ok(about.render(null));
+        }
+
         return redirect(controllers.routes.Application.index());
     }
 }

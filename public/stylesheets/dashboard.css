@@ -1,0 +1,19 @@
+.upload {
+    /*background: linear-gradient(*/
+            /*skyblue,*/
+            /*transparent*/
+    /*);*/
+    background-blend-mode: screen;
+    padding-bottom: 20px;
+    -webkit-box-shadow: inset 0 20px 20px -20px rgba(0,0,0,0.8);
+    -moz-box-shadow: inset 0 20px 20px -20px rgba(0,0,0,0.8);
+    box-shadow: inset 0 20px 20px -20px rgba(0,0,0,0.8);
+}
+
+.upload  .section-header {
+    border-bottom: 1px solid #a37745;
+}
+
+.viz {
+    margin-top: -20px;
+}

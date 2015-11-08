@@ -2,146 +2,120 @@
 @import helper._
 
 @main("Dashboard", user){
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.9/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/dashboard.css")">
     <script type="text/javascript">
-        var isPending = false;
-        function refreshIfPending(){
-            if(!isPending){
-            isPending = true;
-                setTimeout(function() {
-                    window.location.replace("@routes.Application.dashboard()");
-                 }, 10000);
-
-            }
-        }
-    </script>
-    <div class="clearfix"></div>
-    <div class="row">
-
-        <div class="clearfix"></div>
-
-        <div class="col-sm-12">
-            <div class="well bs-component">
-                <div class="page-title">
-                    <div class="title_left">
-                        <h3>
-                            Upload Files
-                            <small>
-                                Zip Files or individual point files
-                            </small>
-                        </h3>
-                    </div>
-                </div>
-                @form(routes.Application.upload(), 'class -> "form-inline", 'enctype -> "multipart/form-data"){
-                    @if(hasError){
-                        <p class="text-danger">@error</p>
-                    }
-                    <button type="submit" class="btn btn-success pull-left">Upload</button>
-                    <div class="form-group">
-                        <input type="file" name="file" style="display: none"  id="file">
-                        <div class="input-group">
-                            <input type="text" id="browseFile" class="form-control">
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-primary" id="browseTrigger">Browse</button>
-                            </span>
-                        </div>
-                    </div>
-                    <div style="display: inherit;" >
-                        <input type="text" class="form-control" style="width:530px;" name="desc" id="desc" placeholder="Enter description">
-                    </div>
+            var isPending = false;
+            function refreshIfPending(){
+                if(!isPending){
+                    isPending = true;
+                    setTimeout(function() {
+                        window.location.replace("@routes.Application.dashboard()");
+                    }, 10000);
 
                 }
-            </div>
-        </div>
+            }
+    </script>
+    <div class="row upload">
+        <div class="col-sm-12 col-md-12">
+            <h2 class="section-header">Upload Files</h2>
+            @form(routes.Application.upload(), 'enctype -> "multipart/form-data"){
+                @if(hasError){
+                    <p class="text-danger">@error</p>
+                }
+                <div class="form-group">
+                    <label for="exampleInputFile">A ZIP file or a point file</label>
+                    <input type="file" id="file" name="file">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Description</label>
+                    <input type="text" class="form-control" style="width: 50%" name="desc" id="desc" placeholder="Enter description">
+                </div>
 
-    @*<div class="page-title">*@
-        @*<div class="title_left">*@
-            @*<h3 id="tables">PlotViz Files</h3>*@
-        @*</div>*@
-    @*</div>*@
-    <div class="clearfix"></div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            }
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <h2 class="section-header">Time Series Files</h2>
+            @if(timeSeries.length != 0) {
+                <table id="timeseriesfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                    <thead>
+                        <tr>
+                            <th>Time Series Name</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Created At</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for( r <- timeSeries) {
+                        <tr>
+                            <td>@r.name</td>
+                            <td>@r.description</td>
+                            <td>@User.findById(r.uploaderId).email</td>
+                            <td>@r.dateCreation</td>
+                            @if("pending".equals(r.status)){
+                                <script type="text/javascript">
+                                        refreshIfPending();
+                                </script>
+                                <td>Pending...</td>
+                            }else {
+                                <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                            }
+                            <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+
+            } else {
+                <div class="dataTables_info" id="example_info" style="padding-top: 20px ; float: none">
+                    No Time Series Files to Display</div>
+            }
+
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Time Series Files</h2>
-                    @if(timeSeries.length != 0) {
-                        <table id="timeseriesfiles" class="table table-striped responsive-utilities jambo_table bulk_action">
-                            <thead>
-                                <tr>
-                                    <th>Time Series Name</th>
-                                    <th>Description</th>
-                                    <th>User</th>
-                                    <th>Created At</th>
-                                    <th>View</th>
-                                    <th>Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @for(r <- timeSeries) {
-                                <tr>
-                                    <td>@r.name</td>
-                                    <td>@r.description</td>
-                                    <td>@User.findById(r.uploaderId).email</td>
-                                    <td>@r.dateCreation</td>
-                                    @if("pending".equals(r.status)){
-                                        <script type="text/javascript">
-                                             refreshIfPending();
-                                        </script>
-                                    <td>Pending...</td>
-                                     }else {
-                                    <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
-                                    }
-                                    <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="fa fa-trash"></i></a></td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-
-                    }else{
-                    </div>
-                        <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Time Series Files to Display</div>
+            <h2 class="section-header">Individual Files</h2>
+            @if(resultSets.length != 0) {
+                <table id="individualfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                    <thead>
+                        <tr>
+                            <th>Single Plot Name</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Created At</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for(r <- resultSets) {
+                        <tr>
+                            <td>@r.name</td>
+                            <td>@r.description</td>
+                            <td>@User.findById(r.uploaderId).email</td>
+                            <td>@r.dateCreation</td>
+                            <td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>
+                        </tr>
                     }
-
-            </div>
+                    </tbody>
+                </table>
+            }else{
+                <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>
+            }
         </div>
-        <div class="clearfix"></div>
-        <div class="col-sm-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Individual Files</h2>
-                    @if(resultSets.length != 0) {
-                        <table id="individualfiles" class="table table-striped responsive-utilities jambo_table bulk_action">
-                            <thead>
-                                <tr>
-                                    <th>Single Plot Name</th>
-                                    <th>Description</th>
-                                    <th>User</th>
-                                    <th>Created At</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @for(r <- resultSets) {
-                                <tr>
-                                    <td>@r.name</td>
-                                    <td>@r.description</td>
-                                    <td>@User.findById(r.uploaderId).email</td>
-                                    <td>@r.dateCreation</td>
-                                    <td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-                    }else{
-                    </div>
-                    <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>
-                    }
-            </div>
-        </div>
-        <div class="clearfix"></div>
-        </div>
+    </div>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/js/jquery.dataTables.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
 
     @* can be used if table tools are needed such as save as pdf, print<script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/tools/js/dataTables.tableTools.js")"></script>*@
     <script>
@@ -153,7 +127,6 @@
                     },
                     'iDisplayLength': 10,
                     "sPaginationType": "full_numbers",
-                    "dom": 'T<"clear">lfrtip',
                     "tableTools": {
 
                     }
@@ -179,14 +152,13 @@
                 });
             });
 
-             $(document).ready(function () {
+            $(document).ready(function () {
                 var oTable = $('#timeseriesfiles').dataTable({
                     "oLanguage": {
                         "sSearch": "Search all columns:"
                     },
                     'iDisplayLength': 10,
                     "sPaginationType": "full_numbers",
-                    "dom": 'T<"clear">lfrtip',
                     "tableTools": {
 
                     }
@@ -211,5 +183,5 @@
                     }
                 });
             });
-        </script>
+    </script>
 }

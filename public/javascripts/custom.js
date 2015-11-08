@@ -6,31 +6,6 @@
 
 /** ******  left menu  *********************** **/
 $(function () {
-    $('#sidebar-menu li ul').first().slideDown();
-    $('#sidebar-menu li').removeClass('active');
-
-    $('#browseTrigger').click(function(){
-        $('#file').click();
-    });
-
-    $('#file').change(function(){
-        $('#browseFile').val($(this).val().substring($(this).val().lastIndexOf('\\')+1))
-    });
-
-    $('#slider-play').click(function () {
-        var $this = $(this);
-
-        if ($this.hasClass("fa fa-play-circle") || $this.hasClass("fa-play-circle fa")) {
-            animateTimeSeriesPlay();
-            $this.removeClass("fa fa-play-circle").addClass("fa fa-pause");
-        }else if($this.hasClass("fa fa-history") || $this.hasClass("fa-history fa")){
-            resetSlider();
-            $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
-        }else{
-            animateTimeSeriesPause();
-            $this.removeClass("fa fa-pause").addClass("fa fa-play-circle");
-        }
-    });
 
     $('#sidebar-footer a').click(function () {
         var $this = $(this);
