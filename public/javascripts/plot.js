@@ -28,6 +28,7 @@ var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
 var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
+var precurrentLoadedStart, precurrentLoadedEnd;
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -164,7 +165,7 @@ function generateGraph() {
         }
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                currentParticles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
             }
         }
@@ -184,13 +185,16 @@ function generateGraph() {
 function generateTimeSeries(resultSets) {
     setupThreeJs();
     currentLoadedStart = 0;
+    precurrentLoadedStart = 0;
 
     if (timeSeriesLength > MAX_PLOTS_STORED) {
         loadPlotData(0, MAX_PLOTS_STORED)
         currentLoadedEnd = MAX_PLOTS_STORED
-    } else {
-        loadPlotData(0, timeSeriesLength)
+        precurrentLoadedEnd = MAX_PLOTS_STORED
+    }else{
+        loadPlotData(0,timeSeriesLength)
         currentLoadedEnd = timeSeriesLength
+        precurrentLoadedEnd = timeSeriesLength
     }
     initBufferAndLoad();
 
@@ -217,7 +221,6 @@ function loadPlotData(start, end) {
     var hsl;
 
     for (var i = start; i < end; i++) {
-
         clusterUrl = "/resultssetall/" + resultSets[i].timeSeriesId + "/file/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
@@ -276,7 +279,7 @@ function loadPlotData(start, end) {
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                    particles[key] = new THREE.PointCloud(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+                    particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 }
             }
 
@@ -370,12 +373,29 @@ function loadMatrial(size, shape, isglyph) {
 
     if (!isglyph) {
         sprite = null;
-    } else {
-        sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    }else{
+        sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     }
 
-    if (size > 1) {
-        sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    if(size>1){
+       sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
+        switch (parseInt(shape)){
+            case 0: sprite = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
+                    break;
+            case 1: sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+                    break;
+            case 2: sprite = THREE.ImageUtils.loadTexture(ImageEnum.STAR);
+                    break;
+            case 3: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CUBE);
+                    break;
+            case 4: sprite = THREE.ImageUtils.loadTexture(ImageEnum.PYRAMID);
+                    break;
+            case 5: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
+                    break;
+            case 6: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
+                    break;
+            default : sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+        }
     }
 
     var material = new THREE.PointsMaterial({
@@ -389,12 +409,20 @@ function loadMatrial(size, shape, isglyph) {
 }
 
 ImageEnum = {
-    BALL: "/assets/images/textures/ball.png",
-    CUBE: "/assets/images/textures/ball.png",
+    BALL : "/assets/images/textures/ball.png",
+    CUBE : "/assets/images/textures/cube.png",
+    DISC : "/assets/images/textures/disc.png",
+    STAR : "/assets/images/textures/star.png",
+    PYRAMID : "/assets/images/textures/pyramid.png",
+    CONE : "/assets/images/textures/cone.png",
+    CYLINDER : "/assets/images/textures/cylinder.png",
 }
 
 function updatePlot(sliderValue) {
-    if (sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd) {
+    if($('#slider-play').hasClass("fa fa-history")){
+        $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
+    }
+    if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
         if (sliderValue in particleSets) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
@@ -431,9 +459,12 @@ function updatePlot(sliderValue) {
             delete particleSets[currentLoadedStart + k];
         }
         currentLoadedStart = sliderValue;
+        precurrentLoadedStart = sliderValue;
         currentLoadedEnd = timeSeriesLength
-        if (timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)) {
+        precurrentLoadedEnd = timeSeriesLength
+        if(timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)){
             currentLoadedEnd = currentLoadedStart + MAX_PLOTS_STORED;
+            precurrentLoadedEnd = precurrentLoadedStart + MAX_PLOTS_STORED;
         }
         //TODO check if this might fail in edge cases
         loadPlotData(currentLoadedStart, currentLoadedEnd)
@@ -488,14 +519,15 @@ function animateTimeSeriesPlay() {
 }
 
 function playLoop() {
+
     var currentValue = parseInt($("#plot-slider").prop("value"));
-    var maxValue = currentLoadedEnd - 1;
-    checkAndBufferData(currentValue + 1);
-    if (currentValue == maxValue) {
-        $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-play");
+    var maxValue = timeSeriesLength - 1;
+    checkAndBufferData(currentValue+1)
+    if(currentValue == maxValue){
+        $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
         return
     }
-    if ((currentValue + 1) > currentLoadedEnd) {
+    if((currentValue + 1) >= currentLoadedEnd){
         isPaused = true;
     } else {
         setTimeout(function () {
@@ -544,20 +576,30 @@ function isBufferNeeded(currentval) {
     if (currentLoadedEnd == timeSeriesLength) {
         return false;
     }
-    return (currentval == (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart) / 2))) ? true : false;
+    return (currentval == (precurrentLoadedStart + Math.floor((precurrentLoadedEnd - precurrentLoadedStart)/2))) ?  true : false;
 }
-function checkAndBufferData(currentval) {
-    if (isBufferNeeded(currentval)) {
-        var loadend = timeSeriesLength
-        if (timeSeriesLength > currentLoadedEnd + LOAD_SIZE) {
-            loadend = currentLoadedEnd + LOAD_SIZE;
-        }
-        loadPlotData(currentLoadedEnd, loadend)
-        for (var i = 0; i < (loadend - currentLoadedEnd); i++) {
-            delete particleSets[currentLoadedStart + i];
-        }
-        checkIfBuffered();
+function checkAndBufferData(currentval){
+    if(isBufferNeeded(currentval)){
+        bufferData();
     }
+}
+
+
+function bufferData(){
+    var loadend = timeSeriesLength
+    if(timeSeriesLength > precurrentLoadedEnd + LOAD_SIZE){
+        loadend = precurrentLoadedEnd + LOAD_SIZE;
+    }
+    loadPlotData(precurrentLoadedEnd,loadend)
+    for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
+        delete particleSets[precurrentLoadedStart+i];
+    }
+    precurrentLoadedStart += LOAD_SIZE;
+    precurrentLoadedEnd += LOAD_SIZE;
+    if(precurrentLoadedEnd > timeSeriesLength){
+        precurrentLoadedEnd = timeSeriesLength
+    }
+    checkIfBuffered();
 }
 
 function checkIfBuffered() {
@@ -570,9 +612,14 @@ function checkIfBuffered() {
             if (currentLoadedEnd > timeSeriesLength) {
                 currentLoadedEnd = timeSeriesLength
             }
-            if (isPlaying) {
+            var currentValue = $("#slider").slider("value");
+            if(currentValue + 1 > (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))){
+                bufferData();
+            }
+            if(isPlaying && isPaused){
                 isPaused = false;
                 playLoop();
+
             }
         }
     }, 1000);
