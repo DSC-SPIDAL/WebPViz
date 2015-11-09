@@ -57,7 +57,8 @@ function generateClusterList(list, initcolors) {
 
     for(var key in list) {
         if(list.hasOwnProperty(key)) {
-            grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #"+ initcolors[key]+" '>"+
+            var colorWithouthHash = initcolors[key].replace(/#/g, '')
+            grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #"+ colorWithouthHash +" '>"+
                 "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "</span>:" + list[key].length +"</p></div>"
         }
     }
@@ -526,6 +527,7 @@ function updatePlot(sliderValue) {
             }
             $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
             $("#plot-clusters").html(generateClusterList(localSection, colorlist));
+            sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             render();
             animate();
@@ -584,11 +586,14 @@ function recolorSection(id, color) {
         colorsd[k * 3 + 2] = tempcolor.b;
     }
     currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+    // update the lables
+    $("#plot-clusters").html(generateClusterList(sections, colorlist));
     //for (var i in colors[id]) {
     //    colors[id][i] = new THREE.Color(color);
     //}
     recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].geometry.colorsNeedUpdate = true;
+
 }
 
 function animateTimeSeriesPlay() {
@@ -637,6 +642,7 @@ function playLoop() {
             }
             $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
             $("#plot-clusters").html(generateClusterList(localSection, colorlist));
+            sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             $("#plot-title").text(fileNames[currentValue + 1]);
             $('.color-pic1').colorpicker();
