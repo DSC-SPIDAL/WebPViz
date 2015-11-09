@@ -526,6 +526,7 @@ function updatePlot(sliderValue) {
             render();
             animate();
             $("#plot-title").text(fileNames[sliderValue]);
+            $('.color-pic1').colorpicker();
         }
     } else {
         for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
@@ -638,6 +639,7 @@ function playLoop() {
             sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             $("#plot-title").text(fileNames[currentValue + 1]);
+            $('.color-pic1').colorpicker();
             render();
             if (maxValue > currentValue + 1 && !isPaused) {
                 playLoop();
