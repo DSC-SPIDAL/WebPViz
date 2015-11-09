@@ -183,7 +183,7 @@ function generateGraph() {
             }
         }
         window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
-        var clusters = $("#plot-clusters").isotope({
+        var cls = $("#plot-clusters").isotope({
             itemSelector: '.element-item',
             layoutMode: 'fitRows',
             containerStyle: null
