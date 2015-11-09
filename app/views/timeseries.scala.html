@@ -83,9 +83,14 @@
             });
     </script>
     <script type="text/javascript">
-            $.getJSON("@routes.Application.timeseries(timeSeriesId)", function (data) {
-                var resultSetUrl = "@routes.Application.timeseries(timeSeriesId)";
-                visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
-            });
+          if ( !Detector.webgl ){
+                //TODO needs to go to seperate page when WebGL is not supported
+                Detector.addGetWebGLMessage({"id":"canvas3d"});
+          }else{
+                $.getJSON("@routes.Application.timeseries(timeSeriesId)", function (data) {
+                    var resultSetUrl = "@routes.Application.timeseries(timeSeriesId)";
+                    visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
+                });
+            }
     </script>
 }
