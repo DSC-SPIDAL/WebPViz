@@ -86,8 +86,12 @@ function generateCheckList(list, initcolors) {
         if (list.hasOwnProperty(key)) {
             tablerows += "<tr class='even pointer' id='" + key + "'>"
                 + "<td class='a-center'>"
-                + "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>"
-                + "<label class='color-box-label'>" + key + "</label> "
+            if (!(removedclusters.hasOwnProperty(key))){
+                tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>"
+            }else{
+                tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>"
+            }
+            tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
                 + "<input value='" + initcolors[key] + "' class='form-control' type='hidden' id='" + key + "'>"
                 + "<span class='input-group-addon color-picker-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
@@ -165,6 +169,7 @@ function generateGraph() {
                 geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
                 currentParticles[clusterdata.clusterid] = new Array();
             }
+            if(!colorlist.hasOwnProperty(clusterdata.clusterid))
             colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
             var positions = new Float32Array(clusterdata.points.length * 3);
@@ -285,6 +290,7 @@ function loadPlotData(start, end) {
                     particles[clusterdata.clusterid] = new Array();
                 }
 
+                if(!colorlist.hasOwnProperty(clusterdata.clusterid))
                 colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
                 var localSection = {
