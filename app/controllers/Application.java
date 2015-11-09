@@ -69,6 +69,7 @@ public class Application extends Controller {
         db.deleteTimeSeries(timeSeriesId);
         return GO_DASHBOARD;
     }
+
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
         MongoDB db = MongoDB.getInstance();
@@ -114,6 +115,7 @@ public class Application extends Controller {
         }
     }
 
+    @Security.Authenticated(Secured.class)
     public static Result visualizeTimeSeries(int timeSeriesId) {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());

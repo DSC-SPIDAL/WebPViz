@@ -2,6 +2,8 @@
 @import helper._
 
 @main("Login", null){
+    <link href="@routes.Assets.at("stylesheets/signin.css")" rel="stylesheet">
+
     @form(routes.Application.authenticate(), 'class -> "form-signin"){
         <h2 class="form-signin-heading">Please sign in</h2>
         @if(loginForm.hasGlobalErrors) {

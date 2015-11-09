@@ -13,6 +13,9 @@
     position: relative;
 }
 
+#canvas3d{
+    z-index: 0;
+}
 .viz-title {
     position: absolute;
     left: 23px;
@@ -20,6 +23,12 @@
     color: #ffffff;
 }
 
+.viz-clusters {
+    /*margin-bottom: 10px;*/
+   position: absolute;
+    z-index: 1000;
+    padding-right: 45px;
+}
 
 .plot {
     margin-left: 0;
@@ -38,31 +47,31 @@ http://www.paulund.co.uk/creating-different-css3-box-shadows-effects
     -moz-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
     box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
 }
-.effect6:before, .effect6:after
-{
-    content:"";
-    position:absolute;
-    z-index:-1;
-    -webkit-box-shadow:0 0 20px rgba(0,0,0,0.8);
-    -moz-box-shadow:0 0 20px rgba(0,0,0,0.8);
-    box-shadow:0 0 20px rgba(0,0,0,0.8);
-    top:50%;
-    bottom:0;
-    left:10px;
-    right:10px;
-    -moz-border-radius:100px / 10px;
-    border-radius:100px / 10px;
-}
-.effect6:after
-{
-    right:10px;
-    left:auto;
-    -webkit-transform:skew(8deg) rotate(3deg);
-    -moz-transform:skew(8deg) rotate(3deg);
-    -ms-transform:skew(8deg) rotate(3deg);
-    -o-transform:skew(8deg) rotate(3deg);
-    transform:skew(8deg) rotate(3deg);
-}
+/*.effect6:before, .effect6:after*/
+/*{*/
+    /*content:"";*/
+    /*position:absolute;*/
+    /*z-index:-1;*/
+    /*-webkit-box-shadow:0 0 20px rgba(0,0,0,0.8);*/
+    /*-moz-box-shadow:0 0 20px rgba(0,0,0,0.8);*/
+    /*box-shadow:0 0 20px rgba(0,0,0,0.8);*/
+    /*top:50%;*/
+    /*bottom:0;*/
+    /*left:10px;*/
+    /*right:10px;*/
+    /*-moz-border-radius:100px / 10px;*/
+    /*border-radius:100px / 10px;*/
+/*}*/
+/*.effect6:after*/
+/*{*/
+    /*right:10px;*/
+    /*left:auto;*/
+    /*-webkit-transform:skew(8deg) rotate(3deg);*/
+    /*-moz-transform:skew(8deg) rotate(3deg);*/
+    /*-ms-transform:skew(8deg) rotate(3deg);*/
+    /*-o-transform:skew(8deg) rotate(3deg);*/
+    /*transform:skew(8deg) rotate(3deg);*/
+/*}*/
 
 /*==================================================
  * Effect 7
@@ -236,3 +245,29 @@ input[type=range]:focus::-ms-fill-upper {
     margin-left: 5px;
 }
 
+.input-group-btn:last-child>.btn:not(:last-child):not(.dropdown-toggle) {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.element-item {
+    position: relative;
+    float: left;
+    /*width: 100px;*/
+    height: 25px;
+    margin: 5px;
+    padding: 8px;
+    background: transparent;
+    color: #262524;
+    border-radius: 2px;
+    margin-top: 15px;
+}
+
+.element-item > * {
+    margin: 0;
+    padding: 0;
+}
+
+.element-item > p {
+    line-height: 1em;
+}

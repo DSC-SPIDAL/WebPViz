@@ -51,6 +51,19 @@ $(function () {
     plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
 });
 
+function generateClusterList(list, initcolors) {
+    var grid = "";
+
+    for(var key in list) {
+        if(list.hasOwnProperty(key)) {
+            grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #"+ initcolors[key]+" '>"+
+                "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "</span>:" + list[key].length +"</p></div>"
+        }
+    }
+
+    return grid;
+}
+
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
 
@@ -170,6 +183,22 @@ function generateGraph() {
             }
         }
         //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        var clusters = $("#plot-clusters").isotope({
+            itemSelector: '.element-item',
+            layoutMode: 'fitRows',
+            containerStyle: null
+        });
+
+        //clusters.on( 'arrangeComplete', function(){
+        //    var height = window.innerHeight - 57 - 40 - 40 - 10 - $("#plot-clusters").height();
+        //    $('#canvas3d').width(window.innerWidth - 45);
+        //    $('#canvas3d').height(height);
+        //    var canvasWidth = $('#canvas3d').width();
+        //    var canvasHeight = $('#canvas3d').height();
+        //    camera.aspect = width / height;
+        //    camera.updateProjectionMatrix();
+        //    renderer.setSize(canvasWidth, canvasHeight);
+        //});
         // stats.domElement.style.position = 'absolute';
         // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
@@ -203,7 +232,7 @@ function generateTimeSeries(resultSets) {
 //TODO WInodow rezise does not work yet need to fix
 function onWindowResize() {
     var width = window.innerWidth
-    var height = window.innerHeight - 57 - 40 - 40 - 10;
+    var height = window.innerHeight - 57 - 40 - 40 - 10 ;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width - 45, height);
@@ -304,6 +333,24 @@ function initPlotData() {
         }
     }
     //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+    $("#plot-clusters").html(generateClusterList(sections, colorlist));
+    var clusters = $("#plot-clusters").isotope({
+        itemSelector: '.element-item',
+        layoutMode: 'fitRows',
+        containerStyle: null
+    });
+
+    //clusters.on( 'arrangeComplete', function(){
+    //    var height = window.innerHeight - 57 - 40 - 40 - 10 - $("#plot-clusters").height();
+    //    $('#canvas3d').width(window.innerWidth - 45);
+    //    $('#canvas3d').height(height);
+    //    var canvasWidth = $('#canvas3d').width();
+    //    var canvasHeight = $('#canvas3d').height();
+    //    camera.aspect = width / height;
+    //    camera.updateProjectionMatrix();
+    //    renderer.setSize(canvasWidth, canvasHeight);
+    //});
+
     $('.color-pic1').colorpicker();
 }
 
