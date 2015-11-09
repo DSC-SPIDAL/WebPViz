@@ -372,8 +372,8 @@ function initBufferAndLoad() {
 function gotoBufferAndLoad(sliderValue) {
 
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
-            gotoBufferAndLoad(sliderValue);
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED && !(currentLoadedEnd == timeSeriesLength)) {
+                gotoBufferAndLoad(sliderValue);
         } else {
             if (currentLoadedStart in particleSets) {
                 updatePlot(sliderValue)
@@ -472,8 +472,8 @@ ImageEnum = {
 }
 
 function updatePlot(sliderValue) {
-    if($('#slider-play').hasClass("fa fa-history")){
-        $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
+    if($("#play-span").hasClass("glyphicon-repeat")){
+        $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
     }
     if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
         if (sliderValue in particleSets) {
@@ -576,10 +576,10 @@ function playLoop() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     var maxValue = timeSeriesLength - 1;
     checkAndBufferData(currentValue+1)
-    if(currentValue == maxValue){
-        $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
-        return
-    }
+    //if(currentValue == maxValue){
+    //    $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
+    //    return
+    //}
     if((currentValue + 1) >= currentLoadedEnd){
         isPaused = true;
     } else {
