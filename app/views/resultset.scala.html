@@ -63,5 +63,8 @@
             var resultSetUrl = "@routes.Application.resultssetall(timeSerisId, resultSetId)";
             visualize(resultSetUrl, data, @resultSetId);
         });
+        $("#settingsModal").draggable({
+            handle: ".modal-header"
+        });
     </script>
 }
