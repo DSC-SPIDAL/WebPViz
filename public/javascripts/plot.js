@@ -67,7 +67,7 @@ function generateClusterList(list, initcolors) {
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
 
-    var tabletop = "<table class='table table-striped' id='cluster_table' style='background-color: #EAEAEA; padding-top: 0px'>"
+    var tabletop = "<table class='table' id='cluster_table'>"
         + "<thead>"
         + "<tr class='headings'>"
         + "<th>"
@@ -89,7 +89,7 @@ function generateCheckList(list, initcolors) {
                 + "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
                 + "<input value='" + initcolors[key] + "' class='form-control' type='hidden' id='" + key + "'>"
-                + "<span class='input-group-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
+                + "<span class='input-group-addon color-picker-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
                 + "</div>"
                 + "</td>"
                 + "<td class=' '>" + list[key].label + "</span></td>"
@@ -182,7 +182,7 @@ function generateGraph() {
                 scene3d.add(currentParticles[key]);
             }
         }
-        //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
         var clusters = $("#plot-clusters").isotope({
             itemSelector: '.element-item',
             layoutMode: 'fitRows',
@@ -332,7 +332,7 @@ function initPlotData() {
             scene3d.add(currentParticles[key]);
         }
     }
-    //window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+    window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
     $("#plot-clusters").html(generateClusterList(sections, colorlist));
     var clusters = $("#plot-clusters").isotope({
         itemSelector: '.element-item',

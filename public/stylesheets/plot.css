@@ -272,3 +272,56 @@ input[type=range]:focus::-ms-fill-upper {
 .element-item > p {
     line-height: 1em;
 }
+
+.viz {
+    margin-top: -21px ;
+    padding : 0px ;
+}
+
+#viz-container {
+    padding: 0px ;
+}
+
+.input-group-shaded {
+    padding-left: 10px ;
+    padding-right: 10px ;
+    border: 1px solid #e7e7e7 ;
+    border-radius: 5px ;
+}
+
+.drop-up {
+    top: auto ;
+    left: -125px ;
+    bottom: 100% !important ;
+    padding: 5px ;
+    background-color: rgba(255,255,255,0.6) ;
+    height: 300px ;
+}
+
+.focus {
+    outline: 0 ;
+}
+
+.btn:focus,.btn.focus,.btn.active.focus,.btn.active:focus {
+    outline: none ;
+}
+
+.btn.active {
+    border-color: #9F002D ;
+}
+
+#cluster_table_div {
+    overflow: auto;
+    max-height: 400px;
+}
+
+.color-pic1 {
+    display: inline;
+}
+
+.color-picker-addon{
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
