@@ -20,6 +20,7 @@ var resultData;
 
 //Time Series Vars
 var particleSets = {};
+var sectionSets = {};
 var fileNames = {};
 var timeSeriesData = [];
 var isPlaying = false;
@@ -83,7 +84,7 @@ function generateCheckList(list, initcolors) {
 
     for (var key in list) {
         if (list.hasOwnProperty(key)) {
-            tablerows += "<tr class='even pointer'>"
+            tablerows += "<tr class='even pointer' id='" + key + "'>"
                 + "<td class='a-center'>"
                 + "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>"
                 + "<label class='color-box-label'>" + key + "</label> "
@@ -93,7 +94,7 @@ function generateCheckList(list, initcolors) {
                 + "</div>"
                 + "</td>"
                 + "<td class=' '>" + list[key].label + "</span></td>"
-                + "<td class=' '>" + list[key].length + "</td>"
+                + "<td class='l1'>" + list[key].length + "</td>"
                 + "</tr>"
         }
     }
@@ -103,6 +104,16 @@ function generateCheckList(list, initcolors) {
 
 
     return tabletop + tablerows + tableend;
+}
+
+function updateClusterList(list, initcolors) {
+    for (var key in list) {
+        if (list.hasOwnProperty(key)) {
+            //var x=$("#" + key);
+            //x[2].html(list[key].length);
+            $("#cluster_table #" + key + " td.l1").html(list[key].length);
+        }
+    }
 }
 
 //Plot functions
@@ -182,7 +193,8 @@ function generateGraph() {
                 scene3d.add(currentParticles[key]);
             }
         }
-        window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+        $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+        $("#plot-clusters").html(generateClusterList(sections, colorlist));
         var cls = $("#plot-clusters").isotope({
             itemSelector: '.element-item',
             layoutMode: 'fitRows',
@@ -258,12 +270,12 @@ function loadPlotData(start, end) {
             clusters = data.clusters;
             fileName = data.fileName;
 
-
+            var localSections = [];
             for (var i = 0; i < clusters.length; i++) {
 
                 var clusterdata = data.clusters[i];
                 var clusterid = clusterdata.clusterid;
-                var clustercolor = clusterdata.color
+                var clustercolor = clusterdata.color;
                 if (clustercolor == null)
                     clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()}
 
@@ -275,15 +287,18 @@ function loadPlotData(start, end) {
 
                 colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
-                if (!sections.hasOwnProperty(clusterdata.clusterid))
-                    sections[clusterdata.clusterid] = {
-                        "length": clusterdata.points.length,
-                        "size": clusterdata.size,
-                        "shape": clusterdata.shape,
-                        "visible": clusterdata.visible,
-                        "color": clustercolor,
-                        "label": clusterdata.label
-                    }
+                var localSection = {
+                    "length": clusterdata.points.length,
+                    "size": clusterdata.size,
+                    "shape": clusterdata.shape,
+                    "visible": clusterdata.visible,
+                    "color": clustercolor,
+                    "label": clusterdata.label
+                };
+                if (!sections.hasOwnProperty(clusterdata.clusterid)) {
+                    sections[clusterdata.clusterid] = localSection;
+                }
+                localSections[clusterdata.clusterid] = localSection;
 
                 var positions = new Float32Array(clusterdata.points.length * 3);
                 var colorarray = new Float32Array(clusterdata.points.length * 3);
@@ -313,6 +328,7 @@ function loadPlotData(start, end) {
             }
 
             particleSets[data.timeSeriesSeqNumber] = particles;
+            sectionSets[data.timeSeriesSeqNumber] = localSections;
             fileNames[data.timeSeriesSeqNumber] = data.fileName;
             console.log(data.fileName)
         });
@@ -332,7 +348,7 @@ function initPlotData() {
             scene3d.add(currentParticles[key]);
         }
     }
-    window.document.getElementById("cluster_table_div").innerHTML = generateCheckList(sections, colorlist);
+    $("#cluster_table_div").html(generateCheckList(sections, colorlist));
     $("#plot-clusters").html(generateClusterList(sections, colorlist));
     var clusters = $("#plot-clusters").isotope({
         itemSelector: '.element-item',
@@ -476,7 +492,7 @@ function updatePlot(sliderValue) {
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
 
             currentParticles = particleSets[sliderValue];
-
+            var localSection = sectionSets[sliderValue];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     if (recoloredclusters.hasOwnProperty(key)) {
@@ -496,6 +512,8 @@ function updatePlot(sliderValue) {
                     }
                 }
             }
+            $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
+            $("#plot-clusters").html(generateClusterList(localSection, colorlist));
             window.addEventListener('resize', onWindowResize, false);
             render();
             animate();
@@ -504,6 +522,7 @@ function updatePlot(sliderValue) {
     } else {
         for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
             delete particleSets[currentLoadedStart + k];
+            delete sectionSets[currentLoadedStart + k];
         }
         currentLoadedStart = sliderValue;
         precurrentLoadedStart = sliderValue;
@@ -583,6 +602,7 @@ function playLoop() {
             //$("#plot-slider").attr("value", currentValue + 1);
             plotRangeSlider.update({from: currentValue + 1});
             currentParticles = particleSets[currentValue + 1];
+            var localSection = sectionSets[currentValue + 1];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     if (recoloredclusters.hasOwnProperty(key)) {
@@ -602,6 +622,8 @@ function playLoop() {
                     }
                 }
             }
+            $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
+            $("#plot-clusters").html(generateClusterList(localSection, colorlist));
             window.addEventListener('resize', onWindowResize, false);
             $("#plot-title").text(fileNames[currentValue + 1]);
             render();
@@ -640,6 +662,7 @@ function bufferData(){
     loadPlotData(precurrentLoadedEnd,loadend)
     for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
         delete particleSets[precurrentLoadedStart+i];
+        delete sectionSets[precurrentLoadedStart+i];
     }
     precurrentLoadedStart += LOAD_SIZE;
     precurrentLoadedEnd += LOAD_SIZE;
