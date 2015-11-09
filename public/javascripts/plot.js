@@ -10,7 +10,7 @@ var scene3d;
 var colors = [];
 var colorlist = {};
 var sections = [];
-
+var sprites = {};
 
 //Single Plot Varibles
 var clusterUrl;
@@ -388,8 +388,8 @@ function initBufferAndLoad() {
 function gotoBufferAndLoad(sliderValue) {
 
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
-            gotoBufferAndLoad(sliderValue);
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED && !(currentLoadedEnd == timeSeriesLength)) {
+                gotoBufferAndLoad(sliderValue);
         } else {
             if (currentLoadedStart in particleSets) {
                 updatePlot(sliderValue)
@@ -429,35 +429,41 @@ function setupThreeJs() {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     // stats.domElement.style.position = 'absolute';
     //document.getElementById("stats").appendChild(stats.domElement);
+    sprites["0"] =  THREE.ImageUtils.loadTexture(ImageEnum.DISC);
+    sprites["1"] =  THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+    sprites["2"] =  THREE.ImageUtils.loadTexture(ImageEnum.STAR);
+    sprites["3"] =  THREE.ImageUtils.loadTexture(ImageEnum.CUBE);
+    sprites["4"] =  THREE.ImageUtils.loadTexture(ImageEnum.PYRAMID);
+    sprites["5"] =  THREE.ImageUtils.loadTexture(ImageEnum.CONE);
+    sprites["6"] =  THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
 }
 
 function loadMatrial(size, shape, isglyph) {
-
+var sprite;
     if (!isglyph) {
         sprite = null;
     }else{
-        sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
+     //   sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     }
 
     if(size>1){
-       sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
         switch (parseInt(shape)){
-            case 0: sprite = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
-                    break;
-            case 1: sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
-                    break;
-            case 2: sprite = THREE.ImageUtils.loadTexture(ImageEnum.STAR);
-                    break;
-            case 3: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CUBE);
-                    break;
-            case 4: sprite = THREE.ImageUtils.loadTexture(ImageEnum.PYRAMID);
-                    break;
-            case 5: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
-                    break;
-            case 6: sprite = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
-                    break;
-            default : sprite = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
+            case 0: sprite = sprites["0"];
+                break;
+            case 1: sprite = sprites["1"];
+                break;
+            case 2: sprite = sprites["2"];
+                break;
+            case 3: sprite = sprites["3"];
+                break;
+            case 4: sprite = sprites["4"];
+                break;
+            case 5: sprite = sprites["5"];
+                break;
+            case 6: sprite = sprites["6"];
+                break;
+            default : sprite = sprites["3"];
         }
     }
 
@@ -482,8 +488,8 @@ ImageEnum = {
 }
 
 function updatePlot(sliderValue) {
-    if($('#slider-play').hasClass("fa fa-history")){
-        $('#slider-play').removeClass("fa fa-history").addClass("fa fa-play-circle");
+    if($("#play-span").hasClass("glyphicon-repeat")){
+        $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
     }
     if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
         if (sliderValue in particleSets) {
@@ -589,10 +595,10 @@ function playLoop() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     var maxValue = timeSeriesLength - 1;
     checkAndBufferData(currentValue+1)
-    if(currentValue == maxValue){
-        $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
-        return
-    }
+    //if(currentValue == maxValue){
+    //    $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
+    //    return
+    //}
     if((currentValue + 1) >= currentLoadedEnd){
         isPaused = true;
     } else {

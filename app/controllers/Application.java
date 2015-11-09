@@ -104,6 +104,7 @@ public class Application extends Controller {
         return GO_DASHBOARD;
     }
 
+    @Security.Authenticated(Secured.class)
     public static Result visualize(int resultSetId, int timeSeriesId) {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
