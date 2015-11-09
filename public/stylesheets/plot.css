@@ -325,3 +325,7 @@ input[type=range]:focus::-ms-fill-upper {
     border: none;
 }
 
+.modal-backdrop.in {
+    opacity: 0.1 !important;
+}
+
