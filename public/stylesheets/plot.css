@@ -204,9 +204,12 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .irs-bar, .irs-bar-edge, .irs-line {
-    top: 23px;
+    top: 25px;
 }
 
+.irs-grid{
+    bottom: 5px;
+}
 .irs-slider {
     top: 18px;
     width: 21px;
