@@ -42,6 +42,7 @@ var plotRangeSlider = {};
 
 $(function () {
     $("#plot-slider").ionRangeSlider({
+        grid: true,
         min: 0,
         max: 100,
         from: 0,
