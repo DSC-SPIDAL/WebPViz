@@ -11,6 +11,7 @@ var colors = [];
 var colorlist = {};
 var sections = [];
 var sprites = {};
+var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
 var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
 
 //Single Plot Varibles
@@ -177,7 +178,9 @@ function generateGraph() {
             var positions = new Float32Array(clusterdata.points.length * 3);
             var colorarray = new Float32Array(clusterdata.points.length * 3);
             var sizes = new Float32Array(clusterdata.points.length);
-
+            xmean = 0
+            ymean = 0
+            zmean = 0
             for (var k = 0; k < clusterdata.points.length; k++) {
                 var p = clusterdata.points[k];
 
@@ -201,13 +204,22 @@ function generateGraph() {
             xmean = xmean/clusterdata.points.length;
             ymean = ymean/clusterdata.points.length;
             zmean = zmean/clusterdata.points.length;
-            cameraCenter = new THREE.Vector3(xmean,ymean,zmean)
-            camera.lookAt(cameraCenter);
             geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+
+            xmeantotal += xmean;
+            ymeantotal += ymean;
+            zmeantotal += zmean;
+
         }
+
+        xmeantotal = xmeantotal/clusters.length;
+        ymeantotal = ymeantotal/clusters.length;
+        zmeantotal = zmeantotal/clusters.length;
+
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
+                geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 scene3d.add(currentParticles[key]);
             }
@@ -323,7 +335,9 @@ function loadPlotData(start, end) {
                 var positions = new Float32Array(clusterdata.points.length * 3);
                 var colorarray = new Float32Array(clusterdata.points.length * 3);
                 var sizes = new Float32Array(clusterdata.points.length);
-
+                xmean = 0
+                ymean = 0
+                zmean = 0
                 for (var k = 0; k < clusterdata.points.length; k++) {
                     var p = clusterdata.points[k];
 
@@ -348,16 +362,22 @@ function loadPlotData(start, end) {
                     xmean = xmean / clusterdata.points.length;
                     ymean = ymean / clusterdata.points.length;
                     zmean = zmean / clusterdata.points.length;
-                    cameraCenter = new THREE.Vector3(xmean, ymean, zmean)
-                    calculatedmeans = true;
+
+                    xmeantotal += xmean;
+                    ymeantotal += ymean;
+                    zmeantotal += zmean;
                 }
 
                 geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
+            xmeantotal = xmeantotal/clusters.length;
+            ymeantotal = ymeantotal/clusters.length;
+            zmeantotal = zmeantotal/clusters.length;
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
+                    geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
                     particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
                 }
             }
@@ -378,7 +398,9 @@ function initPlotData() {
     //$("#plot-slider").attr("max", timeSeriesLength - 1);
     //$("#plot-slider").attr("value", 0);
     currentParticles = particleSets["0"];
-    camera.lookAt(cameraCenter);
+    camera.lookAt(scene3d.position);
+    camera.updateProjectionMatrix();
+    //camera.target.position.copy(cameraCenter);
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
