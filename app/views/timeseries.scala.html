@@ -83,11 +83,19 @@
                 });
 
                 $('#slider-step-backward').click(function () {
-                    plotRangeSlider.update({from: currentValue - 1});
+                    var currentval = plotRangeSlider.result.from - 1;
+                    if((currentval > 0) && !isPlaying ){
+                        updatePlot(currentval);
+                        plotRangeSlider.update({from: currentval});
+                    }
                 });
 
                 $('#slider-step-forward').click(function () {
-                    plotRangeSlider.update({from: currentValue + 1});
+                    var currentval = plotRangeSlider.result.from + 1;
+                    if((currentval < timeSeriesLength) && !isPlaying ){
+                        updatePlot(currentval);
+                        plotRangeSlider.update({from: currentval + 1});
+                    }
                 });
 
                 $('.modal-dialog').draggable({
