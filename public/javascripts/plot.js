@@ -11,6 +11,7 @@ var colors = [];
 var colorlist = {};
 var sections = [];
 var sprites = {};
+var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
 
 //Single Plot Varibles
 var clusterUrl;
@@ -184,12 +185,24 @@ function generateGraph() {
                 positions[k * 3 + 1] = p.y;
                 positions[k * 3 + 2] = p.z;
 
+                xmean += p.x;
+                ymean += p.y;
+                zmean += p.z;
+
                 var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
                 colorarray[k * 3 + 0] = tempcolor.r;
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
 
+
+
             }
+
+            xmean = xmean/clusterdata.points.length;
+            ymean = ymean/clusterdata.points.length;
+            zmean = zmean/clusterdata.points.length;
+            cameraCenter = new THREE.Vector3(xmean,ymean,zmean)
+            camera.lookAt(cameraCenter);
             geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
         }
@@ -318,12 +331,27 @@ function loadPlotData(start, end) {
                     positions[k * 3 + 1] = p.y;
                     positions[k * 3 + 2] = p.z;
 
+                    if(!calculatedmeans){
+                        xmean += p.x;
+                        ymean += p.y;
+                        zmean += p.z;
+                    }
+
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
                     colorarray[k * 3 + 0] = tempcolor.r;
                     colorarray[k * 3 + 1] = tempcolor.g;
                     colorarray[k * 3 + 2] = tempcolor.b;
 
                 }
+
+                if(!calculatedmeans) {
+                    xmean = xmean / clusterdata.points.length;
+                    ymean = ymean / clusterdata.points.length;
+                    zmean = zmean / clusterdata.points.length;
+                    cameraCenter = new THREE.Vector3(xmean, ymean, zmean)
+                    calculatedmeans = true;
+                }
+
                 geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
@@ -350,6 +378,7 @@ function initPlotData() {
     //$("#plot-slider").attr("max", timeSeriesLength - 1);
     //$("#plot-slider").attr("value", 0);
     currentParticles = particleSets["0"];
+    camera.lookAt(cameraCenter);
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
@@ -429,9 +458,11 @@ function setupThreeJs() {
     renderer.setClearColor(0x121224, 1);
 
     //new THREE.PerspectiveCamera
+    cameraCenter = new THREE.Vector3(0,0,0)
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
     camera.position.set(1, 1, 1);
+    camera.lookAt(cameraCenter);
     scene3d.add(camera);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     // stats.domElement.style.position = 'absolute';
