@@ -23,6 +23,14 @@
     color: #ffffff;
 }
 
+.plot-controls{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: #000000;
+    z-index: 1001;
+}
+
 .viz-clusters {
     /*margin-bottom: 10px;*/
    position: absolute;

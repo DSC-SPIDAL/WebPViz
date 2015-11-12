@@ -130,6 +130,7 @@ function visualize(resultSetUrl, resultSet, id) {
     clusters = resultSet.clusters;
     resultSetId = id;
     generateGraph();
+    setupGuiSingle();
     animate();
 }
 
@@ -137,6 +138,7 @@ function visualizeTimeSeries(resultSetUrl, timeSeries, id) {
     resultSets = timeSeries.resultsets;
     timeSeriesLength = resultSets.length;
     generateTimeSeries(resultSets);
+    setupGuiTimeSeries();
 }
 
 
@@ -372,10 +374,12 @@ function loadPlotData(start, end) {
                 geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
-            xmeantotal = xmeantotal/clusters.length;
-            ymeantotal = ymeantotal/clusters.length;
-            zmeantotal = zmeantotal/clusters.length;
-
+            if(!calculatedmeans) {
+                xmeantotal = xmeantotal / clusters.length;
+                ymeantotal = ymeantotal / clusters.length;
+                zmeantotal = zmeantotal / clusters.length;
+                calculatedmeans = true;
+            }
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
                     geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
@@ -784,4 +788,35 @@ function resetSlider() {
     //$("#plot-slider").attr("value", 0);
     plotRangeSlider.update({from: 0});
     updatePlot(0);
+}
+
+var controlers = {
+    delay: 300,
+    size: 3,
+    position: 20,
+    loadsize: 20
+};
+
+
+
+function setupGuiSingle() {
+    var gui = new dat.GUI({ autoPlace: false });
+    var customContainer = document.getElementById('plot-controls');
+    customContainer.appendChild(gui.domElement);
+    gui.add(controlers, 'size', 1.0, 20.0, 23.0)
+    gui.add(controlers, "position", 1.0, 40.0, 1.0)
+    gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
+    //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
+}
+
+function setupGuiTimeSeries() {
+    var gui = new dat.GUI({ autoPlace: false });
+    var customContainer = document.getElementById('plot-controls');
+    customContainer.appendChild(gui.domElement);
+
+    gui.add(controlers, 'delay', 200.0, 2000.0, 1.0)
+    gui.add(controlers, 'size', 1.0, 20.0, 23.0)
+    gui.add(controlers, "position", 1.0, 40.0, 1.0)
+    gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
+    //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
 }
