@@ -714,7 +714,7 @@ function playLoop() {
                     $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
                 }
             }
-        }, TIME_BETWEEN_PLOTS_IN_MILLS);
+        }, controlers.delay);
     }
 }
 
@@ -814,8 +814,8 @@ function setupGuiTimeSeries() {
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
 
-    gui.add(controlers, 'delay', 200.0, 2000.0, 1.0)
-    gui.add(controlers, 'size', 1.0, 20.0, 23.0)
+    gui.add(controlers, 'delay', 10.0, 2000.0, 50.0).name( "Play Delay(ms)")
+    gui.add(controlers, 'size', 1.0, 20.0, 1.0)
     gui.add(controlers, "position", 1.0, 40.0, 1.0)
     gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
