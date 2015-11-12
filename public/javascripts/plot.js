@@ -23,6 +23,7 @@ var resultData;
 //Time Series Vars
 var particleSets = {};
 var sectionSets = {};
+var currentPointSize = 0;
 var fileNames = {};
 var timeSeriesData = [];
 var isPlaying = false;
@@ -566,6 +567,12 @@ function updatePlot(sliderValue) {
             var localSection = sectionSets[sliderValue];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
+
+                    if(controlers.pointsize != 1) {
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        currentParticles[key].material.needsUpdate = true;
+                    }
+                    
                     if (recoloredclusters.hasOwnProperty(key)) {
                         var tempcolor = recoloredclusters[key]
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -681,6 +688,12 @@ function playLoop() {
             var localSection = sectionSets[currentValue + 1];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
+
+                    if(controlers.pointsize != 1) {
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        currentParticles[key].material.needsUpdate = true;
+                    }
+
                     if (recoloredclusters.hasOwnProperty(key)) {
                         var tempcolor = recoloredclusters[key]
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -734,16 +747,16 @@ function checkAndBufferData(currentval){
 
 function bufferData(){
     var loadend = timeSeriesLength
-    if(timeSeriesLength > precurrentLoadedEnd + LOAD_SIZE){
-        loadend = precurrentLoadedEnd + LOAD_SIZE;
+    if(timeSeriesLength > precurrentLoadedEnd + controlers.loadSize){
+        loadend = precurrentLoadedEnd + controlers.loadSize;
     }
     loadPlotData(precurrentLoadedEnd,loadend)
     for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
         delete particleSets[precurrentLoadedStart+i];
         delete sectionSets[precurrentLoadedStart+i];
     }
-    precurrentLoadedStart += LOAD_SIZE;
-    precurrentLoadedEnd += LOAD_SIZE;
+    precurrentLoadedStart += controlers.loadSize;
+    precurrentLoadedEnd += controlers.loadSize;
     if(precurrentLoadedEnd > timeSeriesLength){
         precurrentLoadedEnd = timeSeriesLength
     }
@@ -752,11 +765,11 @@ function bufferData(){
 
 function checkIfBuffered() {
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < controlers.maxPlotsStored) {
             checkIfBuffered();
         } else {
-            currentLoadedStart += LOAD_SIZE;
-            currentLoadedEnd += LOAD_SIZE;
+            currentLoadedStart += controlers.loadSize;
+            currentLoadedEnd += controlers.loadSize;
             if (currentLoadedEnd > timeSeriesLength) {
                 currentLoadedEnd = timeSeriesLength
             }
@@ -792,9 +805,9 @@ function resetSlider() {
 
 var controlers = {
     delay: 300,
-    size: 3,
-    position: 20,
-    loadsize: 20
+    pointsize: 1,
+    loadSize: 5,
+    maxPlotsStored: 20
 };
 
 
@@ -803,7 +816,7 @@ function setupGuiSingle() {
     var gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'size', 1.0, 20.0, 23.0)
+    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize)
     gui.add(controlers, "position", 1.0, 40.0, 1.0)
     gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
@@ -815,8 +828,22 @@ function setupGuiTimeSeries() {
     customContainer.appendChild(gui.domElement);
 
     gui.add(controlers, 'delay', 10.0, 2000.0, 50.0).name( "Play Delay(ms)")
-    gui.add(controlers, 'size', 1.0, 20.0, 1.0)
-    gui.add(controlers, "position", 1.0, 40.0, 1.0)
-    gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
+    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize)
+
+    //var storage = gui.addFolder('Storage Controls');
+    //
+    //storage.add(controlers, "loadSize", 1.0, 20.0, 1.0).name("Load Size").di
+    //storage.add(controlers, 'maxPlotsStored', 10.0, 200.0, 1.0).name("Storage Size")
+
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
+}
+
+function changePointSize(){
+    for (var key in currentParticles) {
+        if (currentParticles.hasOwnProperty(key)) {
+            currentParticles[key].material.size = (sections[key].size/200) * controlers.pointsize;
+            currentParticles[key].material.needsUpdate = true;
+        }
+    }
+    render();
 }
