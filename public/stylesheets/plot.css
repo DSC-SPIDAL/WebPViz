@@ -25,10 +25,10 @@
 
 .plot-controls{
     position: absolute;
-    right: 15px;
+    right: 20px;
     top: 20px;
     color: #000000;
-    z-index: 100;
+    z-index: 1001;
 }
 
 .viz-clusters {
