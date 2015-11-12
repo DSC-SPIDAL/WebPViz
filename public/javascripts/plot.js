@@ -150,7 +150,6 @@ function generateGraph() {
     var cluster;
     var geometry = {};
     var hsl;
-    var sections = {};
     $.getJSON(clusterUrl, function (data) {
         fileName = data.fileName;
         $("#plot-title").text(data.fileName)
@@ -572,7 +571,7 @@ function updatePlot(sliderValue) {
                         currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
                         currentParticles[key].material.needsUpdate = true;
                     }
-                    
+
                     if (recoloredclusters.hasOwnProperty(key)) {
                         var tempcolor = recoloredclusters[key]
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -817,8 +816,6 @@ function setupGuiSingle() {
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize)
-    gui.add(controlers, "position", 1.0, 40.0, 1.0)
-    gui.add(controlers, 'loadsize', 1.0, 50.0, 1.0)
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
 }
 
