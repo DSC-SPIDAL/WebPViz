@@ -372,10 +372,12 @@ function loadPlotData(start, end) {
                 geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
-            xmeantotal = xmeantotal/clusters.length;
-            ymeantotal = ymeantotal/clusters.length;
-            zmeantotal = zmeantotal/clusters.length;
-
+            if(!calculatedmeans) {
+                xmeantotal = xmeantotal / clusters.length;
+                ymeantotal = ymeantotal / clusters.length;
+                zmeantotal = zmeantotal / clusters.length;
+                calculatedmeans = true;
+            }
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
                     geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
