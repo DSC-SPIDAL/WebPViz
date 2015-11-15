@@ -37,6 +37,8 @@ public class TimeSeries extends Model {
 
     public String status;
 
+    public String typeString = "T";
+
     public static Model.Finder<Integer, TimeSeries> find = new Model.Finder<Integer, TimeSeries>(Integer.class, TimeSeries.class);
 
     public static TimeSeries create(String name, String description, User uploader) {

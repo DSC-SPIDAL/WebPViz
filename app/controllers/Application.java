@@ -117,6 +117,18 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    public static Result visualizeSingle(int timeSeriesId) {
+        MongoDB db = MongoDB.getInstance();
+        User loggedInUser = User.findByEmail(request().username());
+        ResultSet r = db.queryResultSetProsById(timeSeriesId);
+        if (r != null) {
+            return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
+        } else {
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
+        }
+    }
+
+    @Security.Authenticated(Secured.class)
     public static Result visualizeTimeSeries(int timeSeriesId) {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());

@@ -29,6 +29,7 @@ GET         /upload                             controllers.Application.uploadGe
 GET      /delete/:id                         controllers.Application.delete(id: Integer)
 
 # Visualize
+GET         /resultsets/:tid                    controllers.Application.visualizeSingle(tid: Integer)
 GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
 GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Integer)
 

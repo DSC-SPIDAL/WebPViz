@@ -323,6 +323,36 @@ public class MongoDB {
         return color;
     }
 
+    public ResultSet queryResultSetProsById(int timeSeriesId) {
+        Document query = new Document("id", timeSeriesId);
+
+        FindIterable<Document> iterable = filesCollection.find(query);
+        for (Document document : iterable) {
+            Object resultSetsObject = document.get("resultsets");
+            if (resultSetsObject instanceof List) {
+                for (Object documentObject : (List)resultSetsObject) {
+                    Document resultDocument = (Document) documentObject;
+                    int fId = (Integer) resultDocument.get("id");
+                    ResultSet resultSet = new ResultSet();
+                    try {
+                        resultSet.dateCreation = format.parse((String) resultDocument.get("dateCreation"));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    resultSet.id = (Integer) resultDocument.get("id");
+                    resultSet.name = (String) resultDocument.get("name");
+                    resultSet.description = (String) resultDocument.get("description");
+                    resultSet.uploaderId = (Integer) resultDocument.get("uploaderId");
+                    resultSet.fileName = (String) resultDocument.get("fileName");
+                    resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get("timeSeriesSeqNumber");
+                    resultSet.timeSeriesId = (Integer) resultDocument.get("timeSeriesId");
+                    return resultSet;
+                }
+            }
+        }
+        return null;
+    }
+
     public ResultSet queryResultSetProsById(int timeSeriesId, int fileId) {
         Document query = new Document("id", timeSeriesId);
 
@@ -398,6 +428,16 @@ public class MongoDB {
             timeSeries.description = (String) document.get("desc");
             timeSeries.uploaderId = (Integer) document.get("uploaded");
             timeSeries.status = (String) document.get("status");
+            Object resultSetsObject = document.get("resultsets");
+            if (resultSetsObject != null && resultSetsObject instanceof List) {
+                if (((List)resultSetsObject).size() > 1) {
+                    timeSeries.typeString = "T";
+                } else {
+                    timeSeries.typeString = "S";
+                }
+            } else {
+                timeSeries.typeString = "S";
+            }
             timeSeriesList.add(timeSeries);
         }
         return timeSeriesList;
