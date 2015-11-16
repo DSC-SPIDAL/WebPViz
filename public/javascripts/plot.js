@@ -523,7 +523,10 @@ function setupThreeJs() {
     camera.position.set(1, 1, 1);
     camera.lookAt(cameraCenter);
     scene3d.add(camera);
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
+    controls.staticMoving = true;
+    controls.rotateSpeed = 20.0;
+    controls.dynamicDampingFactor = 0.3;
     // stats.domElement.style.position = 'absolute';
     //document.getElementById("stats").appendChild(stats.domElement);
     sprites["0"] =  THREE.ImageUtils.loadTexture(ImageEnum.DISC);
