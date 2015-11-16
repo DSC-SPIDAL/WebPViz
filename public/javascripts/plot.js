@@ -87,7 +87,7 @@ function generateClusterList(list, initcolors) {
                         sprite = "Cylinder";
                         break;
                     default :
-                        sprite = sprites["3"];
+                        sprite = "Cube";
                 }
                 grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
                     "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + ")"+ "</span>:" + list[key].length + "</p></div>"
