@@ -60,11 +60,43 @@ function generateClusterList(list, initcolors) {
     var grid = "";
 
     for(var key in list) {
-        if(list.hasOwnProperty(key)) {
+        if (list.hasOwnProperty(key)) {
             var colorWithouthHash = initcolors[key].replace(/#/g, '')
-            grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #"+ colorWithouthHash +" '>"+
-                "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "</span>:" + list[key].length +"</p></div>"
+            if (list[key].size > 1) {
+                var sprite;
+                switch (parseInt(list[key].shape)) {
+                    case 0:
+                        sprite = "Disc";
+                        break;
+                    case 1:
+                        sprite = "Ball";
+                        break;
+                    case 2:
+                        sprite = "Star";
+                        break;
+                    case 3:
+                        sprite = "Cube";
+                        break;
+                    case 4:
+                        sprite = "Pyramid";
+                        break;
+                    case 5:
+                        sprite = "Cone";
+                        break;
+                    case 6:
+                        sprite = "Cylinder";
+                        break;
+                    default :
+                        sprite = sprites["3"];
+                }
+                grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
+                    "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + ")"+ "</span>:" + list[key].length + "</p></div>"
+            } else {
+
+            grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
+                "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "</span>:" + list[key].length + "</p></div>"
         }
+    }
     }
 
     return grid;
