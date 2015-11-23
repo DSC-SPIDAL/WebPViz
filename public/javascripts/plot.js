@@ -727,7 +727,7 @@ function playLoop() {
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
 
-                    if(controlers.pointsize != 1) {
+                    if(controlers.pointsize != 1 || controlers.glyphsize != 1) {
                         if (sections[key].size == 1) {
                             currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
                         } else {
@@ -886,8 +886,10 @@ function changePointSize(){
         if (currentParticles.hasOwnProperty(key)) {
             if (sections[key].size == 1) {
                 currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
-                currentParticles[key].material.needsUpdate = true;
+            } else {
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
             }
+            currentParticles[key].material.needsUpdate = true;
         }
     }
     render();
@@ -896,10 +898,12 @@ function changePointSize(){
 function changeGlyphSize(){
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
-            if (sections[key].size > 1) {
+            if (sections[key].size == 1) {
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+            } else {
                 currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
-                currentParticles[key].material.needsUpdate = true;
             }
+            currentParticles[key].material.needsUpdate = true;
         }
     }
     render();
