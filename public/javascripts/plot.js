@@ -603,7 +603,11 @@ function updatePlot(sliderValue) {
                 if (currentParticles.hasOwnProperty(key)) {
 
                     if(controlers.pointsize != 1) {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        if (sections[key].size == 1) {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        } else {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                        }
                         currentParticles[key].material.needsUpdate = true;
                     }
 
@@ -724,7 +728,11 @@ function playLoop() {
                 if (currentParticles.hasOwnProperty(key)) {
 
                     if(controlers.pointsize != 1) {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        if (sections[key].size == 1) {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        } else {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                        }
                         currentParticles[key].material.needsUpdate = true;
                     }
 
@@ -840,6 +848,7 @@ function resetSlider() {
 var controlers = {
     delay: 300,
     pointsize: 1,
+    glyphsize: 1,
     loadSize: 5,
     maxPlotsStored: 20
 };
@@ -850,7 +859,8 @@ function setupGuiSingle() {
     var gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize)
+    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
 }
 
@@ -859,8 +869,9 @@ function setupGuiTimeSeries() {
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
 
-    gui.add(controlers, 'delay', 10.0, 2000.0, 50.0).name( "Play Delay(ms)")
-    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize)
+    gui.add(controlers, 'delay', 10.0, 2000.0, 50.0).name( "Play Delay(ms)");
+    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
 
     //var storage = gui.addFolder('Storage Controls');
     //
@@ -873,9 +884,24 @@ function setupGuiTimeSeries() {
 function changePointSize(){
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
-            currentParticles[key].material.size = (sections[key].size/200) * controlers.pointsize;
-            currentParticles[key].material.needsUpdate = true;
+            if (sections[key].size == 1) {
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                currentParticles[key].material.needsUpdate = true;
+            }
         }
     }
     render();
 }
+
+function changeGlyphSize(){
+    for (var key in currentParticles) {
+        if (currentParticles.hasOwnProperty(key)) {
+            if (sections[key].size > 1) {
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                currentParticles[key].material.needsUpdate = true;
+            }
+        }
+    }
+    render();
+}
+
