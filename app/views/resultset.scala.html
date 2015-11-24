@@ -18,7 +18,8 @@
                 @*</div>*@
                 @*<input type="text" id="plot-slider" class="form-control">*@
                 <div class="input-group-btn">
-                    <button type="button" data-toggle="modal" data-target="#settingsModal" class="btn btn-default btn-circle margin-right-five">
+                    <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
+                    <button type="button" data-toggle="modal" data-target="#settingsModal" class="btn btn-default btn-circle allign-right-list">
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
                 </div>
@@ -74,5 +75,14 @@
                 handle: ".modal-header"
             });
         }
+    </script>
+    <script>
+            $(function() {
+
+                $('#plot-reset').click(function () {
+                    resetView()
+                });
+
+            });
     </script>
 }
