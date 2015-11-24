@@ -75,37 +75,37 @@
 
         </div>
     </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="section-header">Individual Files</h2>
-            @if(resultSets.length != 0) {
-                <table id="individualfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
-                    <thead>
-                        <tr>
-                            <th>Single Plot Name</th>
-                            <th>Description</th>
-                            <th>User</th>
-                            <th>Created At</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @for(r <- resultSets) {
-                        <tr>
-                            <td>@r.name</td>
-                            <td>@r.description</td>
-                            <td>@User.findById(r.uploaderId).email</td>
-                            <td>@r.dateCreation</td>
-                            <td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            }else{
-                <div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>
-            }
-        </div>
-    </div>
+    @*<div class="row">*@
+        @*<div class="col-sm-12">*@
+            @*<h2 class="section-header">Individual Files</h2>*@
+            @*if(resultSets.length != 0) {
+                @*<table id="individualfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">*@
+                    @*<thead>*@
+                        @*<tr>*@
+                            @*<th>Single Plot Name</th>*@
+                            @*<th>Description</th>*@
+                            @*<th>User</th>*@
+                            @*<th>Created At</th>*@
+                            @*<th></th>*@
+                        @*</tr>*@
+                    @*</thead>*@
+                    @*<tbody>*@
+                    @*for(r <- resultSets) {
+                        @*<tr>*@
+                            @*<td>@r.name</td>*@
+                            @*<td>@r.description</td>*@
+                            @*<td>@User.findById(r.uploaderId).email</td>*@
+                            @*<td>@r.dateCreation</td>*@
+                            @*<td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>*@
+                        @*</tr>*@
+                    @*}*@
+                    @*</tbody>*@
+                @*</table>*@
+            @*}else{*@
+                @*<div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>*@
+            @*}*@
+        @*</div>*@
+    @*</div>*@
 
     <div class="modal fade" id="uploadModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
         <div class="modal-dialog modal-lg">
