@@ -130,6 +130,20 @@ public class MongoDB {
         groupsCollection.deleteOne(groupDocument);
     }
 
+    public List<Group> allGroups() {
+        FindIterable<Document> iterable =  groupsCollection.find();
+        List<Group> groups = new ArrayList<Group>();
+        for (Document d : iterable) {
+            Group group = new Group();
+            String name = (String) d.get(Constants.Group.NAME);
+            String desc = (String) d.get(Constants.Group.DESCRIPTION);
+            group.description = desc;
+            group.name = name;
+            groups.add(group);
+        }
+        return groups;
+    }
+
     /**
      * Insert a zip file containing the time series files
      * @param pvizName name of the uploaded plotviz file
