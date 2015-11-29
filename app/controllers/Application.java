@@ -8,7 +8,6 @@ import models.utils.AppException;
 import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints;
-import play.libs.F;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -19,11 +18,8 @@ import views.html.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.zip.ZipInputStream;
 
 import static play.data.Form.form;
@@ -53,7 +49,7 @@ public class Application extends Controller {
         MongoDB db = MongoDB.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.getAllResultSet(), db.getAllTimeSeries()));
+        return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList()));
     }
 
     @Security.Authenticated(Secured.class)
@@ -108,7 +104,7 @@ public class Application extends Controller {
     public static Result visualize(int resultSetId, int timeSeriesId) {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
-        ResultSet r = db.queryResultSetProsById(timeSeriesId, resultSetId);
+        ResultSet r = db.individualFile(timeSeriesId, resultSetId);
         if (r != null) {
             return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
         } else {
@@ -120,7 +116,7 @@ public class Application extends Controller {
     public static Result visualizeSingle(int timeSeriesId) {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
-        ResultSet r = db.queryResultSetProsById(timeSeriesId);
+        ResultSet r = db.individualFile(timeSeriesId);
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
@@ -133,7 +129,7 @@ public class Application extends Controller {
         MongoDB db = MongoDB.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
-        TimeSeries timeSeriesProps = db.queryTimeSeriesProperties(timeSeriesId);
+        TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId);
         int id = timeSeriesProps.id;
         String name = timeSeriesProps.name;
         return ok(timeseries.render(loggedInUser, id, name));
@@ -173,7 +169,7 @@ public class Application extends Controller {
 
     public static Result resultset(Integer rid, Integer tid) {
         MongoDB db = MongoDB.getInstance();
-        ResultSet r = db.queryResultSetProsById(tid, rid);
+        ResultSet r = db.individualFile(tid, rid);
         ObjectNode result = Json.newObject();
         result.put("id", rid);
         result.put("name", r.name);
@@ -181,7 +177,7 @@ public class Application extends Controller {
         result.put("uploaded", User.findById(r.uploaderId).email);
         result.put("fileName", r.fileName);
 
-        List<Cluster> clusters = db.getClusters(tid, rid);
+        List<Cluster> clusters = db.clusters(tid, rid);
         result.put("clusters", Json.toJson(clusters));
 
         return ok(result);
