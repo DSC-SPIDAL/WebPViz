@@ -20,6 +20,7 @@ public class Constants {
     public static final String SHAPE_FIELD = "shape";
     public static final String CLUSTERID_FIELD = "clusterid";
     public static final String STATUS_PENDING = "pending";
+    public static final String GROUP_FIELD = "group";
 
     public static class Group {
         public static final String DEFAULT_GROUP = "default";

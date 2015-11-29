@@ -1,5 +1,6 @@
 package models;
 
+import db.Constants;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -9,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.*;
 
-@Entity
+
 public class TimeSeries extends Model {
     @Id
     public Integer id;
@@ -31,4 +32,6 @@ public class TimeSeries extends Model {
     public String status;
 
     public String typeString = "T";
+
+    public String group = Constants.Group.DEFAULT_GROUP;
 }

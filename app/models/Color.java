@@ -5,7 +5,6 @@ import play.db.ebean.Model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-@Entity
 public class Color extends Model {
     @Id
     public Integer id;

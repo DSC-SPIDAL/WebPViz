@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import db.Constants;
 import db.MongoDB;
 import models.*;
 import models.utils.AppException;
@@ -18,7 +19,6 @@ import views.html.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
@@ -75,10 +75,16 @@ public class Application extends Controller {
         String originalFileName = resultSet.getFilename();
         String name = resultSet.getFile().getName();
         String[] desc = body.asFormUrlEncoded().get("desc");
+        String[] grp = body.asFormUrlEncoded().get("group");
         String description = "No description";
+        String group = Constants.Group.DEFAULT_GROUP;
 
         if (desc.length >= 1) {
             description = desc[0];
+        }
+
+        if (grp.length >= 1) {
+            group = grp[0];
         }
 
         File file = resultSet.getFile();
@@ -86,9 +92,9 @@ public class Application extends Controller {
         boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
         try {
             if (isZipped) {
-                db.insertZipFile(originalFileName, description, loggedInUser.id, file);
+                db.insertZipFile(originalFileName, description, loggedInUser.id, file, group);
             } else {
-                db.insertSingleFile(originalFileName, description, loggedInUser.id, file);
+                db.insertSingleFile(originalFileName, description, loggedInUser.id, file, group);
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);

@@ -14,7 +14,6 @@ import models.xml.XMLLoader;
 import org.apache.commons.io.FilenameUtils;
 import org.bson.Document;
 import play.Logger;
-import scala.collection.immutable.Stream;
 
 import java.io.*;
 import java.text.ParseException;
@@ -65,7 +64,7 @@ public class MongoDB {
      * @param file the actual file
      * @throws Exception  if the file cannot be inserted
      */
-    public void insertSingleFile(String pvizName, String description, int uploader, File file) throws Exception {
+    public void insertSingleFile(String pvizName, String description, int uploader, File file, String group) throws Exception {
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
         Document mainDoc = new Document();
@@ -76,6 +75,7 @@ public class MongoDB {
         mainDoc.append(Constants.UPLOADED_FIELD, uploader);
         mainDoc.append(Constants.DATE_CREATION_FIELD, dateString);
         mainDoc.append(Constants.STATUS_FIELD, "active");
+        mainDoc.append(Constants.GROUP_FIELD, group);
 
         List<Document> resultSets = new ArrayList<Document>();
 
@@ -138,7 +138,7 @@ public class MongoDB {
      * @param fileName file name
      * @throws Exception if an error happens while inserting
      */
-    public void insertZipFile(String pvizName, String description, int uploader, File fileName) throws Exception {
+    public void insertZipFile(String pvizName, String description, int uploader, File fileName, String group) throws Exception {
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
         Document mainDoc = new Document();
@@ -151,6 +151,7 @@ public class MongoDB {
         mainDoc.append(Constants.STATUS_FIELD, Constants.STATUS_PENDING);
         List<Document> emptyResultSets = new ArrayList<Document>();
         mainDoc.append(Constants.RESULTSETS_FIELD, emptyResultSets);
+        mainDoc.append(Constants.GROUP_FIELD, group);
         filesCollection.insertOne(mainDoc);
 
         Thread t = new Thread(new Runnable() {

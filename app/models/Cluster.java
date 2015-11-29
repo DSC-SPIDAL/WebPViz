@@ -25,7 +25,6 @@ import play.db.ebean.Model;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
 public class Cluster extends Model {
 
     @Id
