@@ -26,16 +26,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class MongoDB {
-    public static final String STATUS_PENDING = "pending";
-    MongoCollection<Document> filesCollection;
-    MongoCollection<Document> clustersCollection;
-
-    public static MongoDB db = new MongoDB();
+    private MongoCollection<Document> filesCollection;
+    private MongoCollection<Document> clustersCollection;
+    private static MongoDB db = new MongoDB();
 
     public static MongoDB getInstance() {
         return db;
     }
+
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private MongoDB() {
         Config conf = ConfigFactory.load();
         String mongoHost = conf.getString("mongo.host");
@@ -87,6 +87,11 @@ public class MongoDB {
         filesCollection.insertOne(mainDoc);
     }
 
+    /**
+     * Delete the time series files
+     * @param timeSeriesId delete the file
+     * @return true if delete successful
+     */
     public boolean deleteTimeSeries(int timeSeriesId) {
         filesCollection.deleteOne(new Document(Constants.ID_FIELD, timeSeriesId));
         clustersCollection.deleteMany(new Document(Constants.TIME_SERIES_ID_FIELD, timeSeriesId));
@@ -111,7 +116,7 @@ public class MongoDB {
         mainDoc.append(Constants.DESC_FIELD, description);
         mainDoc.append(Constants.UPLOADED_FIELD, uploader);
         mainDoc.append(Constants.DATE_CREATION_FIELD, dateString);
-        mainDoc.append(Constants.STATUS_FIELD, STATUS_PENDING);
+        mainDoc.append(Constants.STATUS_FIELD, Constants.STATUS_PENDING);
         List<Document> emptyResultSets = new ArrayList<Document>();
         mainDoc.append(Constants.RESULTSETS_FIELD, emptyResultSets);
         filesCollection.insertOne(mainDoc);

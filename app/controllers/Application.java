@@ -77,9 +77,6 @@ public class Application extends Controller {
         String[] desc = body.asFormUrlEncoded().get("desc");
         String description = "No description";
 
-        if (ResultSet.findByName(name) != null) {
-            return badRequest(dashboard.render(loggedInUser, true, "Result set with same name exists.", ResultSet.all(), TimeSeries.all()));
-        }
         if (desc.length >= 1) {
             description = desc[0];
         }

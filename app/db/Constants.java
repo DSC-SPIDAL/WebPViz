@@ -1,7 +1,6 @@
 package db;
 
 public class Constants {
-
     public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String DESCRIPTION_FIELD = "description";
@@ -20,4 +19,5 @@ public class Constants {
     public static final String VISIBLE_FIELD = "visible";
     public static final String SHAPE_FIELD = "shape";
     public static final String CLUSTERID_FIELD = "clusterid";
+    public static final String STATUS_PENDING = "pending";
 }
