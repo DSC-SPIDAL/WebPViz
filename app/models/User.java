@@ -32,7 +32,6 @@ import java.util.Locale;
 
 @Entity
 public class User extends Model {
-
     @Id
     public int id;
 

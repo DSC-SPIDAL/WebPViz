@@ -32,7 +32,7 @@ public class Application extends Controller {
 
     public static Result index() {
         User loggedInUser = User.findByEmail(session().get("email"));
-        return ok(index.render(loggedInUser, ResultSet.all()));
+        return ok(index.render(loggedInUser));
     }
 
     public static Result logout() {
@@ -92,7 +92,7 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", ResultSet.all(), TimeSeries.all()));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList()));
         }
         return GO_DASHBOARD;
     }
@@ -105,7 +105,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList()));
         }
     }
 
@@ -117,7 +117,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", ResultSet.all(), TimeSeries.all()));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList()));
         }
     }
 
@@ -176,17 +176,6 @@ public class Application extends Controller {
 
         List<Cluster> clusters = db.clusters(tid, rid);
         result.put("clusters", Json.toJson(clusters));
-
-        return ok(result);
-    }
-
-    public static Result cluster(Integer rid, Integer cid, Iterator tid) {
-        Cluster c = Cluster.findByClusterId(rid, cid);
-        ObjectNode result = Json.newObject();
-        result.put("id", c.id);
-        result.put("rid", c.resultSet);
-        result.put("cid", c.cluster);
-        result.put("points", Json.toJson(Point.findByCluster(rid, c.id)));
 
         return ok(result);
     }

@@ -51,11 +51,4 @@ public class ResultSet extends Model {
     public Integer timeSeriesSeqNumber;
 
     public String fileName;
-
-    public static Model.Finder<Integer, ResultSet> find = new Model.Finder<Integer, ResultSet>(Integer.class, ResultSet.class);
-
-    public static List<ResultSet> all() {
-        return find.all();
-    }
-
 }

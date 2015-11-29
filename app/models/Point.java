@@ -27,7 +27,6 @@ import java.util.List;
 
 @Entity
 public class Point extends Model{
-
     @Id
     public Integer id;
 
@@ -45,23 +44,4 @@ public class Point extends Model{
 
     @Constraints.Required
     public Integer resultSet;
-
-    public static Model.Finder<Integer, Point> find = new Model.Finder<Integer, Point>(Integer.class, Point.class);
-
-    public static Point create( Float x, Float y, Float z, Cluster cluster, ResultSet resultSet){
-        Point p = new Point();
-        p.x = x;
-        p.y = y;
-        p.z = z;
-        p.cluster = cluster.id;
-        p.resultSet = resultSet.id;
-
-        p.save();
-
-        return p;
-    }
-
-    public static List<Point> findByCluster(Integer rid, Integer cid){
-        return find.where().eq("resultSet", rid).eq("cluster", cid).findList();
-    }
 }
