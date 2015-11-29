@@ -20,4 +20,19 @@ public class Constants {
     public static final String SHAPE_FIELD = "shape";
     public static final String CLUSTERID_FIELD = "clusterid";
     public static final String STATUS_PENDING = "pending";
+
+    public static class Group {
+        public static final String DEFAULT_GROUP = "default";
+        public static final String NAME = "name";
+        public static final String DESCRIPTION = "desc";
+    }
+
+    public static class DB {
+        public static final String MONGO_HOST = "mongo.host";
+        public static final String MONGO_PORT = "mongo.port";
+        public static final String FILES_COLLECTION = "files";
+        public static final String CLUSTERS_COLLECTION = "clusters";
+        public static final String DB_NAME = "pviz";
+        public static final String GROUPS_COLLECTION = "groups";
+    }
 }

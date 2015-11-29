@@ -7,16 +7,14 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import models.Cluster;
-import models.Color;
-import models.ResultSet;
-import models.TimeSeries;
+import models.*;
 import models.xml.PVizPoint;
 import models.xml.Plotviz;
 import models.xml.XMLLoader;
 import org.apache.commons.io.FilenameUtils;
 import org.bson.Document;
 import play.Logger;
+import scala.collection.immutable.Stream;
 
 import java.io.*;
 import java.text.ParseException;
@@ -28,6 +26,8 @@ import java.util.zip.ZipFile;
 public class MongoDB {
     private MongoCollection<Document> filesCollection;
     private MongoCollection<Document> clustersCollection;
+    private MongoCollection<Document> groupsCollection;
+
     private static MongoDB db = new MongoDB();
 
     public static MongoDB getInstance() {
@@ -38,8 +38,8 @@ public class MongoDB {
 
     private MongoDB() {
         Config conf = ConfigFactory.load();
-        String mongoHost = conf.getString("mongo.host");
-        int mongoPort = conf.getInt("mongo.port");
+        String mongoHost = conf.getString(Constants.DB.MONGO_HOST);
+        int mongoPort = conf.getInt(Constants.DB.MONGO_PORT);
 
         MongoClient mongoClient;
         if (mongoHost != null) {
@@ -50,10 +50,11 @@ public class MongoDB {
             mongoClient = new MongoClient("localhost", 27017);
         }
 
-        MongoDatabase db = mongoClient.getDatabase("pviz");
+        MongoDatabase db = mongoClient.getDatabase(Constants.DB.DB_NAME);
 
-        filesCollection = db.getCollection("files");
-        clustersCollection = db.getCollection("clusters");
+        filesCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
+        clustersCollection = db.getCollection(Constants.DB.CLUSTERS_COLLECTION);
+        groupsCollection = db.getCollection(Constants.DB.GROUPS_COLLECTION);
     }
 
     /**
@@ -96,6 +97,37 @@ public class MongoDB {
         filesCollection.deleteOne(new Document(Constants.ID_FIELD, timeSeriesId));
         clustersCollection.deleteMany(new Document(Constants.TIME_SERIES_ID_FIELD, timeSeriesId));
         return true;
+    }
+
+    public boolean groupExists(Group group) {
+        Document groupDocument = new Document();
+        groupDocument.append(Constants.Group.NAME, group.name);
+        FindIterable<Document> iterable = groupsCollection.find(groupDocument);
+        return iterable.iterator().hasNext();
+    }
+
+    public void insertGroup(Group group) {
+        Document groupDocument = new Document();
+        groupDocument.append(Constants.Group.NAME, group.name);
+        groupDocument.append(Constants.Group.DESCRIPTION, group.description);
+        groupsCollection.insertOne(groupDocument);
+    }
+
+    public void updateGroup(Group oldGroup, Group newGroup) {
+        Document oldGroupDocument = new Document();
+        oldGroupDocument.append(Constants.Group.NAME, oldGroup.name);
+
+        Document groupDocument = new Document();
+        groupDocument.append(Constants.Group.NAME, newGroup.name);
+        groupDocument.append(Constants.Group.DESCRIPTION, newGroup.description);
+
+        groupsCollection.findOneAndReplace(oldGroupDocument, groupDocument);
+    }
+
+    public void deleteGroup(Group group) {
+        Document groupDocument = new Document();
+        groupDocument.append(Constants.Group.NAME, group.name);
+        groupsCollection.deleteOne(groupDocument);
     }
 
     /**
@@ -410,6 +442,11 @@ public class MongoDB {
         return resultSetList;
     }
 
+    /**
+     * Get the uploaded entity list
+     *
+     * @return uploaded entity list
+     */
     public List<TimeSeries> timeSeriesList() {
         FindIterable<Document> iterable = filesCollection.find();
         List<TimeSeries> timeSeriesList = new ArrayList<TimeSeries>();
