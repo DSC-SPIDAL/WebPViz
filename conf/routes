@@ -8,6 +8,8 @@ GET         /                                   controllers.Application.index()
 # Admin Dashboard
 GET         /dashboard                          controllers.Application.dashboard()
 
+GET         /groupdashboard/:group              controllers.Application.groupDashboard(group: String)
+
 # about page
 GET         /about                              controllers.Application.about()
 

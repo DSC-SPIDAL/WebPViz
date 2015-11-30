@@ -24,6 +24,7 @@
                             <th>Description</th>
                             <th></th>
                             <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +32,7 @@
                         <tr>
                             <td>@r.name</td>
                             <td>@r.description</td>
+                            <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
                             <td align="center"><a href="javascript:void(0);" class="edit-link" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
                             <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                         </tr>

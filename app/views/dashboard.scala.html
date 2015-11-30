@@ -1,4 +1,4 @@
-@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries], groups: List[Group])
+@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String)
 @import helper._
 
 @main("Dashboard", user){
@@ -17,14 +17,22 @@
                 }
             }
     </script>
-    <div class="row upload">
-        <div class="col-sm-12 col-md-12">
-            <h2 class="section-header">Upload Files</h2>
+    @if(!group) {
+        <div class="row upload">
+            <div class="col-sm-12 col-md-12">
+                <h2 class="section-header">Upload Files</h2>
                 <button type="button" data-toggle="modal" data-target="#uploadModal" class="btn btn-default btn-circle margin-right-five">
                     Upload
                 </button>
+            </div>
         </div>
-    </div>
+    } else {
+        <div class="row upload">
+            <div class="col-sm-12 col-md-12">
+                <h2 class="section-header">Group: @groupName</h2>
+            </div>
+        </div>
+    }
 
     <div class="row">
         <div class="col-sm-12 col-md-12">
@@ -125,15 +133,15 @@
                     }
                     <form id="uploadForm" method="post" class="form-horizontal">
                         <div class="form-group">
-                            <label for="exampleInputFile">A ZIP file or a point file</label>
+                            <label for="file">A ZIP file or a point file</label>
                             <input type="file" id="file" name="file" required>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Description</label>
+                            <label for="desc">Description</label>
                             <textarea rows="2" cols="100" class="form-control" name="desc" id="desc" placeholder="Enter description"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Group</label>
+                            <label for="group">Group</label>
                             <select class="form-control" name="group" id="group" placeholder="Enter Group Name">
                             @for( r <- groups) {
                                 <option value="@r.name">@r.name<option>
@@ -175,7 +183,7 @@
                             <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_desc" placeholder="Enter description"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Group</label>
+                            <label for="edit_group">Group</label>
                             <select class="form-control" name="group" id="edit_group" placeholder="Enter Group Name">
                             @for( r <- groups) {
                                 <option value="@r.name">@r.name<option>

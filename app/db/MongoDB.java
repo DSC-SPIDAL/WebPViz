@@ -482,6 +482,18 @@ public class MongoDB {
      */
     public List<TimeSeries> timeSeriesList() {
         FindIterable<Document> iterable = filesCollection.find();
+        return getTimeSeriesList(iterable);
+    }
+
+    public List<TimeSeries> timeSeriesList(Group group) {
+        Document findDoc = new Document();
+        findDoc.append(Constants.GROUP_FIELD, group.name);
+
+        FindIterable<Document> iterable = filesCollection.find(findDoc);
+        return getTimeSeriesList(iterable);
+    }
+
+    private List<TimeSeries> getTimeSeriesList(FindIterable<Document> iterable) {
         List<TimeSeries> timeSeriesList = new ArrayList<TimeSeries>();
         for (Document document : iterable) {
             TimeSeries timeSeries = new TimeSeries();
