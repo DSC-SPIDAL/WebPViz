@@ -8,9 +8,9 @@ import com.mongodb.util.JSON;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import models.*;
-import models.xml.PVizPoint;
-import models.xml.Plotviz;
-import models.xml.XMLLoader;
+import models.Cluster;
+import models.Color;
+import models.xml.*;
 import org.apache.commons.io.FilenameUtils;
 import org.bson.Document;
 import play.Logger;
@@ -319,6 +319,31 @@ public class MongoDB {
         List<Document> clustersList = new ArrayList<Document>(clusterDBObjects.values());
         clustersDbObject.append("clusters", clustersList);
 
+        // now insert the edges if there are any
+        List<Document> edgesList = new ArrayList<Document>();
+        List<Edge> edges = plotviz.getEdges();
+        if (edges != null && edges.size() > 0) {
+            for (Edge e : edges) {
+                Document edgeDoc = new Document();
+                edgeDoc.append("key", e.getKey());
+                List<Vertex> vertexes = e.getVertices();
+                if (vertexes != null && vertexes.size() > 0) {
+                    List<Document> vertexDocs = new ArrayList<Document>();
+                    for (Vertex v : vertexes) {
+                        Document vertexDoc = new Document();
+                        vertexDoc.append("key", v.getKey());
+                        vertexDocs.add(vertexDoc);
+                    }
+                    edgeDoc.append("vertices", vertexDocs);
+                } else {
+                    // no point adding this edge, because it doesn't have vertices
+                    continue;
+                }
+                edgesList.add(edgeDoc);
+            }
+            clustersDbObject.append("edges", edgesList);
+        }
+
         clustersCollection.insertOne(clustersDbObject);
     }
 
@@ -368,7 +393,6 @@ public class MongoDB {
                     cluster.size = (int) clusterDocument.get(Constants.SIZE_FIELD);
                     cluster.label = (String) clusterDocument.get(Constants.LABEL_FIELD);
                     cluster.color = color((Document) clusterDocument.get(Constants.COLOR_FIELD));
-                    Logger.info(JSON.serialize(clusterDocument));
                     clusters.add(cluster);
                 }
             }
@@ -561,5 +585,14 @@ public class MongoDB {
             return timeSeries;
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        try {
+            Plotviz plotviz = XMLLoader.load(new FileInputStream("/home/supun/dev/projects/stocks/WebPViz/tree.smacof.dtrans1.0.points.pviz"));
+            System.out.println(plotviz.getEdges().size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
