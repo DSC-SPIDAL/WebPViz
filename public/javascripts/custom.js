@@ -55,8 +55,16 @@ $(function () {
 
 $(function () {
     $('#cluster_table_div').on('click','input[type="checkbox"]',function() {
-        var rm = $(this).val();
-        ((this.checked) ? addSection(rm) : removeSection(rm));
+        var id = $(this).attr('id');
+        if(id == "check-all"){
+            $(".bulk_action input[name='table_records']").prop('checked', this.checked);
+            ((this.checked) ? addAllSections() : removeAllSection());
+        }else{
+            var rm = $(this).val();
+            ((this.checked) ? addSection(rm) : removeSection(rm));
+
+        }
+
     });
 
 });

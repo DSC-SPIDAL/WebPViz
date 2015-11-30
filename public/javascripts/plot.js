@@ -105,11 +105,11 @@ function generateClusterList(list, initcolors) {
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
 
-    var tabletop = "<table class='table' id='cluster_table'>"
+    var tabletop = "<table class='table bulk_action' id='cluster_table'>"
         + "<thead>"
         + "<tr class='headings'>"
         + "<th>"
-        + "<input type='checkbox' id='check-all' disabled='true' class='flat'> Cluster"
+        + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
         + "</th>"
         + "<th class='column-title'>Label</th>"
         + "<th class='column-title'>Size</th>"
@@ -671,6 +671,24 @@ function render() {
 function removeSection(id) {
     scene3d.remove(currentParticles[id]);
     removedclusters[id] = id;
+}
+
+function removeAllSection(){
+    removedclusters = [];
+    for (var key in currentParticles) {
+        if (currentParticles.hasOwnProperty(key)) {
+            scene3d.remove(currentParticles[key]);
+            removedclusters[key] = key;
+        }
+    }
+}
+function addAllSections(){
+    for (var key in removedclusters) {
+        if (removedclusters.hasOwnProperty(key)) {
+            scene3d.add(currentParticles[key]);
+        }
+    }
+    removedclusters = [];
 }
 
 function addSection(id) {
