@@ -48,3 +48,11 @@ GET         /timeseries/:id                     controllers.Application.timeseri
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                       controllers.Assets.at(path="/public", file)
+
+GET         /groups                             controllers.GroupController.groups()
+
+GET         /groups/delete/:name                controllers.GroupController.removeGroup(name: String)
+
+POST        /groups/create                      controllers.GroupController.newGroup()
+
+POST        /groups/update                      controllers.GroupController.updateGroup()

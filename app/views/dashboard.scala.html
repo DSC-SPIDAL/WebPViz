@@ -1,4 +1,4 @@
-@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries])
+@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries], groups: List[Group])
 @import helper._
 
 @main("Dashboard", user){
@@ -34,6 +34,7 @@
                     <thead>
                         <tr>
                             <th>Type</th>
+                            <th>Group</th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>User</th>
@@ -46,6 +47,7 @@
                     @for( r <- timeSeries) {
                         <tr>
                             <td>@r.typeString</td>
+                            <td>@r.group</td>
                             <td>@r.name</td>
                             <td>@r.description</td>
                             <td>@User.findById(r.uploaderId).email</td>
@@ -130,7 +132,12 @@
                         </div>
                         <div class="form-group">
                             <label for="exampleInputPassword1">Group</label>
-                            <input type="text" class="form-control" name="group" id="group" placeholder="Enter Group Name"/>
+                            <select class="form-control" name="group" id="group" placeholder="Enter Group Name">
+                            @for( r <- groups) {
+                                <option value="@r.name">@r.name<option>
+                            }
+                            </select>
+                            @*<input type="text" class="form-control" name="group" id="group" placeholder="Enter Group Name"/>*@
                         </div>
                         <button type="submit" class="btn btn-primary">Upload</button>
                     </form>

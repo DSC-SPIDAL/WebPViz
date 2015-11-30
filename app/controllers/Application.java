@@ -49,7 +49,7 @@ public class Application extends Controller {
         MongoDB db = MongoDB.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList()));
+        return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(), db.allGroups()));
     }
 
     @Security.Authenticated(Secured.class)
@@ -98,7 +98,7 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList()));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
         }
         return GO_DASHBOARD;
     }
@@ -111,7 +111,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList()));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
         }
     }
 
@@ -123,7 +123,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList()));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
         }
     }
 

@@ -102,6 +102,7 @@ public class MongoDB {
     public boolean groupExists(Group group) {
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
+        groupDocument.append(Constants.Group.USER, group.userId);
         FindIterable<Document> iterable = groupsCollection.find(groupDocument);
         return iterable.iterator().hasNext();
     }
@@ -110,16 +111,19 @@ public class MongoDB {
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
         groupDocument.append(Constants.Group.DESCRIPTION, group.description);
+        groupDocument.append(Constants.Group.USER, group.userId);
         groupsCollection.insertOne(groupDocument);
     }
 
     public void updateGroup(Group oldGroup, Group newGroup) {
         Document oldGroupDocument = new Document();
         oldGroupDocument.append(Constants.Group.NAME, oldGroup.name);
+        oldGroupDocument.append(Constants.Group.USER, oldGroup.userId);
 
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, newGroup.name);
         groupDocument.append(Constants.Group.DESCRIPTION, newGroup.description);
+        groupDocument.append(Constants.Group.USER, newGroup.userId);
 
         groupsCollection.findOneAndReplace(oldGroupDocument, groupDocument);
     }
@@ -127,6 +131,7 @@ public class MongoDB {
     public void deleteGroup(Group group) {
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
+        groupDocument.append(Constants.Group.USER, group.userId);
         groupsCollection.deleteOne(groupDocument);
     }
 
@@ -136,9 +141,10 @@ public class MongoDB {
         for (Document d : iterable) {
             Group group = new Group();
             String name = (String) d.get(Constants.Group.NAME);
-            String desc = (String) d.get(Constants.Group.DESCRIPTION);
-            group.description = desc;
+            int user = (int) d.get(Constants.Group.USER);
+            group.description = (String) d.get(Constants.Group.DESCRIPTION);
             group.name = name;
+            group.userId = user;
             groups.add(group);
         }
         return groups;
@@ -477,6 +483,7 @@ public class MongoDB {
             timeSeries.description = (String) document.get(Constants.DESC_FIELD);
             timeSeries.uploaderId = (Integer) document.get(Constants.UPLOADED_FIELD);
             timeSeries.status = (String) document.get(Constants.STATUS_FIELD);
+            timeSeries.group = (String) document.get(Constants.GROUP_FIELD);
             Object resultSetsObject = document.get(Constants.RESULTSETS_FIELD);
             if (resultSetsObject != null && resultSetsObject instanceof List) {
                 if (((List)resultSetsObject).size() > 1) {

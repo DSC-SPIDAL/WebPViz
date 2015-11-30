@@ -25,6 +25,7 @@ public class Constants {
     public static class Group {
         public static final String DEFAULT_GROUP = "default";
         public static final String NAME = "name";
+        public static final String USER = "user";
         public static final String DESCRIPTION = "desc";
     }
 
