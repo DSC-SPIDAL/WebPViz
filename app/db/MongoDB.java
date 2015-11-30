@@ -484,6 +484,9 @@ public class MongoDB {
             timeSeries.uploaderId = (Integer) document.get(Constants.UPLOADED_FIELD);
             timeSeries.status = (String) document.get(Constants.STATUS_FIELD);
             timeSeries.group = (String) document.get(Constants.GROUP_FIELD);
+            if (timeSeries.group == null || "".equals(timeSeries.group)) {
+                timeSeries.group = Constants.Group.DEFAULT_GROUP;
+            }
             Object resultSetsObject = document.get(Constants.RESULTSETS_FIELD);
             if (resultSetsObject != null && resultSetsObject instanceof List) {
                 if (((List)resultSetsObject).size() > 1) {
