@@ -7,8 +7,8 @@
     <div class="row plot">
             <!--div class="col-sm-9 col-sm-offset-3 col-md-10 col-sm-offset-2 plotviz"-->
         <div class="col-sm-12 col-md-12 plotviz">
-            <div class="viz-clusters col-sm-12 col-md-12 hidden-xs" id="plot-clusters"></div>
-            <div class="plot-controls" id="plot-controls"></div>
+            <div class="viz-clusters col-sm-12 col-md-12 hidden-xs hidden-sm" id="plot-clusters"></div>
+            <div class="plot-controls hidden-xs" id="plot-controls"></div>
             <canvas id="canvas3d" class="effect6">
             </canvas>
             <p class="viz-title" id="plot-title"></p>
@@ -19,7 +19,7 @@
                 @*<input type="text" id="plot-slider" class="form-control">*@
                 <div class="input-group-btn">
                     <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
-                    <button type="button" data-toggle="modal" data-target="#settingsModal" class="btn btn-default btn-circle allign-right-list">
+                    <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five">
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
                 </div>
@@ -27,24 +27,18 @@
         </div>
     </div>
 
-    <div class="modal fade" id="settingsModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="settingsModalLabel">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Visualization Settings</h4>
-                </div>
-                <div class="modal-body" id="cluster_table_div">
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    @*<button type="button" class="btn btn-primary">Save changes</button>*@
-                </div>
-            </div>
+    <div id="settingDiv" class="settingdiv settinghidden">
+        <div class="settingdiv-header">
+            <h4>Visualization Settings</h4>
+        </div>
+        <div id="cluster_table_div" class="cluster_table_div">
+
+        </div>
+        <div class="settingdiv-footer">
+            <button type="button" id="settings-div-close" class="btn btn-default margin-right-five">Close</button>
         </div>
     </div>
-
 
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
@@ -83,6 +77,25 @@
                     resetView()
                 });
 
+                $('#settings-toggle').click(function () {
+                    var settingsdiv = $("#settingDiv");
+
+                    if(settingsdiv.hasClass("settinghidden")){
+                        settingsdiv.removeClass("settinghidden")
+                    }else{
+                        settingsdiv.addClass("settinghidden")
+                    }
+                });
+
+                $('#settings-div-close').click(function () {
+                   var settingsdiv = $("#settingDiv");
+
+                    if(settingsdiv.hasClass("settinghidden")){
+                        settingsdiv.removeClass("settinghidden")
+                    }else{
+                        settingsdiv.addClass("settinghidden")
+                    }
+                });
             });
     </script>
 }
