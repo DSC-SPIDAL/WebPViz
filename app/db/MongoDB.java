@@ -54,6 +54,17 @@ public class MongoDB {
         filesCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
         clustersCollection = db.getCollection(Constants.DB.CLUSTERS_COLLECTION);
         groupsCollection = db.getCollection(Constants.DB.GROUPS_COLLECTION);
+
+        initGroupsCollection();
+    }
+
+    private void initGroupsCollection() {
+        Group defaultGroup = new Group(0, "default", "The default group");
+        if (!groupExists(defaultGroup)) {
+            insertGroup(defaultGroup);
+        } else {
+            System.out.println("Default exists");
+        }
     }
 
     /**
@@ -146,6 +157,7 @@ public class MongoDB {
             group.name = name;
             group.userId = user;
             groups.add(group);
+            System.out.println(group.name);
         }
         return groups;
     }
@@ -500,6 +512,32 @@ public class MongoDB {
             timeSeriesList.add(timeSeries);
         }
         return timeSeriesList;
+    }
+
+    public boolean timeSeriesExists(TimeSeries timeSeries) {
+        Document doc = new Document();
+        doc.append(Constants.ID_FIELD, timeSeries.id);
+        FindIterable<Document> iterable = filesCollection.find(doc);
+        return iterable.iterator().hasNext();
+    }
+
+    public void updateTimeSeries(TimeSeries old, TimeSeries newTimeSeries) {
+        Logger.info("updating the document with id " + old.id + " with group: " + newTimeSeries.group + " desc: " + newTimeSeries.description);
+        Document oldGroupDocument = new Document();
+        oldGroupDocument.append(Constants.ID_FIELD, old.id);
+
+        FindIterable<Document> iterable = filesCollection.find(oldGroupDocument);
+        Document findDocument = null;
+        for (Document d : iterable) {
+            findDocument = d;
+            break;
+        }
+
+        if (findDocument != null) {
+            findDocument.append(Constants.GROUP_FIELD, newTimeSeries.group);
+            findDocument.append(Constants.DESC_FIELD, newTimeSeries.description);
+            filesCollection.replaceOne(oldGroupDocument, findDocument);
+        }
     }
 
     public TimeSeries timeSeries(int id) {

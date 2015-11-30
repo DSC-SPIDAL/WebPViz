@@ -24,6 +24,7 @@ GET         /logout                             controllers.Application.logout()
 
 # Upload
 POST        /upload                             controllers.Application.upload()
+POST        /update                             controllers.Application.updateFile()
 GET         /upload                             controllers.Application.uploadGet()
 #TODO need to replace this with post call
 GET      /delete/:id                         controllers.Application.delete(id: Integer)

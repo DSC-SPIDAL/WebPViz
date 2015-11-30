@@ -41,6 +41,7 @@
                             <th>Created At</th>
                             <th></th>
                             <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,6 +65,7 @@
                                     <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
                                 }
                             }
+                            <td align="center"><a href="javascript:void(0);" class="edit-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
                             <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                         </tr>
                     }
@@ -150,6 +152,48 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit File</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                @form(routes.Application.updateFile()){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <form id="uploadForm" method="post" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="edit_name">Name</label>
+                            <input type="text" id="edit_name" name="name" required disabled="disabled">
+                            <input type="hidden" name="id" id="edit_id">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_desc">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_desc" placeholder="Enter description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Group</label>
+                            <select class="form-control" name="group" id="edit_group" placeholder="Enter Group Name">
+                            @for( r <- groups) {
+                                <option value="@r.name">@r.name<option>
+                                }
+                            </select>
+                            @*<input type="text" class="form-control" name="group" id="group" placeholder="Enter Group Name"/>*@
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
@@ -221,6 +265,22 @@
                         this.value = asInitVals[$("tfoot input").index(this)];
                     }
                 });
+
+                $('.edit-link').click(function(e) {
+                   e.preventDefault();
+                   var n = $(this).data('name');
+                   var id = $(this).data('id');
+                   var desc = $(this).data('desc');
+                   var group = $(this).data('group');
+                    $("#disabledEdit_name").val(n);
+                    $("#edit_name").val(n);
+                    $("#edit_desc").val(desc);
+                    if (group) {
+                        $("#edit_group").val(group);
+                    }
+                    $('#edit_id').val(id);
+                    $('#editModal').modal('show');
+                 });
             });
     </script>
 }

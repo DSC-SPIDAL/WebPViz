@@ -22,7 +22,6 @@
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>User</th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -32,7 +31,6 @@
                         <tr>
                             <td>@r.name</td>
                             <td>@r.description</td>
-                            <td>@User.findById(r.userId).email</td>
                             <td align="center"><a href="javascript:void(0);" class="edit-link" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
                             <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                         </tr>
@@ -119,6 +117,15 @@
     <script>
             var asInitVals = new Array();
             $(document).ready(function () {
+                $('.edit-link').click(function(e) {
+                   e.preventDefault();
+                   n = $(this).data('name');
+                   desc = $(this).data('desc');
+                    $("#disabledEdit_name").val(n);
+                    $("#edit_name").val(n);
+                    $("#edit_desc").val(desc);
+                    $('#editGroupModal').modal('show');
+                 });
                 var oTable = $('#timeseriesfiles').dataTable({
                     "oLanguage": {
                         "sSearch": "Search all columns:"
@@ -150,15 +157,7 @@
                     }
                 });
 
-                $('.edit-link').click(function(e) {
-                   e.preventDefault();
-                   n = $(this).data('name');
-                   desc = $(this).data('desc');
-                    $("#disabledEdit_name").val(n);
-                    $("#edit_name").val(n);
-                    $("#edit_desc").val(desc);
-                    $('#editGroupModal').modal('show');
-                 });
+
             });
 
 

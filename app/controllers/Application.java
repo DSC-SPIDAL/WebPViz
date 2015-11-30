@@ -7,6 +7,7 @@ import db.MongoDB;
 import models.*;
 import models.utils.AppException;
 import play.Logger;
+import play.data.DynamicForm;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.libs.Json;
@@ -101,6 +102,42 @@ public class Application extends Controller {
             return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
         }
         return GO_DASHBOARD;
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result updateFile() {
+        System.out.println("Update");
+        DynamicForm form = Form.form().bindFromRequest();
+
+        String description, group, id;
+        MongoDB db = MongoDB.getInstance();
+        User loggedInUser = User.findByEmail(request().username());
+
+        if (form.data().size() == 0) {
+            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
+        }
+        id = form.get("id");
+        description = form.get("desc");
+        group = form.get("group");
+
+
+        TimeSeries oldGroup = new TimeSeries();
+        oldGroup.id = Integer.parseInt(id);
+        oldGroup.uploaderId = loggedInUser.id;
+
+        TimeSeries newTimeSeries = new TimeSeries();
+        newTimeSeries.description = description;
+        newTimeSeries.group = group;
+
+        if (db.timeSeriesExists(oldGroup)) {
+            System.out.println("Exists");
+            db.updateTimeSeries(oldGroup, newTimeSeries);
+            return GO_DASHBOARD;
+        } else {
+            //
+            System.out.println("non exisits");
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.individualFiles(), db.timeSeriesList(), db.allGroups()));
+        }
     }
 
     @Security.Authenticated(Secured.class)
