@@ -286,13 +286,13 @@ public class MongoDB {
         for (int i = 0; i < points.size(); i++) {
             PVizPoint point = points.get(i);
             int clusterkey = point.getClusterkey();
-
+            int pointKey = point.getKey();
             List<Document> basicDBObjectList = pointsForClusters.get(clusterkey);
             if (basicDBObjectList == null) {
                 basicDBObjectList = new ArrayList<Document>();
                 pointsForClusters.put(clusterkey, basicDBObjectList);
             }
-            Document pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(), clusterkey);
+            Document pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(), clusterkey, pointKey);
             basicDBObjectList.add(pointDBObject);
         }
 
@@ -347,12 +347,13 @@ public class MongoDB {
         clustersCollection.insertOne(clustersDbObject);
     }
 
-    public Document createPoint( Float x, Float y, Float z, int cluster){
+    public Document createPoint( Float x, Float y, Float z, int cluster, int pointKey){
         Document object = new Document();
         object.append("x", x);
         object.append("y", y);
         object.append("z", z);
         object.append("cluster", cluster);
+        object.append("key", pointKey);
 
         return object;
     }
