@@ -258,18 +258,14 @@ public class MongoDB {
 
     public void insertXMLFile(int id, String name, String description, int uploader, InputStream file,
                               int parent, Long sequenceNumber, String originalFileName) throws Exception {
-        Document clustersDbObject = new Document();
-        clustersDbObject.append(Constants.ID_FIELD, id);
-        clustersDbObject.append(Constants.NAME_FIELD, name);
-        clustersDbObject.append(Constants.DESC_FIELD, description);
-        clustersDbObject.append(Constants.UPLOADED_FIELD, uploader);
-        clustersDbObject.append(Constants.FILE_NAME_FIELD,  originalFileName);
-        clustersDbObject.append(Constants.TIME_SERIES_ID_FIELD, parent);
-        clustersDbObject.append(Constants.TIME_SERIES_SEQ_NUMBER_FIELD, sequenceNumber);
+        // maximum number of points per file
+        final int maxPointsPerFile = 250000;
+        Map<Integer, Integer> clusterPointCount = new HashMap<>();
+        Document rootObject = createRootClusterObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
 
         Plotviz plotviz = XMLLoader.load(file);
         List<models.xml.Cluster> clusters = plotviz.getClusters();
-        Map<Integer, Document> clusterDBObjects = new HashMap<Integer, Document>();
+        Map<Integer, Document> clusterDBObjectList = new HashMap<Integer, Document>();
         for (models.xml.Cluster cl : clusters) {
             Document c = new Document();
             c.put(Constants.CLUSTERID_FIELD, cl.getKey());
@@ -278,7 +274,7 @@ public class MongoDB {
             c.put(Constants.SIZE_FIELD, cl.getSize());
             c.put(Constants.VISIBLE_FIELD, cl.getVisible());
             c.put(Constants.SHAPE_FIELD, cl.getShape());
-            clusterDBObjects.put(cl.getKey(), c);
+            clusterDBObjectList.put(cl.getKey(), c);
         }
 
         List<PVizPoint> points = plotviz.getPoints();
@@ -300,15 +296,16 @@ public class MongoDB {
         while (entries.hasNext()) {
             Map.Entry<Integer, List<Document>> e = entries.next();
             if (e.getValue() != null && e.getValue().size() > 0) {
-                Document clusterDBObject = clusterDBObjects.get(e.getKey());
+                Document clusterDBObject = clusterDBObjectList.get(e.getKey());
                 clusterDBObject.append("points", e.getValue());
+                clusterPointCount.put(e.getKey(), e.getValue().size());
             } else {
                 Logger.info("Remove: " + e.getKey());
                 entries.remove();
             }
         }
 
-        for(Iterator<Map.Entry<Integer, Document>> it = clusterDBObjects.entrySet().iterator(); it.hasNext(); ) {
+        for(Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Integer, Document> entry = it.next();
             if (!pointsForClusters.containsKey(entry.getKey())) {
                 it.remove();
@@ -316,8 +313,25 @@ public class MongoDB {
         }
 
         // add each cluster to clusters object
-        List<Document> clustersList = new ArrayList<Document>(clusterDBObjects.values());
-        clustersDbObject.append("clusters", clustersList);
+        // we are going to create separate docs when total number of points exceeds
+        int count = 0;
+        List<Document> currentClusterList = new ArrayList<>();
+        for (Map.Entry<Integer, Document> e : clusterDBObjectList.entrySet()) {
+            count += clusterPointCount.get(e.getKey());
+            currentClusterList.add(e.getValue());
+            if (count > maxPointsPerFile) {
+                count = 0;
+                Document preRootObject = createRootClusterObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+                preRootObject.append("clusters", currentClusterList);
+                clustersCollection.insertOne(preRootObject);
+                currentClusterList = new ArrayList<>();
+            }
+        }
+
+        // we will add the remainder or the whole list, if we didn't exceed the max number
+        if (currentClusterList.size() > 0) {
+            rootObject.append("clusters", currentClusterList);
+        }
 
         // now insert the edges if there are any
         List<Document> edgesList = new ArrayList<Document>();
@@ -341,10 +355,33 @@ public class MongoDB {
                 }
                 edgesList.add(edgeDoc);
             }
-            clustersDbObject.append("edges", edgesList);
+            rootObject.append("edges", edgesList);
         }
 
-        clustersCollection.insertOne(clustersDbObject);
+        clustersCollection.insertOne(rootObject);
+    }
+
+    /**
+     * Constructs the root cluster object
+     * @param id id
+     * @param name name
+     * @param description description
+     * @param uploader user
+     * @param parent the big file
+     * @param sequenceNumber sequence
+     * @param originalFileName original file
+     * @return document
+     */
+    private Document createRootClusterObject(int id, String name, String description, int uploader, int parent, Long sequenceNumber, String originalFileName) {
+        Document rootObject = new Document();
+        rootObject.append(Constants.ID_FIELD, id);
+        rootObject.append(Constants.NAME_FIELD, name);
+        rootObject.append(Constants.DESC_FIELD, description);
+        rootObject.append(Constants.UPLOADED_FIELD, uploader);
+        rootObject.append(Constants.FILE_NAME_FIELD, originalFileName);
+        rootObject.append(Constants.TIME_SERIES_ID_FIELD, parent);
+        rootObject.append(Constants.TIME_SERIES_SEQ_NUMBER_FIELD, sequenceNumber);
+        return rootObject;
     }
 
     public Document createPoint( Float x, Float y, Float z, int cluster, int pointKey){
@@ -370,10 +407,34 @@ public class MongoDB {
     public String queryFile(int tid, int fid) {
         Document query = new Document(Constants.ID_FIELD, fid).append(Constants.TIME_SERIES_ID_FIELD, tid);
         FindIterable<Document> iterable = clustersCollection.find(query);
+        Document mainDoc = new Document();
         for (Document d : iterable) {
-            return JSON.serialize(d);
+            mainDoc = d;
+            break;
         }
-        return null;
+
+        List<Document> clusters = new ArrayList<>();
+        List<Document> edges = new ArrayList<>();
+        for (Document d : iterable) {
+            Object clusterObjects = d.get("clusters");
+            if (clusterObjects instanceof List) {
+                for (Object c : (List)clusterObjects) {
+                    Document clusterDocument = (Document) c;
+                    clusters.add(clusterDocument);
+                }
+            }
+
+            Object edgeObjects = d.get("edges");
+            if (edgeObjects instanceof List) {
+                for (Object c : (List)edgeObjects) {
+                    Document edgeDocument = (Document) c;
+                    edges.add(edgeDocument);
+                }
+            }
+        }
+        mainDoc.append("clusters", clusters);
+        mainDoc.append("edges", edges);
+        return JSON.serialize(mainDoc);
     }
 
     public List<Cluster> clusters(int tid, int fid) {
@@ -387,7 +448,7 @@ public class MongoDB {
                     Document clusterDocument = (Document) c;
                     Cluster cluster = new Cluster();
                     cluster.resultSet = fid;
-                    cluster.id = (Integer) clusterDocument.get(Constants.ID_FIELD);
+                    cluster.id = (Integer) clusterDocument.get(Constants.CLUSTERID_FIELD);
                     cluster.cluster = (Integer) clusterDocument.get(Constants.CLUSTERID_FIELD);
                     cluster.shape = (String) clusterDocument.get(Constants.SHAPE_FIELD);
                     cluster.visible = (int) clusterDocument.get(Constants.VISIBLE_FIELD);
