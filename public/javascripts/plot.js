@@ -41,6 +41,9 @@ var LOAD_SIZE = 5;
 
 var plotRangeSlider = {};
 
+
+
+
 $(function () {
     $("#plot-slider").ionRangeSlider({
         grid: true,
@@ -184,8 +187,11 @@ function generateGraph() {
     var cluster;
     var geometry = {};
     var hsl;
+
     $.getJSON(clusterUrl, function (data) {
         fileName = data.fileName;
+        //temp only till data change
+        var points = {}
         $("#plot-title").text(data.fileName)
         for (var i = 0; i < clusters.length; i++) {
             var clusterdata = data.clusters[i];
@@ -235,7 +241,7 @@ function generateGraph() {
                 colorarray[k * 3 + 2] = tempcolor.b;
 
 
-
+                points[p.key] = [p.x, p.y, p.z]
             }
 
             xmean = xmean/clusterdata.points.length;
@@ -247,13 +253,13 @@ function generateGraph() {
             xmeantotal += xmean;
             ymeantotal += ymean;
             zmeantotal += zmean;
-
         }
 
         xmeantotal = xmeantotal/clusters.length;
         ymeantotal = ymeantotal/clusters.length;
         zmeantotal = zmeantotal/clusters.length;
 
+        drawEdges(data.edges,points)
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
@@ -289,6 +295,43 @@ function generateGraph() {
 
     animate();
 
+}
+
+function drawEdges(edges,points){
+
+   if(edges == null || edges == undefined)
+        return
+
+    var geometry = new THREE.Geometry();
+    var material = new THREE.LineBasicMaterial( { opacity: 1} );
+
+    for (var key in edges) {
+        if (edges.hasOwnProperty(key)) {
+            var edge = edges[key];
+            var vertices = edge.vertices;
+            var previousvertex = null;
+            var isFirst = true;
+            for (var verkey in vertices) {
+                if (vertices.hasOwnProperty(verkey)) {
+                    var pointkey = vertices[verkey];
+                    var point = points[parseInt(pointkey.key)];
+                    var vertex = new THREE.Vector3(point[0],point[1],point[2]);
+                    if(previousvertex != null){
+                        if(isFirst){
+                            isFirst = false
+                        }else{
+                            geometry.vertices.push( previousvertex );
+                        }
+                    }
+                    geometry.vertices.push( vertex );
+                    previousvertex = vertex;
+                }
+            }
+        }
+    }
+    geometry.translate(-xmeantotal,-ymeantotal,-zmeantotal);
+    var linesegs = line = new THREE.LineSegments( geometry, material );
+    scene3d.add(linesegs)
 }
 
 function generateTimeSeries(resultSets) {
@@ -336,6 +379,7 @@ function loadPlotData(start, end) {
             colors = {};
             geometry = {};
             clusters = data.clusters;
+
             fileName = data.fileName;
 
             var localSections = [];
@@ -408,6 +452,8 @@ function loadPlotData(start, end) {
                 geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
+
+
             if(!calculatedmeans) {
                 xmeantotal = xmeantotal / clusters.length;
                 ymeantotal = ymeantotal / clusters.length;
