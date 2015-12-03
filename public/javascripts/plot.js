@@ -338,6 +338,7 @@ function drawEdges(edges,points,pointcolors){
                     positions.push(vertex.y);
                     positions.push(vertex.z);
                     previousvertex = vertex;
+                    
                     previouscolor = pointcolor
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
