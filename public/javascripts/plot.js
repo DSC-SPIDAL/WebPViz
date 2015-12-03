@@ -192,6 +192,7 @@ function generateGraph() {
         fileName = data.fileName;
         //temp only till data change
         var points = {}
+        var pointcolors = {}
         $("#plot-title").text(data.fileName)
         for (var i = 0; i < clusters.length; i++) {
             var clusterdata = data.clusters[i];
@@ -242,6 +243,7 @@ function generateGraph() {
 
 
                 points[p.key] = [p.x, p.y, p.z]
+                pointcolors[p.key] = tempcolor
             }
 
             xmean = xmean/clusterdata.points.length;
@@ -259,7 +261,7 @@ function generateGraph() {
         ymeantotal = ymeantotal/clusters.length;
         zmeantotal = zmeantotal/clusters.length;
 
-        drawEdges(data.edges,points)
+        drawEdges(data.edges,points,pointcolors)
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
@@ -297,38 +299,61 @@ function generateGraph() {
 
 }
 
-function drawEdges(edges,points){
+function drawEdges(edges,points,pointcolors){
 
    if(edges == null || edges == undefined)
         return
 
-    var geometry = new THREE.Geometry();
-    var material = new THREE.LineBasicMaterial( { opacity: 1} );
-
+    var geometry = new THREE.BufferGeometry()
+    var material = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors });
+        var positions = []
+    var colorarray = []
     for (var key in edges) {
         if (edges.hasOwnProperty(key)) {
             var edge = edges[key];
             var vertices = edge.vertices;
             var previousvertex = null;
+            var previouscolor = null;
             var isFirst = true;
             for (var verkey in vertices) {
                 if (vertices.hasOwnProperty(verkey)) {
                     var pointkey = vertices[verkey];
                     var point = points[parseInt(pointkey.key)];
+                    var pointcolor = pointcolors[parseInt(pointkey.key)]
                     var vertex = new THREE.Vector3(point[0],point[1],point[2]);
                     if(previousvertex != null){
                         if(isFirst){
                             isFirst = false
                         }else{
-                            geometry.vertices.push( previousvertex );
+                            colorarray.push(previouscolor.r);
+                            colorarray.push(previouscolor.g);
+                            colorarray.push(previouscolor.b);
+
+                            positions.push(previousvertex.x);
+                            positions.push(previousvertex.y);
+                            positions.push(previousvertex.z);
                         }
                     }
-                    geometry.vertices.push( vertex );
+                    positions.push(vertex.x);
+                    positions.push(vertex.y);
+                    positions.push(vertex.z);
                     previousvertex = vertex;
+                    previouscolor = pointcolor
+                    colorarray.push(pointcolor.r);
+                    colorarray.push(pointcolor.g);
+                    colorarray.push(pointcolor.b);
                 }
             }
         }
     }
+
+
+    var positions32 = new Float32Array(positions.length);
+    var colorarray32 = new Float32Array(colorarray.length);
+    positions32.set(positions)
+    colorarray32.set(colorarray)
+    geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
+    geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
     geometry.translate(-xmeantotal,-ymeantotal,-zmeantotal);
     var linesegs = line = new THREE.LineSegments( geometry, material );
     scene3d.add(linesegs)
