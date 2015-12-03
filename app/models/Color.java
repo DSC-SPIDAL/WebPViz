@@ -6,9 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 public class Color extends Model {
-    @Id
-    public Integer id;
-
     public int a;
     public int b;
     public int g;
