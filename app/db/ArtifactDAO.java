@@ -1,12 +1,7 @@
 package db;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import models.*;
 import models.Cluster;
 import models.Color;
@@ -22,50 +17,14 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class MongoDB {
-    private MongoCollection<Document> filesCollection;
-    private MongoCollection<Document> clustersCollection;
-    private MongoCollection<Document> groupsCollection;
+public class ArtifactDAO {
+    private static ArtifactDAO db = new ArtifactDAO();
 
-    private static MongoDB db = new MongoDB();
-
-    public static MongoDB getInstance() {
+    public static ArtifactDAO getInstance() {
         return db;
     }
 
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    private MongoDB() {
-        Config conf = ConfigFactory.load();
-        String mongoHost = conf.getString(Constants.DB.MONGO_HOST);
-        int mongoPort = conf.getInt(Constants.DB.MONGO_PORT);
-
-        MongoClient mongoClient;
-        if (mongoHost != null) {
-            Logger.info("Using mongo DB " + mongoHost + ":" + mongoPort);
-            mongoClient = new MongoClient(mongoHost, mongoPort);
-        } else {
-            Logger.info("Using local mongo DB " + "localhost:27017");
-            mongoClient = new MongoClient("localhost", 27017);
-        }
-
-        MongoDatabase db = mongoClient.getDatabase(Constants.DB.DB_NAME);
-
-        filesCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
-        clustersCollection = db.getCollection(Constants.DB.CLUSTERS_COLLECTION);
-        groupsCollection = db.getCollection(Constants.DB.GROUPS_COLLECTION);
-
-        initGroupsCollection();
-    }
-
-    private void initGroupsCollection() {
-        Group defaultGroup = new Group(0, "default", "The default group");
-        if (!groupExists(defaultGroup)) {
-            insertGroup(defaultGroup);
-        } else {
-            System.out.println("Default exists");
-        }
-    }
 
     /**
      * Insert a single fie pviz file or a txt file
@@ -76,6 +35,7 @@ public class MongoDB {
      * @throws Exception  if the file cannot be inserted
      */
     public void insertSingleFile(String pvizName, String description, int uploader, File file, String group) throws Exception {
+        MongoConnection con = MongoConnection.getInstance();
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
         Document mainDoc = new Document();
@@ -96,7 +56,7 @@ public class MongoDB {
         resultSets.add(resultSet);
 
         mainDoc.append(Constants.RESULTSETS_FIELD, resultSets);
-        filesCollection.insertOne(mainDoc);
+        con.filesCollection.insertOne(mainDoc);
     }
 
     /**
@@ -105,62 +65,13 @@ public class MongoDB {
      * @return true if delete successful
      */
     public boolean deleteTimeSeries(int timeSeriesId) {
-        filesCollection.deleteOne(new Document(Constants.ID_FIELD, timeSeriesId));
-        clustersCollection.deleteMany(new Document(Constants.TIME_SERIES_ID_FIELD, timeSeriesId));
+        MongoConnection con = MongoConnection.getInstance();
+        con.filesCollection.deleteOne(new Document(Constants.ID_FIELD, timeSeriesId));
+        con.clustersCollection.deleteMany(new Document(Constants.TIME_SERIES_ID_FIELD, timeSeriesId));
         return true;
     }
 
-    public boolean groupExists(Group group) {
-        Document groupDocument = new Document();
-        groupDocument.append(Constants.Group.NAME, group.name);
-        groupDocument.append(Constants.Group.USER, group.userId);
-        FindIterable<Document> iterable = groupsCollection.find(groupDocument);
-        return iterable.iterator().hasNext();
-    }
 
-    public void insertGroup(Group group) {
-        Document groupDocument = new Document();
-        groupDocument.append(Constants.Group.NAME, group.name);
-        groupDocument.append(Constants.Group.DESCRIPTION, group.description);
-        groupDocument.append(Constants.Group.USER, group.userId);
-        groupsCollection.insertOne(groupDocument);
-    }
-
-    public void updateGroup(Group oldGroup, Group newGroup) {
-        Document oldGroupDocument = new Document();
-        oldGroupDocument.append(Constants.Group.NAME, oldGroup.name);
-        oldGroupDocument.append(Constants.Group.USER, oldGroup.userId);
-
-        Document groupDocument = new Document();
-        groupDocument.append(Constants.Group.NAME, newGroup.name);
-        groupDocument.append(Constants.Group.DESCRIPTION, newGroup.description);
-        groupDocument.append(Constants.Group.USER, newGroup.userId);
-
-        groupsCollection.findOneAndReplace(oldGroupDocument, groupDocument);
-    }
-
-    public void deleteGroup(Group group) {
-        Document groupDocument = new Document();
-        groupDocument.append(Constants.Group.NAME, group.name);
-        groupDocument.append(Constants.Group.USER, group.userId);
-        groupsCollection.deleteOne(groupDocument);
-    }
-
-    public List<Group> allGroups() {
-        FindIterable<Document> iterable =  groupsCollection.find();
-        List<Group> groups = new ArrayList<Group>();
-        for (Document d : iterable) {
-            Group group = new Group();
-            String name = (String) d.get(Constants.Group.NAME);
-            int user = (int) d.get(Constants.Group.USER);
-            group.description = (String) d.get(Constants.Group.DESCRIPTION);
-            group.name = name;
-            group.userId = user;
-            groups.add(group);
-            System.out.println(group.name);
-        }
-        return groups;
-    }
 
     /**
      * Insert a zip file containing the time series files
@@ -171,6 +82,7 @@ public class MongoDB {
      * @throws Exception if an error happens while inserting
      */
     public void insertZipFile(String pvizName, String description, int uploader, File fileName, String group) throws Exception {
+        MongoConnection con = MongoConnection.getInstance();
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
         Document mainDoc = new Document();
@@ -184,7 +96,7 @@ public class MongoDB {
         List<Document> emptyResultSets = new ArrayList<Document>();
         mainDoc.append(Constants.RESULTSETS_FIELD, emptyResultSets);
         mainDoc.append(Constants.GROUP_FIELD, group);
-        filesCollection.insertOne(mainDoc);
+        con.filesCollection.insertOne(mainDoc);
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -241,7 +153,7 @@ public class MongoDB {
                 }
                 mainDoc.append(Constants.STATUS_FIELD, "active");
 
-                filesCollection.replaceOne(new Document(Constants.ID_FIELD, timeSeriesId), mainDoc);
+                con.filesCollection.replaceOne(new Document(Constants.ID_FIELD, timeSeriesId), mainDoc);
             }
         });
         t.start();
@@ -258,6 +170,7 @@ public class MongoDB {
 
     public void insertXMLFile(int id, String name, String description, int uploader, InputStream file,
                               int parent, Long sequenceNumber, String originalFileName) throws Exception {
+        MongoConnection con = MongoConnection.getInstance();
         // maximum number of points per file
         final int maxPointsPerFile = 250000;
         Map<Integer, Integer> clusterPointCount = new HashMap<>();
@@ -323,7 +236,7 @@ public class MongoDB {
                 count = 0;
                 Document preRootObject = createRootClusterObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
                 preRootObject.append("clusters", currentClusterList);
-                clustersCollection.insertOne(preRootObject);
+                con.clustersCollection.insertOne(preRootObject);
                 currentClusterList = new ArrayList<>();
             }
         }
@@ -358,7 +271,7 @@ public class MongoDB {
             rootObject.append("edges", edgesList);
         }
 
-        clustersCollection.insertOne(rootObject);
+        con.clustersCollection.insertOne(rootObject);
     }
 
     /**
@@ -396,8 +309,9 @@ public class MongoDB {
     }
 
     public String queryTimeSeries(int id) {
+        MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.ID_FIELD, id);
-        FindIterable<Document> iterable = filesCollection.find(query);
+        FindIterable<Document> iterable = con.filesCollection.find(query);
         for (Document d : iterable) {
             return JSON.serialize(d);
         }
@@ -405,8 +319,9 @@ public class MongoDB {
     }
 
     public String queryFile(int tid, int fid) {
+        MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.ID_FIELD, fid).append(Constants.TIME_SERIES_ID_FIELD, tid);
-        FindIterable<Document> iterable = clustersCollection.find(query);
+        FindIterable<Document> iterable = con.clustersCollection.find(query);
         Document mainDoc = new Document();
         for (Document d : iterable) {
             mainDoc = d;
@@ -438,8 +353,9 @@ public class MongoDB {
     }
 
     public List<Cluster> clusters(int tid, int fid) {
+        MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.ID_FIELD, fid).append(Constants.TIME_SERIES_ID_FIELD, tid);
-        FindIterable<Document> iterable = clustersCollection.find(query);
+        FindIterable<Document> iterable = con.clustersCollection.find(query);
         List<Cluster> clusters = new ArrayList<Cluster>();
         for (Document d : iterable) {
             Object clusterObjects = d.get("clusters");
@@ -472,9 +388,10 @@ public class MongoDB {
     }
 
     public ResultSet individualFile(int timeSeriesId) {
+        MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.ID_FIELD, timeSeriesId);
 
-        FindIterable<Document> iterable = filesCollection.find(query);
+        FindIterable<Document> iterable = con.filesCollection.find(query);
         for (Document document : iterable) {
             Object resultSetsObject = document.get(Constants.RESULTSETS_FIELD);
             if (resultSetsObject instanceof List) {
@@ -502,9 +419,10 @@ public class MongoDB {
     }
 
     public ResultSet individualFile(int timeSeriesId, int fileId) {
+        MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.ID_FIELD, timeSeriesId);
 
-        FindIterable<Document> iterable = filesCollection.find(query);
+        FindIterable<Document> iterable = con.filesCollection.find(query);
         for (Document document : iterable) {
             Object resultSetsObject = document.get(Constants.RESULTSETS_FIELD);
             if (resultSetsObject instanceof List) {
@@ -534,7 +452,8 @@ public class MongoDB {
     }
 
     public List<ResultSet> individualFiles() {
-        FindIterable<Document> iterable = filesCollection.find();
+        MongoConnection con = MongoConnection.getInstance();
+        FindIterable<Document> iterable = con.filesCollection.find();
         List<ResultSet> resultSetList = new ArrayList<ResultSet>();
         for (Document document : iterable) {
             Object resultSetsObject = document.get(Constants.RESULTSETS_FIELD);
@@ -567,15 +486,17 @@ public class MongoDB {
      * @return uploaded entity list
      */
     public List<TimeSeries> timeSeriesList() {
-        FindIterable<Document> iterable = filesCollection.find();
+        MongoConnection con = MongoConnection.getInstance();
+        FindIterable<Document> iterable = con.filesCollection.find();
         return getTimeSeriesList(iterable);
     }
 
     public List<TimeSeries> timeSeriesList(Group group) {
+        MongoConnection con = MongoConnection.getInstance();
         Document findDoc = new Document();
         findDoc.append(Constants.GROUP_FIELD, group.name);
 
-        FindIterable<Document> iterable = filesCollection.find(findDoc);
+        FindIterable<Document> iterable = con.filesCollection.find(findDoc);
         return getTimeSeriesList(iterable);
     }
 
@@ -613,18 +534,20 @@ public class MongoDB {
     }
 
     public boolean timeSeriesExists(TimeSeries timeSeries) {
+        MongoConnection con = MongoConnection.getInstance();
         Document doc = new Document();
         doc.append(Constants.ID_FIELD, timeSeries.id);
-        FindIterable<Document> iterable = filesCollection.find(doc);
+        FindIterable<Document> iterable = con.filesCollection.find(doc);
         return iterable.iterator().hasNext();
     }
 
     public void updateTimeSeries(TimeSeries old, TimeSeries newTimeSeries) {
+        MongoConnection con = MongoConnection.getInstance();
         Logger.info("updating the document with id " + old.id + " with group: " + newTimeSeries.group + " desc: " + newTimeSeries.description);
         Document oldGroupDocument = new Document();
         oldGroupDocument.append(Constants.ID_FIELD, old.id);
 
-        FindIterable<Document> iterable = filesCollection.find(oldGroupDocument);
+        FindIterable<Document> iterable = con.filesCollection.find(oldGroupDocument);
         Document findDocument = null;
         for (Document d : iterable) {
             findDocument = d;
@@ -634,12 +557,13 @@ public class MongoDB {
         if (findDocument != null) {
             findDocument.append(Constants.GROUP_FIELD, newTimeSeries.group);
             findDocument.append(Constants.DESC_FIELD, newTimeSeries.description);
-            filesCollection.replaceOne(oldGroupDocument, findDocument);
+            con.filesCollection.replaceOne(oldGroupDocument, findDocument);
         }
     }
 
     public TimeSeries timeSeries(int id) {
-        FindIterable<Document> iterable = filesCollection.find(new Document(Constants.ID_FIELD, id));
+        MongoConnection con = MongoConnection.getInstance();
+        FindIterable<Document> iterable = con.filesCollection.find(new Document(Constants.ID_FIELD, id));
         for (Document d : iterable) {
             TimeSeries timeSeries = new TimeSeries();
             timeSeries.id = (Integer) d.get(Constants.ID_FIELD);

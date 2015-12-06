@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import db.MongoConnection;
 import models.User;
 import models.utils.AppException;
 import play.Application;
@@ -35,6 +36,10 @@ public class Global extends GlobalSettings{
             Logger.error("Cannot register admin users.", e);
             throw new RuntimeException("Something went wrong during startup", e);
         }
+
+        // create the group dao
+        MongoConnection con = MongoConnection.getInstance();
+        con.initGroupsCollection();
     }
 
     private void registerAdmins() throws AppException {

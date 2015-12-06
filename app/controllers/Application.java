@@ -3,7 +3,8 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.Constants;
-import db.MongoDB;
+import db.ArtifactDAO;
+import db.GroupsDAO;
 import models.*;
 import models.utils.AppException;
 import play.Logger;
@@ -47,22 +48,22 @@ public class Application extends Controller {
 
     @Security.Authenticated(Secured.class)
     public static Result dashboard() {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+        return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
     }
 
     @Security.Authenticated(Secured.class)
     public static Result groupDashboard(String group) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
         Group g = new Group(loggedInUser.id, group);
-        if (db.groupExists(g)) {
-            return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(g), db.allGroups(), true, group));
+        if (GroupsDAO.groupExists(g)) {
+            return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(g), GroupsDAO.allGroups(), true, group));
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return ok(dashboard.render(loggedInUser, false, null, db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -75,14 +76,14 @@ public class Application extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result delete(int timeSeriesId){
         //TODO delete time series
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         db.deleteTimeSeries(timeSeriesId);
         return GO_DASHBOARD;
     }
 
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart resultSet = body.getFile("file");
@@ -112,7 +113,7 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
         return GO_DASHBOARD;
     }
@@ -123,11 +124,11 @@ public class Application extends Controller {
         DynamicForm form = Form.form().bindFromRequest();
 
         String description, group, id;
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
         id = form.get("id");
         description = form.get("desc");
@@ -149,37 +150,37 @@ public class Application extends Controller {
         } else {
             //
             System.out.println("non exisits");
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
     @Security.Authenticated(Secured.class)
     public static Result visualize(int resultSetId, int timeSeriesId) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = db.individualFile(timeSeriesId, resultSetId);
         if (r != null) {
             return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
     @Security.Authenticated(Secured.class)
     public static Result visualizeSingle(int timeSeriesId) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = db.individualFile(timeSeriesId);
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), db.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.individualFiles(), db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
     @Security.Authenticated(Secured.class)
     public static Result visualizeTimeSeries(int timeSeriesId) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
         TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId);
@@ -207,21 +208,21 @@ public class Application extends Controller {
     }
 
     public static Result resultssetall(int tid, int rid) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.queryFile(tid, rid);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
 
     public static Result timeseries(int id) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.queryTimeSeries(id);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
 
     public static Result resultset(Integer rid, Integer tid) {
-        MongoDB db = MongoDB.getInstance();
+        ArtifactDAO db = ArtifactDAO.getInstance();
         ResultSet r = db.individualFile(tid, rid);
         ObjectNode result = Json.newObject();
         result.put("id", rid);
