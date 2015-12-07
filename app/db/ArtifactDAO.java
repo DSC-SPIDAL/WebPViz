@@ -576,13 +576,4 @@ public class ArtifactDAO {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        try {
-            Plotviz plotviz = XMLLoader.load(new FileInputStream("/home/supun/dev/projects/stocks/WebPViz/tree.smacof.dtrans1.0.points.pviz"));
-            System.out.println(plotviz.getEdges().size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
