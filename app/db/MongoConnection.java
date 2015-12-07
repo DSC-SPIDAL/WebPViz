@@ -36,8 +36,8 @@ public class MongoConnection {
 
         MongoDatabase db = mongoClient.getDatabase(Constants.DB.DB_NAME);
 
-        filesCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
-        clustersCollection = db.getCollection(Constants.DB.CLUSTERS_COLLECTION);
+        filesCollection = db.getCollection(Constants.DB.ARTIFACTS_COLLECTION);
+        clustersCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
         groupsCollection = db.getCollection(Constants.DB.GROUPS_COLLECTION);
     }
 
