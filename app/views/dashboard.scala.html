@@ -1,4 +1,4 @@
-@(user: User, hasError: Boolean, error: String, resultSets : List[ResultSet], timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String)
+@(user: User, hasError: Boolean, error: String, timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String)
 @import helper._
 
 @main("Dashboard", user){
@@ -55,7 +55,7 @@
                     <tbody>
                     @for( r <- timeSeries) {
                         <tr>
-                            <td>@r.typeString</td>
+                            <td>@r.t</td>
                             <td>@r.group</td>
                             <td>@r.name</td>
                             <td>@r.description</td>
@@ -67,7 +67,7 @@
                                 </script>
                                 <td>Pending...</td>
                             }else {
-                                @if("T".equals(r.typeString)) {
+                                @if("T".equals(r.t)) {
                                     <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
                                 } else {
                                     <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>

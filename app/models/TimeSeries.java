@@ -31,7 +31,7 @@ public class TimeSeries extends Model {
 
     public String status;
 
-    public String typeString = "T";
+    public String t = "T";
 
     public String group = Constants.Group.DEFAULT_GROUP;
 }

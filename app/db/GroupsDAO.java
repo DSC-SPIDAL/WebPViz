@@ -14,7 +14,7 @@ public class GroupsDAO {
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
         groupDocument.append(Constants.Group.USER, group.userId);
-        FindIterable<Document> iterable = db.groupsCollection.find(groupDocument);
+        FindIterable<Document> iterable = db.groupsCol.find(groupDocument);
         return iterable.iterator().hasNext();
     }
 
@@ -24,7 +24,7 @@ public class GroupsDAO {
         groupDocument.append(Constants.Group.NAME, group.name);
         groupDocument.append(Constants.Group.DESCRIPTION, group.description);
         groupDocument.append(Constants.Group.USER, group.userId);
-        db.groupsCollection.insertOne(groupDocument);
+        db.groupsCol.insertOne(groupDocument);
     }
 
     public static void updateGroup(Group oldGroup, Group newGroup) {
@@ -38,7 +38,7 @@ public class GroupsDAO {
         groupDocument.append(Constants.Group.DESCRIPTION, newGroup.description);
         groupDocument.append(Constants.Group.USER, newGroup.userId);
 
-        db.groupsCollection.findOneAndReplace(oldGroupDocument, groupDocument);
+        db.groupsCol.findOneAndReplace(oldGroupDocument, groupDocument);
     }
 
     public static void deleteGroup(Group group) {
@@ -46,12 +46,12 @@ public class GroupsDAO {
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
         groupDocument.append(Constants.Group.USER, group.userId);
-        db.groupsCollection.deleteOne(groupDocument);
+        db.groupsCol.deleteOne(groupDocument);
     }
 
     public static List<Group> allGroups() {
         MongoConnection db = MongoConnection.getInstance();
-        FindIterable<Document> iterable =  db.groupsCollection.find();
+        FindIterable<Document> iterable =  db.groupsCol.find();
         List<Group> groups = new ArrayList<Group>();
         for (Document d : iterable) {
             Group group = new Group();

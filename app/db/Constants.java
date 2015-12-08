@@ -3,7 +3,6 @@ package db;
 public class Constants {
     public static final String UPLOADER_ID_FIELD = "uploaderId";
     public static final String LABEL_FIELD = "label";
-    public static final String RESULTSETS_FIELD = "resultsets";
     public static final String COLOR_FIELD = "color";
     public static final String SIZE_FIELD = "size";
     public static final String VISIBLE_FIELD = "visible";
@@ -11,9 +10,9 @@ public class Constants {
     public static final String CLUSTERID_FIELD = "clusterid";
 
     public static class ArtifactType {
-        public static final int TIME_SERIES = 0;
-        public static final int PLOTVIZ = 1;
-        public static final int POINT = 2;
+        public static final String TIME_SERIES = "T";
+        public static final String PLOTVIZ = "P";
+        public static final String POINT = "S";
     }
 
     public static class ArtifactStatus {
@@ -69,6 +68,7 @@ public class Constants {
         public static final String VERSION = "version";
         public static final String SETTINGS = "settings";
         public static final String UDP = "udp";
+        public static final String RESULTSETS_FIELD = "files";
     }
 
     public static class Group {

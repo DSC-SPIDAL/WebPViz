@@ -10,9 +10,9 @@ import com.typesafe.config.ConfigFactory;
 import play.Logger;
 
 public class MongoConnection {
-    public MongoCollection<Document> filesCollection;
-    public MongoCollection<Document> clustersCollection;
-    public MongoCollection<Document> groupsCollection;
+    public MongoCollection<Document> artifactCol;
+    public MongoCollection<Document> filesCol;
+    public MongoCollection<Document> groupsCol;
 
     public static MongoConnection con = new MongoConnection();
 
@@ -36,9 +36,9 @@ public class MongoConnection {
 
         MongoDatabase db = mongoClient.getDatabase(Constants.DB.DB_NAME);
 
-        filesCollection = db.getCollection(Constants.DB.ARTIFACTS_COLLECTION);
-        clustersCollection = db.getCollection(Constants.DB.FILES_COLLECTION);
-        groupsCollection = db.getCollection(Constants.DB.GROUPS_COLLECTION);
+        artifactCol = db.getCollection(Constants.DB.ARTIFACTS_COLLECTION);
+        filesCol = db.getCollection(Constants.DB.FILES_COLLECTION);
+        groupsCol = db.getCollection(Constants.DB.GROUPS_COLLECTION);
     }
 
     public void initGroupsCollection() {
