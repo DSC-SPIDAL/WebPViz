@@ -120,18 +120,18 @@ function generateCheckList(list, initcolors) {
         + "<th class='column-title'>Size</th>"
         + "</tr>"
         + "</thead>"
-        + "<tbody>"
+        + "<tbody>";
 
     var tablerows = "";
 
     for (var key in list) {
         if (list.hasOwnProperty(key)) {
             tablerows += "<tr class='even pointer' id='" + key + "'>"
-                + "<td class='a-center'>"
+                + "<td class='a-center'>";
             if (!(removedclusters.hasOwnProperty(key))){
-                tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>"
+                tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
             }else{
-                tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>"
+                tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
             }
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
@@ -141,12 +141,12 @@ function generateCheckList(list, initcolors) {
                 + "</td>"
                 + "<td class=' '>" + list[key].label + "</span></td>"
                 + "<td class='l1'>" + list[key].length + "</td>"
-                + "</tr>"
+                + "</tr>";
         }
     }
 
     var tableend = "</tbody>"
-        + "</table>"
+        + "</table>";
 
 
     return tabletop + tablerows + tableend;
@@ -298,7 +298,9 @@ function generateGraph() {
         // stats.domElement.style.position = 'absolute';
         // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
-        $('.color-pic1').colorpicker();
+        if (clusters && clusters.length < 100) {
+            $('.color-pic1').colorpicker();
+        }
         render();
         animate();
     });
@@ -558,8 +560,9 @@ function initPlotData() {
     //    camera.updateProjectionMatrix();
     //    renderer.setSize(canvasWidth, canvasHeight);
     //});
-
-    $('.color-pic1').colorpicker();
+    //if (clusters && clusters.length < 100) {
+    //    $('.color-pic1').colorpicker();
+    //}
 }
 
 function initBufferAndLoad() {
@@ -732,7 +735,9 @@ function updatePlot(sliderValue) {
             render();
             animate();
             $("#plot-title").text(fileNames[sliderValue]);
-            $('.color-pic1').colorpicker();
+            if (clusters && clusters.length < 100) {
+                $('.color-pic1').colorpicker();
+            }
         }
     } else {
         for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
@@ -873,7 +878,9 @@ function playLoop() {
             sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             $("#plot-title").text(fileNames[currentValue + 1]);
-            $('.color-pic1').colorpicker();
+            if (clusters && clusters.length < 100) {
+                $('.color-pic1').colorpicker();
+            }
             render();
             if (maxValue > currentValue + 1 && !isPaused) {
                 playLoop();
