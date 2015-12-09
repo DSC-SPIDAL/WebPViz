@@ -216,7 +216,7 @@ public class Application extends Controller {
 
     public static Result timeseries(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
-        String r = db.queryTimeSeries(id);
+        String r = db.getArtifact(id);
         JsonNode result = Json.parse(r);
         return ok(result);
     }

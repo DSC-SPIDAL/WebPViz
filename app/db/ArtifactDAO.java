@@ -183,7 +183,7 @@ public class ArtifactDAO {
                               int parent, Long sequenceNumber, String originalFileName) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         // maximum number of points per file
-        final int maxPointsPerFile = 250000;
+        final int maxPointsPerFile = 200000;
         Map<Integer, Integer> clusterPointCount = new HashMap<>();
         Document rootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
 
@@ -250,9 +250,49 @@ public class ArtifactDAO {
         }
 
         // clusters to root object
-        rootObject.append(Constants.File.CLUSTERS, clusterDBObjectList.values());
+        // rootObject.append(Constants.File.CLUSTERS, clusterDBObjectList.values());
         // add points to root object list
-        rootObject.append(Constants.File.POINTS, pointList);
+        // rootObject.append(Constants.File.POINTS, pointList);
+
+        // add each cluster to clusters object
+        // we are going to create separate docs when total number of points exceeds
+        int count = 0;
+        List<Document> currentClusterList = new ArrayList<>();
+        for (Map.Entry<Integer, Document> e : clusterDBObjectList.entrySet()) {
+            count += clusterPointCount.get(e.getKey());
+            currentClusterList.add(e.getValue());
+            if (count > maxPointsPerFile) {
+                count = 0;
+                Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+                preRootObject.append(Constants.File.CLUSTERS, currentClusterList);
+                con.filesCol.insertOne(preRootObject);
+                currentClusterList = new ArrayList<>();
+                Logger.info("Breaking file clusters: " + originalFileName);
+            }
+        }
+        // we will add the remainder or the whole list, if we didn't exceed the max number
+        if (currentClusterList.size() > 0) {
+            rootObject.append(Constants.File.CLUSTERS, currentClusterList);
+        }
+
+        count = 0;
+        List<Document> currentPointList = new ArrayList<>();
+        for (Document e : pointList) {
+            currentPointList.add(e);
+            count++;
+            if (count > maxPointsPerFile) {
+                count = 0;
+                Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+                preRootObject.append(Constants.File.POINTS, currentPointList);
+                con.filesCol.insertOne(preRootObject);
+                currentPointList = new ArrayList<>();
+                Logger.info("Breaking file points: " + originalFileName);
+            }
+        }
+        // we will add the remainder or the whole list, if we didn't exceed the max number
+        if (currentPointList.size() > 0) {
+            rootObject.append(Constants.File.POINTS, currentPointList);
+        }
 
         // now insert the edges if there are any
         List<Document> edgesList = new ArrayList<Document>();
@@ -278,6 +318,7 @@ public class ArtifactDAO {
             rootObject.append(Constants.File.EDGES, edgesList);
         }
         con.filesCol.insertOne(rootObject);
+        Logger.info("Inserted document: " + originalFileName);
     }
 
     /**
@@ -325,7 +366,7 @@ public class ArtifactDAO {
         return object;
     }
 
-    public String queryTimeSeries(int id) {
+    public String getArtifact(int id) {
         MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.Artifact.ID_FIELD, id);
         FindIterable<Document> iterable = con.artifactCol.find(query);
@@ -347,8 +388,9 @@ public class ArtifactDAO {
 
         List<Document> clusters = new ArrayList<>();
         List<Document> edges = new ArrayList<>();
+        List<Document> points = new ArrayList<>();
         for (Document d : iterable) {
-            Object clusterObjects = d.get("clusters");
+            Object clusterObjects = d.get(Constants.File.CLUSTERS);
             if (clusterObjects instanceof List) {
                 for (Object c : (List)clusterObjects) {
                     Document clusterDocument = (Document) c;
@@ -356,17 +398,38 @@ public class ArtifactDAO {
                 }
             }
 
-            Object edgeObjects = d.get("edges");
+            Object edgeObjects = d.get(Constants.File.EDGES);
             if (edgeObjects instanceof List) {
                 for (Object c : (List)edgeObjects) {
                     Document edgeDocument = (Document) c;
                     edges.add(edgeDocument);
                 }
             }
+            Object pointObjects = d.get(Constants.File.POINTS);
+            if (pointObjects instanceof List) {
+                for (Object c : (List)pointObjects) {
+                    Document pointDocument = (Document) c;
+                    points.add(pointDocument);
+                }
+            }
         }
-        mainDoc.append("clusters", clusters);
-        mainDoc.append("edges", edges);
-        return JSON.serialize(mainDoc);
+        if (mainDoc.containsKey(Constants.File.CLUSTERS)) {
+            mainDoc.replace(Constants.File.CLUSTERS, clusters);
+        } else {
+            mainDoc.append(Constants.File.CLUSTERS, clusters);
+        }
+        if (edges.size() > 0) {
+            mainDoc.replace(Constants.File.EDGES, edges);
+        }
+        if (mainDoc.containsKey(Constants.File.POINTS)) {
+            mainDoc.replace(Constants.File.POINTS, points);
+        } else {
+            mainDoc.append(Constants.File.POINTS, points);
+        }
+        String serialize = JSON.serialize(mainDoc);
+        Logger.info("Retreived document with tid: " + tid + " fid: " + fid);
+        // System.out.println(serialize);
+        return serialize;
     }
 
     public List<Cluster> clusters(int tid, int fid) {
@@ -375,7 +438,7 @@ public class ArtifactDAO {
         FindIterable<Document> iterable = con.filesCol.find(query);
         List<Cluster> clusters = new ArrayList<Cluster>();
         for (Document d : iterable) {
-            Object clusterObjects = d.get("clusters");
+            Object clusterObjects = d.get(Constants.File.CLUSTERS);
             if (clusterObjects instanceof List) {
                 for (Object c : (List)clusterObjects) {
                     Document clusterDocument = (Document) c;
