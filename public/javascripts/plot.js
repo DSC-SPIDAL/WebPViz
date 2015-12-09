@@ -325,15 +325,16 @@ function drawEdges(edges,points,pointcolors){
     for (var key in edges) {
         if (edges.hasOwnProperty(key)) {
             var edge = edges[key];
-            var vertices = edge.vertices;
+            var vertices = edge.v;
             var previousvertex = null;
             var previouscolor = null;
             var isFirst = true;
-            for (var verkey in vertices) {
-                if (vertices.hasOwnProperty(verkey)) {
-                    var pointkey = vertices[verkey];
-                    var point = points[parseInt(pointkey.key)];
-                    var pointcolor = pointcolors[parseInt(pointkey.key)];
+            for (var i = 0; i < vertices.length; i++) {
+                var verkey = vertices[i];
+                //if (vertices.hasOwnProperty(verkey)) {
+                    var pointkey = verkey;
+                    var point = points[parseInt(pointkey)];
+                    var pointcolor = pointcolors[parseInt(pointkey)];
                     var vertex = new THREE.Vector3(point[0],point[1],point[2]);
                     if(previousvertex != null){
                         if(isFirst){
@@ -357,7 +358,7 @@ function drawEdges(edges,points,pointcolors){
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
-                }
+                //}
             }
         }
     }

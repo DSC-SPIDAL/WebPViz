@@ -262,7 +262,7 @@ public class ArtifactDAO {
                 Document edgeDoc = new Document();
                 edgeDoc.append(Constants.Edge.ID, e.getKey());
                 List<Vertex> vertexes = e.getVertices();
-                List<String> vertices = new ArrayList<>();
+                List<Integer> vertices = new ArrayList<>();
                 if (vertexes != null && vertexes.size() > 0) {
                     List<Document> vertexDocs = new ArrayList<Document>();
                     for (Vertex v : vertexes) {

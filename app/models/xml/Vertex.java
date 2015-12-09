@@ -3,14 +3,14 @@ package models.xml;
 import javax.xml.bind.annotation.XmlAttribute;
 
 public class Vertex {
-    private String key;
+    private int key;
 
-    public String getKey() {
+    public int getKey() {
         return key;
     }
 
     @XmlAttribute
-    public void setKey(String key) {
+    public void setKey(int key) {
         this.key = key;
     }
 }

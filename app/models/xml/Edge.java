@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Edge {
-    private String key;
+    private int key;
     private List<Vertex> vertices;
 
-    public String getKey() {
+    public int getKey() {
         return key;
     }
 
@@ -18,7 +18,7 @@ public class Edge {
     }
 
     @XmlElement
-    public void setKey(String key) {
+    public void setKey(int key) {
         this.key = key;
     }
 
