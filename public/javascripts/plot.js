@@ -236,13 +236,13 @@ function generateGraph() {
                     continue;
                 }
 
-                positions[k * 3 + 0] = p.v[0];
-                positions[k * 3 + 1] = p.v[1];
-                positions[k * 3 + 2] = p.v[2];
+                positions[k * 3 + 0] = p[0];
+                positions[k * 3 + 1] = p[1];
+                positions[k * 3 + 2] = p[2];
 
-                xmean += p.v[0];
-                ymean += p.v[1];
-                zmean += p.v[2];
+                xmean += p[0];
+                ymean += p[1];
+                zmean += p[2];
 
                 var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
                 colorarray[k * 3 + 0] = tempcolor.r;
@@ -250,7 +250,7 @@ function generateGraph() {
                 colorarray[k * 3 + 2] = tempcolor.b;
 
 
-                points[p.k] = [p.v[0], p.v[1], p.v[2]];
+                points[p.k] = [p[0], p[1], p[2]];
                 pointcolors[p.k] = tempcolor
             }
 
@@ -308,11 +308,7 @@ function generateGraph() {
 }
 
 function findPoint(data, key) {
-    for (var k = 0; k < data.points.length; k++) {
-        if (data.points[k].k == key) {
-            return data.points[k];
-        }
-    }
+    return data.points[key.toString()];
 }
 
 function drawEdges(edges,points,pointcolors){
