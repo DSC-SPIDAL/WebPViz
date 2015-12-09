@@ -139,6 +139,7 @@ public class ArtifactDAO {
                     List<Document> resultSets = new ArrayList<Document>();
                     for (String f : filesInOrder) {
                         if (fileMap.get(f) != null) {
+                            Logger.info("adding file: " + f);
                             String resultSetName = "timeseries_" + f + "_" + i;
                             insertXMLFile(i, resultSetName, description, uploader, zipFile.getInputStream(fileMap.get(f)), timeSeriesId, (long) i, f);
                             Document resultSet = createResultSet(i, resultSetName, description, dateString, uploader, timeSeriesId, i, f);

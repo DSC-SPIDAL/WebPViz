@@ -173,7 +173,7 @@ function visualize(resultSetUrl, resultSet, id) {
 }
 
 function visualizeTimeSeries(resultSetUrl, timeSeries, id) {
-    resultSets = timeSeries.resultsets;
+    resultSets = timeSeries.files;
     timeSeriesLength = resultSets.length;
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
@@ -316,12 +316,12 @@ function findPoint(data, key) {
 function drawEdges(edges,points,pointcolors){
 
    if(edges == null || edges == undefined)
-        return
+        return;
 
-    var geometry = new THREE.BufferGeometry()
+    var geometry = new THREE.BufferGeometry();
     var material = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors });
-        var positions = []
-    var colorarray = []
+        var positions = [];
+    var colorarray = [];
     for (var key in edges) {
         if (edges.hasOwnProperty(key)) {
             var edge = edges[key];
@@ -333,7 +333,7 @@ function drawEdges(edges,points,pointcolors){
                 if (vertices.hasOwnProperty(verkey)) {
                     var pointkey = vertices[verkey];
                     var point = points[parseInt(pointkey.key)];
-                    var pointcolor = pointcolors[parseInt(pointkey.key)]
+                    var pointcolor = pointcolors[parseInt(pointkey.key)];
                     var vertex = new THREE.Vector3(point[0],point[1],point[2]);
                     if(previousvertex != null){
                         if(isFirst){
@@ -353,7 +353,7 @@ function drawEdges(edges,points,pointcolors){
                     positions.push(vertex.z);
                     previousvertex = vertex;
                     
-                    previouscolor = pointcolor
+                    previouscolor = pointcolor;
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
@@ -365,8 +365,8 @@ function drawEdges(edges,points,pointcolors){
 
     var positions32 = new Float32Array(positions.length);
     var colorarray32 = new Float32Array(colorarray.length);
-    positions32.set(positions)
-    colorarray32.set(colorarray)
+    positions32.set(positions);
+    colorarray32.set(colorarray);
     geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
     geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
     geometry.translate(-xmeantotal,-ymeantotal,-zmeantotal);
@@ -380,12 +380,12 @@ function generateTimeSeries(resultSets) {
     precurrentLoadedStart = 0;
 
     if (timeSeriesLength > MAX_PLOTS_STORED) {
-        loadPlotData(0, MAX_PLOTS_STORED)
-        currentLoadedEnd = MAX_PLOTS_STORED
+        loadPlotData(0, MAX_PLOTS_STORED);
+        currentLoadedEnd = MAX_PLOTS_STORED;
         precurrentLoadedEnd = MAX_PLOTS_STORED
     }else{
-        loadPlotData(0,timeSeriesLength)
-        currentLoadedEnd = timeSeriesLength
+        loadPlotData(0,timeSeriesLength);
+        currentLoadedEnd = timeSeriesLength;
         precurrentLoadedEnd = timeSeriesLength
     }
     initBufferAndLoad();
@@ -394,7 +394,7 @@ function generateTimeSeries(resultSets) {
 
 //TODO WInodow rezise does not work yet need to fix
 function onWindowResize() {
-    var width = window.innerWidth
+    var width = window.innerWidth;
     var height = window.innerHeight - 57 - 40 - 40 - 10 ;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -413,63 +413,71 @@ function loadPlotData(start, end) {
     var hsl;
 
     for (var i = start; i < end; i++) {
-        clusterUrl = "/resultssetall/" + resultSets[i].timeSeriesId + "/file/" + resultSets[i].id;
+        clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
             geometry = {};
             clusters = data.clusters;
 
-            fileName = data.fileName;
+            fileName = data.file;
 
             var localSections = [];
             for (var i = 0; i < clusters.length; i++) {
 
                 var clusterdata = data.clusters[i];
-                var clusterid = clusterdata.clusterid;
-                var clustercolor = clusterdata.color;
+                var clusterid = clusterdata.k;
+                var clustercolor = {"r":0, "g":0, "b":0};
+                if (clusterdata.r) {
+                    clustercolor["r"] = clusterdata.r[1];
+                    clustercolor["g"] = clusterdata.r[2];
+                    clustercolor["b"] = clusterdata.r[3];
+                }
                 if (clustercolor == null)
-                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()}
+                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
                 hsl = [heus[clusterid], 1, 0.8];
-                if (!geometry.hasOwnProperty(clusterdata.clusterid)) {
-                    geometry[clusterdata.clusterid] = new THREE.BufferGeometry()
-                    particles[clusterdata.clusterid] = new Array();
+                if (!geometry.hasOwnProperty(clusterdata.k)) {
+                    geometry[clusterdata.k] = new THREE.BufferGeometry()
+                    particles[clusterdata.k] = new Array();
                 }
 
-                if(!colorlist.hasOwnProperty(clusterdata.clusterid))
-                colorlist[clusterdata.clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
+                if(!colorlist.hasOwnProperty(clusterdata.k))
+                colorlist[clusterdata.k] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
                 var localSection = {
-                    "length": clusterdata.points.length,
-                    "size": clusterdata.size,
-                    "shape": clusterdata.shape,
-                    "visible": clusterdata.visible,
+                    "length": clusterdata.p.length,
+                    "size": clusterdata.s,
+                    "shape": clusterdata.f,
+                    "visible": clusterdata.v,
                     "color": clustercolor,
-                    "label": clusterdata.label
+                    "label": clusterdata.l
                 };
-                if (!sections.hasOwnProperty(clusterdata.clusterid)) {
-                    sections[clusterdata.clusterid] = localSection;
+                if (!sections.hasOwnProperty(clusterdata.k)) {
+                    sections[clusterdata.k] = localSection;
                 }
-                localSections[clusterdata.clusterid] = localSection;
+                localSections[clusterdata.k] = localSection;
 
-                var positions = new Float32Array(clusterdata.points.length * 3);
-                var colorarray = new Float32Array(clusterdata.points.length * 3);
-                var sizes = new Float32Array(clusterdata.points.length);
-                xmean = 0
-                ymean = 0
-                zmean = 0
-                for (var k = 0; k < clusterdata.points.length; k++) {
-                    var p = clusterdata.points[k];
+                var positions = new Float32Array(clusterdata.p.length * 3);
+                var colorarray = new Float32Array(clusterdata.p.length * 3);
+                var sizes = new Float32Array(clusterdata.p.length);
+                xmean = 0;
+                ymean = 0;
+                zmean = 0;
+                for (var k = 0; k < clusterdata.p.length; k++) {
+                    var p = findPoint(data, clusterdata.p[k]);
+                    if (!p) {
+                        continue;
+                    }
 
-                    positions[k * 3 + 0] = p.x;
-                    positions[k * 3 + 1] = p.y;
-                    positions[k * 3 + 2] = p.z;
+                    positions[k * 3 + 0] = p.v[0];
+                    positions[k * 3 + 1] = p.v[1];
+                    positions[k * 3 + 2] = p.v[2];
 
                     if(!calculatedmeans){
-                        xmean += p.x;
-                        ymean += p.y;
-                        zmean += p.z;
+                        xmean += p.v[0];
+                        ymean += p.v[1];
+                        zmean += p.v[2];
                     }
 
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
@@ -480,17 +488,17 @@ function loadPlotData(start, end) {
                 }
 
                 if(!calculatedmeans) {
-                    xmean = xmean / clusterdata.points.length;
-                    ymean = ymean / clusterdata.points.length;
-                    zmean = zmean / clusterdata.points.length;
+                    xmean = xmean / clusterdata.p.length;
+                    ymean = ymean / clusterdata.p.length;
+                    zmean = zmean / clusterdata.p.length;
 
                     xmeantotal += xmean;
                     ymeantotal += ymean;
                     zmeantotal += zmean;
                 }
 
-                geometry[clusterdata.clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
-                geometry[clusterdata.clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+                geometry[clusterdata.k].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry[clusterdata.k].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
 
 
@@ -507,10 +515,10 @@ function loadPlotData(start, end) {
                 }
             }
 
-            particleSets[data.timeSeriesSeqNumber] = particles;
-            sectionSets[data.timeSeriesSeqNumber] = localSections;
-            fileNames[data.timeSeriesSeqNumber] = data.fileName;
-            console.log(data.fileName)
+            particleSets[data.seq] = particles;
+            sectionSets[data.seq] = localSections;
+            fileNames[data.seq] = data.file;
+            console.log(data.file)
         });
 
     }
