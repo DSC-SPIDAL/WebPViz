@@ -380,13 +380,16 @@ public class ArtifactDAO {
                     Document clusterDocument = (Document) c;
                     Cluster cluster = new Cluster();
                     cluster.resultSet = fid;
-                    cluster.id = (Integer) clusterDocument.get(Constants.CLUSTERID_FIELD);
-                    cluster.cluster = (Integer) clusterDocument.get(Constants.CLUSTERID_FIELD);
-                    cluster.shape = (String) clusterDocument.get(Constants.SHAPE_FIELD);
-                    cluster.visible = (int) clusterDocument.get(Constants.VISIBLE_FIELD);
-                    cluster.size = (int) clusterDocument.get(Constants.SIZE_FIELD);
-                    cluster.label = (String) clusterDocument.get(Constants.LABEL_FIELD);
-                    cluster.color = color((Document) clusterDocument.get(Constants.COLOR_FIELD));
+                    cluster.id = (Integer) clusterDocument.get(Constants.Cluster.KEY);
+                    cluster.cluster = (Integer) clusterDocument.get(Constants.Cluster.KEY);
+                    cluster.shape = (String) clusterDocument.get(Constants.Cluster.SHAPE);
+                    cluster.visible = (int) clusterDocument.get(Constants.Cluster.VISIBILE);
+                    cluster.size = (int) clusterDocument.get(Constants.Cluster.SIZE);
+                    cluster.label = (String) clusterDocument.get(Constants.Cluster.LABEL);
+                    Object colorObject = clusterDocument.get(Constants.Cluster.COLOR);
+                    if (colorObject != null) {
+                        cluster.color = color(colorObject);
+                    }
                     clusters.add(cluster);
                 }
             }
@@ -394,13 +397,12 @@ public class ArtifactDAO {
         return clusters;
     }
 
-    private Color color(Document document) {
-        Color color = new Color();
-        color.a = (int) document.get("a");
-        color.b = (int) document.get("b");
-        color.g = (int) document.get("g");
-        color.r = (int) document.get("r");
-        return color;
+    private Color color(Object document) {
+        if (document instanceof List && ((List) document).size() >= 4) {
+            List colors = (List) document;
+            return new Color((Integer)colors.get(0), (Integer)colors.get(1), (Integer)colors.get(2), (Integer)colors.get(3));
+        }
+        return null;
     }
 
     public ResultSet individualFile(int timeSeriesId) {
@@ -409,22 +411,27 @@ public class ArtifactDAO {
 
         FindIterable<Document> iterable = con.artifactCol.find(query);
         for (Document document : iterable) {
-            Document resultDocument = (Document) document;
-            int fId = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
-            ResultSet resultSet = new ResultSet();
-            try {
-                resultSet.dateCreation = format.parse((String) resultDocument.get(Constants.Artifact.DATE_CREATION_FIELD));
-            } catch (ParseException e) {
-                e.printStackTrace();
+            Object resultSetsObject = document.get(Constants.Artifact.RESULTSETS_FIELD);
+            if (resultSetsObject instanceof List) {
+                for (Object documentObject : (List)resultSetsObject) {
+                    Document resultDocument = (Document) documentObject;
+                    int fId = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
+                    ResultSet resultSet = new ResultSet();
+                    try {
+                        resultSet.dateCreation = format.parse((String) resultDocument.get(Constants.Artifact.DATE_CREATION_FIELD));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
+                    resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
+                    resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
+                    resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
+                    resultSet.timeSeriesSeqNumber = 0;
+                    resultSet.timeSeriesId = timeSeriesId;
+                    return resultSet;
+                }
             }
-            resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
-            resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
-            resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-            resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
-            resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
-            resultSet.timeSeriesSeqNumber = 0;
-            resultSet.timeSeriesId = timeSeriesId;
-            return resultSet;
         }
         return null;
     }
