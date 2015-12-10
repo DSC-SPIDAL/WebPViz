@@ -257,16 +257,16 @@ public class ArtifactDAO {
         // add each cluster to clusters object
         // we are going to create separate docs when total number of points exceeds
         int count = 0;
-        List<Document> currentClusterList = new ArrayList<>();
+        Map<String, Document> currentClusterList = new HashMap<>();
         for (Map.Entry<Integer, Document> e : clusterDBObjectList.entrySet()) {
             count += clusterPointCount.get(e.getKey());
-            currentClusterList.add(e.getValue());
+            currentClusterList.put(Integer.toString(e.getKey()), e.getValue());
             if (count > maxPointsPerFile) {
                 count = 0;
                 Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
                 preRootObject.append(Constants.File.CLUSTERS, currentClusterList);
                 con.filesCol.insertOne(preRootObject);
-                currentClusterList = new ArrayList<>();
+                currentClusterList = new HashMap<>();
                 Logger.info("Breaking file clusters: " + originalFileName);
             }
         }
@@ -295,12 +295,11 @@ public class ArtifactDAO {
         }
 
         // now insert the edges if there are any
-        List<Document> edgesList = new ArrayList<Document>();
+        Map<String, Document> edgesList = new HashMap<>();
         List<Edge> edges = plotviz.getEdges();
         if (edges != null && edges.size() > 0) {
             for (Edge e : edges) {
                 Document edgeDoc = new Document();
-                edgeDoc.append(Constants.Edge.ID, e.getKey());
                 List<Vertex> vertexes = e.getVertices();
                 List<Integer> vertices = new ArrayList<>();
                 if (vertexes != null && vertexes.size() > 0) {
@@ -313,7 +312,7 @@ public class ArtifactDAO {
                     // no point adding this edge, because it doesn't have vertices
                     continue;
                 }
-                edgesList.add(edgeDoc);
+                edgesList.put(Integer.toString(e.getKey()), edgeDoc);
             }
             rootObject.append(Constants.File.EDGES, edgesList);
         }
@@ -387,24 +386,18 @@ public class ArtifactDAO {
             break;
         }
 
-        List<Document> clusters = new ArrayList<>();
-        List<Document> edges = new ArrayList<>();
+        Map<String, Object> clusters = new HashMap<>();
+        Map<String, Object> edges = new HashMap<>();
         Map<String, Object> points = new HashMap<>();
         for (Document d : iterable) {
             Object clusterObjects = d.get(Constants.File.CLUSTERS);
-            if (clusterObjects instanceof List) {
-                for (Object c : (List)clusterObjects) {
-                    Document clusterDocument = (Document) c;
-                    clusters.add(clusterDocument);
-                }
+            if (clusterObjects instanceof Document) {
+                clusters.putAll((Document)clusterObjects);
             }
 
             Object edgeObjects = d.get(Constants.File.EDGES);
-            if (edgeObjects instanceof List) {
-                for (Object c : (List)edgeObjects) {
-                    Document edgeDocument = (Document) c;
-                    edges.add(edgeDocument);
-                }
+            if (edgeObjects instanceof Document) {
+                edges.putAll((Document)edgeObjects);
             }
             Object pointObjects = d.get(Constants.File.POINTS);
             if (pointObjects instanceof Document) {

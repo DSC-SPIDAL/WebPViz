@@ -194,80 +194,85 @@ function generateGraph() {
         var points = {};
         var pointcolors = {};
         $("#plot-title").text(data.file);
-        for (var i = 0; i < clusters.length; i++) {
-            var clusterdata = data.clusters[i];
-            var clusterid = clusterdata.k;
+        clusters = data.clusters;
+        var clusterCount = 0;
+        for (var cid in clusters) {
+            if (data.clusters.hasOwnProperty(cid)) {
+                clusterCount++;
+                var clusterdata = data.clusters[cid];
+                var clusterid = parseInt(cid);
 
-            var clustercolor = {"r":0, "g":0, "b":0};
-            if (clusterdata.r) {
-                clustercolor["r"] = clusterdata.r[1];
-                clustercolor["g"] = clusterdata.r[2];
-                clustercolor["b"] = clusterdata.r[3];
-            }
-            if (clustercolor == null)
-                clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+                var clustercolor = {"r": 0, "g": 0, "b": 0};
+                if (clusterdata.r) {
+                    clustercolor["r"] = clusterdata.r[1];
+                    clustercolor["g"] = clusterdata.r[2];
+                    clustercolor["b"] = clusterdata.r[3];
+                }
+                if (clustercolor == null)
+                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
-            if (!sections.hasOwnProperty(clusterdata.clusterid))
-                sections[clusterdata.k] = {
-                    "length": clusterdata.p.length,
-                    "size": clusterdata.s,
-                    "shape": clusterdata.f,
-                    "visible": clusterdata.v,
-                    "color": clustercolor,
-                    "label": clusterdata.l
-                };
+                if (!sections.hasOwnProperty(clusterid))
+                    sections[clusterid] = {
+                        "length": clusterdata.p.length,
+                        "size": clusterdata.s,
+                        "shape": clusterdata.f,
+                        "visible": clusterdata.v,
+                        "color": clustercolor,
+                        "label": clusterdata.l
+                    };
 
-            if (!geometry.hasOwnProperty(clusterdata.k)) {
-                geometry[clusterdata.k] = new THREE.BufferGeometry();
-                currentParticles[clusterdata.k] = [];
-            }
-            if(!colorlist.hasOwnProperty(clusterdata.k))
-            colorlist[clusterdata.k] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                if (!geometry.hasOwnProperty(clusterid)) {
+                    geometry[clusterid] = new THREE.BufferGeometry();
+                    currentParticles[clusterid] = [];
+                }
+                if (!colorlist.hasOwnProperty(clusterid))
+                    colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
 
-            var positions = new Float32Array(clusterdata.p.length * 3);
-            var colorarray = new Float32Array(clusterdata.p.length * 3);
-            var sizes = new Float32Array(clusterdata.p.length);
-            xmean = 0;
-            ymean = 0;
-            zmean = 0;
-            for (var k = 0; k < clusterdata.p.length; k++) {
-                var p = findPoint(data, clusterdata.p[k]);
-                if (!p) {
-                    continue;
+                var positions = new Float32Array(clusterdata.p.length * 3);
+                var colorarray = new Float32Array(clusterdata.p.length * 3);
+                var sizes = new Float32Array(clusterdata.p.length);
+                xmean = 0;
+                ymean = 0;
+                zmean = 0;
+                for (var k = 0; k < clusterdata.p.length; k++) {
+                    var p = findPoint(data, clusterdata.p[k]);
+                    if (!p) {
+                        continue;
+                    }
+
+                    positions[k * 3 + 0] = p[0];
+                    positions[k * 3 + 1] = p[1];
+                    positions[k * 3 + 2] = p[2];
+
+                    xmean += p[0];
+                    ymean += p[1];
+                    zmean += p[2];
+
+                    var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+                    colorarray[k * 3 + 0] = tempcolor.r;
+                    colorarray[k * 3 + 1] = tempcolor.g;
+                    colorarray[k * 3 + 2] = tempcolor.b;
+
+
+                    points[clusterdata.p[k]] = [p[0], p[1], p[2]];
+                    pointcolors[clusterdata.p[k]] = tempcolor;
                 }
 
-                positions[k * 3 + 0] = p[0];
-                positions[k * 3 + 1] = p[1];
-                positions[k * 3 + 2] = p[2];
+                xmean = xmean / clusterdata.p.length;
+                ymean = ymean / clusterdata.p.length;
+                zmean = zmean / clusterdata.p.length;
+                geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
 
-                xmean += p[0];
-                ymean += p[1];
-                zmean += p[2];
-
-                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
-                colorarray[k * 3 + 0] = tempcolor.r;
-                colorarray[k * 3 + 1] = tempcolor.g;
-                colorarray[k * 3 + 2] = tempcolor.b;
-
-
-                points[p.k] = [p[0], p[1], p[2]];
-                pointcolors[p.k] = tempcolor
+                xmeantotal += xmean;
+                ymeantotal += ymean;
+                zmeantotal += zmean;
             }
-
-            xmean = xmean/clusterdata.p.length;
-            ymean = ymean/clusterdata.p.length;
-            zmean = zmean/clusterdata.p.length;
-            geometry[clusterdata.k].addAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry[clusterdata.k].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
-
-            xmeantotal += xmean;
-            ymeantotal += ymean;
-            zmeantotal += zmean;
         }
 
-        xmeantotal = xmeantotal/clusters.length;
-        ymeantotal = ymeantotal/clusters.length;
-        zmeantotal = zmeantotal/clusters.length;
+        xmeantotal = xmeantotal/clusterCount;
+        ymeantotal = ymeantotal/clusterCount;
+        zmeantotal = zmeantotal/clusterCount;
 
         drawEdges(data.edges,points,pointcolors);
         for (var key in geometry) {
@@ -298,7 +303,7 @@ function generateGraph() {
         // stats.domElement.style.position = 'absolute';
         // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
-        if (clusters && clusters.length < 100) {
+        if (clusters && clusterCount < 100) {
             $('.color-pic1').colorpicker();
         }
         render();
@@ -422,89 +427,92 @@ function loadPlotData(start, end) {
             fileName = data.file;
 
             var localSections = [];
-            for (var i = 0; i < clusters.length; i++) {
+            var clusterCount = 0;
+            for (var cid in clusters) {
+                if (data.clusters.hasOwnProperty(cid)) {
+                    clusterCount++;
+                    var clusterdata = data.clusters[cid];
+                    var clusterid =  parseInt(cid)
+                    var clustercolor = {"r": 0, "g": 0, "b": 0};
+                    if (clusterdata.r) {
+                        clustercolor["r"] = clusterdata.r[1];
+                        clustercolor["g"] = clusterdata.r[2];
+                        clustercolor["b"] = clusterdata.r[3];
+                    }
+                    if (clustercolor == null)
+                        clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
-                var clusterdata = data.clusters[i];
-                var clusterid = clusterdata.k;
-                var clustercolor = {"r":0, "g":0, "b":0};
-                if (clusterdata.r) {
-                    clustercolor["r"] = clusterdata.r[1];
-                    clustercolor["g"] = clusterdata.r[2];
-                    clustercolor["b"] = clusterdata.r[3];
-                }
-                if (clustercolor == null)
-                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
-
-                hsl = [heus[clusterid], 1, 0.8];
-                if (!geometry.hasOwnProperty(clusterdata.k)) {
-                    geometry[clusterdata.k] = new THREE.BufferGeometry()
-                    particles[clusterdata.k] = new Array();
-                }
-
-                if(!colorlist.hasOwnProperty(clusterdata.k))
-                colorlist[clusterdata.k] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
-
-                var localSection = {
-                    "length": clusterdata.p.length,
-                    "size": clusterdata.s,
-                    "shape": clusterdata.f,
-                    "visible": clusterdata.v,
-                    "color": clustercolor,
-                    "label": clusterdata.l
-                };
-                if (!sections.hasOwnProperty(clusterdata.k)) {
-                    sections[clusterdata.k] = localSection;
-                }
-                localSections[clusterdata.k] = localSection;
-
-                var positions = new Float32Array(clusterdata.p.length * 3);
-                var colorarray = new Float32Array(clusterdata.p.length * 3);
-                var sizes = new Float32Array(clusterdata.p.length);
-                xmean = 0;
-                ymean = 0;
-                zmean = 0;
-                for (var k = 0; k < clusterdata.p.length; k++) {
-                    var p = findPoint(data, clusterdata.p[k]);
-                    if (!p) {
-                        continue;
+                    hsl = [heus[clusterid], 1, 0.8];
+                    if (!geometry.hasOwnProperty(clusterid)) {
+                        geometry[clusterid] = new THREE.BufferGeometry()
+                        particles[clusterid] = new Array();
                     }
 
-                    positions[k * 3 + 0] = p[0];
-                    positions[k * 3 + 1] = p[1];
-                    positions[k * 3 + 2] = p[2];
+                    if (!colorlist.hasOwnProperty(clusterid))
+                        colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
 
-                    if(!calculatedmeans){
-                        xmean += p[0];
-                        ymean += p[1];
-                        zmean += p[2];
+                    var localSection = {
+                        "length": clusterdata.p.length,
+                        "size": clusterdata.s,
+                        "shape": clusterdata.f,
+                        "visible": clusterdata.v,
+                        "color": clustercolor,
+                        "label": clusterdata.l
+                    };
+                    if (!sections.hasOwnProperty(clusterid)) {
+                        sections[clusterid] = localSection;
+                    }
+                    localSections[clusterid] = localSection;
+
+                    var positions = new Float32Array(clusterdata.p.length * 3);
+                    var colorarray = new Float32Array(clusterdata.p.length * 3);
+                    var sizes = new Float32Array(clusterdata.p.length);
+                    xmean = 0;
+                    ymean = 0;
+                    zmean = 0;
+                    for (var k = 0; k < clusterdata.p.length; k++) {
+                        var p = findPoint(data, clusterdata.p[k]);
+                        if (!p) {
+                            continue;
+                        }
+
+                        positions[k * 3 + 0] = p[0];
+                        positions[k * 3 + 1] = p[1];
+                        positions[k * 3 + 2] = p[2];
+
+                        if (!calculatedmeans) {
+                            xmean += p[0];
+                            ymean += p[1];
+                            zmean += p[2];
+                        }
+
+                        var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
+                        colorarray[k * 3 + 0] = tempcolor.r;
+                        colorarray[k * 3 + 1] = tempcolor.g;
+                        colorarray[k * 3 + 2] = tempcolor.b;
+
                     }
 
-                    var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
-                    colorarray[k * 3 + 0] = tempcolor.r;
-                    colorarray[k * 3 + 1] = tempcolor.g;
-                    colorarray[k * 3 + 2] = tempcolor.b;
+                    if (!calculatedmeans) {
+                        xmean = xmean / clusterdata.p.length;
+                        ymean = ymean / clusterdata.p.length;
+                        zmean = zmean / clusterdata.p.length;
 
+                        xmeantotal += xmean;
+                        ymeantotal += ymean;
+                        zmeantotal += zmean;
+                    }
+
+                    geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
                 }
-
-                if(!calculatedmeans) {
-                    xmean = xmean / clusterdata.p.length;
-                    ymean = ymean / clusterdata.p.length;
-                    zmean = zmean / clusterdata.p.length;
-
-                    xmeantotal += xmean;
-                    ymeantotal += ymean;
-                    zmeantotal += zmean;
-                }
-
-                geometry[clusterdata.k].addAttribute('position', new THREE.BufferAttribute(positions, 3));
-                geometry[clusterdata.k].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
             }
 
 
             if(!calculatedmeans) {
-                xmeantotal = xmeantotal / clusters.length;
-                ymeantotal = ymeantotal / clusters.length;
-                zmeantotal = zmeantotal / clusters.length;
+                xmeantotal = xmeantotal / clusterCount;
+                ymeantotal = ymeantotal / clusterCount;
+                zmeantotal = zmeantotal / clusterCount;
                 calculatedmeans = true;
             }
             for (var key in geometry) {
