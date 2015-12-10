@@ -183,7 +183,7 @@ public class ArtifactDAO {
                               int parent, Long sequenceNumber, String originalFileName) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         // maximum number of points per file
-        final int maxPointsPerFile = 200000;
+        final int maxPointsPerFile = 100000;
         Map<Integer, Integer> clusterPointCount = new HashMap<>();
         Document rootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
 
