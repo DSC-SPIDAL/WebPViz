@@ -244,7 +244,7 @@ function generateGraph() {
                 ymean += p[1];
                 zmean += p[2];
 
-                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
+                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                 colorarray[k * 3 + 0] = tempcolor.r;
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
@@ -469,14 +469,14 @@ function loadPlotData(start, end) {
                         continue;
                     }
 
-                    positions[k * 3 + 0] = p.v[0];
-                    positions[k * 3 + 1] = p.v[1];
-                    positions[k * 3 + 2] = p.v[2];
+                    positions[k * 3 + 0] = p[0];
+                    positions[k * 3 + 1] = p[1];
+                    positions[k * 3 + 2] = p[2];
 
                     if(!calculatedmeans){
-                        xmean += p.v[0];
-                        ymean += p.v[1];
-                        zmean += p.v[2];
+                        xmean += p[0];
+                        ymean += p[1];
+                        zmean += p[2];
                     }
 
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
