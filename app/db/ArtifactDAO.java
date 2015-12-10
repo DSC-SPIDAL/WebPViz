@@ -283,7 +283,7 @@ public class ArtifactDAO {
             if (count > maxPointsPerFile) {
                 count = 0;
                 Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
-                preRootObject.append(Constants.File.POINTS, pointList);
+                preRootObject.append(Constants.File.POINTS, currentPointList);
                 con.filesCol.insertOne(preRootObject);
                 currentPointList = new HashMap<>();
                 Logger.info("Breaking file points: " + originalFileName);
@@ -291,7 +291,7 @@ public class ArtifactDAO {
         }
         // we will add the remainder or the whole list, if we didn't exceed the max number
         if (currentPointList.size() > 0) {
-            rootObject.append(Constants.File.POINTS, pointList);
+            rootObject.append(Constants.File.POINTS, currentPointList);
         }
 
         // now insert the edges if there are any
