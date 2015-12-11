@@ -195,6 +195,9 @@
                         <div class="form-group">
                             <label for="file">A ZIP file or a point file</label>
                             <input type="file" id="file" name="file" required>
+                            @if(group){
+                                <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
+                                }
                         </div>
                         <div class="form-group">
                             <label for="desc">Description</label>
@@ -237,6 +240,9 @@
                             <label for="edit_file_name">Name</label>
                             <input type="text" id="edit_file_name" name="name" required disabled="disabled">
                             <input type="hidden" name="id" id="edit_file_id">
+                            @if(group){
+                                <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
+                            }
                         </div>
                         <div class="form-group">
                             <label for="edit_file_desc">Description</label>
@@ -278,6 +284,9 @@
                         <div class="form-group">
                             <label for="exampleInputFile">Name</label>
                             <input type="text" id="name" name="name" required>
+                            @if(group){
+                                <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
+                                }
                         </div>
                         <div class="form-group">
                             <label for="exampleInputPassword1">Description</label>
@@ -311,6 +320,9 @@
                             <label for="disabledEdit_name">Name</label>
                             <input type="text" id="disabledEdit_name" name="name" required disabled="disabled">
                             <input type="hidden" id="edit_col_name" name="name" required>
+                            @if(group){
+                                <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
+                                }
                         </div>
                         <div class="form-group">
                             <label for="edit_desc">Description</label>

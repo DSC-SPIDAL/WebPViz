@@ -91,8 +91,11 @@ public class Application extends Controller {
         String name = resultSet.getFile().getName();
         String[] desc = body.asFormUrlEncoded().get("desc");
         String[] grp = body.asFormUrlEncoded().get("group");
+        String[] fromGroupForm = body.asFormUrlEncoded().get("from_group");
+
         String description = "No description";
         String group = Constants.Group.DEFAULT_GROUP;
+        String fromGroup = null;
 
         if (desc.length >= 1) {
             description = desc[0];
@@ -115,7 +118,11 @@ public class Application extends Controller {
             Logger.error("Failed to create time series from zip", e);
             return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
-        return GO_DASHBOARD;
+        if (fromGroupForm == null) {
+            return GO_DASHBOARD;
+        } else {
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group)), GroupsDAO.allGroups(), true, group));
+        }
     }
 
     @Security.Authenticated(Secured.class)
@@ -123,7 +130,7 @@ public class Application extends Controller {
         System.out.println("Update");
         DynamicForm form = Form.form().bindFromRequest();
 
-        String description, group, id;
+        String description, group, id, fromGroup = null;
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
@@ -133,7 +140,7 @@ public class Application extends Controller {
         id = form.get("id");
         description = form.get("desc");
         group = form.get("group");
-
+        fromGroup = form.get("from_group");
 
         TimeSeries oldGroup = new TimeSeries();
         oldGroup.id = Integer.parseInt(id);
@@ -146,7 +153,11 @@ public class Application extends Controller {
         if (db.timeSeriesExists(oldGroup)) {
             System.out.println("Exists");
             db.updateTimeSeries(oldGroup, newTimeSeries);
-            return GO_DASHBOARD;
+            if (fromGroup == null) {
+                return GO_DASHBOARD;
+            } else {
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group)), GroupsDAO.allGroups(), true, group));
+            }
         } else {
             //
             System.out.println("non exisits");

@@ -23,6 +23,9 @@ import models.utils.AppException;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.libs.F;
+import play.mvc.Http;
+import play.mvc.Result;
 
 public class Global extends GlobalSettings{
 
