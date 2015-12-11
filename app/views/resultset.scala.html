@@ -19,6 +19,7 @@
                 @*<input type="text" id="plot-slider" class="form-control">*@
                 <div class="input-group-btn">
                     <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
+                    <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"><span id="plot-reset-span" class="glyphicon glyphicon-save"></span></button>
                     <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five">
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
@@ -64,7 +65,7 @@
         }else{
             $.getJSON("@routes.Application.resultset(resultSetId, timeSerisId)", function (data) {
                 var resultSetUrl = "@routes.Application.resultssetall(timeSerisId, resultSetId)";
-                visualize(resultSetUrl, data, @resultSetId);
+                visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
             });
             $("#settingsModal").draggable({
                 handle: ".modal-header"
@@ -82,6 +83,9 @@
                         // the checkbox was unchecked
                         colorEnable(false);
                     }
+                });
+                $('.plot-save').click(function() {
+                    savePlot();
                 });
                 $('#plot-reset').click(function () {
                     resetView()

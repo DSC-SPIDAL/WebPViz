@@ -166,6 +166,21 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    public static Result savePlot() {
+        User loggedInUser = User.findByEmail(request().username());
+        JsonNode json = request().body().asJson();
+        int timeSeriesId = 0;
+        JsonNode camera = json.get("camera");
+        TimeSeries tid = new TimeSeries();
+        tid.uploaderId = loggedInUser.id;
+        tid.id = timeSeriesId;
+
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        db.updateArtifactSetting(tid, json);
+        return ok("success");
+    }
+
+    @Security.Authenticated(Secured.class)
     public static Result visualize(int resultSetId, int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());

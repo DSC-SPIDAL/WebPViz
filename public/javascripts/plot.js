@@ -18,6 +18,7 @@ var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
 var clusterUrl;
 var clusters;
 var resultSetId;
+var timeseriesId;
 var resultData;
 
 //Time Series Vars
@@ -171,10 +172,11 @@ function updateClusterList(list, initcolors) {
 }
 
 //Plot functions
-function visualize(resultSetUrl, resultSet, id) {
+function visualize(resultSetUrl, resultSet, fid, tid) {
     clusterUrl = resultSetUrl;
     clusters = resultSet.clusters;
-    resultSetId = id;
+    resultSetId = fid;
+    timeseriesId = tid;
     generateGraph();
     setupGuiSingle();
     animate();
@@ -453,12 +455,12 @@ function loadPlotData(start, end) {
 
                     hsl = [heus[clusterid], 1, 0.8];
                     if (!geometry.hasOwnProperty(clusterid)) {
-                        geometry[clusterid] = new THREE.BufferGeometry()
-                        particles[clusterid] = new Array();
+                        geometry[clusterid] = new THREE.BufferGeometry();
+                        particles[clusterid] = [];
                     }
 
                     if (!colorlist.hasOwnProperty(clusterid))
-                        colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString()
+                        colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
 
                     var localSection = {
                         "length": clusterdata.p.length,
@@ -1044,5 +1046,24 @@ function changeGlyphSize(){
         }
     }
     render();
+}
+
+function savePlot() {
+    var url = '/timeseries/save ';
+    var c = camera.toJSON();
+    var obj = {};
+    obj['camera'] = camera.toJSON();
+    obj['tid'] = timeseriesId;
+    obj['fid'] = resultSetId;
+    $.ajax({
+        type :  "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(obj),
+        url  :  url,
+        success: function(data){
+            console.log(data);
+        }
+    });
 }
 

@@ -68,7 +68,7 @@ public class Constants {
         public static final String VERSION = "version";
         public static final String SETTINGS = "settings";
         public static final String UDP = "udp";
-        public static final String RESULTSETS_FIELD = "files";
+        public static final String FILES = "files";
     }
 
     public static class Group {

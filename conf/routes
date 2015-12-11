@@ -59,3 +59,5 @@ GET         /groups/delete/:name                controllers.GroupController.remo
 POST        /groups/create                      controllers.GroupController.newGroup()
 
 POST        /groups/update                      controllers.GroupController.updateGroup()
+
+POST        /timeseries/save                    controllers.Application.savePlot()

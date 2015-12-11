@@ -51,4 +51,6 @@ public class ResultSet extends Model {
     public Integer timeSeriesSeqNumber;
 
     public String fileName;
+
+
 }

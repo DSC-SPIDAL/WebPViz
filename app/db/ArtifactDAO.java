@@ -1,5 +1,6 @@
 package db;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBList;
 import com.mongodb.client.FindIterable;
 import com.mongodb.util.JSON;
@@ -57,7 +58,7 @@ public class ArtifactDAO {
         Document resultSet = createResultSet(0, resultSetName, description, dateString, uploader, timeSeriesId, 0, pvizName);
         List<Document> emptyResultSets = new ArrayList<Document>();
         emptyResultSets.add(resultSet);
-        mainDoc.append(Constants.Artifact.RESULTSETS_FIELD, emptyResultSets);
+        mainDoc.append(Constants.Artifact.FILES, emptyResultSets);
         con.artifactCol.insertOne(mainDoc);
     }
 
@@ -94,7 +95,7 @@ public class ArtifactDAO {
         mainDoc.append(Constants.Artifact.DATE_CREATION_FIELD, dateString);
         mainDoc.append(Constants.Artifact.STATUS_FIELD, Constants.ArtifactStatus.PENDING);
         List<Document> emptyResultSets = new ArrayList<Document>();
-        mainDoc.append(Constants.Artifact.RESULTSETS_FIELD, emptyResultSets);
+        mainDoc.append(Constants.Artifact.FILES, emptyResultSets);
         mainDoc.append(Constants.Artifact.GROUP_FIELD, group);
         mainDoc.append(Constants.Artifact.TYPE, Constants.ArtifactType.TIME_SERIES);
         con.artifactCol.insertOne(mainDoc);
@@ -148,7 +149,7 @@ public class ArtifactDAO {
 
                         }
                     }
-                    mainDoc.append(Constants.Artifact.RESULTSETS_FIELD, resultSets);
+                    mainDoc.append(Constants.Artifact.FILES, resultSets);
                     zipFile.close();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -159,6 +160,29 @@ public class ArtifactDAO {
             }
         });
         t.start();
+    }
+
+    public void updateArtifactSetting(TimeSeries tid, JsonNode settings) {
+        MongoConnection con = MongoConnection.getInstance();
+
+        Document oldGroupDocument = new Document();
+        oldGroupDocument.append(Constants.Artifact.ID_FIELD, tid.id);
+
+        FindIterable<Document> iterable = con.artifactCol.find(oldGroupDocument);
+        Document findDocument = null;
+        for (Document d : iterable) {
+            findDocument = d;
+            break;
+        }
+
+        if (findDocument != null) {
+            if (findDocument.containsKey(Constants.Artifact.SETTINGS)) {
+                findDocument.replace(Constants.Artifact.SETTINGS, settings);
+            } else {
+                findDocument.append(Constants.Artifact.SETTINGS, settings);
+            }
+            con.artifactCol.replaceOne(oldGroupDocument, findDocument);
+        }
     }
 
     public Document createResultSet(int id, String name, String description, String dateCreation, int uploaderId, int timeSeriesId, int timeSeriesSeqNumber, String originalFileName) {
@@ -466,7 +490,7 @@ public class ArtifactDAO {
 
         FindIterable<Document> iterable = con.artifactCol.find(query);
         for (Document document : iterable) {
-            Object resultSetsObject = document.get(Constants.Artifact.RESULTSETS_FIELD);
+            Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject instanceof List) {
                 for (Object documentObject : (List)resultSetsObject) {
                     Document resultDocument = (Document) documentObject;
@@ -497,7 +521,7 @@ public class ArtifactDAO {
 
         FindIterable<Document> iterable = con.artifactCol.find(query);
         for (Document document : iterable) {
-            Object resultSetsObject = document.get(Constants.Artifact.RESULTSETS_FIELD);
+            Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject instanceof List) {
                 for (Object documentObject : (List)resultSetsObject) {
                     Document resultDocument = (Document) documentObject;
@@ -529,7 +553,7 @@ public class ArtifactDAO {
         FindIterable<Document> iterable = con.artifactCol.find();
         List<ResultSet> resultSetList = new ArrayList<ResultSet>();
         for (Document document : iterable) {
-            Object resultSetsObject = document.get(Constants.Artifact.RESULTSETS_FIELD);
+            Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject instanceof List) {
                 for (Object documentObject : (List)resultSetsObject) {
                     Document resultDocument = (Document) documentObject;
@@ -591,7 +615,7 @@ public class ArtifactDAO {
             if (timeSeries.group == null || "".equals(timeSeries.group)) {
                 timeSeries.group = Constants.Group.DEFAULT_GROUP;
             }
-            Object resultSetsObject = document.get(Constants.Artifact.RESULTSETS_FIELD);
+            Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject != null && resultSetsObject instanceof List) {
                 if (((List)resultSetsObject).size() > 1) {
                     timeSeries.t = "T";
