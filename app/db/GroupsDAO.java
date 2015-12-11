@@ -10,6 +10,9 @@ import java.util.List;
 
 public class GroupsDAO {
     public static boolean groupExists(Group group) {
+        if (Constants.Group.DEFAULT_GROUP.equals(group.name)) {
+            return true;
+        }
         MongoConnection db = MongoConnection.getInstance();
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);

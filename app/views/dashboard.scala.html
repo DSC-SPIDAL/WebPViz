@@ -17,107 +17,167 @@
                 }
             }
     </script>
-    @if(!group) {
-        <div class="row upload">
-            <div class="col-sm-12 col-md-12">
-                <h2 class="section-header">Upload Files</h2>
-                <button type="button" data-toggle="modal" data-target="#uploadModal" class="btn btn-default btn-circle margin-right-five">
+
+    <div class="row upload">
+        <div class="col-sm-12 col-md-12 pull-right">
+            <h2 class="section-header"></h2>
+            <div class="dropdown">
+                <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Upload
+                    <span class="caret"></span>
                 </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="#" data-toggle="modal" data-target="#uploadModal">Upload Artifact</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#newGroupModal">Create Collection</a></li>
+                </ul>
+            </div>
+            @if(group) {
+                <h2 class="section-header">Collection: @groupName</h2>
+            }
+        </div>
+    </div>
+    @if(!group) {
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <h2 class="section-header">Collections</h2>
+                @if(groups.nonEmpty) {
+                    <table id="collections" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for( r <- groups) {
+                            <tr>
+                                <td>@r.name</td>
+                                <td>@r.description</td>
+                                <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
+                                <td align="center"><a href="javascript:void(0);" class="edit-col-link" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                } else {
+                    <div class="dataTables_info" id="example_info" style="padding-top: 20px ; float: none">
+                        No Groups to Display</div>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <h2 class="section-header">Artifacts</h2>
+                @if(timeSeries.length != 0) {
+                    <table id="timeseriesfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Collection</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>User</th>
+                                <th>Created At</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for(r <- timeSeries) {
+                            <tr>
+                                <td>@r.t</td>
+                                <td>@r.group</td>
+                                <td>@r.name</td>
+                                <td>@r.description</td>
+                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.dateCreation</td>
+                                @if("pending".equals(r.status)) {
+                                    <script type="text/javascript">
+                                        refreshIfPending();
+                                </script>
+                                    <td>Pending...</td>
+                                } else {
+                                    @if("T".equals(r.t)) {
+                                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                    } else {
+                                        <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
+                                    }
+                                }
+                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+
+                } else {
+                    <div class="dataTables_info" id="example_info" style="padding-top : 20 px ; float : none">
+                        No Time Series Files to Display</div>
+                }
+
             </div>
         </div>
     } else {
-        <div class="row upload">
+        <div class="row">
             <div class="col-sm-12 col-md-12">
-                <h2 class="section-header">Group: @groupName</h2>
+                <h2 class="section-header">Artifacts</h2>
+                @if(timeSeries.length != 0) {
+                    <table id="timeseriesfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Group</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>User</th>
+                                <th>Created At</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for(r <- timeSeries) {
+                            <tr>
+                                <td>@r.t</td>
+                                <td>@r.group</td>
+                                <td>@r.name</td>
+                                <td>@r.description</td>
+                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.dateCreation</td>
+                                @if("pending".equals(r.status)) {
+                                    <script type="text/javascript">
+                                        refreshIfPending();
+                                </script>
+                                    <td>Pending...</td>
+                                } else {
+                                    @if("T".equals(r.t)) {
+                                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                    } else {
+                                        <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
+                                    }
+                                }
+                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+
+                } else {
+                    <div class="dataTables_info" id="example_info" style="padding-top : 20 px ; float : none">
+                        No Time Series Files to Display</div>
+                }
+
             </div>
         </div>
     }
-
-    <div class="row">
-        <div class="col-sm-12 col-md-12">
-            <h2 class="section-header">Files</h2>
-            @if(timeSeries.length != 0) {
-                <table id="timeseriesfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Group</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>User</th>
-                            <th>Created At</th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @for( r <- timeSeries) {
-                        <tr>
-                            <td>@r.t</td>
-                            <td>@r.group</td>
-                            <td>@r.name</td>
-                            <td>@r.description</td>
-                            <td>@User.findById(r.uploaderId).email</td>
-                            <td>@r.dateCreation</td>
-                            @if("pending".equals(r.status)){
-                                <script type="text/javascript">
-                                        refreshIfPending();
-                                </script>
-                                <td>Pending...</td>
-                            }else {
-                                @if("T".equals(r.t)) {
-                                    <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
-                                } else {
-                                    <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
-                                }
-                            }
-                            <td align="center"><a href="javascript:void(0);" class="edit-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
-                            <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-
-            } else {
-                <div class="dataTables_info" id="example_info" style="padding-top: 20px ; float: none">
-                    No Time Series Files to Display</div>
-            }
-
-        </div>
-    </div>
-    @*<div class="row">*@
-        @*<div class="col-sm-12">*@
-            @*<h2 class="section-header">Individual Files</h2>*@
-            @*if(resultSets.length != 0) {
-                @*<table id="individualfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">*@
-                    @*<thead>*@
-                        @*<tr>*@
-                            @*<th>Single Plot Name</th>*@
-                            @*<th>Description</th>*@
-                            @*<th>User</th>*@
-                            @*<th>Created At</th>*@
-                            @*<th></th>*@
-                        @*</tr>*@
-                    @*</thead>*@
-                    @*<tbody>*@
-                    @*for(r <- resultSets) {
-                        @*<tr>*@
-                            @*<td>@r.name</td>*@
-                            @*<td>@r.description</td>*@
-                            @*<td>@User.findById(r.uploaderId).email</td>*@
-                            @*<td>@r.dateCreation</td>*@
-                            @*<td><a href="@routes.Application.visualize(r.id, r.timeSeriesId)">View</a> </td>*@
-                        @*</tr>*@
-                    @*}*@
-                    @*</tbody>*@
-                @*</table>*@
-            @*}else{*@
-                @*<div class="dataTables_info" id="example_info" style="padding-top: 20px;float: none">No Files to Display</div>*@
-            @*}*@
-        @*</div>*@
-    @*</div>*@
 
     <div class="modal fade" id="uploadModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
         <div class="modal-dialog modal-lg">
@@ -160,7 +220,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+    <div class="modal fade" id="editFileModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -174,13 +234,13 @@
                     }
                     <form id="uploadForm" method="post" class="form-horizontal">
                         <div class="form-group">
-                            <label for="edit_name">Name</label>
-                            <input type="text" id="edit_name" name="name" required disabled="disabled">
-                            <input type="hidden" name="id" id="edit_id">
+                            <label for="edit_file_name">Name</label>
+                            <input type="text" id="edit_file_name" name="name" required disabled="disabled">
+                            <input type="hidden" name="id" id="edit_file_id">
                         </div>
                         <div class="form-group">
-                            <label for="edit_desc">Description</label>
-                            <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_desc" placeholder="Enter description"></textarea>
+                            <label for="edit_file_desc">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_file_desc" placeholder="Enter description"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="edit_group">Group</label>
@@ -202,6 +262,71 @@
         </div>
     </div>
 
+    <div class="modal fade" id="newGroupModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Create new Group</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                @form(routes.GroupController.newGroup()){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <form id="uploadForm" method="post" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="exampleInputFile">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="desc" placeholder="Enter description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </form>
+                }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editColModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit Group</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                @form(routes.GroupController.updateGroup()){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <form id="uploadForm" method="post" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="disabledEdit_name">Name</label>
+                            <input type="text" id="disabledEdit_name" name="name" required disabled="disabled">
+                            <input type="hidden" id="edit_col_name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_desc">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_col_desc" placeholder="Enter description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
@@ -209,39 +334,6 @@
     @* can be used if table tools are needed such as save as pdf, print<script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/tools/js/dataTables.tableTools.js")"></script>*@
     <script>
             var asInitVals = new Array();
-            $(document).ready(function () {
-                var oTable = $('#individualfiles').dataTable({
-                    "oLanguage": {
-                        "sSearch": "Search all columns:"
-                    },
-                    'iDisplayLength': 10,
-                    "sPaginationType": "full_numbers",
-                    "order": [[ 3, "desc" ]],
-                    "tableTools": {
-
-                    }
-                });
-                $("tfoot input").keyup(function () {
-                    /* Filter on the column based on the index of this element's parent <th> */
-                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
-                });
-                $("tfoot input").each(function (i) {
-                    asInitVals[i] = this.value;
-                });
-                $("tfoot input").focus(function () {
-                    if (this.className == "search_init") {
-                        this.className = "";
-                        this.value = "";
-                    }
-                });
-                $("tfoot input").blur(function (i) {
-                    if (this.value == "") {
-                        this.className = "search_init";
-                        this.value = asInitVals[$("tfoot input").index(this)];
-                    }
-                });
-            });
-
             $(document).ready(function () {
                 var oTable = $('#timeseriesfiles').dataTable({
                     "oLanguage": {
@@ -274,21 +366,63 @@
                     }
                 });
 
-                $('.edit-link').click(function(e) {
+                $('.edit-file-link').click(function(e) {
                    e.preventDefault();
                    var n = $(this).data('name');
                    var id = $(this).data('id');
                    var desc = $(this).data('desc');
                    var group = $(this).data('group');
-                    $("#disabledEdit_name").val(n);
-                    $("#edit_name").val(n);
-                    $("#edit_desc").val(desc);
+                    $("#edit_file_name").val(n);
+                    $("#edit_file_desc").val(desc);
                     if (group) {
                         $("#edit_group").val(group);
                     }
-                    $('#edit_id').val(id);
-                    $('#editModal').modal('show');
+                    $('#edit_file_id').val(id);
+                    $('#editFileModal').modal('show');
                  });
+            });
+
+            $(document).ready(function () {
+                $('.edit-col-link').click(function(e) {
+                   e.preventDefault();
+                   n = $(this).data('name');
+                   desc = $(this).data('desc');
+                    $("#edit_col_name").val(n);
+                    $("#edit_col_desc").val(desc);
+                    $('#editColModal').modal('show');
+                 });
+                var oTable = $('#collections').dataTable({
+                    "oLanguage": {
+                        "sSearch": "Search all columns:"
+                    },
+                    'iDisplayLength': 10,
+                    "sPaginationType": "full_numbers",
+                    "order": [[ 0, "desc" ]],
+                    "tableTools": {
+
+                    }
+                });
+                $("tfoot input").keyup(function () {
+                    /* Filter on the column based on the index of this element's parent <th> */
+                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+                });
+                $("tfoot input").each(function (i) {
+                    asInitVals[i] = this.value;
+                });
+                $("tfoot input").focus(function () {
+                    if (this.className == "search_init") {
+                        this.className = "";
+                        this.value = "";
+                    }
+                });
+                $("tfoot input").blur(function (i) {
+                    if (this.value == "") {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("tfoot input").index(this)];
+                    }
+                });
+
+
             });
     </script>
 }

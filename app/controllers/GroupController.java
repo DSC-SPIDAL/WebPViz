@@ -9,11 +9,16 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import views.html.dashboard;
 import views.html.groups;
 
 public class GroupController extends Controller {
     public static Result GO_GROUPS = redirect(
             controllers.routes.GroupController.groups()
+    );
+
+    public static Result GO_DASHBOARD = redirect(
+            controllers.routes.Application.dashboard()
     );
 
     @Security.Authenticated(Secured.class)
@@ -33,17 +38,17 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(groups.render(loggedInUser, true, "Should give group info", GroupsDAO.allGroups()));
+            return badRequest(dashboard.render(loggedInUser, true, "No data", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
         name = form.get("name");
         description = form.get("desc");
         Group group = new Group(loggedInUser.id, name);
         if (!GroupsDAO.groupExists(group)) {
             GroupsDAO.insertGroup(new Group(loggedInUser.id, name, description));
-            return GO_GROUPS;
+            return GO_DASHBOARD;
         } else {
             //
-            return badRequest(groups.render(loggedInUser, true, "Existing group", GroupsDAO.allGroups()));
+            return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -56,7 +61,7 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(groups.render(loggedInUser, true, "Should give group info", GroupsDAO.allGroups()));
+            return badRequest(dashboard.render(loggedInUser, true, "No group information", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
         name = form.get("name");
         description = form.get("desc");
@@ -64,10 +69,10 @@ public class GroupController extends Controller {
         Group oldGroup = new Group(loggedInUser.id, name);
         if (GroupsDAO.groupExists(oldGroup)) {
             GroupsDAO.updateGroup(oldGroup, new Group(loggedInUser.id, name, description));
-            return GO_GROUPS;
+            return GO_DASHBOARD;
         } else {
             //
-            return badRequest(groups.render(loggedInUser, true, "Non existing group", GroupsDAO.allGroups()));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -79,10 +84,10 @@ public class GroupController extends Controller {
         Group group = new Group(loggedInUser.id, name);
         if (GroupsDAO.groupExists(group)) {
             GroupsDAO.deleteGroup(group);
-            return GO_GROUPS;
+            return GO_DASHBOARD;
         } else {
             //
-            return badRequest(groups.render(loggedInUser, true, "Non existing group", GroupsDAO.allGroups()));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 }
