@@ -107,6 +107,14 @@ function generateClusterList(list, initcolors) {
     return grid;
 }
 
+function colorEnable(check) {
+    if (check) {
+        $('.color-pic1').colorpicker();
+    } else {
+        $('.color-pic1').colorpicker('destroy');
+    }
+}
+
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
 
@@ -305,6 +313,7 @@ function generateGraph() {
         window.addEventListener('resize', onWindowResize, true);
         if (clusters && clusterCount < 100) {
             $('.color-pic1').colorpicker();
+            $('.color_enable').prop('checked', true);
         }
         render();
         animate();
@@ -741,6 +750,7 @@ function updatePlot(sliderValue) {
             $("#plot-title").text(fileNames[sliderValue]);
             if (clusters && clusters.length < 100) {
                 $('.color-pic1').colorpicker();
+                $('.color_enable').prop('checked', true);
             }
         }
     } else {
@@ -884,6 +894,7 @@ function playLoop() {
             $("#plot-title").text(fileNames[currentValue + 1]);
             if (clusters && clusters.length < 100) {
                 $('.color-pic1').colorpicker();
+                $('.color_enable').prop('checked', true);
             }
             render();
             if (maxValue > currentValue + 1 && !isPaused) {

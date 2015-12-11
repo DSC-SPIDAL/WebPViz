@@ -44,6 +44,7 @@
 
         </div>
         <div class="settingdiv-footer">
+            <input type="checkbox" name="color_picker_enable" value="color_picker_enable" id="color_picker_enable" class="color_enable margin-left-five"><span>Enable Coloring</span>
             <button type="button" id="settings-div-close" class="btn btn-default margin-right-five">Close</button>
         </div>
     </div>
@@ -65,6 +66,16 @@
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
     <script>
             $(function() {
+                 $('.color_enable').click(function() {
+                    var $this = $(this);
+                    // $this will contain a reference to the checkbox
+                    if ($this.is(':checked')) {
+                        colorEnable(true);
+                    } else {
+                        // the checkbox was unchecked
+                        colorEnable(false);
+                    }
+                });
                 $('#slider-play').click(function () {
                     var span = $("#play-span");
 
