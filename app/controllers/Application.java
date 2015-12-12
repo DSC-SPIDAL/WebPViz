@@ -167,6 +167,7 @@ public class Application extends Controller {
 
     @Security.Authenticated(Secured.class)
     public static Result savePlot() {
+        ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         JsonNode json = request().body().asJson();
         String body = Json.stringify(json);
@@ -178,11 +179,10 @@ public class Application extends Controller {
             timeSeriesId = Integer.parseInt(timeSeries);
             tid.uploaderId = loggedInUser.id;
             tid.id = timeSeriesId;
-            ArtifactDAO db = ArtifactDAO.getInstance();
             db.updateArtifactSetting(tid, body);
             return ok("success");
         } else {
-            return ok("fail");
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
         }
     }
 
