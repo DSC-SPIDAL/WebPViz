@@ -1095,35 +1095,35 @@ function savePlot() {
     var res = false;
     bootbox.confirm("You are about to save the current plot configuration. Continue?", function(result) {
         res = result;
+        if (res) {
+            var url = '/timeseries/save ';
+            var c = camera.toJSON();
+            var obj = {};
+            obj['camera'] = camera.toJSON();
+            obj['tid'] = timeseriesId;
+            obj['fid'] = resultSetId;
+            obj['pointSize'] = controlers.pointsize;
+            obj['glyphSize'] = controlers.glyphsize;
+            var lookAtVector = new THREE.Vector3(0, 0, -1);
+            lookAtVector.applyQuaternion(camera.quaternion);
+            var lookAtJson = {};
+            lookAtJson.x = lookAtVector.x;
+            lookAtJson.y = lookAtVector.y;
+            lookAtJson.z = lookAtVector.z;
+            obj['lookVector'] = lookAtJson;
+            obj['cameraPosition'] = camera.position;
+            obj['zoom'] = camera.zoom;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(obj),
+                url: url,
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+        }
     });
-    if (res) {
-        var url = '/timeseries/save ';
-        var c = camera.toJSON();
-        var obj = {};
-        obj['camera'] = camera.toJSON();
-        obj['tid'] = timeseriesId;
-        obj['fid'] = resultSetId;
-        obj['pointSize'] = controlers.pointsize;
-        obj['glyphSize'] = controlers.glyphsize;
-        var lookAtVector = new THREE.Vector3(0, 0, -1);
-        lookAtVector.applyQuaternion(camera.quaternion);
-        var lookAtJson = {};
-        lookAtJson.x = lookAtVector.x;
-        lookAtJson.y = lookAtVector.y;
-        lookAtJson.z = lookAtVector.z;
-        obj['lookVector'] = lookAtJson;
-        obj['cameraPosition'] = camera.position;
-        obj['zoom'] = camera.zoom;
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(obj),
-            url: url,
-            success: function (data) {
-                console.log(data);
-            }
-        });
-    }
 }
 
