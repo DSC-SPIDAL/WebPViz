@@ -63,8 +63,8 @@
         //TODO needs to go to seperate page when WebGL is not supported
             Detector.addGetWebGLMessage({"id":"canvas3d"});
         }else{
-            $.getJSON("@routes.Application.resultset(resultSetId, timeSerisId)", function (data) {
-                var resultSetUrl = "@routes.Application.resultssetall(timeSerisId, resultSetId)";
+            $.getJSON("@routes.Application.getArtifact(timeSerisId)", function (data) {
+                var resultSetUrl = "@routes.Application.getFile(timeSerisId, resultSetId)";
                 visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
             });
             $("#settingsModal").draggable({

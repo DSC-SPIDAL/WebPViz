@@ -104,9 +104,9 @@
                                     <td>Pending...</td>
                                 } else {
                                     @if("T".equals(r.t)) {
-                                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                        <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
                                     } else {
-                                        <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
+                                        <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
                                     }
                                 }
                                 <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
@@ -158,9 +158,9 @@
                                     <td>Pending...</td>
                                 } else {
                                     @if("T".equals(r.t)) {
-                                        <td><a href="@routes.Application.visualizeTimeSeries(r.id)">View</a> </td>
+                                        <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
                                     } else {
-                                        <td><a href="@routes.Application.visualizeSingle(r.id)">View</a> </td>
+                                        <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
                                     }
                                 }
                                 <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>

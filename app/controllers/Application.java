@@ -181,19 +181,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result visualize(int resultSetId, int timeSeriesId) {
-        ArtifactDAO db = ArtifactDAO.getInstance();
-        User loggedInUser = User.findByEmail(request().username());
-        ResultSet r = db.individualFile(timeSeriesId, resultSetId);
-        if (r != null) {
-            return ok(resultset.render(loggedInUser, resultSetId, timeSeriesId, r.name));
-        } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
-        }
-    }
-
-    @Security.Authenticated(Secured.class)
-    public static Result visualizeSingle(int timeSeriesId) {
+    public static Result singlePage(int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = db.individualFile(timeSeriesId);
@@ -205,7 +193,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result visualizeTimeSeries(int timeSeriesId) {
+    public static Result timeSeriesPage(int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
@@ -233,33 +221,30 @@ public class Application extends Controller {
         }
     }
 
-    public static Result resultssetall(int tid, int rid) {
+    /**
+     * Get the individual plot with the clusters, points and edges
+     * @param tid artifact id
+     * @param rid file id
+     * @return
+     */
+    @Security.Authenticated(Secured.class)
+    public static Result getFile(int tid, int rid) {
         ArtifactDAO db = ArtifactDAO.getInstance();
-        String r = db.queryFile(tid, rid);
+        String r = db.getFile(tid, rid);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
 
-    public static Result timeseries(int id) {
+    /**
+     * Get the artifact information.
+     * @param id artifact id
+     * @return
+     */
+    @Security.Authenticated(Secured.class)
+    public static Result getArtifact(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.getArtifact(id);
         JsonNode result = Json.parse(r);
-        return ok(result);
-    }
-
-    public static Result resultset(Integer rid, Integer tid) {
-        ArtifactDAO db = ArtifactDAO.getInstance();
-        ResultSet r = db.individualFile(tid, rid);
-        ObjectNode result = Json.newObject();
-        result.put("id", rid);
-        result.put("name", r.name);
-        result.put("desc", r.description);
-        result.put("uploaded", User.findById(r.uploaderId).email);
-        result.put("fileName", r.fileName);
-
-        List<Cluster> clusters = db.clusters(tid, rid);
-        result.put("clusters", Json.toJson(clusters));
-
         return ok(result);
     }
 
@@ -284,20 +269,16 @@ public class Application extends Controller {
      * Login class used by Login Form.
      */
     public static class Login {
-
         @Constraints.Required
         public String email;
-
         @Constraints.Required
         public String password;
-
         /**
          * Validate the authentication.
          *
          * @return null if validation ok, string with details otherwise
          */
         public String validate() {
-
             User user = null;
             try {
                 user = User.authenticate(email, password);

@@ -42,9 +42,6 @@ var LOAD_SIZE = 5;
 
 var plotRangeSlider = {};
 
-
-
-
 $(function () {
     $("#plot-slider").ionRangeSlider({
         grid: true,
@@ -172,9 +169,9 @@ function updateClusterList(list, initcolors) {
 }
 
 //Plot functions
-function visualize(resultSetUrl, resultSet, fid, tid) {
+function visualize(resultSetUrl, artifact, fid, tid) {
     clusterUrl = resultSetUrl;
-    clusters = resultSet.clusters;
+    //clusters = resultSet.clusters;
     resultSetId = fid;
     timeseriesId = tid;
     generateGraph();
@@ -182,13 +179,12 @@ function visualize(resultSetUrl, resultSet, fid, tid) {
     animate();
 }
 
-function visualizeTimeSeries(resultSetUrl, timeSeries, id) {
-    resultSets = timeSeries.files;
+function visualizeTimeSeries(resultSetUrl, artifact, id) {
+    resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
 }
-
 
 function generateGraph() {
 
@@ -968,8 +964,8 @@ function checkIfBuffered() {
 }
 
 function animateTimeSeriesPause() {
-    isPaused = true
-    isPlaying = false
+    isPaused = true;
+    isPlaying = false;
 }
 
 function resetView() {
@@ -1055,6 +1051,8 @@ function savePlot() {
     obj['camera'] = camera.toJSON();
     obj['tid'] = timeseriesId;
     obj['fid'] = resultSetId;
+    obj['pointSize'] = controlers.pointsize;
+    obj['glyphSize'] = controlers.glyphsize;
     $.ajax({
         type :  "POST",
         contentType: "application/json; charset=utf-8",

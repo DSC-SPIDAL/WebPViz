@@ -147,8 +147,8 @@
                 //TODO needs to go to seperate page when WebGL is not supported
                 Detector.addGetWebGLMessage({"id":"canvas3d"});
           }else{
-                $.getJSON("@routes.Application.timeseries(timeSeriesId)", function (data) {
-                    var resultSetUrl = "@routes.Application.timeseries(timeSeriesId)";
+                $.getJSON("@routes.Application.getArtifact(timeSeriesId)", function (data) {
+                    var resultSetUrl = "@routes.Application.getArtifact(timeSeriesId)";
                     visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
                 });
             }

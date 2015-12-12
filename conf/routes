@@ -19,7 +19,7 @@ POST        /authenticate                       controllers.Application.authenti
 GET         /authenticate                       controllers.Application.authenticateGet()
 
 #plot
-GET         /plot                               controllers.Application.visualize(rid: Integer, tid: Integer)
+#GET         /plot                               controllers.Application.visualize(rid: Integer, tid: Integer)
 
 # Log out
 GET         /logout                             controllers.Application.logout()
@@ -29,23 +29,23 @@ POST        /upload                             controllers.Application.upload()
 POST        /update                             controllers.Application.updateFile()
 GET         /upload                             controllers.Application.uploadGet()
 #TODO need to replace this with post call
-GET      /delete/:id                         controllers.Application.delete(id: Integer)
+GET      /delete/:id                            controllers.Application.delete(id: Integer)
 
 # Visualize
-GET         /resultsets/:tid                    controllers.Application.visualizeSingle(tid: Integer)
-GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
-GET         /timeseriesview/:id                 controllers.Application.visualizeTimeSeries(id: Integer)
+GET         /resultsets/:tid                    controllers.Application.singlePage(tid: Integer)
+#GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
+GET         /timeseriesview/:id                 controllers.Application.timeSeriesPage(id: Integer)
 
 # ResultSet data
-GET         /resultset/:tid/file/:rid           controllers.Application.resultset(rid: Integer, tid: Integer)
+#GET         /resultset/:tid/file/:rid           controllers.Application.resultset(rid: Integer, tid: Integer)
 
 #GET         /resultset/:tid/file/:rid/cluster/:cid      controllers.Application.cluster(rid: Integer, cid: Integer, tid: Integer)
 
 
-GET         /resultssetall/:tid/file/:rid       controllers.Application.resultssetall(tid: Integer, rid: Integer)
+GET         /resultssetall/:tid/file/:rid       controllers.Application.getFile(tid: Integer, rid: Integer)
 
 #time series
-GET         /timeseries/:id                     controllers.Application.timeseries(id: Integer)
+GET         /timeseries/:id                     controllers.Application.getArtifact(id: Integer)
 
 
 

@@ -400,7 +400,7 @@ public class ArtifactDAO {
         return null;
     }
 
-    public String queryFile(int tid, int fid) {
+    public String getFile(int tid, int fid) {
         MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.Artifact.ID_FIELD, fid).append(Constants.File.TIME_SERIES_ID_FIELD, tid);
         FindIterable<Document> iterable = con.filesCol.find(query);
