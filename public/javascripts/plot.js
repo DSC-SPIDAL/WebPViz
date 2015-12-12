@@ -42,6 +42,10 @@ var LOAD_SIZE = 5;
 
 var plotRangeSlider = {};
 
+var speed = 300;
+var glyphSize = 1.0;
+var pointSize = 1.0;
+
 $(function () {
     $("#plot-slider").ionRangeSlider({
         grid: true,
@@ -174,16 +178,35 @@ function visualize(resultSetUrl, artifact, fid, tid) {
     //clusters = resultSet.clusters;
     resultSetId = fid;
     timeseriesId = tid;
+    setUpCamera(artifact);
     generateGraph();
     setupGuiSingle();
     animate();
 }
 
 function visualizeTimeSeries(resultSetUrl, artifact, id) {
+    timeseriesId = id;
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
+    setUpCamera(artifact);
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
+}
+
+function setUpCamera(artifact) {
+    // check weather we have camera
+    if (artifact.settings) {
+        if (artifact.settings.glyphSize) {
+            glyphSize = artifact.settings.glyphSize;
+        }
+        if (artifact.settings.pointSize) {
+            pointSize = artifact.settings.pointSize;
+        }
+    }
+
+    controlers.pointsize = pointSize;
+    controlers.glyphsize = glyphSize;
+    controlers.speed = speed;
 }
 
 function generateGraph() {
@@ -313,6 +336,8 @@ function generateGraph() {
             $('.color-pic1').colorpicker();
             $('.color_enable').prop('checked', true);
         }
+        changeGlyphSize();
+        changePointSize();
         render();
         animate();
     });
@@ -530,6 +555,19 @@ function loadPlotData(start, end) {
             }
 
             particleSets[data.seq] = particles;
+            for (var key in particles) {
+                if (particles.hasOwnProperty(key)) {
+                    if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                        if (sections[key].size == 1) {
+                            particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
+                        } else {
+                            particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                        }
+                        particles[key].material.needsUpdate = true;
+                    }
+                }
+            }
+
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
             console.log(data.file)
@@ -628,7 +666,7 @@ function setupThreeJs() {
     renderer.setClearColor(0x121224, 1);
 
     //new THREE.PerspectiveCamera
-    cameraCenter = new THREE.Vector3(0,0,0)
+    cameraCenter = new THREE.Vector3(0,0,0);
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
     camera.position.set(1, 1, 1);
@@ -651,7 +689,7 @@ function setupThreeJs() {
 }
 
 function loadMatrial(size, shape, isglyph) {
-var sprite;
+    var sprite;
     if (!isglyph) {
         sprite = null;
     }else{
@@ -683,7 +721,7 @@ var sprite;
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true,
-        opacity: 0.9
+        opacity: 0.8
     });
     return material;
 }
@@ -988,8 +1026,6 @@ var controlers = {
     maxPlotsStored: 20
 };
 
-
-
 function setupGuiSingle() {
     var gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
@@ -1003,17 +1039,9 @@ function setupGuiTimeSeries() {
     var gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
-
-    gui.add(controlers, 'delay', 10.0, 2000.0, 50.0).name( "Play Delay(ms)");
-    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
-
-    //var storage = gui.addFolder('Storage Controls');
-    //
-    //storage.add(controlers, "loadSize", 1.0, 20.0, 1.0).name("Load Size").di
-    //storage.add(controlers, 'maxPlotsStored', 10.0, 200.0, 1.0).name("Storage Size")
-
-    //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
+    gui.add(controlers, 'delay', 10.0, 2000.0, speed).name( "Play Delay(ms)");
+    gui.add(controlers, 'pointsize', 0.01, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.01, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
 }
 
 function changePointSize(){

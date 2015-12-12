@@ -162,9 +162,10 @@ public class ArtifactDAO {
         t.start();
     }
 
-    public void updateArtifactSetting(TimeSeries tid, JsonNode settings) {
+    public void updateArtifactSetting(TimeSeries tid, String json) {
         MongoConnection con = MongoConnection.getInstance();
-
+        Document document = new Document();
+        Object data = JSON.parse(json);
         Document oldGroupDocument = new Document();
         oldGroupDocument.append(Constants.Artifact.ID_FIELD, tid.id);
 
@@ -177,9 +178,9 @@ public class ArtifactDAO {
 
         if (findDocument != null) {
             if (findDocument.containsKey(Constants.Artifact.SETTINGS)) {
-                findDocument.replace(Constants.Artifact.SETTINGS, settings);
+                findDocument.replace(Constants.Artifact.SETTINGS, data);
             } else {
-                findDocument.append(Constants.Artifact.SETTINGS, settings);
+                findDocument.append(Constants.Artifact.SETTINGS, data);
             }
             con.artifactCol.replaceOne(oldGroupDocument, findDocument);
         }
