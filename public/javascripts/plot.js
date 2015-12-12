@@ -178,6 +178,7 @@ function visualize(resultSetUrl, artifact, fid, tid) {
     //clusters = resultSet.clusters;
     resultSetId = fid;
     timeseriesId = tid;
+    setupThreeJs();
     setUpCamera(artifact);
     generateGraph();
     setupGuiSingle();
@@ -188,6 +189,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id) {
     timeseriesId = id;
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
+    setupThreeJs();
     setUpCamera(artifact);
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
@@ -202,6 +204,27 @@ function setUpCamera(artifact) {
         if (artifact.settings.pointSize) {
             pointSize = artifact.settings.pointSize;
         }
+        if (artifact.settings.camera) {
+            var c = artifact.settings.camera;
+            //camera.aspect = c.aspect;
+            //camera.far = c.far;
+            //camera.near = c.near;
+            //camera.zoom = c.zoom;
+            //camera.updateProjectionMatrix ();
+        }
+        if (artifact.settings.lookVector) {
+            var look = artifact.settings.lookVector;
+            var vector = new THREE.Vector3(look.x, look.y, look.z);
+            camera.lookAt(vector);
+        }
+        if (artifact.settings.cameraPosition) {
+            var pos = artifact.settings.cameraPosition;
+            camera.position.set(pos.x, pos.y, pos.z);
+        }
+        if (artifact.settings.zoom) {
+            camera.zoom = artifact.settings.zoom;
+        }
+        camera.updateProjectionMatrix();
     }
 
     controlers.pointsize = pointSize;
@@ -210,9 +233,6 @@ function setUpCamera(artifact) {
 }
 
 function generateGraph() {
-
-    setupThreeJs();
-
     var cluster;
     var geometry = {};
     var hsl;
@@ -411,7 +431,6 @@ function drawEdges(edges,points,pointcolors){
 }
 
 function generateTimeSeries(resultSets) {
-    setupThreeJs();
     currentLoadedStart = 0;
     precurrentLoadedStart = 0;
 
@@ -1081,6 +1100,15 @@ function savePlot() {
     obj['fid'] = resultSetId;
     obj['pointSize'] = controlers.pointsize;
     obj['glyphSize'] = controlers.glyphsize;
+    var lookAtVector = new THREE.Vector3(0,0, -1);
+    lookAtVector.applyQuaternion(camera.quaternion);
+    var lookAtJson  = {};
+    lookAtJson.x =lookAtVector.x;
+    lookAtJson.y = lookAtVector.y;
+    lookAtJson.z = lookAtVector.z;
+    obj['lookVector'] = lookAtJson;
+    obj['cameraPosition'] = camera.position;
+    obj['zoom'] = camera.zoom;
     $.ajax({
         type :  "POST",
         contentType: "application/json; charset=utf-8",
