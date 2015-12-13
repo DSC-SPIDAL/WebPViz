@@ -9,6 +9,7 @@ var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.
 var scene3d;
 var colors = [];
 var colorlist = {};
+var trueColorList = {};
 var sections = [];
 var sprites = {};
 var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
@@ -62,10 +63,29 @@ $(function () {
 });
 
 function generateClusterList(list, initcolors) {
+    var keys = [];
+    for (var k in trueColorList) {
+        if (trueColorList.hasOwnProperty(k)) {
+            keys.push(k);
+        }
+    }
+
+    var emptyList = [];
+    var nonEmptyList = [];
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var aCol = trueColorList[key];
+        if ($.isEmptyObject(aCol)) {
+            emptyList.push(key);
+        } else {
+            nonEmptyList.push(key);
+        }
+    }
     var grid = "";
 
-    if (list && list.length < 50) {
-        for (var key in list) {
+    if (list && nonEmptyList.length < 50) {
+        for (var i = 0; i < nonEmptyList.length; i++) {
+            var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '')
                 if (list[key].size > 1) {
@@ -119,6 +139,26 @@ function colorEnable(check) {
 
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
+    var keys = [];
+    for (var k in trueColorList) {
+        if (trueColorList.hasOwnProperty(k)) {
+            keys.push(k);
+        }
+    }
+
+    var emptyList = [];
+    var nonEmptyList = [];
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var aCol = trueColorList[key];
+        if ($.isEmptyObject(aCol)) {
+            emptyList.push(key);
+        } else {
+            nonEmptyList.push(key);
+        }
+    }
+
+    keys = nonEmptyList.concat(emptyList);
 
     var tabletop = "<table class='table bulk_action' id='cluster_table'>"
         + "<thead>"
@@ -134,8 +174,9 @@ function generateCheckList(list, initcolors) {
 
     var tablerows = "";
 
-    for (var key in list) {
-        if (list.hasOwnProperty(key)) {
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        //if (list.hasOwnProperty(key)) {
             tablerows += "<tr class='even pointer' id='" + key + "'>"
                 + "<td class='a-center'>";
             if (!(removedclusters.hasOwnProperty(key))){
@@ -152,7 +193,7 @@ function generateCheckList(list, initcolors) {
                 + "<td class=' '>" + list[key].label + "</span></td>"
                 + "<td class='l1'>" + list[key].length + "</td>"
                 + "</tr>";
-        }
+        //}
     }
 
     var tableend = "</tbody>"
@@ -251,14 +292,15 @@ function generateGraph() {
                 var clusterdata = data.clusters[cid];
                 var clusterid = parseInt(cid);
 
-                var clustercolor = {"r": 0, "g": 0, "b": 0};
+                var clustercolor = {"r": 255, "g": 255, "b": 255};
                 if (clusterdata.r) {
                     clustercolor["r"] = clusterdata.r[1];
                     clustercolor["g"] = clusterdata.r[2];
                     clustercolor["b"] = clusterdata.r[3];
+                    trueColorList[clusterid] = clustercolor;
+                } else {
+                    trueColorList[clusterid] = {};
                 }
-                if (clustercolor == null)
-                    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
                 if (!sections.hasOwnProperty(clusterid))
                     sections[clusterid] = {
@@ -489,6 +531,9 @@ function loadPlotData(start, end) {
                         clustercolor["r"] = clusterdata.r[1];
                         clustercolor["g"] = clusterdata.r[2];
                         clustercolor["b"] = clusterdata.r[3];
+                        trueColorList[clusterid] = clustercolor;
+                    } else {
+                        trueColorList[clusterid] = {};
                     }
                     if (clustercolor == null)
                         clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
@@ -869,6 +914,7 @@ function addSection(id) {
 
 function recolorSection(id, color) {
     colorlist[id] = color;
+    trueColorList[id] = color;
     var tempcolor = new THREE.Color(color);
     var colorattri = currentParticles[id].geometry.getAttribute('color');
     var colorsd = new Float32Array(colorattri.length);

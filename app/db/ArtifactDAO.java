@@ -220,7 +220,9 @@ public class ArtifactDAO {
         for (models.xml.Cluster cl : clusters) {
             Document c = new Document();
             c.put(Constants.Cluster.KEY, cl.getKey());
-            c.put(Constants.Cluster.COLOR, color(cl.getColor().getA(), cl.getColor().getB(), cl.getColor().getG(), cl.getColor().getR()));
+            if (cl.getColor() != null) {
+                c.put(Constants.Cluster.COLOR, color(cl.getColor().getA(), cl.getColor().getB(), cl.getColor().getG(), cl.getColor().getR()));
+            }
             c.put(Constants.Cluster.LABEL, cl.getLabel());
             c.put(Constants.Cluster.SIZE, cl.getSize());
             c.put(Constants.Cluster.VISIBILE, cl.getVisible());
