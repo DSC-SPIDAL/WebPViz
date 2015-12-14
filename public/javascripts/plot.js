@@ -64,6 +64,15 @@ $(function () {
     plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
 });
 
+var totalItemsToLoad = 1;
+var itemsLoaded = 1;
+
+function progress() {
+    var bar = 250;
+    bar = Math.floor( bar * itemsLoaded / totalItemsToLoad);
+    $("#bar").css({width : bar + "px"});
+}
+
 function generateClusterList(list, initcolors) {
     var keys = [];
     for (var k in trueColorList) {
@@ -239,6 +248,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id) {
 }
 
 function intialSetup(artifact) {
+    $("#progress").css({ display: "block" });
     // check weather we have camera
     if (artifact.settings) {
         if (artifact.settings.glyphSize) {
@@ -422,6 +432,8 @@ function generateGraph() {
         changePointSize();
         render();
         animate();
+        itemsLoaded = totalItemsToLoad;
+        $( "#progress" ).css({display : "none"});
     });
     animate();
 }
@@ -725,6 +737,7 @@ function initBufferAndLoad() {
             initBufferAndLoad();
         } else {
             if (currentLoadedStart in particleSets) {
+                $( "#progress" ).css({display : "none"});
                 initPlotData();
                 render();
                 animate();
@@ -740,6 +753,7 @@ function gotoBufferAndLoad(sliderValue) {
                 gotoBufferAndLoad(sliderValue);
         } else {
             if (currentLoadedStart in particleSets) {
+                $( "#progress" ).css({display : "none"});
                 updatePlot(sliderValue)
                 render();
                 animate();
