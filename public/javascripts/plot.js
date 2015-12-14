@@ -10,6 +10,8 @@ var scene3d;
 var colors = [];
 var colorlist = {};
 var trueColorList = {};
+var colorsLoaded = false;
+var colorPickersLoaded = false;
 var sections = [];
 var sprites = {};
 var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
@@ -220,7 +222,7 @@ function visualize(resultSetUrl, artifact, fid, tid) {
     resultSetId = fid;
     timeseriesId = tid;
     setupThreeJs();
-    setUpCamera(artifact);
+    intialSetup(artifact);
     generateGraph();
     setupGuiSingle();
     animate();
@@ -231,12 +233,12 @@ function visualizeTimeSeries(resultSetUrl, artifact, id) {
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
     setupThreeJs();
-    setUpCamera(artifact);
+    intialSetup(artifact);
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
 }
 
-function setUpCamera(artifact) {
+function intialSetup(artifact) {
     // check weather we have camera
     if (artifact.settings) {
         if (artifact.settings.glyphSize) {
@@ -266,6 +268,20 @@ function setUpCamera(artifact) {
             camera.zoom = artifact.settings.zoom;
         }
         camera.updateProjectionMatrix();
+
+        var colors = artifact.settings.clusterColors;
+        if (colors) {
+            var count = 0;
+            for (var key in colors) {
+                if (colors.hasOwnProperty(key)) {
+                    var clustercolor = colors[key];
+                    colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                    trueColorList[key] = clustercolor;
+                    count += 1;
+                }
+            }
+            colorsLoaded = true;
+        }
     }
 
     controlers.pointsize = pointSize;
@@ -291,15 +307,19 @@ function generateGraph() {
                 clusterCount++;
                 var clusterdata = data.clusters[cid];
                 var clusterid = parseInt(cid);
-
-                var clustercolor = {"r": 255, "g": 255, "b": 255};
-                if (clusterdata.r) {
-                    clustercolor["r"] = clusterdata.r[1];
-                    clustercolor["g"] = clusterdata.r[2];
-                    clustercolor["b"] = clusterdata.r[3];
-                    trueColorList[clusterid] = clustercolor;
+                var clustercolor;
+                if (!colorsLoaded) {
+                    clustercolor = {"r": 255, "g": 255, "b": 255};
+                    if (clusterdata.r) {
+                        clustercolor["r"] = clusterdata.r[1];
+                        clustercolor["g"] = clusterdata.r[2];
+                        clustercolor["b"] = clusterdata.r[3];
+                        trueColorList[clusterid] = clustercolor;
+                    } else {
+                        trueColorList[clusterid] = {};
+                    }
                 } else {
-                    trueColorList[clusterid] = {};
+                    clustercolor = trueColorList[clusterid];
                 }
 
                 if (!sections.hasOwnProperty(clusterid))
@@ -526,14 +546,19 @@ function loadPlotData(start, end) {
                     clusterCount++;
                     var clusterdata = data.clusters[cid];
                     var clusterid =  parseInt(cid)
-                    var clustercolor = {"r": 0, "g": 0, "b": 0};
-                    if (clusterdata.r) {
-                        clustercolor["r"] = clusterdata.r[1];
-                        clustercolor["g"] = clusterdata.r[2];
-                        clustercolor["b"] = clusterdata.r[3];
-                        trueColorList[clusterid] = clustercolor;
+                    var clustercolor;
+                    if (!colorsLoaded) {
+                        clustercolor = {"r": 0, "g": 0, "b": 0};
+                        if (clusterdata.r) {
+                            clustercolor["r"] = clusterdata.r[1];
+                            clustercolor["g"] = clusterdata.r[2];
+                            clustercolor["b"] = clusterdata.r[3];
+                            trueColorList[clusterid] = clustercolor;
+                        } else {
+                            trueColorList[clusterid] = {};
+                        }
                     } else {
-                        trueColorList[clusterid] = {};
+                        clustercolor = trueColorList[clusterid];
                     }
                     if (clustercolor == null)
                         clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
@@ -635,6 +660,21 @@ function loadPlotData(start, end) {
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
             console.log(data.file)
+
+            if (!colorPickersLoaded) {
+                $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+                $("#plot-clusters").html(generateClusterList(sections, colorlist));
+                var cls = $("#plot-clusters").isotope({
+                    itemSelector: '.element-item',
+                    layoutMode: 'fitRows',
+                    containerStyle: null
+                });
+                if (clusters && clusterCount < 100) {
+                    $('.color-pic1').colorpicker();
+                    $('.color_enable').prop('checked', true);
+                }
+                colorPickersLoaded = true;
+            }
         });
 
     }
@@ -655,13 +695,13 @@ function initPlotData() {
             scene3d.add(currentParticles[key]);
         }
     }
-    $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-    $("#plot-clusters").html(generateClusterList(sections, colorlist));
-    var clusters = $("#plot-clusters").isotope({
-        itemSelector: '.element-item',
-        layoutMode: 'fitRows',
-        containerStyle: null
-    });
+    //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
+    //$("#plot-clusters").html(generateClusterList(sections, colorlist));
+    //var clusters = $("#plot-clusters").isotope({
+    //    itemSelector: '.element-item',
+    //    layoutMode: 'fitRows',
+    //    containerStyle: null
+    //});
 
     //clusters.on( 'arrangeComplete', function(){
     //    var height = window.innerHeight - 57 - 40 - 40 - 10 - $("#plot-clusters").height();
@@ -914,8 +954,8 @@ function addSection(id) {
 
 function recolorSection(id, color) {
     colorlist[id] = color;
-    trueColorList[id] = color;
     var tempcolor = new THREE.Color(color);
+    trueColorList[id] = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
     var colorattri = currentParticles[id].geometry.getAttribute('color');
     var colorsd = new Float32Array(colorattri.length);
     for (var k = 0; k < colorattri.length / 3; k++) {
@@ -1156,6 +1196,7 @@ function savePlot() {
             lookAtJson.x = lookAtVector.x;
             lookAtJson.y = lookAtVector.y;
             lookAtJson.z = lookAtVector.z;
+            obj['clusterColors'] = trueColorList;
             obj['lookVector'] = lookAtJson;
             obj['cameraPosition'] = camera.position;
             obj['zoom'] = camera.zoom;
