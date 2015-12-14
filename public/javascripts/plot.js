@@ -257,6 +257,9 @@ function intialSetup(artifact) {
         if (artifact.settings.pointSize) {
             pointSize = artifact.settings.pointSize;
         }
+        if (artifact.settings.speed) {
+            speed = artifact.settings.speed;
+        }
         if (artifact.settings.camera) {
             var c = artifact.settings.camera;
             //camera.aspect = c.aspect;
@@ -296,7 +299,7 @@ function intialSetup(artifact) {
 
     controlers.pointsize = pointSize;
     controlers.glyphsize = glyphSize;
-    controlers.speed = speed;
+    controlers.delay = speed;
 }
 
 function generateGraph() {
@@ -1204,6 +1207,7 @@ function savePlot() {
             obj['fid'] = resultSetId;
             obj['pointSize'] = controlers.pointsize;
             obj['glyphSize'] = controlers.glyphsize;
+            obj['speed'] = controlers.delay;
             var lookAtVector = new THREE.Vector3(0, 0, -1);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};
