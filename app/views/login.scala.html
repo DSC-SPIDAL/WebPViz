@@ -1,4 +1,4 @@
-@(loginForm: Form[Application.Login])
+@(loginForm: Form[Application.Login], from: String)
 @import helper._
 
 @main("Login", null){
@@ -13,6 +13,7 @@
         <input type="text" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus value="admin">
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required value="admin">
+        <input type="hidden" name="targetUrl" value="@from">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
     }
 }

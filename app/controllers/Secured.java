@@ -35,7 +35,11 @@ public class Secured extends Security.Authenticator{
         if(context.request().path().equals("/about")){
             return ok(about.render(null));
         }
-
-        return redirect(controllers.routes.Application.index());
+        if ("GET".equals(context.request().method())) {
+            String path = context.request().path();
+            return redirect(controllers.routes.Application.login() + "?from=" + path);
+        } else {
+            return redirect(controllers.routes.Application.login());
+        }
     }
 }

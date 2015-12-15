@@ -21,7 +21,9 @@ import views.html.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import static play.data.Form.form;
@@ -43,7 +45,15 @@ public class Application extends Controller {
     }
 
     public static Result login() {
-        return ok(login.render(form(Login.class)));
+        String from = request().getQueryString("from");
+        if (from != null) {
+            Map<String,String> anyData = new HashMap();
+            anyData.put("targetUrl", from);
+            Form<Login> loginForm = form(Login.class).bind(anyData);
+            return ok(login.render(loginForm, from));
+        } else {
+            return ok(login.render(form(Login.class), ""));
+        }
     }
 
     @Security.Authenticated(Secured.class)
@@ -263,9 +273,13 @@ public class Application extends Controller {
         Form<Login> loginForm = form(Login.class).bindFromRequest();
 
         if (loginForm.hasErrors()) {
-            return badRequest(login.render(loginForm));
+            return badRequest(login.render(loginForm, ""));
         } else {
             session("email", loginForm.get().email);
+            String targetUrl = loginForm.get().targetUrl;
+            if (targetUrl != null && !"".equals(targetUrl)) {
+                return redirect(targetUrl);
+            }
             return GO_DASHBOARD;
         }
     }
@@ -279,6 +293,7 @@ public class Application extends Controller {
         public String email;
         @Constraints.Required
         public String password;
+        public String targetUrl;
         /**
          * Validate the authentication.
          *
