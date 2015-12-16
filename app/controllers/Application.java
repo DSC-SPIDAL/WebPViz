@@ -285,7 +285,7 @@ public class Application extends Controller {
             JsonElement jsonElement = gson.toJsonTree(pointMap);
             jobj.add(Constants.File.POINTS, jsonElement);
             String s = gson.toJson(jobj);
-            return ok(r).as("application/jston");
+            return ok(s).as("application/jston");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         } catch (IOException e) {
