@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "org.mongodb" % "mongo-java-driver" % "3.0.4",
   "mysql" % "mysql-connector-java" % "5.1.21",
+  "com.google.code.gson" % "gson" % "2.5",
   javaWs
 )
 

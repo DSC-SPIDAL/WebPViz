@@ -1,7 +1,14 @@
 package controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import db.Constants;
 import db.ArtifactDAO;
 import db.GroupsDAO;
@@ -21,6 +28,11 @@ import views.html.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +249,18 @@ public class Application extends Controller {
         }
     }
 
+    public static class DSerializer implements JsonSerializer<Double> {
+        private static NumberFormat format = new DecimalFormat("#0.0000");
+        @Override
+        public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
+            // This method gets involved whenever the parser encounters the Dog
+            // object (for which this serializer is registered)
+            if (src.isNaN() || src.isInfinite())
+                return new JsonPrimitive(format.format(src.toString()));
+            return new JsonPrimitive((new BigDecimal(src)).setScale(5, BigDecimal.ROUND_HALF_UP));
+        }
+    }
+
     /**
      * Get the individual plot with the clusters, points and edges
      * @param tid artifact id
@@ -247,8 +271,27 @@ public class Application extends Controller {
     public static Result getFile(int tid, int rid) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.getFile(tid, rid);
-        JsonNode result = Json.parse(r);
-        return ok(result);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode result = null;
+        try {
+            result = mapper.readTree(r);
+            JsonNode points = result.get(Constants.File.POINTS);
+            String ps = mapper.writeValueAsString(points);
+            JsonObject jobj = new Gson().fromJson(r, JsonObject.class);
+            Gson gson = new GsonBuilder().registerTypeAdapter(Double.class, new DSerializer()).create();
+
+            Type type = new TypeToken<Map<String, Double[]>>() {}.getType();
+            Map<String, Double[]> pointMap = gson.fromJson(ps, type);
+            JsonElement jsonElement = gson.toJsonTree(pointMap);
+            jobj.add(Constants.File.POINTS, jsonElement);
+            String s = gson.toJson(jobj);
+            return ok(r).as("application/jston");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return internalServerError();
     }
 
     /**
