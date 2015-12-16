@@ -255,8 +255,9 @@ public class Application extends Controller {
         public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
             // This method gets involved whenever the parser encounters the Dog
             // object (for which this serializer is registered)
-            if (src.isNaN() || src.isInfinite())
+            if (src.isNaN() || src.isInfinite()) {
                 return new JsonPrimitive(format.format(src.toString()));
+            }
             return new JsonPrimitive((new BigDecimal(src)).setScale(5, BigDecimal.ROUND_HALF_UP));
         }
     }
@@ -286,10 +287,8 @@ public class Application extends Controller {
             jobj.add(Constants.File.POINTS, jsonElement);
             String s = gson.toJson(jobj);
             return ok(s).as("application/jston");
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error("Failed to process", e);
         }
         return internalServerError();
     }
