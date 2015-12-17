@@ -31,8 +31,9 @@ var fileNames = {};
 var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
-var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
-var precurrentLoadedStart, precurrentLoadedEnd;
+var timeSeriesLength;
+
+var bufferLoopStarted = false;
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -247,6 +248,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id) {
     timeSeriesLength = resultSets.length;
     setupThreeJs();
     intialSetup(artifact);
+    initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
 }
@@ -512,19 +514,9 @@ function drawEdges(edges,points,pointcolors){
 }
 
 function generateTimeSeries(resultSets) {
-    currentLoadedStart = 0;
-    precurrentLoadedStart = 0;
-
-    if (timeSeriesLength > MAX_PLOTS_STORED) {
-        loadPlotData(0, MAX_PLOTS_STORED);
-        currentLoadedEnd = MAX_PLOTS_STORED;
-        precurrentLoadedEnd = MAX_PLOTS_STORED
-    }else{
-        loadPlotData(0,timeSeriesLength);
-        currentLoadedEnd = timeSeriesLength;
-        precurrentLoadedEnd = timeSeriesLength
-    }
     initBufferAndLoad();
+    playStatus = playEnum.PAUSE;
+    playLoop();
 }
 
 //TODO WInodow rezise does not work yet need to fix
@@ -548,6 +540,11 @@ function loadPlotData(start, end) {
     var hsl;
 
     for (var i = start; i < end; i++) {
+        // check weather we already have a value
+        if (particleSets[i]) {
+            continue;
+        }
+
         clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
@@ -713,27 +710,6 @@ function initPlotData() {
             scene3d.add(currentParticles[key]);
         }
     }
-    //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
-    //$("#plot-clusters").html(generateClusterList(sections, colorlist));
-    //var clusters = $("#plot-clusters").isotope({
-    //    itemSelector: '.element-item',
-    //    layoutMode: 'fitRows',
-    //    containerStyle: null
-    //});
-
-    //clusters.on( 'arrangeComplete', function(){
-    //    var height = window.innerHeight - 57 - 40 - 40 - 10 - $("#plot-clusters").height();
-    //    $('#canvas3d').width(window.innerWidth - 45);
-    //    $('#canvas3d').height(height);
-    //    var canvasWidth = $('#canvas3d').width();
-    //    var canvasHeight = $('#canvas3d').height();
-    //    camera.aspect = width / height;
-    //    camera.updateProjectionMatrix();
-    //    renderer.setSize(canvasWidth, canvasHeight);
-    //});
-    //if (clusters && clusters.length < 100) {
-    //    $('.color-pic1').colorpicker();
-    //}
 }
 
 
@@ -840,8 +816,7 @@ function updatePlot(index) {
     if($("#play-span").hasClass("glyphicon-repeat")){
         $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
     }
-    if (index >= currentLoadedStart && index < currentLoadedEnd){
-        if (index in particleSets) {
+        if (index in particleSets && particleSets[index]) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
@@ -889,12 +864,7 @@ function updatePlot(index) {
                 $('.color_enable').prop('checked', true);
             }
             return true;
-        }
     } else {
-        for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
-            delete particleSets[currentLoadedStart + k];
-            delete sectionSets[currentLoadedStart + k];
-        }
         return false;
     }
     return false;
@@ -964,18 +934,17 @@ function recolorSection(id, color) {
 
 function animateTimeSeriesPlay() {
     playStatus = playEnum.PLAY;
-    playLoop();
 }
 
 function playLoop() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     var maxValue = timeSeriesLength - 1;
-    checkAndBufferData(currentValue + 1);
     setTimeout(function () {
-        if ((currentValue + 1) < currentLoadedEnd && playStatus == playEnum.PLAY) {
-            plotRangeSlider.update({from: currentValue + 1});
-            updatePlot(currentValue + 1);
-            render();
+        if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
+            if (updatePlot(currentValue + 1)) {
+                plotRangeSlider.update({from: currentValue + 1});
+                render();
+            }
         }
 
         if (!(maxValue > currentValue + 1 && playStatus == playEnum.PLAY)) {
@@ -989,86 +958,53 @@ function playLoop() {
 }
 
 function initBufferAndLoad() {
+    var currentValue = parseInt($("#plot-slider").prop("value"));
     setTimeout(function () {
         if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
+            if (timeSeriesLength > MAX_PLOTS_STORED) {
+                loadPlotData(0, MAX_PLOTS_STORED);
+            }else{
+                loadPlotData(0, timeSeriesLength);
+            }
             initBufferAndLoad();
         } else {
-            if (currentLoadedStart in particleSets) {
-                $( "#progress" ).css({display : "none"});
-                initPlotData();
-                render();
-                animate();
+            updatePlot(0);
+            $( "#progress" ).css({display : "none"});
+            if (!bufferLoopStarted) {
+                bufferLoopStarted = true;
+                bufferLoop();
             }
         }
-    }, controlers.delay / 3);
+    }, controlers.delay);
 }
 
-function gotoBufferAndLoad(sliderValue) {
+function bufferLoop(){
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED && !(currentLoadedEnd == timeSeriesLength)) {
-            gotoBufferAndLoad(sliderValue);
-        } else {
-            if (currentLoadedStart in particleSets) {
-                $("#progress" ).css({display : "none"});
-                updatePlot(sliderValue)
-                render();
-                animate();
-            }
+        var currentIndex = parseInt($("#plot-slider").prop("value"));
+        var loadend = timeSeriesLength;
+        if (timeSeriesLength > currentIndex + controlers.loadSize) {
+            loadend = currentIndex + controlers.loadSize;
         }
-    }, 1000);
-}
-
-function isBufferNeeded(currentval) {
-    if (currentLoadedEnd == timeSeriesLength) {
-        return false;
-    }
-    return (currentval == (precurrentLoadedStart + Math.floor((precurrentLoadedEnd - precurrentLoadedStart)/2))) ?  true : false;
-}
-
-function checkAndBufferData(currentval){
-    if(isBufferNeeded(currentval)){
-        bufferData();
-    }
-}
-
-function bufferData(){
-    var loadend = timeSeriesLength;
-    if(timeSeriesLength > precurrentLoadedEnd + controlers.loadSize){
-        loadend = precurrentLoadedEnd + controlers.loadSize;
-    }
-    loadPlotData(precurrentLoadedEnd, loadend);
-    for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
-        delete particleSets[precurrentLoadedStart+i];
-        delete sectionSets[precurrentLoadedStart+i];
-    }
-    precurrentLoadedStart += controlers.loadSize;
-    precurrentLoadedEnd += controlers.loadSize;
-    if(precurrentLoadedEnd > timeSeriesLength){
-        precurrentLoadedEnd = timeSeriesLength
-    }
-    checkIfBuffered();
-}
-
-function checkIfBuffered() {
-    setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < controlers.maxPlotsStored) {
-            checkIfBuffered();
-        } else {
-            currentLoadedStart += controlers.loadSize;
-            currentLoadedEnd += controlers.loadSize;
-            if (currentLoadedEnd > timeSeriesLength) {
-                currentLoadedEnd = timeSeriesLength
-            }
-            var currentValue = $("#slider").slider("value");
-            if (currentValue + 1 > (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))) {
-                bufferData();
-            }
-            if (playStatus == playEnum.PAUSE || playStatus == playEnum.PLAY){
-                playStatus = playEnum.PLAY;
-                playLoop();
-            }
+        var loadStartIndex = 0;
+        if (currentIndex - controlers.loadSize > 0) {
+            loadStartIndex = currentIndex - controlers.loadSize;
         }
-    }, 1000);
+        for (var i = 0; i < loadStartIndex; i++) {
+            delete particleSets[i];
+            particleSets[i] = null;
+            delete sectionSets[i];
+            sectionSets[i] = null;
+        }
+        for (var i = loadend + 1; i < timeSeriesLength; i++) {
+            delete particleSets[i];
+            particleSets[i] = null;
+            delete sectionSets[i];
+            sectionSets[i] = null;
+        }
+        loadPlotData(loadStartIndex, loadend);
+        updatePlot(currentIndex);
+        bufferLoop();
+    }, controlers.delay * 2);
 }
 
 function animateTimeSeriesPause() {
@@ -1083,14 +1019,13 @@ function resetSlider() {
     playStatus = playEnum.PAUSE;
     //$("#plot-slider").attr("value", 0);
     plotRangeSlider.update({from: 0});
-    updatePlot(0);
 }
 
 var controlers = {
     delay: 300,
     pointsize: 1,
     glyphsize: 1,
-    loadSize: 5,
+    loadSize: 10,
     maxPlotsStored: 20
 };
 
