@@ -106,6 +106,9 @@
                 $('#slider-step-backward').click(function () {
                     var currentval = plotRangeSlider.result.from - 1;
                     if ((currentval > 0) && playStatus == playEnum.PAUSE) {
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
                         plotRangeSlider.update({from: currentval});
                     }
                 });
@@ -113,6 +116,9 @@
                 $('#slider-step-forward').click(function () {
                     var currentval = plotRangeSlider.result.from + 1;
                     if ((currentval < timeSeriesLength) && playStatus == playEnum.PAUSE){
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
                         plotRangeSlider.update({from: currentval});
                     }
                 });

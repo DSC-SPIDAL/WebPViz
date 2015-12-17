@@ -811,9 +811,7 @@ ImageEnum = {
  * @param index
  */
 function updatePlot(index) {
-    if($("#play-span").hasClass("glyphicon-repeat")){
-        $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
-    }
+
         if (index in particleSets && particleSets[index]) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
@@ -945,9 +943,9 @@ function playLoop() {
             }
         }
 
-        if (!(maxValue > currentValue + 1 && playStatus == playEnum.PLAY)) {
+        if (!(maxValue > currentValue && playStatus == playEnum.PLAY)) {
             playStatus = playEnum.PAUSE;
-            if (maxValue == currentValue + 1) {
+            if (maxValue == currentValue) {
                 $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
             }
         }
