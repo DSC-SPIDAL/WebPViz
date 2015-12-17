@@ -543,6 +543,7 @@ function loadPlotData(start, end) {
 
         clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
         bufferRequestMade[i] = true;
+        (function(i){
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
@@ -691,6 +692,7 @@ function loadPlotData(start, end) {
         }).fail(function() {
             bufferRequestMade[i] = false;
         });
+        })(i);
 
     }
 }
