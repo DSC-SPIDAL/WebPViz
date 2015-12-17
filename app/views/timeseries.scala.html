@@ -105,7 +105,7 @@
 
                 $('#slider-step-backward').click(function () {
                     var currentval = plotRangeSlider.result.from - 1;
-                    if((currentval > 0) && !isPlaying ){
+                    if ((currentval > 0) && playStatus == playEnum.PAUSE) {
                         updatePlot(currentval);
                         plotRangeSlider.update({from: currentval});
                     }
@@ -113,7 +113,7 @@
 
                 $('#slider-step-forward').click(function () {
                     var currentval = plotRangeSlider.result.from + 1;
-                    if((currentval < timeSeriesLength) && !isPlaying ){
+                    if ((currentval < timeSeriesLength) && playStatus == playEnum.PAUSE){
                         updatePlot(currentval);
                         plotRangeSlider.update({from: currentval + 1});
                     }
