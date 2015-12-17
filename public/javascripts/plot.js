@@ -688,6 +688,8 @@ function loadPlotData(start, end) {
                 }
                 colorPickersLoaded = true;
             }
+        }).fail(function() {
+            bufferRequestMade[i] = false;
         });
 
     }
