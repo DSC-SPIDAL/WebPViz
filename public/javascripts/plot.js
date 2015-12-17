@@ -330,9 +330,9 @@ function generateGraph() {
                 if (!colorsLoaded) {
                     clustercolor = {"r": 255, "g": 255, "b": 255};
                     if (clusterdata.r) {
-                        clustercolor["r"] = clusterdata.r[1];
+                        clustercolor["r"] = clusterdata.r[3];
                         clustercolor["g"] = clusterdata.r[2];
-                        clustercolor["b"] = clusterdata.r[3];
+                        clustercolor["b"] = clusterdata.r[1];
                         trueColorList[clusterid] = clustercolor;
                     } else {
                         trueColorList[clusterid] = {};
@@ -565,9 +565,9 @@ function loadPlotData(start, end) {
                     if (!colorsLoaded) {
                         clustercolor = {"r": 0, "g": 0, "b": 0};
                         if (clusterdata.r) {
-                            clustercolor["r"] = clusterdata.r[1];
+                            clustercolor["r"] = clusterdata.r[3];
                             clustercolor["g"] = clusterdata.r[2];
-                            clustercolor["b"] = clusterdata.r[3];
+                            clustercolor["b"] = clusterdata.r[1];
                             trueColorList[clusterid] = clustercolor;
                         } else {
                             trueColorList[clusterid] = {};
