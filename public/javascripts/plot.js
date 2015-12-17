@@ -535,21 +535,19 @@ function randomRBG() {
 }
 
 function loadPlotData(start, end) {
-    var cluster;
-    var geometry = [];
-    var hsl;
-
     for (var i = start; i < end; i++) {
         // check weather we already have a value
-        if (particleSets[i]) {
+        if (particleSets[i] || bufferRequestMade[i]) {
             continue;
         }
 
         clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+        bufferRequestMade[i] = true;
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
-            geometry = {};
+            var hsl;
+            var geometry = {};
             clusters = data.clusters;
 
             fileName = data.file;
@@ -978,6 +976,8 @@ function initBufferAndLoad() {
     }, controlers.delay);
 }
 
+var bufferRequestMade = {};
+
 function bufferLoop(){
     setTimeout(function () {
         var currentIndex = parseInt($("#plot-slider").prop("value"));
@@ -990,21 +990,38 @@ function bufferLoop(){
             loadStartIndex = currentIndex - controlers.loadSize;
         }
         for (var i = 0; i < loadStartIndex; i++) {
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
             delete particleSets[i];
-            particleSets[i] = null;
-            delete sectionSets[i];
-            sectionSets[i] = null;
+            if (particleSets[i]) {
+                delete bufferRequestMade[i];
+                particleSets[i] = null;
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+                sectionSets[i] = null;
+            }
         }
         for (var i = loadend + 1; i < timeSeriesLength; i++) {
-            delete particleSets[i];
-            particleSets[i] = null;
-            delete sectionSets[i];
-            sectionSets[i] = null;
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
+            if (particleSets[i]) {
+                delete particleSets[i];
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+            }
         }
+
         loadPlotData(loadStartIndex, loadend);
-        updatePlot(currentIndex);
+        if (playStatus == playEnum.PAUSE) {
+            updatePlot(currentIndex);
+        }
         bufferLoop();
-    }, controlers.delay * 2);
+
+    }, controlers.delay / 2);
 }
 
 function animateTimeSeriesPause() {

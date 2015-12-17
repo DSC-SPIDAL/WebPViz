@@ -270,27 +270,31 @@ public class Application extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public static Result getFile(int tid, int rid) {
+        long t0 = System.currentTimeMillis();
         ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.getFile(tid, rid);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode result = null;
-        try {
-            result = mapper.readTree(r);
-            JsonNode points = result.get(Constants.File.POINTS);
-            String ps = mapper.writeValueAsString(points);
-            JsonObject jobj = new Gson().fromJson(r, JsonObject.class);
-            Gson gson = new GsonBuilder().registerTypeAdapter(Double.class, new DSerializer()).create();
-
-            Type type = new TypeToken<Map<String, Double[]>>() {}.getType();
-            Map<String, Double[]> pointMap = gson.fromJson(ps, type);
-            JsonElement jsonElement = gson.toJsonTree(pointMap);
-            jobj.add(Constants.File.POINTS, jsonElement);
-            String s = gson.toJson(jobj);
-            return ok(s).as("application/jston");
-        } catch (IOException e) {
-            Logger.error("Failed to process", e);
-        }
-        return internalServerError();
+        Logger.info("Time: " + (System.currentTimeMillis() - t0));
+        return ok(r).as("application/jston");
+//        ObjectMapper mapper = new ObjectMapper();
+//        JsonNode result = null;
+//        try {
+//            result = mapper.readTree(r);
+//            JsonNode points = result.get(Constants.File.POINTS);
+//            String ps = mapper.writeValueAsString(points);
+//            JsonObject jobj = new Gson().fromJson(r, JsonObject.class);
+//            Gson gson = new GsonBuilder().registerTypeAdapter(Double.class, new DSerializer()).create();
+//
+//            Type type = new TypeToken<Map<String, Double[]>>() {}.getType();
+//            Map<String, Double[]> pointMap = gson.fromJson(ps, type);
+//            JsonElement jsonElement = gson.toJsonTree(pointMap);
+//            jobj.add(Constants.File.POINTS, jsonElement);
+//            String s = gson.toJson(jobj);
+//            Logger.info("Time: " + (System.currentTimeMillis() - t0));
+//            return ok(s).as("application/jston");
+//        } catch (IOException e) {
+//            Logger.error("Failed to process", e);
+//        }
+//        return internalServerError();
     }
 
     /**
