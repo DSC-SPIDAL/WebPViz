@@ -982,7 +982,8 @@ function initBufferAndLoad() {
     }, controlers.delay);
 }
 
-var bufferRequestMade = {};
+var bufferRequestMade = {};        // track the requests made to get data to be buffered
+var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
 function bufferLoop(){
     setTimeout(function () {
@@ -1022,8 +1023,9 @@ function bufferLoop(){
         }
 
         loadPlotData(loadStartIndex, loadend);
-        if (playStatus == playEnum.PAUSE) {
+        if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
             updatePlot(currentIndex);
+            currentPlotUpdated = true;
         }
         bufferLoop();
 

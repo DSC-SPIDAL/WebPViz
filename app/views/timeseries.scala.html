@@ -92,12 +92,15 @@
                     var span = $("#play-span");
 
                     if (span.hasClass("glyphicon-play")) {
+                        currentPlotUpdated = false;
                         animateTimeSeriesPlay();
                         span.removeClass("glyphicon-play").addClass("glyphicon-pause");
                     } else if (span.hasClass("glyphicon-repeat")) {
+                        currentPlotUpdated = false;
                         resetSlider();
                         span.removeClass("glyphicon-repeat").addClass("glyphicon-play");
                     } else {
+                        currentPlotUpdated = false;
                         animateTimeSeriesPause();
                         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
                     }
@@ -110,6 +113,7 @@
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
                         plotRangeSlider.update({from: currentval});
+                        currentPlotUpdated = false;
                     }
                 });
 
@@ -120,6 +124,7 @@
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
                         plotRangeSlider.update({from: currentval});
+                        currentPlotUpdated = false;
                     }
                 });
 
