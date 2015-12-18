@@ -176,7 +176,7 @@ function generateCheckList(list, initcolors) {
 
     keys = nonEmptyList.concat(emptyList);
 
-    var tabletop = "<table class='table bulk_action' id='cluster_table'>"
+    var tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
         + "<thead>"
         + "<tr class='headings'>"
         + "<th>"
