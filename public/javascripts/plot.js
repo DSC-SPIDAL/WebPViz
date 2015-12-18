@@ -376,9 +376,9 @@ function generateGraph() {
                     positions[k * 3 + 1] = p1;
                     positions[k * 3 + 2] = p2;
 
-                    xmean += 0;
-                    ymean += 1;
-                    zmean += 2;
+                    xmean += p0;
+                    ymean += p1;
+                    zmean += p2;
 
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                     colorarray[k * 3 + 0] = tempcolor.r;
