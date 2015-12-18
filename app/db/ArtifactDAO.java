@@ -234,7 +234,7 @@ public class ArtifactDAO {
         List<PVizPoint> points = plotviz.getPoints();
         // point key for each cluster
         Map<Integer, List<Integer>> pointsForClusters = new HashMap<Integer, List<Integer>>();
-        Map<String, List<Float>> pointList = new HashMap<>();
+        Map<String, List<String>> pointList = new HashMap<>();
         for (PVizPoint point : points) {
             int clusterkey = point.getClusterkey();
             int pointKey = point.getKey();
@@ -243,7 +243,7 @@ public class ArtifactDAO {
                 clusterPoints = new ArrayList<Integer>();
                 pointsForClusters.put(clusterkey, clusterPoints);
             }
-            List<Float> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ());
+            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ());
             // add the key to cluster and point to point list
             clusterPoints.add(pointKey);
             pointList.put(Integer.toString(pointKey), pointDBObject);
@@ -303,8 +303,8 @@ public class ArtifactDAO {
         }
 
         count = 0;
-        Map<String, List<Float>> currentPointList = new HashMap<>();
-        for (Map.Entry<String, List<Float>> e : pointList.entrySet()) {
+        Map<String, List<String>> currentPointList = new HashMap<>();
+        for (Map.Entry<String, List<String>> e : pointList.entrySet()) {
             currentPointList.put(e.getKey(), e.getValue());
             count++;
             if (count > maxPointsPerFile) {
@@ -385,8 +385,8 @@ public class ArtifactDAO {
      * @param z
      * @return
      */
-    public List<Float> createPoint(Float x, Float y, Float z) {
-        List<Float> list = new ArrayList<>();
+    public List<String> createPoint(String x, String y, String z) {
+        List<String> list = new ArrayList<>();
         list.add(x);
         list.add(y);
         list.add(z);
