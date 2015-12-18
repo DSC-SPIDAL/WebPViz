@@ -441,7 +441,6 @@ function generateGraph() {
         }
         changeGlyphSize();
         changePointSize();
-        render();
         animate();
         itemsLoaded = totalItemsToLoad;
         $( "#progress" ).css({display : "none"});
@@ -677,22 +676,21 @@ function loadPlotData(start, end) {
 
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
-            console.log(data.file)
 
-            if (!colorPickersLoaded) {
-                $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-                $("#plot-clusters").html(generateClusterList(sections, colorlist));
-                var cls = $("#plot-clusters").isotope({
-                    itemSelector: '.element-item',
-                    layoutMode: 'fitRows',
-                    containerStyle: null
-                });
-                if (clusters && clusterCount < 100) {
-                    $('.color-pic1').colorpicker();
-                    $('.color_enable').prop('checked', true);
-                }
-                colorPickersLoaded = true;
-            }
+            //if (!colorPickersLoaded) {
+            //    $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+            //    $("#plot-clusters").html(generateClusterList(sections, colorlist));
+            //    var cls = $("#plot-clusters").isotope({
+            //        itemSelector: '.element-item',
+            //        layoutMode: 'fitRows',
+            //        containerStyle: null
+            //    });
+            //    if (clusters && clusterCount < 100) {
+            //        $('.color-pic1').colorpicker();
+            //        $('.color_enable').prop('checked', true);
+            //    }
+            //    colorPickersLoaded = true;
+            //}
         }).fail(function() {
             bufferRequestMade[i] = false;
         });
@@ -863,9 +861,11 @@ function updatePlot(index) {
             render();
             animate();
             $("#plot-title").text(fileNames[index]);
-            if (clusters && clusters.length < 100) {
-                $('.color-pic1').colorpicker();
-                $('.color_enable').prop('checked', true);
+            if (!colorPickersLoaded) {
+                if (clusters && Object.keys(clusters).length < 100) {
+                    $('.color-pic1').colorpicker();
+                    $('.color_enable').prop('checked', true);
+                }
             }
             return true;
     } else {
