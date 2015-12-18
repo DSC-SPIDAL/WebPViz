@@ -182,7 +182,7 @@ function generateCheckList(list, initcolors) {
         + "<th>"
         + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
         + "</th>"
-        + "<th class='column-title'>Label</th>"
+        + "<th class='column-title' >Label</th>"
         + "<th class='column-title'>Size</th>"
         + "</tr>"
         + "</thead>"
