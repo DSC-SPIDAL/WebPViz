@@ -340,6 +340,31 @@ public class Application extends Controller {
         @Constraints.Required
         public String password;
         public String targetUrl;
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getTargetUrl() {
+            return targetUrl;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public void setTargetUrl(String targetUrl) {
+            this.targetUrl = targetUrl;
+        }
+
         /**
          * Validate the authentication.
          *
