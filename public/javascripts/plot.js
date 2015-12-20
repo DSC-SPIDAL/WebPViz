@@ -215,9 +215,19 @@ function generateCheckList(list, initcolors) {
                 + "</div>"
                 + "</td>";
             if(sprite != null){
-                tablerows += "<td class=' '>" + list[key].label + sprite + "</span></td>";
+                tablerows += "<td class=' '><span>" + list[key].label + sprite + "</span>"
+                    + "<select name='glyphs' class='select-glyph'>"
+                    + "<option value='0'" + checkIfSelected("0", list[key].shape) + ">Disc</option>"
+                    + "<option value='1'" + checkIfSelected("1", list[key].shape) + ">Ball</option>"
+                    + "<option value='2'" + checkIfSelected("2", list[key].shape) + ">Star</option>"
+                    + "<option value='3'" + checkIfSelected("3", list[key].shape) + ">Cube</option>"
+                    + "<option value='4'" + checkIfSelected("4", list[key].shape) + ">Pyramid</option>"
+                    + "<option value='5'" + checkIfSelected("5", list[key].shape) + ">Cone</option>"
+                    + "<option value='6'" + checkIfSelected("6", list[key].shape) + ">Cylinder</option>"
+                    + "</select>"
+                    "</td>";
             }else{
-                tablerows += "<td class=' '>" + list[key].label +"</span></td>";
+                tablerows += "<td class=' '><span>" + list[key].label +"</span></td>";
             }
                 tablerows += "<td class='l1'>" + list[key].length + "</td>"
                     + "</tr>";
@@ -231,6 +241,13 @@ function generateCheckList(list, initcolors) {
     return tabletop + tablerows + tableend;
 }
 
+function checkIfSelected(key, shape){
+    if (key == shape) {
+        return "selected"
+    }else{
+        return ""
+    };
+}
 function updateClusterList(list, initcolors) {
     for (var key in list) {
         if (list.hasOwnProperty(key)) {
