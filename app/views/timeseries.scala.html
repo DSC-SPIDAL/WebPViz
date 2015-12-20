@@ -73,6 +73,8 @@
     <script type="text/javascript" src="@routes.Assets.at("javascripts/ion-rangeslider/ion.rangeSlider.min.js")"></script>
     <script src="@routes.Assets.at("javascripts/isotope.pkgd.js")"></script>
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
     <script>
             $(function() {
                  $('.color_enable').click(function() {
@@ -92,12 +94,15 @@
                     var span = $("#play-span");
 
                     if (span.hasClass("glyphicon-play")) {
+                        currentPlotUpdated = false;
                         animateTimeSeriesPlay();
                         span.removeClass("glyphicon-play").addClass("glyphicon-pause");
                     } else if (span.hasClass("glyphicon-repeat")) {
+                        currentPlotUpdated = false;
                         resetSlider();
                         span.removeClass("glyphicon-repeat").addClass("glyphicon-play");
                     } else {
+                        currentPlotUpdated = false;
                         animateTimeSeriesPause();
                         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
                     }
@@ -105,17 +110,23 @@
 
                 $('#slider-step-backward').click(function () {
                     var currentval = plotRangeSlider.result.from - 1;
-                    if((currentval > 0) && !isPlaying ){
-                        updatePlot(currentval);
+                    if ((currentval > 0) && playStatus == playEnum.PAUSE) {
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
                         plotRangeSlider.update({from: currentval});
+                        currentPlotUpdated = false;
                     }
                 });
 
                 $('#slider-step-forward').click(function () {
                     var currentval = plotRangeSlider.result.from + 1;
-                    if((currentval < timeSeriesLength) && !isPlaying ){
-                        updatePlot(currentval);
-                        plotRangeSlider.update({from: currentval + 1});
+                    if ((currentval < timeSeriesLength) && playStatus == playEnum.PAUSE){
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
+                        plotRangeSlider.update({from: currentval});
+                        currentPlotUpdated = false;
                     }
                 });
 
@@ -127,6 +138,7 @@
                     var settingsdiv = $("#settingDiv");
 
                     if(settingsdiv.hasClass("settinghidden")){
+                        enablesearch()
                         settingsdiv.removeClass("settinghidden")
                     }else{
                         settingsdiv.addClass("settinghidden")
@@ -153,6 +165,51 @@
                 $('.modal-backdrop').removeClass("modal-backdrop");
 
             });
+    </script>
+    <script>
+            var asInitVals = new Array();
+            var oTable;
+            function enablesearch() {
+            if ( $.fn.dataTable.isDataTable( '#cluster_table' ) ) {
+                    oTable = $('#cluster_table').DataTable();
+                }
+                else {
+                    oTable = $('#cluster_table').dataTable({
+                    "oLanguage": {
+                        "sSearch": "Search all columns:"
+                    },
+                    'iDisplayLength': 25,
+                    "bInfo": false,
+                    "ordering": false,
+                     "columns": [
+                                { "width": "20%" },
+                                { "width": "40%" },
+                                { "width": "40%" },
+                                ],
+                    "sPaginationType": "full_numbers"
+                });
+                }
+
+                $("tfoot input").keyup(function () {
+                    /* Filter on the column based on the index of this element's parent <th> */
+                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+                });
+                $("tfoot input").each(function (i) {
+                    asInitVals[i] = this.value;
+                });
+                $("tfoot input").focus(function () {
+                    if (this.className == "search_init") {
+                        this.className = "";
+                        this.value = "";
+                    }
+                });
+                $("tfoot input").blur(function (i) {
+                    if (this.value == "") {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("tfoot input").index(this)];
+                    }
+                });
+            };
     </script>
     <script type="text/javascript">
           if ( !Detector.webgl ){

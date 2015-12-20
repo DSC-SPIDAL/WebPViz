@@ -27,16 +27,13 @@ var resultData;
 //Time Series Vars
 var particleSets = {};
 var sectionSets = {};
-var currentPointSize = 0;
 var fileNames = {};
-var timeSeriesData = [];
-var isPlaying = false;
-var isPaused = false;
 var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
-var currentLoadedStart, currentLoadedEnd, timeSeriesLength;
-var precurrentLoadedStart, precurrentLoadedEnd;
+var timeSeriesLength;
+
+var bufferLoopStarted = false;
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -48,6 +45,14 @@ var plotRangeSlider = {};
 var speed = 300;
 var glyphSize = 1.0;
 var pointSize = 1.0;
+
+var playEnum = {
+    INIT: "init",
+    PLAY: "play",
+    PAUSE: "pause"
+};
+
+var playStatus = playEnum.INIT;
 
 $(function () {
     $("#plot-slider").ionRangeSlider({
@@ -171,13 +176,13 @@ function generateCheckList(list, initcolors) {
 
     keys = nonEmptyList.concat(emptyList);
 
-    var tabletop = "<table class='table bulk_action' id='cluster_table'>"
+    var tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
         + "<thead>"
         + "<tr class='headings'>"
         + "<th>"
         + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
         + "</th>"
-        + "<th class='column-title'>Label</th>"
+        + "<th class='column-title' >Label</th>"
         + "<th class='column-title'>Size</th>"
         + "</tr>"
         + "</thead>"
@@ -243,6 +248,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id) {
     timeSeriesLength = resultSets.length;
     setupThreeJs();
     intialSetup(artifact);
+    initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
 }
@@ -324,9 +330,9 @@ function generateGraph() {
                 if (!colorsLoaded) {
                     clustercolor = {"r": 255, "g": 255, "b": 255};
                     if (clusterdata.r) {
-                        clustercolor["r"] = clusterdata.r[1];
+                        clustercolor["r"] = clusterdata.r[3];
                         clustercolor["g"] = clusterdata.r[2];
-                        clustercolor["b"] = clusterdata.r[3];
+                        clustercolor["b"] = clusterdata.r[1];
                         trueColorList[clusterid] = clustercolor;
                     } else {
                         trueColorList[clusterid] = {};
@@ -363,14 +369,16 @@ function generateGraph() {
                     if (!p) {
                         continue;
                     }
+                    var p0 = parseFloat(p[0]);
+                    var p1 = parseFloat(p[1]);
+                    var p2 = parseFloat(p[2]);
+                    positions[k * 3 + 0] = p0;
+                    positions[k * 3 + 1] = p1;
+                    positions[k * 3 + 2] = p2;
 
-                    positions[k * 3 + 0] = p[0];
-                    positions[k * 3 + 1] = p[1];
-                    positions[k * 3 + 2] = p[2];
-
-                    xmean += p[0];
-                    ymean += p[1];
-                    zmean += p[2];
+                    xmean += p0;
+                    ymean += p1;
+                    zmean += p2;
 
                     var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                     colorarray[k * 3 + 0] = tempcolor.r;
@@ -378,7 +386,7 @@ function generateGraph() {
                     colorarray[k * 3 + 2] = tempcolor.b;
 
 
-                    points[clusterdata.p[k]] = [p[0], p[1], p[2]];
+                    points[clusterdata.p[k]] = [p0, p1, p2];
                     pointcolors[clusterdata.p[k]] = tempcolor;
                 }
 
@@ -433,7 +441,6 @@ function generateGraph() {
         }
         changeGlyphSize();
         changePointSize();
-        render();
         animate();
         itemsLoaded = totalItemsToLoad;
         $( "#progress" ).css({display : "none"});
@@ -508,20 +515,9 @@ function drawEdges(edges,points,pointcolors){
 }
 
 function generateTimeSeries(resultSets) {
-    currentLoadedStart = 0;
-    precurrentLoadedStart = 0;
-
-    if (timeSeriesLength > MAX_PLOTS_STORED) {
-        loadPlotData(0, MAX_PLOTS_STORED);
-        currentLoadedEnd = MAX_PLOTS_STORED;
-        precurrentLoadedEnd = MAX_PLOTS_STORED
-    }else{
-        loadPlotData(0,timeSeriesLength);
-        currentLoadedEnd = timeSeriesLength;
-        precurrentLoadedEnd = timeSeriesLength
-    }
     initBufferAndLoad();
-
+    playStatus = playEnum.PAUSE;
+    playLoop();
 }
 
 //TODO WInodow rezise does not work yet need to fix
@@ -540,16 +536,20 @@ function randomRBG() {
 }
 
 function loadPlotData(start, end) {
-    var cluster;
-    var geometry = [];
-    var hsl;
-
     for (var i = start; i < end; i++) {
+        // check weather we already have a value
+        if (particleSets[i] || bufferRequestMade[i]) {
+            continue;
+        }
+
         clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+        bufferRequestMade[i] = true;
+        (function(i){
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
-            geometry = {};
+            var hsl;
+            var geometry = {};
             clusters = data.clusters;
 
             fileName = data.file;
@@ -565,9 +565,9 @@ function loadPlotData(start, end) {
                     if (!colorsLoaded) {
                         clustercolor = {"r": 0, "g": 0, "b": 0};
                         if (clusterdata.r) {
-                            clustercolor["r"] = clusterdata.r[1];
+                            clustercolor["r"] = clusterdata.r[3];
                             clustercolor["g"] = clusterdata.r[2];
-                            clustercolor["b"] = clusterdata.r[3];
+                            clustercolor["b"] = clusterdata.r[1];
                             trueColorList[clusterid] = clustercolor;
                         } else {
                             trueColorList[clusterid] = {};
@@ -611,18 +611,20 @@ function loadPlotData(start, end) {
                         if (!p) {
                             continue;
                         }
-
-                        positions[k * 3 + 0] = p[0];
-                        positions[k * 3 + 1] = p[1];
-                        positions[k * 3 + 2] = p[2];
+                        var p0 = parseFloat(p[0]);
+                        var p1 = parseFloat(p[1]);
+                        var p2 = parseFloat(p[2]);
+                        positions[k * 3 + 0] = p0;
+                        positions[k * 3 + 1] = p1;
+                        positions[k * 3 + 2] = p2;
 
                         if (!calculatedmeans) {
-                            xmean += p[0];
-                            ymean += p[1];
-                            zmean += p[2];
+                            xmean += p0;
+                            ymean += p1;
+                            zmean += p2;
                         }
 
-                        var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")")
+                        var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                         colorarray[k * 3 + 0] = tempcolor.r;
                         colorarray[k * 3 + 1] = tempcolor.g;
                         colorarray[k * 3 + 2] = tempcolor.b;
@@ -674,23 +676,25 @@ function loadPlotData(start, end) {
 
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
-            console.log(data.file)
 
-            if (!colorPickersLoaded) {
-                $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-                $("#plot-clusters").html(generateClusterList(sections, colorlist));
-                var cls = $("#plot-clusters").isotope({
-                    itemSelector: '.element-item',
-                    layoutMode: 'fitRows',
-                    containerStyle: null
-                });
-                if (clusters && clusterCount < 100) {
-                    $('.color-pic1').colorpicker();
-                    $('.color_enable').prop('checked', true);
-                }
-                colorPickersLoaded = true;
-            }
+            //if (!colorPickersLoaded) {
+            //    $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+            //    $("#plot-clusters").html(generateClusterList(sections, colorlist));
+            //    var cls = $("#plot-clusters").isotope({
+            //        itemSelector: '.element-item',
+            //        layoutMode: 'fitRows',
+            //        containerStyle: null
+            //    });
+            //    if (clusters && clusterCount < 100) {
+            //        $('.color-pic1').colorpicker();
+            //        $('.color_enable').prop('checked', true);
+            //    }
+            //    colorPickersLoaded = true;
+            //}
+        }).fail(function() {
+            bufferRequestMade[i] = false;
         });
+        })(i);
 
     }
 }
@@ -710,60 +714,9 @@ function initPlotData() {
             scene3d.add(currentParticles[key]);
         }
     }
-    //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
-    //$("#plot-clusters").html(generateClusterList(sections, colorlist));
-    //var clusters = $("#plot-clusters").isotope({
-    //    itemSelector: '.element-item',
-    //    layoutMode: 'fitRows',
-    //    containerStyle: null
-    //});
-
-    //clusters.on( 'arrangeComplete', function(){
-    //    var height = window.innerHeight - 57 - 40 - 40 - 10 - $("#plot-clusters").height();
-    //    $('#canvas3d').width(window.innerWidth - 45);
-    //    $('#canvas3d').height(height);
-    //    var canvasWidth = $('#canvas3d').width();
-    //    var canvasHeight = $('#canvas3d').height();
-    //    camera.aspect = width / height;
-    //    camera.updateProjectionMatrix();
-    //    renderer.setSize(canvasWidth, canvasHeight);
-    //});
-    //if (clusters && clusters.length < 100) {
-    //    $('.color-pic1').colorpicker();
-    //}
 }
 
-function initBufferAndLoad() {
 
-    setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
-            initBufferAndLoad();
-        } else {
-            if (currentLoadedStart in particleSets) {
-                $( "#progress" ).css({display : "none"});
-                initPlotData();
-                render();
-                animate();
-            }
-        }
-    }, 1000);
-}
-
-function gotoBufferAndLoad(sliderValue) {
-
-    setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED && !(currentLoadedEnd == timeSeriesLength)) {
-                gotoBufferAndLoad(sliderValue);
-        } else {
-            if (currentLoadedStart in particleSets) {
-                $( "#progress" ).css({display : "none"});
-                updatePlot(sliderValue)
-                render();
-                animate();
-            }
-        }
-    }, 1000);
-}
 
 function setupThreeJs() {
     renderer = null;
@@ -854,21 +807,24 @@ ImageEnum = {
     STAR : "/assets/images/textures/star.png",
     PYRAMID : "/assets/images/textures/pyramid.png",
     CONE : "/assets/images/textures/cone.png",
-    CYLINDER : "/assets/images/textures/cylinder.png",
+    CYLINDER : "/assets/images/textures/cylinder.png"
 };
 
-function updatePlot(sliderValue) {
-    if($("#play-span").hasClass("glyphicon-repeat")){
-        $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
-    }
-    if(sliderValue >= currentLoadedStart && sliderValue < currentLoadedEnd){
-        if (sliderValue in particleSets) {
+/**
+ * This function will try to render the plot with the index
+ * If this plot is not loaded yet, it will simply do nothing.
+ * It is the loading functions responsibility to load the data required
+ * @param index
+ */
+function updatePlot(index) {
+
+        if (index in particleSets && particleSets[index]) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
 
-            currentParticles = particleSets[sliderValue];
-            var localSection = sectionSets[sliderValue];
+            currentParticles = particleSets[index];
+            var localSection = sectionSets[index];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
 
@@ -904,29 +860,18 @@ function updatePlot(sliderValue) {
             window.addEventListener('resize', onWindowResize, false);
             render();
             animate();
-            $("#plot-title").text(fileNames[sliderValue]);
-            if (clusters && clusters.length < 100) {
-                $('.color-pic1').colorpicker();
-                $('.color_enable').prop('checked', true);
+            $("#plot-title").text(fileNames[index]);
+            if (!colorPickersLoaded) {
+                if (clusters && Object.keys(clusters).length < 100) {
+                    $('.color-pic1').colorpicker();
+                    $('.color_enable').prop('checked', true);
+                }
             }
-        }
+            return true;
     } else {
-        for (var k = 0; k < (currentLoadedEnd - currentLoadedStart); k++) {
-            delete particleSets[currentLoadedStart + k];
-            delete sectionSets[currentLoadedStart + k];
-        }
-        currentLoadedStart = sliderValue;
-        precurrentLoadedStart = sliderValue;
-        currentLoadedEnd = timeSeriesLength;
-        precurrentLoadedEnd = timeSeriesLength;
-        if(timeSeriesLength > (currentLoadedStart + MAX_PLOTS_STORED)){
-            currentLoadedEnd = currentLoadedStart + MAX_PLOTS_STORED;
-            precurrentLoadedEnd = precurrentLoadedStart + MAX_PLOTS_STORED;
-        }
-        //TODO check if this might fail in edge cases
-        loadPlotData(currentLoadedStart, currentLoadedEnd);
-        gotoBufferAndLoad(sliderValue);
+        return false;
     }
+    return false;
 }
 
 function animate() {
@@ -992,140 +937,103 @@ function recolorSection(id, color) {
 }
 
 function animateTimeSeriesPlay() {
-    isPlaying = true;
-    isPaused = false;
-    playLoop();
+    playStatus = playEnum.PLAY;
 }
 
 function playLoop() {
-
     var currentValue = parseInt($("#plot-slider").prop("value"));
     var maxValue = timeSeriesLength - 1;
-    checkAndBufferData(currentValue+1)
-    //if(currentValue == maxValue){
-    //    $('#slider-play').removeClass("fa fa-pause").addClass("fa fa-play-circle");
-    //    return
-    //}
-    if((currentValue + 1) >= currentLoadedEnd){
-        isPaused = true;
-    } else {
-        setTimeout(function () {
-            scene3d = new THREE.Scene();
-            scene3d.add(camera);
-            //$("#plot-slider").attr("value", currentValue + 1);
-            plotRangeSlider.update({from: currentValue + 1});
-            currentParticles = particleSets[currentValue + 1];
-            var localSection = sectionSets[currentValue + 1];
-            for (var key in currentParticles) {
-                if (currentParticles.hasOwnProperty(key)) {
-
-                    if(controlers.pointsize != 1 || controlers.glyphsize != 1) {
-                        if (sections[key].size == 1) {
-                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
-                        } else {
-                            currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
-                        }
-                        currentParticles[key].material.needsUpdate = true;
-                    }
-
-                    if (recoloredclusters.hasOwnProperty(key)) {
-                        var tempcolor = recoloredclusters[key]
-                        var colorattri = currentParticles[key].geometry.getAttribute('color');
-                        var colorsd = new Float32Array(colorattri.length);
-                        for (var k = 0; k < colorattri.length / 3; k++) {
-                            colorsd[k * 3 + 0] = tempcolor.r;
-                            colorsd[k * 3 + 1] = tempcolor.g;
-                            colorsd[k * 3 + 2] = tempcolor.b;
-                        }
-                        currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                        currentParticles[key].geometry.colorsNeedUpdate = true;
-                    }
-                    if (!(removedclusters.hasOwnProperty(key))) {
-                        scene3d.add(currentParticles[key]);
-                    }
-                }
-            }
-            $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
-            $("#plot-clusters").html(generateClusterList(localSection, colorlist));
-            sections = localSection;
-            window.addEventListener('resize', onWindowResize, false);
-            $("#plot-title").text(fileNames[currentValue + 1]);
-            if (clusters && clusters.length < 100) {
-                $('.color-pic1').colorpicker();
-                $('.color_enable').prop('checked', true);
-            }
-            render();
-            if (maxValue > currentValue + 1 && !isPaused) {
-                playLoop();
-            } else {
-                isPaused = true;
-                isPlaying = false;
-                if (maxValue == currentValue + 1) {
-                    $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
-                }
-            }
-        }, controlers.delay);
-    }
-}
-
-
-function isBufferNeeded(currentval) {
-    if (currentLoadedEnd == timeSeriesLength) {
-        return false;
-    }
-    return (currentval == (precurrentLoadedStart + Math.floor((precurrentLoadedEnd - precurrentLoadedStart)/2))) ?  true : false;
-}
-function checkAndBufferData(currentval){
-    if(isBufferNeeded(currentval)){
-        bufferData();
-    }
-}
-
-
-function bufferData(){
-    var loadend = timeSeriesLength
-    if(timeSeriesLength > precurrentLoadedEnd + controlers.loadSize){
-        loadend = precurrentLoadedEnd + controlers.loadSize;
-    }
-    loadPlotData(precurrentLoadedEnd,loadend)
-    for(var i =0; i < (loadend - precurrentLoadedEnd); i++){
-        delete particleSets[precurrentLoadedStart+i];
-        delete sectionSets[precurrentLoadedStart+i];
-    }
-    precurrentLoadedStart += controlers.loadSize;
-    precurrentLoadedEnd += controlers.loadSize;
-    if(precurrentLoadedEnd > timeSeriesLength){
-        precurrentLoadedEnd = timeSeriesLength
-    }
-    checkIfBuffered();
-}
-
-function checkIfBuffered() {
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < controlers.maxPlotsStored) {
-            checkIfBuffered();
-        } else {
-            currentLoadedStart += controlers.loadSize;
-            currentLoadedEnd += controlers.loadSize;
-            if (currentLoadedEnd > timeSeriesLength) {
-                currentLoadedEnd = timeSeriesLength
-            }
-            var currentValue = $("#slider").slider("value");
-            if(currentValue + 1 > (currentLoadedStart + Math.floor((currentLoadedEnd - currentLoadedStart)/2))){
-                bufferData();
-            }
-            if(isPlaying && isPaused){
-                isPaused = false;
-                playLoop();
-
+        if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
+            if (updatePlot(currentValue + 1)) {
+                plotRangeSlider.update({from: currentValue + 1});
+                render();
             }
         }
-    }, 1000);
+
+        if (!(maxValue > currentValue && playStatus == playEnum.PLAY)) {
+            playStatus = playEnum.PAUSE;
+            if (maxValue == currentValue) {
+                $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
+            }
+        }
+        playLoop();
+    }, controlers.delay);
+}
+
+function initBufferAndLoad() {
+    var currentValue = parseInt($("#plot-slider").prop("value"));
+    setTimeout(function () {
+        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
+            if (timeSeriesLength > MAX_PLOTS_STORED) {
+                loadPlotData(0, MAX_PLOTS_STORED);
+            }else{
+                loadPlotData(0, timeSeriesLength);
+            }
+            initBufferAndLoad();
+        } else {
+            updatePlot(0);
+            $( "#progress" ).css({display : "none"});
+            if (!bufferLoopStarted) {
+                bufferLoopStarted = true;
+                bufferLoop();
+            }
+        }
+    }, controlers.delay);
+}
+
+var bufferRequestMade = {};        // track the requests made to get data to be buffered
+var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
+
+function bufferLoop(){
+    setTimeout(function () {
+        var currentIndex = parseInt($("#plot-slider").prop("value"));
+        var loadend = timeSeriesLength;
+        if (timeSeriesLength > currentIndex + controlers.loadSize) {
+            loadend = currentIndex + controlers.loadSize;
+        }
+        var loadStartIndex = 0;
+        if (currentIndex - controlers.loadSize > 0) {
+            loadStartIndex = currentIndex - controlers.loadSize;
+        }
+        for (var i = 0; i < loadStartIndex; i++) {
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
+            delete particleSets[i];
+            if (particleSets[i]) {
+                delete bufferRequestMade[i];
+                particleSets[i] = null;
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+                sectionSets[i] = null;
+            }
+        }
+        for (var i = loadend + 1; i < timeSeriesLength; i++) {
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
+            if (particleSets[i]) {
+                delete particleSets[i];
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+            }
+        }
+
+        loadPlotData(loadStartIndex, loadend);
+        if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
+            updatePlot(currentIndex);
+            currentPlotUpdated = true;
+        }
+        bufferLoop();
+
+    }, controlers.delay / 2);
 }
 
 function animateTimeSeriesPause() {
-    isPaused = true;
-    isPlaying = false;
+    playStatus = playEnum.PAUSE;
 }
 
 function resetView() {
@@ -1133,18 +1041,16 @@ function resetView() {
 }
 
 function resetSlider() {
-    isPaused = true;
-    isPlaying = false;
+    playStatus = playEnum.PAUSE;
     //$("#plot-slider").attr("value", 0);
     plotRangeSlider.update({from: 0});
-    updatePlot(0);
 }
 
 var controlers = {
     delay: 300,
     pointsize: 1,
     glyphsize: 1,
-    loadSize: 5,
+    loadSize: 10,
     maxPlotsStored: 20
 };
 

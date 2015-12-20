@@ -3,11 +3,11 @@ package models.xml;
 import javax.xml.bind.annotation.XmlAttribute;
 
 public class Location {
-    private float x;
-    private float y;
-    private float z;
+    private String x;
+    private String y;
+    private String z;
 
-    public Location(float x, float y, float z) {
+    public Location(String x, String y, String z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -17,29 +17,29 @@ public class Location {
     }
 
     @XmlAttribute
-    public void setX(float x) {
+    public void setX(String x) {
         this.x = x;
     }
 
     @XmlAttribute
-    public void setY(float y) {
+    public void setY(String y) {
         this.y = y;
     }
 
     @XmlAttribute
-    public void setZ(float z) {
+    public void setZ(String z) {
         this.z = z;
     }
 
-    public float getX() {
+    public String getX() {
         return x;
     }
 
-    public float getY() {
+    public String getY() {
         return y;
     }
 
-    public float getZ() {
+    public String getZ() {
         return z;
     }
 }
