@@ -880,6 +880,11 @@ function updatePlot(index) {
                         currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
+
+                    if(changedGlyphs.hasOwnProperty(key)){
+                        currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                        currentParticles[key].material.needsUpdate = true;
+                    }
                     if (!(removedclusters.hasOwnProperty(key))) {
                         scene3d.add(currentParticles[key]);
                     }
@@ -947,7 +952,6 @@ function addSection(id) {
 
 function changeGlyph(id,shape){
     changedGlyphs[id] = shape;
-    var s = sprites[shape];
     currentParticles[id].material.map = sprites[shape];
     currentParticles[id].material.needsUpdate = true;
 }
