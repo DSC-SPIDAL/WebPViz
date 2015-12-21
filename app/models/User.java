@@ -26,13 +26,13 @@ import play.db.ebean.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Date;
-import java.util.Locale;
 
 @Entity
 public class User extends Model {
     @Id
+    @GeneratedValue
     public int id;
 
     @Constraints.Required
@@ -42,18 +42,7 @@ public class User extends Model {
 
     @Constraints.Required
     @Formats.NonEmpty
-    @Column(unique = true)
-    public String fullname;
-
-    @Constraints.Required
-    @Formats.NonEmpty
     public String passwordHash;
-
-    @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
-    public Date dateCreation;
-
-    @Formats.NonEmpty
-    public Boolean validated = false;
 
     // -- Queries (long id, user.class)
     public static Model.Finder<Integer, User> find = new Model.Finder<Integer, User>(Integer.class, User.class);
@@ -69,16 +58,6 @@ public class User extends Model {
      */
     public static User findByEmail(String email) {
         return find.where().eq("email", email).findUnique();
-    }
-
-    /**
-     * Retrieve a user from a fullname.
-     *
-     * @param fullname Full name
-     * @return a user
-     */
-    public static User findByFullname(String fullname) {
-        return find.where().eq("fullname", fullname).findUnique();
     }
 
 
@@ -108,15 +87,13 @@ public class User extends Model {
      *
      * @param email         email
      * @param clearPassword clear text password
-     * @param fullname      full name
      * @return User if successful, null otherwise
      * @throws AppException App exception
      */
-    public static User create(String email, String clearPassword, String fullname) throws AppException {
+    public static User create(String email, String clearPassword) throws AppException {
         User u = new User();
         u.email = email;
         u.passwordHash = Hash.createPassword(clearPassword);
-        u.fullname = fullname;
         u.save();
 
         return u;

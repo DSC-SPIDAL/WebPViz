@@ -14,6 +14,7 @@ import db.ArtifactDAO;
 import db.GroupsDAO;
 import models.*;
 import models.utils.AppException;
+import models.utils.Hash;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -65,6 +66,26 @@ public class Application extends Controller {
             return ok(login.render(loginForm, from));
         } else {
             return ok(login.render(form(Login.class), ""));
+        }
+    }
+
+    public static Result reg() {
+        return ok(register.render(form(SignUp.class), ""));
+    }
+
+    public static Result register() {
+        Form<SignUp> loginForm = form(SignUp.class).bindFromRequest();
+
+        if (loginForm.hasErrors()) {
+            return badRequest(register.render(loginForm, ""));
+        } else {
+            try {
+                User user = User.create(loginForm.get().email, loginForm.get().password);
+            } catch (AppException e) {
+                e.printStackTrace();
+            }
+            session("email", loginForm.get().email);
+            return GO_DASHBOARD;
         }
     }
 
@@ -379,21 +400,12 @@ public class Application extends Controller {
          * @return null if validation ok, string with details otherwise
          */
         public String validate() {
-
-            User user = null;
-            try {
-                user = User.create(email, password, "Wickramasinghe");
-            } catch (AppException e) {
-                Logger.error("Something went wrong during authentication.", e);
-                return "Technical error, please retry later.";
-            }
-
-            if (user == null) {
+            User user = User.findByEmail(email);
+            if (user != null) {
                 String errMessage = "Invalid user or password.";
                 Logger.warn(errMessage);
                 return errMessage;
             }
-
             return null;
         }
 

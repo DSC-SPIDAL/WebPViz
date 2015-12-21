@@ -47,7 +47,8 @@ GET         /resultssetall/:tid/file/:rid       controllers.Application.getFile(
 #time series
 GET         /timeseries/:id                     controllers.Application.getArtifact(id: Integer)
 
-
+GET         /registerpage                       controllers.Application.reg()
+POST         /register                       controllers.Application.register()
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                       controllers.Assets.at(path="/public", file)

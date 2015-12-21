@@ -66,6 +66,9 @@
                         <li id="webgl-stats"></li>
                         @if(user == null) {
                             <li>
+                                <a href="@routes.Application.reg()">Register</a>
+                            </li>
+                            <li>
                                 <a href="@routes.Application.login()">Sign in</a>
                             </li>
                         } else {

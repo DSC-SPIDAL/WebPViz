@@ -48,10 +48,9 @@ public class Global extends GlobalSettings{
     private void registerAdmins() throws AppException {
         String email = "admin";
         String password = "admin";
-        String fullname = "Admin";
 
         if (User.findByEmail(email) == null) {
-            User.create(email, password, fullname);
+            User.create(email, password);
         } else {
             Logger.warn(String.format("User with email %s already exists.", email));
         }
