@@ -256,7 +256,7 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = db.individualFile(timeSeriesId, loggedInUser.email);
         if (r != null) {
-            return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
+            return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name, false));
         } else {
             return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
@@ -270,7 +270,7 @@ public class Application extends Controller {
         TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId, loggedInUser.email);
         int id = timeSeriesProps.id;
         String name = timeSeriesProps.name;
-        return ok(timeseries.render(loggedInUser, id, name));
+        return ok(timeseries.render(loggedInUser, id, name, false));
     }
 
     public static Result singlePublicPage(int timeSeriesId) {
@@ -282,7 +282,7 @@ public class Application extends Controller {
             loggedInUser = User.findByEmail(email);
         }
         if (r != null) {
-            return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
+            return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name, true));
         } else {
             return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(null), GroupsDAO.allGroups(null), false, null, true, "Public"));
         }
@@ -298,7 +298,7 @@ public class Application extends Controller {
         if (email != null) {
             loggedInUser = User.findByEmail(email);
         }
-        return ok(timeseries.render(loggedInUser, id, name));
+        return ok(timeseries.render(loggedInUser, id, name, true));
     }
 
     public static Result uploadGet() {
