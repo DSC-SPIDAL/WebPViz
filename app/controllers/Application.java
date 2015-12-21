@@ -81,6 +81,7 @@ public class Application extends Controller {
         } else {
             try {
                 User user = User.create(loginForm.get().email, loginForm.get().password);
+                GroupsDAO.createDafault(user.id);
             } catch (AppException e) {
                 e.printStackTrace();
             }

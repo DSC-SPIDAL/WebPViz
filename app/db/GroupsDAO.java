@@ -25,6 +25,11 @@ public class GroupsDAO {
         return iterable.iterator().hasNext();
     }
 
+    public static void createDafault(int user) {
+        Group defaultGroup = new Group(user, "default", "The default group", false);
+        GroupsDAO.insertGroup(defaultGroup);
+    }
+
     public static void insertGroup(Group group) {
         MongoConnection db = MongoConnection.getInstance();
         Document groupDocument = new Document();

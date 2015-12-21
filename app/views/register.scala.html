@@ -5,6 +5,7 @@
     <link href="@routes.Assets.at("stylesheets/signin.css")" rel="stylesheet">
 
     @form(routes.Application.register(), 'class -> "form-signin"){
+        <form id="regForm">
     <fieldset>
         <div id="legend">
             <legend class="">Register</legend>
@@ -42,9 +43,14 @@
         <div class="control-group">
                 <!-- Button -->
             <div class="controls">
-                <button class="btn btn-success">Register</button>
+                <button class="btn btn-success" type="submit">Register</button>
             </div>
         </div>
     </fieldset>
+        </form>
     }
+
+    <script>
+$("#regForm").validate();
+</script>
 }
