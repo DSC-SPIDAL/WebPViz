@@ -46,17 +46,17 @@ public class Application extends Controller {
             controllers.routes.Application.dashboard()
     );
 
-    public static Result index() {
+    public Result index() {
         User loggedInUser = User.findByEmail(session().get("email"));
         return ok(index.render(loggedInUser));
     }
 
-    public static Result logout() {
+    public Result logout() {
         session().clear();
         return redirect(routes.Application.index());
     }
 
-    public static Result login() {
+    public  Result login() {
         String from = request().getQueryString("from");
         if (from != null) {
             Map<String,String> anyData = new HashMap();
@@ -69,7 +69,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result dashboard() {
+    public  Result dashboard() {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
@@ -77,7 +77,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result groupDashboard(String group) {
+    public  Result groupDashboard(String group) {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
@@ -90,13 +90,13 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result about() {
+    public  Result about() {
         User loggedInUser = User.findByEmail(request().username());
         return ok(about.render(loggedInUser));
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result delete(int timeSeriesId){
+    public  Result delete(int timeSeriesId){
         //TODO delete time series
         ArtifactDAO db = ArtifactDAO.getInstance();
         db.deleteTimeSeries(timeSeriesId);
@@ -104,7 +104,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result upload() throws IOException {
+    public  Result upload() throws IOException {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -148,7 +148,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result updateFile() {
+    public  Result updateFile() {
         System.out.println("Update");
         DynamicForm form = Form.form().bindFromRequest();
 
@@ -188,7 +188,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result savePlot() {
+    public  Result savePlot() {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         JsonNode json = request().body().asJson();
@@ -209,7 +209,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result singlePage(int timeSeriesId) {
+    public  Result singlePage(int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         ResultSet r = db.individualFile(timeSeriesId);
@@ -221,7 +221,7 @@ public class Application extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result timeSeriesPage(int timeSeriesId) {
+    public  Result timeSeriesPage(int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
@@ -231,15 +231,15 @@ public class Application extends Controller {
         return ok(timeseries.render(loggedInUser, id, name));
     }
 
-    public static Result uploadGet() {
+    public  Result uploadGet() {
         return redirect(controllers.routes.Application.dashboard());
     }
 
-    public static Result authenticateGet() {
+    public  Result authenticateGet() {
         return redirect(controllers.routes.Application.login());
     }
 
-    public static Result addUser() {
+    public  Result addUser() {
         Form<SignUp> loginForm = form(SignUp.class).bindFromRequest();
         if (loginForm.hasErrors()) {
             return badRequest();
@@ -269,7 +269,7 @@ public class Application extends Controller {
      * @return
      */
     @Security.Authenticated(Secured.class)
-    public static Result getFile(int tid, int rid) {
+    public  Result getFile(int tid, int rid) {
         long t0 = System.currentTimeMillis();
         ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.getFile(tid, rid);
@@ -303,7 +303,7 @@ public class Application extends Controller {
      * @return
      */
     @Security.Authenticated(Secured.class)
-    public static Result getArtifact(int id) {
+    public Result getArtifact(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         String r = db.getArtifact(id);
         JsonNode result = Json.parse(r);
@@ -315,7 +315,7 @@ public class Application extends Controller {
      *
      * @return Dashboard if auth OK or login form if auth KO
      */
-    public static Result authenticate() {
+    public  Result authenticate() {
         Form<Login> loginForm = form(Login.class).bindFromRequest();
 
         if (loginForm.hasErrors()) {
