@@ -97,6 +97,13 @@ public class Application extends Controller {
         return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
     }
 
+
+    public static Result publicDashboard() {
+        ArtifactDAO db = ArtifactDAO.getInstance();
+
+        return ok(dashboard.render(null, false, null, db.timeSeriesList(-1), GroupsDAO.allGroups(-1), false, null));
+    }
+
     @Security.Authenticated(Secured.class)
     public static Result groupDashboard(String group) {
         ArtifactDAO db = ArtifactDAO.getInstance();
@@ -260,6 +267,24 @@ public class Application extends Controller {
         return ok(timeseries.render(loggedInUser, id, name));
     }
 
+    public static Result singlePublicPage(int timeSeriesId) {
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        ResultSet r = db.individualFile(timeSeriesId, -1);
+        if (r != null) {
+            return ok(resultset.render(null, r.id, timeSeriesId, r.name));
+        } else {
+            return badRequest(dashboard.render(null, true, "Plot cannot be found.", db.timeSeriesList(-1), GroupsDAO.allGroups(-1), false, null));
+        }
+    }
+
+    public static Result timeSeriesPublicPage(int timeSeriesId) {
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId, -1);
+        int id = timeSeriesProps.id;
+        String name = timeSeriesProps.name;
+        return ok(timeseries.render(null, id, name));
+    }
+
     public static Result uploadGet() {
         return redirect(controllers.routes.Application.dashboard());
     }
@@ -299,6 +324,24 @@ public class Application extends Controller {
     }
 
     /**
+     * Get the individual plot with the clusters, points and edges
+     * @param tid artifact id
+     * @param rid file id
+     * @return
+     */
+    public static Result getPublicFile(int tid, int rid) {
+        long t0 = System.currentTimeMillis();
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        String r = db.getFile(tid, rid, -1);
+        Logger.info("Time: " + (System.currentTimeMillis() - t0));
+        if (r != null) {
+            return ok(r).as("application/jston");
+        } else {
+            return notFound("{found: false}");
+        }
+    }
+
+    /**
      * Get the artifact information.
      * @param id artifact id
      * @return
@@ -308,6 +351,18 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         String r = db.getArtifact(id, loggedInUser.id);
+        JsonNode result = Json.parse(r);
+        return ok(result);
+    }
+
+    /**
+     * Get the artifact information.
+     * @param id artifact id
+     * @return
+     */
+    public static Result getPublicArtifact(int id) {
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        String r = db.getArtifact(id, -1);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
@@ -331,7 +386,6 @@ public class Application extends Controller {
             return GO_DASHBOARD;
         }
     }
-
 
     /**
      * Login class used by Login Form.

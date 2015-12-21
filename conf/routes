@@ -8,6 +8,8 @@ GET         /                                   controllers.Application.index()
 # Admin Dashboard
 GET         /dashboard                          controllers.Application.dashboard()
 
+GET         /publicdashboard                    controllers.Application.publicDashboard()
+
 GET         /groupdashboard/:group              controllers.Application.groupDashboard(group: String)
 
 # about page
@@ -33,8 +35,10 @@ GET      /delete/:id                            controllers.Application.delete(i
 
 # Visualize
 GET         /resultsets/:tid                    controllers.Application.singlePage(tid: Integer)
+GET         /public/resultsets/:tid             controllers.Application.singlePublicPage(tid: Integer)
 #GET         /resultsets/:tid/file/:rid          controllers.Application.visualize(rid: Integer, tid: Integer)
 GET         /timeseriesview/:id                 controllers.Application.timeSeriesPage(id: Integer)
+GET         /public/timeseriesview/:id                 controllers.Application.timeSeriesPublicPage(id: Integer)
 
 # ResultSet data
 #GET         /resultset/:tid/file/:rid           controllers.Application.resultset(rid: Integer, tid: Integer)
@@ -43,9 +47,11 @@ GET         /timeseriesview/:id                 controllers.Application.timeSeri
 
 
 GET         /resultssetall/:tid/file/:rid       controllers.Application.getFile(tid: Integer, rid: Integer)
+GET         /public/resultssetall/:tid/file/:rid       controllers.Application.getPublicFile(tid: Integer, rid: Integer)
 
 #time series
 GET         /timeseries/:id                     controllers.Application.getArtifact(id: Integer)
+GET         /public/timeseries/:id              controllers.Application.getPublicArtifact(id: Integer)
 
 GET         /registerpage                       controllers.Application.reg()
 POST         /register                       controllers.Application.register()

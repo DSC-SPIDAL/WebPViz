@@ -56,7 +56,12 @@ public class GroupsDAO {
 
     public static List<Group> allGroups(int uid) {
         MongoConnection db = MongoConnection.getInstance();
-        FindIterable<Document> iterable =  db.groupsCol.find(new Document(Constants.Group.USER, uid));
+        FindIterable<Document> iterable;
+        if (uid >= 0) {
+            iterable = db.groupsCol.find(new Document(Constants.Group.USER, uid));
+        } else {
+            iterable = db.groupsCol.find(new Document(Constants.Group.PUBLIC, true));
+        }
         List<Group> groups = new ArrayList<Group>();
         for (Document d : iterable) {
             Group group = new Group();

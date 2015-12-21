@@ -17,25 +17,26 @@
                 }
             }
     </script>
-
-    <div class="row upload">
-        <div class="col-sm-12 col-md-12 pull-right">
-            <h2 class="section-header"></h2>
-            <div class="dropdown">
-                <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    Upload
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                    <li><a href="#" data-toggle="modal" data-target="#uploadModal">Upload Artifact</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#newGroupModal">Create Collection</a></li>
-                </ul>
+    @if(user != null) {
+        <div class="row upload">
+            <div class="col-sm-12 col-md-12 pull-right">
+                <h2 class="section-header"></h2>
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Upload
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li><a href="#" data-toggle="modal" data-target="#uploadModal">Upload Artifact</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#newGroupModal">Create Collection</a></li>
+                    </ul>
+                </div>
+                @if(group) {
+                    <h2 class="section-header">Collection: @groupName</h2>
+                }
             </div>
-            @if(group) {
-                <h2 class="section-header">Collection: @groupName</h2>
-            }
         </div>
-    </div>
+    }
     @if(!group) {
         <div class="row">
             <div class="col-sm-12 col-md-12">
