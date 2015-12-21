@@ -320,6 +320,9 @@ function intialSetup(artifact) {
         if (artifact.settings.zoom) {
             camera.zoom = artifact.settings.zoom;
         }
+        if(artifact.settings.glyphs){
+            changedGlyphs =  artifact.settings.glyphs;
+        }
         camera.updateProjectionMatrix();
 
         var colors = artifact.settings.clusterColors;
@@ -1159,6 +1162,7 @@ function savePlot() {
             obj['pointSize'] = controlers.pointsize;
             obj['glyphSize'] = controlers.glyphsize;
             obj['speed'] = controlers.delay;
+            obj['glyphs'] = changedGlyphs;
             var lookAtVector = new THREE.Vector3(0, 0, -1);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};
