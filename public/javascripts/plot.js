@@ -219,13 +219,13 @@ function generateCheckList(list, initcolors) {
             if(sprite != null){
                 tablerows += "<td class=' '><span>" + list[key].label + sprite + "</span>"
                     + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
-                    + "<option value='0'" + checkIfSelected("0", list[key].shape) + ">Disc</option>"
-                    + "<option value='1'" + checkIfSelected("1", list[key].shape) + ">Ball</option>"
-                    + "<option value='2'" + checkIfSelected("2", list[key].shape) + ">Star</option>"
-                    + "<option value='3'" + checkIfSelected("3", list[key].shape) + ">Cube</option>"
-                    + "<option value='4'" + checkIfSelected("4", list[key].shape) + ">Pyramid</option>"
-                    + "<option value='5'" + checkIfSelected("5", list[key].shape) + ">Cone</option>"
-                    + "<option value='6'" + checkIfSelected("6", list[key].shape) + ">Cylinder</option>"
+                    + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
+                    + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
+                    + "<option value='2'" + checkIfSelected("2", list[key].shape, key) + ">Star</option>"
+                    + "<option value='3'" + checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
+                    + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
+                    + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
+                    + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
                     + "</select>"
                     "</td>";
             }else{
@@ -243,12 +243,15 @@ function generateCheckList(list, initcolors) {
     return tabletop + tablerows + tableend;
 }
 
-function checkIfSelected(key, shape){
+function checkIfSelected(key, shape, clusterkey){
+    if(changedGlyphs.hasOwnProperty(clusterkey)){
+        shape = changedGlyphs[clusterkey]
+    }
     if (key == shape) {
         return "selected"
     }else{
         return ""
-    };
+    }
 }
 function updateClusterList(list, initcolors) {
     for (var key in list) {
