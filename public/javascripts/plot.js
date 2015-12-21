@@ -33,6 +33,8 @@ var removedclusters = [];
 var recoloredclusters = [];
 var timeSeriesLength;
 
+var changedGlyphs = {};
+
 var bufferLoopStarted = false;
 
 //Constants
@@ -216,7 +218,7 @@ function generateCheckList(list, initcolors) {
                 + "</td>";
             if(sprite != null){
                 tablerows += "<td class=' '><span>" + list[key].label + sprite + "</span>"
-                    + "<select name='glyphs' class='select-glyph'>"
+                    + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
                     + "<option value='0'" + checkIfSelected("0", list[key].shape) + ">Disc</option>"
                     + "<option value='1'" + checkIfSelected("1", list[key].shape) + ">Ball</option>"
                     + "<option value='2'" + checkIfSelected("2", list[key].shape) + ">Star</option>"
@@ -941,6 +943,13 @@ function addAllSections(){
 function addSection(id) {
     scene3d.add(currentParticles[id]);
     delete removedclusters[id];
+}
+
+function changeGlyph(id,shape){
+    changedGlyphs[id] = shape;
+    var s = sprites[shape];
+    currentParticles[id].material.map = sprites[shape];
+    currentParticles[id].material.needsUpdate = true;
 }
 
 function recolorSection(id, color) {
