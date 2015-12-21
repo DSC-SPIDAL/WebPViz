@@ -347,7 +347,7 @@ public class Application extends Controller {
         String r = db.getFile(tid, rid, loggedInUser.id);
         Logger.info("Time: " + (System.currentTimeMillis() - t0));
         if (r != null) {
-            return ok(r).as("application/jston");
+            return ok(r).as("application/json");
         } else {
             return notFound("{found: false}");
         }
@@ -365,7 +365,7 @@ public class Application extends Controller {
         String r = db.getFile(tid, rid, -1);
         Logger.info("Time: " + (System.currentTimeMillis() - t0));
         if (r != null) {
-            return ok(r).as("application/jston");
+            return ok(r).as("application/json");
         } else {
             return notFound("{found: false}");
         }
