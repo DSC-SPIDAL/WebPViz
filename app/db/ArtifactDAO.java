@@ -657,6 +657,10 @@ public class ArtifactDAO {
             timeSeries.uploaderId = (Integer) document.get(Constants.Artifact.USER);
             timeSeries.status = (String) document.get(Constants.Artifact.STATUS_FIELD);
             timeSeries.group = (String) document.get(Constants.Artifact.GROUP_FIELD);
+            Object pub = document.get(Constants.Artifact.PUBLIC);
+            if (pub != null && pub instanceof Boolean) {
+                timeSeries.pub = (boolean) pub;
+            }
             if (timeSeries.group == null || "".equals(timeSeries.group)) {
                 timeSeries.group = Constants.Group.DEFAULT_GROUP;
             }
@@ -687,7 +691,7 @@ public class ArtifactDAO {
         MongoConnection con = MongoConnection.getInstance();
         Logger.info("updating the document with id " + old.id + " with group: " + newTimeSeries.group + " desc: " + newTimeSeries.description);
         Document oldGroupDocument = new Document();
-        oldGroupDocument.append(Constants.Artifact.ID_FIELD, old.id).append(Constants.Artifact.ID_FIELD, old.uploaderId);
+        oldGroupDocument.append(Constants.Artifact.ID_FIELD, old.id).append(Constants.Artifact.USER, old.uploaderId);
 
         FindIterable<Document> iterable = con.artifactCol.find(oldGroupDocument);
         Document findDocument = null;
@@ -699,6 +703,7 @@ public class ArtifactDAO {
         if (findDocument != null) {
             findDocument.append(Constants.Artifact.GROUP_FIELD, newTimeSeries.group);
             findDocument.append(Constants.Artifact.DESC_FIELD, newTimeSeries.description);
+            findDocument.append(Constants.Artifact.PUBLIC, newTimeSeries.pub);
             con.artifactCol.replaceOne(oldGroupDocument, findDocument);
         }
     }
@@ -715,6 +720,10 @@ public class ArtifactDAO {
             TimeSeries timeSeries = new TimeSeries();
             timeSeries.id = (Integer) d.get(Constants.Artifact.ID_FIELD);
             timeSeries.name = (String) d.get(Constants.Artifact.NAME_FIELD);
+            Object pub = d.get(Constants.Artifact.PUBLIC);
+            if (pub != null && pub instanceof Boolean) {
+                timeSeries.pub = (boolean) pub;
+            }
             return timeSeries;
         }
         return null;

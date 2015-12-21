@@ -57,7 +57,7 @@
                                 <td>@r.name</td>
                                 <td>@r.description</td>
                                 <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
-                                <td align="center"><a href="javascript:void(0);" class="edit-col-link" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="javascript:void(0);" class="edit-col-link" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
                                 <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                             </tr>
                         }
@@ -109,7 +109,7 @@
                                         <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
                                     }
                                 }
-                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
                                 <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                             </tr>
                         }
@@ -163,7 +163,7 @@
                                         <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
                                     }
                                 }
-                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
                                 <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
                             </tr>
                         }
@@ -239,7 +239,7 @@
                         <div class="form-group">
                             <label for="edit_file_name">Name</label>
                             <input type="text" id="edit_file_name" name="name" required disabled="disabled">
-                            <input type="hidden" name="id" id="edit_file_id">
+                            <input type="hidden" name="id" id="edit_file_hname">
                             @if(group){
                                 <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
                             }
@@ -257,6 +257,10 @@
                             </select>
                             @*<input type="text" class="form-control" name="group" id="group" placeholder="Enter Group Name"/>*@
                         </div>
+                        <div class="form-group">
+                            <input type="checkbox" class="margin-left-five pull-left" name="pub" id="edit_file_pub"><span class="pull-left">Public</span>
+                        </div>
+                        <h2 class="section-header"></h2>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </form>
                 }
@@ -318,7 +322,7 @@
                     <form id="uploadForm" method="post" class="form-horizontal">
                         <div class="form-group">
                             <label for="disabledEdit_name">Name</label>
-                            <input type="text" id="disabledEdit_name" name="name" required disabled="disabled">
+                            <input type="text" id="disabled_edit_col_id" name="name" required disabled="disabled">
                             <input type="hidden" id="edit_col_name" name="name" required>
                             @if(group){
                                 <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
@@ -328,6 +332,10 @@
                             <label for="edit_desc">Description</label>
                             <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_col_desc" placeholder="Enter description"></textarea>
                         </div>
+                        <div class="form-group">
+                            <input type="checkbox" class="margin-left-five pull-left" name="pub" id="edit_group_pub"><span class="pull-left">Public</span>
+                        </div>
+                        <h2 class="section-header"></h2>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </form>
                 }
@@ -395,24 +403,34 @@
                    var id = $(this).data('id');
                    var desc = $(this).data('desc');
                    var group = $(this).data('group');
+                   var pub = $(this).data('pub');
                     $("#edit_file_name").val(n);
+                    $("#edit_file_hname").val(n);
                     $("#edit_file_desc").val(desc);
                     if (group) {
                         $("#edit_group").val(group);
                     }
                     $('#edit_file_id').val(id);
                     $('#editFileModal').modal('show');
+                    if (pub) {
+                        $('#edit_file_pub').prop('checked', true);
+                    }
                  });
             });
 
             $(document).ready(function () {
                 $('.edit-col-link').click(function(e) {
                    e.preventDefault();
-                   n = $(this).data('name');
-                   desc = $(this).data('desc');
+                  var  n = $(this).data('name');
+                   var desc = $(this).data('desc');
                     $("#edit_col_name").val(n);
                     $("#edit_col_desc").val(desc);
+                    $("#disabled_edit_col_id").val(n);
+                    var pub = $(this).data('pub');
                     $('#editColModal').modal('show');
+                    if (pub) {
+                        $('#edit_group_pub').prop('checked', true);
+                    }
                  });
                 var oTable = $('#collections').dataTable({
                     "oLanguage": {

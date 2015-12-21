@@ -94,7 +94,7 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
     }
 
     @Security.Authenticated(Secured.class)
@@ -104,9 +104,9 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         Group g = new Group(loggedInUser.id, group);
         if (GroupsDAO.groupExists(g)) {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, loggedInUser.id), GroupsDAO.allGroups(), true, group));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), true, group));
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
     }
 
@@ -160,12 +160,12 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
         if (fromGroupForm == null) {
             return GO_DASHBOARD;
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(), true, group));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), true, group));
         }
     }
 
@@ -174,17 +174,22 @@ public class Application extends Controller {
         System.out.println("Update");
         DynamicForm form = Form.form().bindFromRequest();
 
-        String description, group, id, fromGroup = null;
+        String description, group, id, fromGroup = null, pub;
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
         id = form.get("id");
         description = form.get("desc");
         group = form.get("group");
         fromGroup = form.get("from_group");
+        pub = form.get("pub");
+        boolean pubVal = false;
+        if (pub != null && ("on".equals(pub) || "checked".equals(pub))) {
+            pubVal = true;
+        }
 
         TimeSeries oldGroup = new TimeSeries();
         oldGroup.id = Integer.parseInt(id);
@@ -193,6 +198,8 @@ public class Application extends Controller {
         TimeSeries newTimeSeries = new TimeSeries();
         newTimeSeries.description = description;
         newTimeSeries.group = group;
+        newTimeSeries.pub = pubVal;
+        newTimeSeries.id = loggedInUser.id;
 
         if (db.timeSeriesExists(oldGroup)) {
             System.out.println("Exists");
@@ -200,12 +207,12 @@ public class Application extends Controller {
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(), true, group));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), true, group));
             }
         } else {
             //
             System.out.println("non exisits");
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
     }
 
@@ -226,7 +233,7 @@ public class Application extends Controller {
             db.updateArtifactSetting(tid, body);
             return ok("success");
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
     }
 
@@ -238,7 +245,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null));
         }
     }
 

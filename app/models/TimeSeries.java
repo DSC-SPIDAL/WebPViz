@@ -34,4 +34,6 @@ public class TimeSeries extends Model {
     public String t = "T";
 
     public String group = Constants.Group.DEFAULT_GROUP;
+
+    public boolean pub;
 }

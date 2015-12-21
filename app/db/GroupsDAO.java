@@ -27,6 +27,7 @@ public class GroupsDAO {
         groupDocument.append(Constants.Group.NAME, group.name);
         groupDocument.append(Constants.Group.DESCRIPTION, group.description);
         groupDocument.append(Constants.Group.USER, group.userId);
+        groupDocument.append(Constants.Group.PUBLIC, group.pub);
         db.groupsCol.insertOne(groupDocument);
     }
 
@@ -40,6 +41,7 @@ public class GroupsDAO {
         groupDocument.append(Constants.Group.NAME, newGroup.name);
         groupDocument.append(Constants.Group.DESCRIPTION, newGroup.description);
         groupDocument.append(Constants.Group.USER, newGroup.userId);
+        groupDocument.append(Constants.Group.PUBLIC, newGroup.pub);
 
         db.groupsCol.findOneAndReplace(oldGroupDocument, groupDocument);
     }
@@ -52,9 +54,9 @@ public class GroupsDAO {
         db.groupsCol.deleteOne(groupDocument);
     }
 
-    public static List<Group> allGroups() {
+    public static List<Group> allGroups(int uid) {
         MongoConnection db = MongoConnection.getInstance();
-        FindIterable<Document> iterable =  db.groupsCol.find();
+        FindIterable<Document> iterable =  db.groupsCol.find(new Document(Constants.Group.USER, uid));
         List<Group> groups = new ArrayList<Group>();
         for (Document d : iterable) {
             Group group = new Group();
@@ -63,6 +65,10 @@ public class GroupsDAO {
             group.description = (String) d.get(Constants.Group.DESCRIPTION);
             group.name = name;
             group.userId = user;
+            Object pub = d.get(Constants.Artifact.PUBLIC);
+            if (pub != null && pub instanceof Boolean) {
+                group.pub = (boolean) pub;
+            }
             groups.add(group);
             System.out.println(group.name);
         }

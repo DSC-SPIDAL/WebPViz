@@ -79,6 +79,7 @@ public class Constants {
         public static final String NAME = "name";
         public static final String USER = "user";
         public static final String DESCRIPTION = "desc";
+        public static final String PUBLIC = "public";
     }
 
     public static class DB {
