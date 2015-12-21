@@ -23,9 +23,11 @@ import models.utils.AppException;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
-import play.libs.F;
-import play.mvc.Http;
-import play.mvc.Result;
+import play.Play;
+import org.pac4j.play.Config;
+
+import org.pac4j.core.client.Clients;
+import org.pac4j.oidc.client.OidcClient;
 
 public class Global extends GlobalSettings{
 
@@ -43,6 +45,20 @@ public class Global extends GlobalSettings{
         // create the group dao
         MongoConnection con = MongoConnection.getInstance();
         con.initGroupsCollection();
+
+        final String baseUrl = Play.application().configuration().getString("baseUrl");
+        final String clientID = Play.application().configuration().getString("clientID");
+        final String oidSecret = Play.application().configuration().getString("secret");
+
+        // OpenID Connect
+        final OidcClient oidcClient = new OidcClient();
+        oidcClient.setClientID(clientID);
+        oidcClient.setSecret(oidSecret);
+        oidcClient.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration");
+        oidcClient.addCustomParam("prompt", "consent");
+
+        final Clients clients = new Clients(baseUrl + "/callback", oidcClient);
+        Config.setClients(clients);
     }
 
     private void registerAdmins() throws AppException {

@@ -66,7 +66,7 @@
                         <li id="webgl-stats"></li>
                         @if(user == null) {
                             <li>
-                                <a href="@routes.Application.login()">Sign in</a>
+                                <a href="@routes.LoggingController.oidcIndex()">Sign in</a>
                             </li>
                         } else {
                             <li class="dropdown">
