@@ -217,7 +217,7 @@ function generateCheckList(list, initcolors) {
                 + "</div>"
                 + "</td>";
             if(sprite != null){
-                tablerows += "<td class=' '><span>" + list[key].label + sprite + "</span>"
+                tablerows += "<td class=' '><span>" + list[key].label + "</span>"
                     + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
                     + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
                     + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
