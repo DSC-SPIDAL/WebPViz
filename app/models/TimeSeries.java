@@ -27,7 +27,7 @@ public class TimeSeries extends Model {
 
     @Constraints.Required
     @Formats.NonEmpty
-    public Integer uploaderId;
+    public String uploaderId;
 
     public String status;
 

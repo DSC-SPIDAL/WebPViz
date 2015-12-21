@@ -1,8 +1,10 @@
-    package edu.iu.soic.dsc;
+package edu.iu.soic.dsc;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 
 import java.text.DecimalFormat;
@@ -39,6 +41,32 @@ public class ConvertPointsToString {
         artifactCol = db.getCollection(ARTIFACTS_COLLECTION);
         filesCol = db.getCollection(FILES_COLLECTION);
         groupsCol = db.getCollection(GROUPS_COLLECTION);
+    }
+
+    public void changeUserID() {
+        Iterable<Document> fileDocuments = artifactCol.find();
+        for (Document d : fileDocuments) {
+            d.append("uploader", "webplotviziu");
+            Document replace = new Document("_id", d.get("_id"));
+//            Iterable<Document> it = artifactCol.find(replace);
+//            for (Document t : it) {
+//                System.out.println(t);
+//            }
+            UpdateResult update = artifactCol.replaceOne(replace, d);
+            System.out.println(update);
+        }
+        System.out.println("Changing groups");
+        Iterable<Document> groupDocuments = groupsCol.find();
+        for (Document d : groupDocuments) {
+            d.append("user", "webplotviziu");
+            Document replace = new Document("_id", d.get("_id"));
+//            Iterable<Document> it = groupsCol.find(replace);
+//            for (Document t : it) {
+//                System.out.println(t);
+//            }
+            UpdateResult updateResult = groupsCol.replaceOne(replace, d);
+            System.out.println(updateResult);
+        }
     }
 
     public void changeFileCollection() {
@@ -83,6 +111,6 @@ public class ConvertPointsToString {
         ConvertPointsToString cpts = new ConvertPointsToString();
         cpts.createConnection("localhost", 27017);
 
-        cpts.changeFileCollection();
+        cpts.changeUserID();
     }
 }

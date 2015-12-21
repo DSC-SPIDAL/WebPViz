@@ -26,15 +26,9 @@ import play.db.ebean.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 @Entity
 public class User extends Model {
-    @Id
-    @GeneratedValue
-    public int id;
-
     @Constraints.Required
     @Formats.NonEmpty
     @Column(unique = true)
@@ -70,7 +64,6 @@ public class User extends Model {
      * @throws AppException App Exception
      */
     public static User authenticate(String email, String clearPassword) throws AppException {
-
         // get the user with email only to keep the salt password
         User user = find.where().eq("email", email).findUnique();
         if (user != null) {
