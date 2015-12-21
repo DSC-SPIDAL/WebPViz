@@ -69,6 +69,9 @@ public class Constants {
         public static final String SETTINGS = "settings";
         public static final String UDP = "udp";
         public static final String FILES = "files";
+        public static final String PUBLIC = "public";
+        public static final String PUBLIC_TRUE = "t";
+        public static final String PUBLIC_FALSE = "f";
     }
 
     public static class Group {

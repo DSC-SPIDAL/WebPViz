@@ -94,7 +94,7 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
     }
 
     @Security.Authenticated(Secured.class)
@@ -104,9 +104,9 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         Group g = new Group(loggedInUser.id, group);
         if (GroupsDAO.groupExists(g)) {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g), GroupsDAO.allGroups(), true, group));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, loggedInUser.id), GroupsDAO.allGroups(), true, group));
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -119,8 +119,9 @@ public class Application extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result delete(int timeSeriesId){
         //TODO delete time series
+        User loggedInUser = User.findByEmail(request().username());
         ArtifactDAO db = ArtifactDAO.getInstance();
-        db.deleteTimeSeries(timeSeriesId);
+        db.deleteTimeSeries(timeSeriesId, loggedInUser.id);
         return GO_DASHBOARD;
     }
 
@@ -159,12 +160,12 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
         if (fromGroupForm == null) {
             return GO_DASHBOARD;
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group)), GroupsDAO.allGroups(), true, group));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(), true, group));
         }
     }
 
@@ -178,7 +179,7 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
         id = form.get("id");
         description = form.get("desc");
@@ -199,12 +200,12 @@ public class Application extends Controller {
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group)), GroupsDAO.allGroups(), true, group));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, group), loggedInUser.id), GroupsDAO.allGroups(), true, group));
             }
         } else {
             //
             System.out.println("non exisits");
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -225,7 +226,7 @@ public class Application extends Controller {
             db.updateArtifactSetting(tid, body);
             return ok("success");
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -233,11 +234,11 @@ public class Application extends Controller {
     public static Result singlePage(int timeSeriesId) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
-        ResultSet r = db.individualFile(timeSeriesId);
+        ResultSet r = db.individualFile(timeSeriesId, loggedInUser.id);
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(), GroupsDAO.allGroups(), false, null));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(), false, null));
         }
     }
 
@@ -246,7 +247,7 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
-        TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId);
+        TimeSeries timeSeriesProps = db.timeSeries(timeSeriesId, loggedInUser.id);
         int id = timeSeriesProps.id;
         String name = timeSeriesProps.name;
         return ok(timeseries.render(loggedInUser, id, name));
@@ -270,19 +271,6 @@ public class Application extends Controller {
         }
     }
 
-    public static class DSerializer implements JsonSerializer<Double> {
-        private static NumberFormat format = new DecimalFormat("#0.0000");
-        @Override
-        public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
-            // This method gets involved whenever the parser encounters the Dog
-            // object (for which this serializer is registered)
-            if (src.isNaN() || src.isInfinite()) {
-                return new JsonPrimitive(format.format(src.toString()));
-            }
-            return new JsonPrimitive((new BigDecimal(src)).setScale(5, BigDecimal.ROUND_HALF_UP));
-        }
-    }
-
     /**
      * Get the individual plot with the clusters, points and edges
      * @param tid artifact id
@@ -292,30 +280,15 @@ public class Application extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result getFile(int tid, int rid) {
         long t0 = System.currentTimeMillis();
+        User loggedInUser = User.findByEmail(request().username());
         ArtifactDAO db = ArtifactDAO.getInstance();
-        String r = db.getFile(tid, rid);
+        String r = db.getFile(tid, rid, loggedInUser.id);
         Logger.info("Time: " + (System.currentTimeMillis() - t0));
-        return ok(r).as("application/jston");
-//        ObjectMapper mapper = new ObjectMapper();
-//        JsonNode result = null;
-//        try {
-//            result = mapper.readTree(r);
-//            JsonNode points = result.get(Constants.File.POINTS);
-//            String ps = mapper.writeValueAsString(points);
-//            JsonObject jobj = new Gson().fromJson(r, JsonObject.class);
-//            Gson gson = new GsonBuilder().registerTypeAdapter(Double.class, new DSerializer()).create();
-//
-//            Type type = new TypeToken<Map<String, Double[]>>() {}.getType();
-//            Map<String, Double[]> pointMap = gson.fromJson(ps, type);
-//            JsonElement jsonElement = gson.toJsonTree(pointMap);
-//            jobj.add(Constants.File.POINTS, jsonElement);
-//            String s = gson.toJson(jobj);
-//            Logger.info("Time: " + (System.currentTimeMillis() - t0));
-//            return ok(s).as("application/jston");
-//        } catch (IOException e) {
-//            Logger.error("Failed to process", e);
-//        }
-//        return internalServerError();
+        if (r != null) {
+            return ok(r).as("application/jston");
+        } else {
+            return notFound("{found: false}");
+        }
     }
 
     /**
@@ -326,7 +299,8 @@ public class Application extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result getArtifact(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
-        String r = db.getArtifact(id);
+        User loggedInUser = User.findByEmail(request().username());
+        String r = db.getArtifact(id, loggedInUser.id);
         JsonNode result = Json.parse(r);
         return ok(result);
     }
