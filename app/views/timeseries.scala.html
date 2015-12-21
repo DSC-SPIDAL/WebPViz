@@ -216,10 +216,17 @@
                 //TODO needs to go to seperate page when WebGL is not supported
                 Detector.addGetWebGLMessage({"id":"canvas3d"});
           }else{
+                @if(user != null) {
                 $.getJSON("@routes.Application.getArtifact(timeSeriesId)", function (data) {
                     var resultSetUrl = "@routes.Application.getArtifact(timeSeriesId)";
                     visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
                 });
+                } else {
+                    $.getJSON("@routes.Application.getPublicArtifact(timeSeriesId)", function (data) {
+                    var resultSetUrl = "@routes.Application.getPublicArtifact(timeSeriesId)";
+                    visualizeTimeSeries(resultSetUrl, data, @timeSeriesId);
+                });
+                }
             }
     </script>
 }

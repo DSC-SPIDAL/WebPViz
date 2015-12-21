@@ -1,8 +1,7 @@
-@(user: User, hasError: Boolean, error: String, timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String)
+@(user: User, hasError: Boolean, error: String, timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String, pub: Boolean, title: String)
 @import helper._
 
-@main("Dashboard", user){
-
+@main(title, user){
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.9/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/dashboard.css")">
     <script type="text/javascript">
@@ -17,7 +16,7 @@
                 }
             }
     </script>
-    @if(user != null) {
+    @if(!pub) {
         <div class="row upload">
             <div class="col-sm-12 col-md-12 pull-right">
                 <h2 class="section-header"></h2>
@@ -36,6 +35,14 @@
                 }
             </div>
         </div>
+    } else {
+        @if(group) {
+            <div class="row upload">
+                <div class="col-sm-12 col-md-12 pull-right">
+                    <h2 class="section-header">Collection: @groupName</h2>
+                </div>
+            </div>
+        }
     }
     @if(!group) {
         <div class="row">
@@ -48,8 +55,10 @@
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th></th>
-                                <th></th>
-                                <th></th>
+                                @if(!pub) {
+                                    <th></th>
+                                    <th></th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -57,9 +66,13 @@
                             <tr>
                                 <td>@r.name</td>
                                 <td>@r.description</td>
-                                <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
-                                <td align="center"><a href="javascript:void(0);" class="edit-col-link" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                @if(!pub) {
+                                    <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
+                                    <td align="center"><a href="javascript:void(0);" class="edit-col-link" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                    <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                } else {
+                                    <td><a href="@routes.Application.groupDashboardPublic(r.name)">View</a> </td>
+                                }
                             </tr>
                         }
                         </tbody>
@@ -85,8 +98,10 @@
                                 <th>User</th>
                                 <th>Created At</th>
                                 <th></th>
-                                <th></th>
-                                <th></th>
+                                @if(!pub) {
+                                    <th></th>
+                                    <th></th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -105,13 +120,23 @@
                                     <td>Pending...</td>
                                 } else {
                                     @if("T".equals(r.t)) {
-                                        <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
+                                        @if(!pub) {
+                                            <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
+                                        } else {
+                                            <td><a href="@routes.Application.timeSeriesPublicPage(r.id)">View</a> </td>
+                                        }
                                     } else {
-                                        <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
+                                        @if(!pub) {
+                                            <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
+                                        } else {
+                                            <td><a href="@routes.Application.singlePublicPage(r.id)">View</a> </td>
+                                        }
                                     }
                                 }
-                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                @if(!pub) {
+                                    <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                    <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                }
                             </tr>
                         }
                         </tbody>
@@ -139,8 +164,10 @@
                                 <th>User</th>
                                 <th>Created At</th>
                                 <th></th>
-                                <th></th>
-                                <th></th>
+                                @if(!pub) {
+                                    <th></th>
+                                    <th></th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -159,13 +186,23 @@
                                     <td>Pending...</td>
                                 } else {
                                     @if("T".equals(r.t)) {
-                                        <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
+                                        @if(!pub) {
+                                            <td><a href="@routes.Application.timeSeriesPage(r.id)">View</a> </td>
+                                        } else {
+                                            <td><a href="@routes.Application.timeSeriesPublicPage(r.id)">View</a> </td>
+                                        }
                                     } else {
-                                        <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
+                                        @if(!pub) {
+                                            <td><a href="@routes.Application.singlePage(r.id)">View</a> </td>
+                                        } else {
+                                            <td><a href="@routes.Application.singlePublicPage(r.id)">View</a> </td>
+                                        }
                                     }
                                 }
-                                <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                @if(!pub) {
+                                    <td align="center"><a href="javascript:void(0);" class="edit-file-link" data-group="@r.group" data-id="@r.id" data-name="@r.name" data-desc="@r.description" data-pub="@r.pub"><i class="glyphicon glyphicon-edit"></i></a></td>
+                                    <td align="center"><a href="@routes.Application.delete(r.id)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                                }
                             </tr>
                         }
                         </tbody>
@@ -240,7 +277,8 @@
                         <div class="form-group">
                             <label for="edit_file_name">Name</label>
                             <input type="text" id="edit_file_name" name="name" required disabled="disabled">
-                            <input type="hidden" name="id" id="edit_file_hname">
+                            <input type="hidden" name="name" id="edit_file_hname">
+                            <input type="hidden" name="id" id="edit_file_hid">
                             @if(group){
                                 <input type="hidden" name="from_group" id="hidden_group" value="@groupName">
                             }
@@ -363,6 +401,7 @@
                     'iDisplayLength': 25,
                     "sPaginationType": "full_numbers",
                     "order": [[ 5, "desc" ]],
+                    @if(!pub) {
                     "columns": [
                                 { "width": "5%" },
                                  { "width": "8%" },
@@ -374,6 +413,7 @@
                                 { "width": "4%" },
                                 { "width": "4%" }
                                 ],
+                                }
                     "tableTools": {
 
                     }
@@ -411,7 +451,7 @@
                     if (group) {
                         $("#edit_group").val(group);
                     }
-                    $('#edit_file_id').val(id);
+                    $('#edit_file_hid').val(id);
                     $('#editFileModal').modal('show');
                     if (pub) {
                         $('#edit_file_pub').prop('checked', true);
@@ -440,6 +480,7 @@
                     'iDisplayLength': 10,
                     "sPaginationType": "full_numbers",
                     "order": [[ 0, "desc" ]],
+                    @if(!pub) {
                     "columns": [
                                 { "width": "30%" },
                                 { "width": "58%" },
@@ -447,6 +488,7 @@
                                 { "width": "4%" },
                                 { "width": "4%" }
                                 ],
+                                }
                     "tableTools": {
 
                     }

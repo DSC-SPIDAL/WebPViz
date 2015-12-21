@@ -11,6 +11,7 @@ GET         /dashboard                          controllers.Application.dashboar
 GET         /publicdashboard                    controllers.Application.publicDashboard()
 
 GET         /groupdashboard/:group              controllers.Application.groupDashboard(group: String)
+GET         /public/groupdashboard/:group       controllers.Application.groupDashboardPublic(group: String)
 
 # about page
 GET         /about                              controllers.Application.about()

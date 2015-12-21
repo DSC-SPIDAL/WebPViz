@@ -74,10 +74,17 @@
         //TODO needs to go to seperate page when WebGL is not supported
             Detector.addGetWebGLMessage({"id":"canvas3d"});
         }else{
-            $.getJSON("@routes.Application.getArtifact(timeSerisId)", function (data) {
-                var resultSetUrl = "@routes.Application.getFile(timeSerisId, resultSetId)";
+            @if(user != null) {
+                $.getJSON("@routes.Application.getArtifact(timeSerisId)", function (data) {
+                    var resultSetUrl = "@routes.Application.getFile(timeSerisId, resultSetId)";
+                    visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
+                });
+            } else {
+                $.getJSON("@routes.Application.getPublicArtifact(timeSerisId)", function (data) {
+                var resultSetUrl = "@routes.Application.getPublicFile(timeSerisId, resultSetId)";
                 visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
             });
+            }
             $("#settingsModal").draggable({
                 handle: ".modal-header"
             });

@@ -16,7 +16,11 @@ public class GroupsDAO {
         MongoConnection db = MongoConnection.getInstance();
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
-        groupDocument.append(Constants.Group.USER, group.userId);
+        if (group.userId >= 0) {
+            groupDocument.append(Constants.Group.USER, group.userId);
+        } else {
+            groupDocument.append(Constants.Group.PUBLIC, true);
+        }
         FindIterable<Document> iterable = db.groupsCol.find(groupDocument);
         return iterable.iterator().hasNext();
     }
