@@ -33,6 +33,8 @@ var removedclusters = [];
 var recoloredclusters = [];
 var timeSeriesLength;
 
+var changedGlyphs = {};
+
 var bufferLoopStarted = false;
 
 //Constants
@@ -104,33 +106,8 @@ function generateClusterList(list, initcolors) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '')
-                if (list[key].size > 1) {
-                    var sprite;
-                    switch (parseInt(list[key].shape)) {
-                        case 0:
-                            sprite = "Disc";
-                            break;
-                        case 1:
-                            sprite = "Ball";
-                            break;
-                        case 2:
-                            sprite = "Star";
-                            break;
-                        case 3:
-                            sprite = "Cube";
-                            break;
-                        case 4:
-                            sprite = "Pyramid";
-                            break;
-                        case 5:
-                            sprite = "Cone";
-                            break;
-                        case 6:
-                            sprite = "Cylinder";
-                            break;
-                        default :
-                            sprite = "Cube";
-                    }
+                var sprite = getGlyphName(list[key]);
+                if (sprite != null ) {
                     grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
                         "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + ")" + "</span>:" + list[key].length + "</p></div>"
                 } else {
@@ -143,6 +120,38 @@ function generateClusterList(list, initcolors) {
     }
 
     return grid;
+}
+
+function getGlyphName(key){
+    var glyph = null;
+    if (key.size > 1) {
+        switch (parseInt(key.shape)) {
+            case 0:
+                glyph = "Disc";
+                break;
+            case 1:
+                glyph = "Ball";
+                break;
+            case 2:
+                glyph = "Star";
+                break;
+            case 3:
+                glyph = "Cube";
+                break;
+            case 4:
+                glyph = "Pyramid";
+                break;
+            case 5:
+                glyph = "Cone";
+                break;
+            case 6:
+                glyph = "Cylinder";
+                break;
+            default :
+                glyph = "Cube";
+        }
+    }
+    return glyph;
 }
 
 function colorEnable(check) {
@@ -200,15 +209,30 @@ function generateCheckList(list, initcolors) {
             }else{
                 tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
             }
+            var sprite = getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
                 + "<input value='" + initcolors[key] + "' class='form-control' type='hidden' id='" + key + "'>"
                 + "<span class='input-group-addon color-picker-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
                 + "</div>"
-                + "</td>"
-                + "<td class=' '>" + list[key].label + "</span></td>"
-                + "<td class='l1'>" + list[key].length + "</td>"
-                + "</tr>";
+                + "</td>";
+            if(sprite != null){
+                tablerows += "<td class=' '><span>" + list[key].label + sprite + "</span>"
+                    + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
+                    + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
+                    + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
+                    + "<option value='2'" + checkIfSelected("2", list[key].shape, key) + ">Star</option>"
+                    + "<option value='3'" + checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
+                    + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
+                    + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
+                    + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
+                    + "</select>"
+                    "</td>";
+            }else{
+                tablerows += "<td class=' '><span>" + list[key].label +"</span></td>";
+            }
+                tablerows += "<td class='l1'>" + list[key].length + "</td>"
+                    + "</tr>";
         //}
     }
 
@@ -219,6 +243,16 @@ function generateCheckList(list, initcolors) {
     return tabletop + tablerows + tableend;
 }
 
+function checkIfSelected(key, shape, clusterkey){
+    if(changedGlyphs.hasOwnProperty(clusterkey)){
+        shape = changedGlyphs[clusterkey]
+    }
+    if (key == shape) {
+        return "selected"
+    }else{
+        return ""
+    }
+}
 function updateClusterList(list, initcolors) {
     for (var key in list) {
         if (list.hasOwnProperty(key)) {
@@ -285,6 +319,9 @@ function intialSetup(artifact) {
         }
         if (artifact.settings.zoom) {
             camera.zoom = artifact.settings.zoom;
+        }
+        if(artifact.settings.glyphs){
+            changedGlyphs =  artifact.settings.glyphs;
         }
         camera.updateProjectionMatrix();
 
@@ -849,6 +886,11 @@ function updatePlot(index) {
                         currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                         currentParticles[key].geometry.colorsNeedUpdate = true;
                     }
+
+                    if(changedGlyphs.hasOwnProperty(key)){
+                        currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                        currentParticles[key].material.needsUpdate = true;
+                    }
                     if (!(removedclusters.hasOwnProperty(key))) {
                         scene3d.add(currentParticles[key]);
                     }
@@ -912,6 +954,12 @@ function addAllSections(){
 function addSection(id) {
     scene3d.add(currentParticles[id]);
     delete removedclusters[id];
+}
+
+function changeGlyph(id,shape){
+    changedGlyphs[id] = shape;
+    currentParticles[id].material.map = sprites[shape];
+    currentParticles[id].material.needsUpdate = true;
 }
 
 function recolorSection(id, color) {
@@ -1114,6 +1162,7 @@ function savePlot() {
             obj['pointSize'] = controlers.pointsize;
             obj['glyphSize'] = controlers.glyphsize;
             obj['speed'] = controlers.delay;
+            obj['glyphs'] = changedGlyphs;
             var lookAtVector = new THREE.Vector3(0, 0, -1);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};

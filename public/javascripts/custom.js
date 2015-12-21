@@ -70,6 +70,14 @@ $(function () {
 });
 
 $(function () {
+    $('#cluster_table_div').on('change','select',function() {
+        var id = $(this).attr('id');
+        changeGlyph(id,$(this).val());
+    });
+
+});
+
+$(function () {
     // The event listener for the file upload\
     if (document.getElementById('txtFileUpload') != null) {
         document.getElementById('txtFileUpload').addEventListener('change', upload, false);
