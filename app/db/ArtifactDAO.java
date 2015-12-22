@@ -241,7 +241,7 @@ public class ArtifactDAO {
                 clusterPoints = new ArrayList<Integer>();
                 pointsForClusters.put(clusterkey, clusterPoints);
             }
-            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ());
+            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(),point.getLabel());
             // add the key to cluster and point to point list
             clusterPoints.add(pointKey);
             pointList.put(Integer.toString(pointKey), pointDBObject);
@@ -383,11 +383,12 @@ public class ArtifactDAO {
      * @param z
      * @return
      */
-    public List<String> createPoint(String x, String y, String z) {
+    public List<String> createPoint(String x, String y, String z, String label) {
         List<String> list = new ArrayList<>();
         list.add(x);
         list.add(y);
         list.add(z);
+        list.add(label);
         return list;
     }
 
