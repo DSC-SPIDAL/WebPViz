@@ -540,7 +540,7 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = 0;
                     resultSet.timeSeriesId = timeSeriesId;
@@ -602,7 +602,7 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get(Constants.File.TIME_SERIES_SEQ_NUMBER_FIELD);
                     resultSet.timeSeriesId = (Integer) resultDocument.get(Constants.File.TIME_SERIES_ID_FIELD);
