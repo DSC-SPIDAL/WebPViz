@@ -4,14 +4,10 @@
 # --- !Ups
 
 create table user (
-  id                        integer not null,
   email                     varchar(255),
   password_hash             varchar(255),
-  constraint uq_user_email unique (email),
-  constraint pk_user primary key (id))
+  constraint uq_user_email unique (email))
 ;
-
-create sequence user_seq;
 
 
 
@@ -23,6 +19,4 @@ SET REFERENTIAL_INTEGRITY FALSE;
 drop table if exists user;
 
 SET REFERENTIAL_INTEGRITY TRUE;
-
-drop sequence if exists user_seq;
 

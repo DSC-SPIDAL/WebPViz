@@ -111,7 +111,7 @@
                                 <td>@r.group</td>
                                 <td>@r.name</td>
                                 <td>@r.description</td>
-                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.uploaderId</td>
                                 <td>@r.dateCreation</td>
                                 @if("pending".equals(r.status)) {
                                     <script type="text/javascript">
@@ -177,7 +177,7 @@
                                 <td>@r.group</td>
                                 <td>@r.name</td>
                                 <td>@r.description</td>
-                                <td>@User.findById(r.uploaderId).email</td>
+                                <td>@r.uploaderId</td>
                                 <td>@r.dateCreation</td>
                                 @if("pending".equals(r.status)) {
                                     <script type="text/javascript">

@@ -43,7 +43,7 @@ public class ResultSet extends Model {
 
     @Constraints.Required
     @Formats.NonEmpty
-    public Integer uploaderId;
+    public String uploaderId;
 
     @Constraints.Required
     public Integer timeSeriesId;

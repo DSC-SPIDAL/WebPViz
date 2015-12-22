@@ -35,7 +35,7 @@ public class ArtifactDAO {
      * @param file the actual file
      * @throws Exception  if the file cannot be inserted
      */
-    public void insertSingleFile(String pvizName, String description, int uploader, File file, String group) throws Exception {
+    public void insertSingleFile(String pvizName, String description, String uploader, File file, String group) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
@@ -66,7 +66,7 @@ public class ArtifactDAO {
      * @param timeSeriesId delete the file
      * @return true if delete successful
      */
-    public boolean deleteTimeSeries(int timeSeriesId, int user) {
+    public boolean deleteTimeSeries(int timeSeriesId, String user) {
         MongoConnection con = MongoConnection.getInstance();
         con.artifactCol.deleteOne(new Document(Constants.Artifact.ID_FIELD, timeSeriesId).append(Constants.Artifact.USER, user));
         con.filesCol.deleteMany(new Document(Constants.File.TIME_SERIES_ID_FIELD, timeSeriesId));
@@ -81,7 +81,7 @@ public class ArtifactDAO {
      * @param fileName file name
      * @throws Exception if an error happens while inserting
      */
-    public void insertZipFile(String pvizName, String description, int uploader, File fileName, String group) throws Exception {
+    public void insertZipFile(String pvizName, String description, String uploader, File fileName, String group) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
@@ -184,7 +184,7 @@ public class ArtifactDAO {
         }
     }
 
-    public Document createResultSet(int id, String name, String description, String dateCreation, int uploaderId, int timeSeriesId, int timeSeriesSeqNumber, String originalFileName) {
+    public Document createResultSet(int id, String name, String description, String dateCreation, String uploaderId, int timeSeriesId, int timeSeriesSeqNumber, String originalFileName) {
         Document document = new Document();
         document.append(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.NAME_FIELD, name).append(Constants.Artifact.DESCRIPTION_FIELD, description).
                 append(Constants.Artifact.DATE_CREATION_FIELD, dateCreation).append(Constants.UPLOADER_ID_FIELD, uploaderId).
@@ -202,7 +202,7 @@ public class ArtifactDAO {
         return list;
     }
 
-    public void insertXMLFile(int id, String name, String description, int uploader, InputStream file,
+    public void insertXMLFile(int id, String name, String description, String uploader, InputStream file,
                               int parent, Long sequenceNumber, String originalFileName) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         // maximum number of points per file
@@ -364,7 +364,7 @@ public class ArtifactDAO {
      * @param originalFileName original file
      * @return document
      */
-    private Document createRootFileObject(int id, String name, String description, int uploader, int parent, Long sequenceNumber, String originalFileName) {
+    private Document createRootFileObject(int id, String name, String description, String uploader, int parent, Long sequenceNumber, String originalFileName) {
         Document rootObject = new Document();
         rootObject.append(Constants.Artifact.ID_FIELD, id);
         rootObject.append(Constants.Artifact.NAME_FIELD, name);
@@ -391,11 +391,11 @@ public class ArtifactDAO {
         return list;
     }
 
-    public String getArtifact(int id, int user) {
+    public String getArtifact(int id, String user) {
         MongoConnection con = MongoConnection.getInstance();
         Document query;
 
-        if (user >= 0) {
+        if (user != null) {
             query = new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.USER, user);
         } else {
             query = new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE);
@@ -409,10 +409,10 @@ public class ArtifactDAO {
         return null;
     }
 
-    public String getFile(int tid, int fid, int user) {
+    public String getFile(int tid, int fid, String user) {
         MongoConnection con = MongoConnection.getInstance();
         // if there is no user specified the file has to be public
-        if (user > 0) {
+        if (user != null) {
             Document tidQuery = new Document(Constants.Artifact.ID_FIELD, tid).append(Constants.Artifact.USER, user);
             FindIterable<Document> iterable = con.artifactCol.find(tidQuery);
             boolean found = false;
@@ -516,11 +516,11 @@ public class ArtifactDAO {
         return null;
     }
 
-    public ResultSet individualFile(int timeSeriesId, int user) {
+    public ResultSet individualFile(int timeSeriesId, String user) {
         MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.Artifact.ID_FIELD, timeSeriesId);
         FindIterable<Document> iterable;
-        if (user >= 0) {
+        if (user != null) {
             iterable = con.artifactCol.find(query.append(Constants.Artifact.USER, user));
         } else {
             iterable = con.artifactCol.find(query.append(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE));
@@ -540,7 +540,7 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = 0;
                     resultSet.timeSeriesId = timeSeriesId;
@@ -602,7 +602,7 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get(Constants.File.TIME_SERIES_SEQ_NUMBER_FIELD);
                     resultSet.timeSeriesId = (Integer) resultDocument.get(Constants.File.TIME_SERIES_ID_FIELD);
@@ -618,10 +618,10 @@ public class ArtifactDAO {
      *
      * @return uploaded entity list
      */
-    public List<TimeSeries> timeSeriesList(int user) {
+    public List<TimeSeries> timeSeriesList(String user) {
         MongoConnection con = MongoConnection.getInstance();
         FindIterable<Document> iterable;
-        if (user >= 0) {
+        if (user != null) {
             iterable = con.artifactCol.find(new Document(Constants.Artifact.USER, user));
         } else {
             iterable = con.artifactCol.find(new Document(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE));
@@ -629,11 +629,11 @@ public class ArtifactDAO {
         return getTimeSeriesList(iterable);
     }
 
-    public List<TimeSeries> timeSeriesList(Group group, int user) {
+    public List<TimeSeries> timeSeriesList(Group group, String user) {
         MongoConnection con = MongoConnection.getInstance();
         Document findDoc = new Document();
         findDoc.append(Constants.Artifact.GROUP_FIELD, group.name);
-        if (user >= 0) {
+        if (user != null) {
             findDoc.append(Constants.Artifact.USER, user);
         } else {
             findDoc.append(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE);
@@ -654,7 +654,7 @@ public class ArtifactDAO {
             timeSeries.id = (Integer) document.get(Constants.Artifact.ID_FIELD);
             timeSeries.name = (String) document.get(Constants.Artifact.NAME_FIELD);
             timeSeries.description = (String) document.get(Constants.Artifact.DESC_FIELD);
-            timeSeries.uploaderId = (Integer) document.get(Constants.Artifact.USER);
+            timeSeries.uploaderId = (String) document.get(Constants.Artifact.USER);
             timeSeries.status = (String) document.get(Constants.Artifact.STATUS_FIELD);
             timeSeries.group = (String) document.get(Constants.Artifact.GROUP_FIELD);
             Object pub = document.get(Constants.Artifact.PUBLIC);
@@ -708,10 +708,10 @@ public class ArtifactDAO {
         }
     }
 
-    public TimeSeries timeSeries(int id, int user) {
+    public TimeSeries timeSeries(int id, String user) {
         MongoConnection con = MongoConnection.getInstance();
         FindIterable<Document> iterable;
-        if (user >= 0) {
+        if (user != null) {
             iterable = con.artifactCol.find(new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.USER, user));
         } else {
             iterable = con.artifactCol.find(new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE));

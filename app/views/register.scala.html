@@ -4,53 +4,40 @@
 @main("Register", null){
     <link href="@routes.Assets.at("stylesheets/signin.css")" rel="stylesheet">
 
-    @form(routes.Application.register(), 'class -> "form-signin"){
-        <form id="regForm">
-    <fieldset>
-        <div id="legend">
-            <legend class="">Register</legend>
-        </div>
-        @if(loginForm.hasGlobalErrors) {
-            <p class="text-danger">@loginForm.globalError.message</p>
-        }
-        <div class="control-group">
-                <!-- E-mail -->
-            <label class="control-label" for="email">E-mail</label>
-            <div class="controls">
-                <input type="text" id="email" name="email" placeholder="" class="input-xlarge">
-                <p class="help-block">Please provide your E-mail</p>
+    <form id="regForm" class="form-horizontal form-signin" action='@routes.Application.register()' method="POST">
+        <fieldset>
+            <div id="legend">
+                <legend class="">Register</legend>
             </div>
-        </div>
-
-        <div class="control-group">
-                <!-- Password-->
-            <label class="control-label" for="password">Password</label>
-            <div class="controls">
-                <input type="password" id="password" name="password" placeholder="" class="input-xlarge">
-                <p class="help-block">Password should be at least 4 characters</p>
+            <div class="control-group"> <!-- E-mail -->
+                <label class="control-label" for="email">E-mail/Userid</label>
+                <div class="controls">
+                    <input type="text" id="email" name="email" placeholder="" class="input-xlarge form-control" required>
+                    <label id="email-error" class="error help-block" for="email">Please enter a email or user iid</label>
+                </div>
             </div>
-        </div>
-
-        <div class="control-group">
-                <!-- Password -->
-            <label class="control-label"  for="password_confirm">Password (Confirm)</label>
-            <div class="controls">
-                <input type="password" id="password_confirm" name="password_confirm" placeholder="" class="input-xlarge">
-                <p class="help-block">Please confirm password</p>
+            <div class="control-group"> <!-- Password-->
+                <label class="control-label" for="password">Password</label>
+                <div class="controls">
+                    <input type="password" id="password" name="password" placeholder="" class="input-xlarge form-control" minlength="4" required>
+                    <label id="password-error" class="error help-block" for="password">Password should be at least 4 letters</label>
+                </div>
             </div>
-        </div>
-
-        <div class="control-group">
-                <!-- Button -->
-            <div class="controls">
-                <button class="btn btn-success" type="submit">Register</button>
+            <div class="control-group"> <!-- Password -->
+                <label class="control-label" for="password_confirm">Password (Confirm)</label>
+                <div class="controls">
+                    <input type="password" id="password_confirm" name="password_confirm" placeholder="" class="input-xlarge form-control">
+                    <p id="password_confirm-error" class="error help-block" for="password_confirm">Please confirm password</p>
+                </div>
             </div>
-        </div>
-    </fieldset>
-        </form>
-    }
-
+            <div class="control-group"> <!-- Button -->
+                <div class="controls">
+                    <button class="btn btn-success">Register</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
     <script>
-$("#regForm").validate();
-</script>
+        $("#regForm").validate();
+    </script>
 }

@@ -1,4 +1,4 @@
-@(user: User, resultSetId: Integer, timeSerisId: Integer, resultSetName: String)
+@(user: User, resultSetId: Integer, timeSerisId: Integer, resultSetName: String, pub : Boolean)
 
 @main(resultSetName, user){
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/bootstrap-colorpicker.min.css")">
@@ -74,7 +74,7 @@
         //TODO needs to go to seperate page when WebGL is not supported
             Detector.addGetWebGLMessage({"id":"canvas3d"});
         }else{
-            @if(user != null) {
+            @if(!pub) {
                 $.getJSON("@routes.Application.getArtifact(timeSerisId)", function (data) {
                     var resultSetUrl = "@routes.Application.getFile(timeSerisId, resultSetId)";
                     visualize(resultSetUrl, data, @resultSetId, @timeSerisId);

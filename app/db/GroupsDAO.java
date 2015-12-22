@@ -16,7 +16,7 @@ public class GroupsDAO {
         MongoConnection db = MongoConnection.getInstance();
         Document groupDocument = new Document();
         groupDocument.append(Constants.Group.NAME, group.name);
-        if (group.userId >= 0) {
+        if (group.userId != null) {
             groupDocument.append(Constants.Group.USER, group.userId);
         } else {
             groupDocument.append(Constants.Group.PUBLIC, true);
@@ -25,7 +25,7 @@ public class GroupsDAO {
         return iterable.iterator().hasNext();
     }
 
-    public static void createDafault(int user) {
+    public static void createDafault(String user) {
         Group defaultGroup = new Group(user, "default", "The default group", false);
         GroupsDAO.insertGroup(defaultGroup);
     }
@@ -63,10 +63,10 @@ public class GroupsDAO {
         db.groupsCol.deleteOne(groupDocument);
     }
 
-    public static List<Group> allGroups(int uid) {
+    public static List<Group> allGroups(String uid) {
         MongoConnection db = MongoConnection.getInstance();
         FindIterable<Document> iterable;
-        if (uid >= 0) {
+        if (uid != null) {
             iterable = db.groupsCol.find(new Document(Constants.Group.USER, uid));
         } else {
             iterable = db.groupsCol.find(new Document(Constants.Group.PUBLIC, true));
@@ -75,7 +75,7 @@ public class GroupsDAO {
         for (Document d : iterable) {
             Group group = new Group();
             String name = (String) d.get(Constants.Group.NAME);
-            int user = (int) d.get(Constants.Group.USER);
+            String user = (String) d.get(Constants.Group.USER);
             group.description = (String) d.get(Constants.Group.DESCRIPTION);
             group.name = name;
             group.userId = user;

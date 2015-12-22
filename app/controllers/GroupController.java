@@ -26,7 +26,7 @@ public class GroupController extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(groups.render(loggedInUser, false, null, GroupsDAO.allGroups(loggedInUser.id)));
+        return ok(groups.render(loggedInUser, false, null, GroupsDAO.allGroups(loggedInUser.email)));
     }
 
     @Security.Authenticated(Secured.class)
@@ -38,22 +38,22 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "No data", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "No data", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
         name = form.get("name");
         description = form.get("desc");
         fromGroup = form.get("from_group");
-        Group group = new Group(loggedInUser.id, name);
+        Group group = new Group(loggedInUser.email, name);
         if (!GroupsDAO.groupExists(group)) {
-            GroupsDAO.insertGroup(new Group(loggedInUser.id, name, description));
+            GroupsDAO.insertGroup(new Group(loggedInUser.email, name, description));
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, name), loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), true, name, false, "Dashboard"));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, name, false, "Dashboard"));
             }
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
     }
 
@@ -66,7 +66,7 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "No group information", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "No group information", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
         name = form.get("name");
         description = form.get("desc");
@@ -78,17 +78,17 @@ public class GroupController extends Controller {
 
         fromGroup = form.get("from_group");
         System.out.println(name);
-        Group oldGroup = new Group(loggedInUser.id, name);
+        Group oldGroup = new Group(loggedInUser.email, name);
         if (GroupsDAO.groupExists(oldGroup)) {
-            GroupsDAO.updateGroup(oldGroup, new Group(loggedInUser.id, name, description, pubVal));
+            GroupsDAO.updateGroup(oldGroup, new Group(loggedInUser.email, name, description, pubVal));
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.id, name), loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), true, name, false, "Dashboard"));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, name, false, "Dashboard"));
             }
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
     }
 
@@ -97,13 +97,13 @@ public class GroupController extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
-        Group group = new Group(loggedInUser.id, name);
+        Group group = new Group(loggedInUser.email, name);
         if (GroupsDAO.groupExists(group)) {
             GroupsDAO.deleteGroup(group);
             return GO_DASHBOARD;
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.id), GroupsDAO.allGroups(loggedInUser.id), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
     }
 }

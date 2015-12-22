@@ -276,7 +276,11 @@ function visualize(resultSetUrl, artifact, fid, tid) {
     animate();
 }
 
-function visualizeTimeSeries(resultSetUrl, artifact, id) {
+var publicUrl = false;
+
+function visualizeTimeSeries(resultSetUrl, artifact, id, pub) {
+    clusterUrl = resultSetUrl;
+    publicUrl = pub;
     timeseriesId = id;
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
@@ -578,8 +582,11 @@ function loadPlotData(start, end) {
         if (particleSets[i] || bufferRequestMade[i]) {
             continue;
         }
-
-        clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+        if (!publicUrl) {
+            clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+        } else {
+            clusterUrl = "/public/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+        }
         bufferRequestMade[i] = true;
         (function(i){
         $.getJSON(clusterUrl, function (data) {

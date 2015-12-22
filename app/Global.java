@@ -46,8 +46,8 @@ public class Global extends GlobalSettings{
     }
 
     private void registerAdmins() throws AppException {
-        String email = "admin";
-        String password = "admin";
+        String email = "webplotviziu";
+        String password = "webplotviziu";
 
         if (User.findByEmail(email) == null) {
             User.create(email, password);
