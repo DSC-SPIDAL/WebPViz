@@ -40,6 +40,7 @@
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
                     <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
+                    <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal"><span class="glyphicon glyphicon-th"></span></button>
                 </div>
             </div>
         </div>
@@ -58,6 +59,62 @@
         </div>
     </div>
 
+    <div id="cluster-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Custom Clusters</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="cluster-label">Cluster Label</label>
+                            <input type="text" class="form-control" id="cluster-label" placeholder="Enter cluster label">
+                        </div>
+                        <div class="form-group">
+                            <label for="shape">Shape</label>
+                            <select class="selectpicker" data-size="8">
+                                <option selected>None</option>
+                                <option>Disc</option>
+                                <option>Ball</option>
+                                <option>Star</option>
+                                <option>Cube</option>
+                                <option>Pyramid</option>
+                                <option>Cone</option>
+                                <option>Cylinder</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="size">Size</label>
+                            <input type="text" class="form-control" id="size" placeholder="Enter cluster point Size">
+                        </div>
+                        <div class="form-group">
+                            <label for="color">Color</label>
+                            <div class="input-group color-pic">
+                                <input type="text" class="form-control" id="color" placeholder="Enter cluster point Size" value="#ffffff">
+                                <span class="input-group-addon"><i></i></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="points">Points</label>
+                            <textarea class="form-control" id="points" placeholder="Enter point label names seperated by commas Ex : YMW,REW"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-default btn-success">Add</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+    $(function(){
+        $('.color-pic').colorpicker();
+    });
+</script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
