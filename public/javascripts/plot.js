@@ -34,6 +34,8 @@ var recoloredclusters = [];
 var timeSeriesLength;
 
 var changedGlyphs = {};
+var customclusters = {}
+var pointLabelxKey = {}
 
 var bufferLoopStarted = false;
 
@@ -356,6 +358,7 @@ function generateGraph() {
 
     $.getJSON(clusterUrl, function (data) {
         fileName = data.fileName;
+        maplabelstokeys(data.points)
         //temp only till data change
         var points = {};
         var pointcolors = {};
@@ -489,6 +492,16 @@ function generateGraph() {
     animate();
 }
 
+function maplabelstokeys(points){
+    pointLabelxKey = {};
+    for (var key in points) {
+        if (points.hasOwnProperty(key)) {
+            var p = points[key.toString()]
+            pointLabelxKey[p[3]] = key;
+        }
+    }
+}
+
 function findPoint(data, key) {
     return data.points[key.toString()];
 }
@@ -595,7 +608,7 @@ function loadPlotData(start, end) {
             var hsl;
             var geometry = {};
             clusters = data.clusters;
-
+            maplabelstokeys(data.points)
             fileName = data.file;
 
             var localSections = [];
@@ -989,6 +1002,30 @@ function recolorSection(id, color) {
     recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].geometry.colorsNeedUpdate = true;
 
+}
+
+var customclustercounter = 0;
+function addCustomCluster(){
+    var clusterLabel = $('#cclabel').val();
+    var shape = $('#ccshape').val();
+    var size = $('#ccsize').val();
+    var color = $('#cccolor').val();
+    var points = ($('#ccpoints').val()).split(",");
+
+    var p = new Array(points.length)
+    var point
+    for(var i=0, len=points.length; i < len; i++){
+        p[i] = pointLabelxKey[points[i]]
+    }
+    var clusterkey = "_cc_" + customclustercounter;
+    var cluster = {
+        label: clusterLabel,
+        shape: shape,
+        size: size,
+        color: color,
+        points:p
+    }
+    customclusters[clusterkey] = cluster;
 }
 
 function animateTimeSeriesPlay() {

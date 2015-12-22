@@ -67,44 +67,44 @@
                     <h4 class="modal-title">Custom Clusters</h4>
                 </div>
                 <div class="modal-body">
-                    <form role="form">
+                    <form role="form" onsubmit="addCustomCluster(this)">
                         <div class="form-group">
                             <label for="cluster-label">Cluster Label</label>
-                            <input type="text" class="form-control" id="cluster-label" placeholder="Enter cluster label">
+                            <input type="text" class="form-control" id="cclabel" placeholder="Enter cluster label">
                         </div>
                         <div class="form-group">
                             <label for="shape">Shape</label>
-                            <select class="selectpicker" data-size="8">
-                                <option selected>None</option>
-                                <option>Disc</option>
-                                <option>Ball</option>
-                                <option>Star</option>
-                                <option>Cube</option>
-                                <option>Pyramid</option>
-                                <option>Cone</option>
-                                <option>Cylinder</option>
+                            <select id="ccshape" data-size="8">
+                                <option selected value="-1">Point</option>
+                                <option value="0">Disc</option>
+                                <option value="1">Ball</option>
+                                <option value="2">Star</option>
+                                <option value="3">Cube</option>
+                                <option value="4">Pyramid</option>
+                                <option value="5">Cone</option>
+                                <option value="6">Cylinder</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="size">Size</label>
-                            <input type="text" class="form-control" id="size" placeholder="Enter cluster point Size">
+                            <label for="ccsize">Size</label>
+                            <input type="text" class="form-control" id="ccsize" placeholder="Enter cluster point Size">
                         </div>
                         <div class="form-group">
                             <label for="color">Color</label>
                             <div class="input-group color-pic">
-                                <input type="text" class="form-control" id="color" placeholder="Enter cluster point Size" value="#ffffff">
+                                <input type="text" class="form-control" id="cccolor" placeholder="Enter cluster point Size" value="#ffffff">
                                 <span class="input-group-addon"><i></i></span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="points">Points</label>
-                            <textarea class="form-control" id="points" placeholder="Enter point label names seperated by commas Ex : YMW,REW"></textarea>
+                            <textarea class="form-control" id="ccpoints" placeholder="Enter point label names seperated by commas Ex : YMW,REW"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-default btn-success">Add</button>
+                        <button type="submit" id="addcluster" class="btn btn-default btn-success">Add</button>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button"  class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
 
@@ -113,7 +113,13 @@
     <script>
     $(function(){
         $('.color-pic').colorpicker();
+         $("#addcluster").on("click", function(e) {
+    e.preventDefault();
+    addCustomCluster()
     });
+    });
+
+
 </script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
