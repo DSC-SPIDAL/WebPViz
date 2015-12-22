@@ -43,7 +43,7 @@ public class MongoConnection {
 
     public void initGroupsCollection() {
         Group defaultGroup = new Group("webplotviziu", "default", "The default group", false);
-        if (!GroupsDAO.groupExists(defaultGroup)) {
+        if (!GroupsDAO.groupExistsNonDefault(defaultGroup)) {
             GroupsDAO.insertGroup(defaultGroup);
         } else {
             System.out.println("Default exists");

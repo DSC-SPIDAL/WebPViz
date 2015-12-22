@@ -9,6 +9,19 @@ import java.util.List;
 
 
 public class GroupsDAO {
+    public static boolean groupExistsNonDefault(Group group) {
+        MongoConnection db = MongoConnection.getInstance();
+        Document groupDocument = new Document();
+        groupDocument.append(Constants.Group.NAME, group.name);
+        if (group.userId != null) {
+            groupDocument.append(Constants.Group.USER, group.userId);
+        } else {
+            groupDocument.append(Constants.Group.PUBLIC, true);
+        }
+        FindIterable<Document> iterable = db.groupsCol.find(groupDocument);
+        return iterable.iterator().hasNext();
+    }
+
     public static boolean groupExists(Group group) {
         if (Constants.Group.DEFAULT_GROUP.equals(group.name)) {
             return true;

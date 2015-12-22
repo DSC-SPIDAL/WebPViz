@@ -517,6 +517,26 @@ public class ArtifactDAO {
         return null;
     }
 
+//    public ResultSet individualFile(int id, String user) {
+//        MongoConnection con = MongoConnection.getInstance();
+//        FindIterable<Document> iterable;
+//        if (user != null) {
+//            iterable = con.artifactCol.find(new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.USER, user));
+//        } else {
+//            iterable = con.artifactCol.find(new Document(Constants.Artifact.ID_FIELD, id).append(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE));
+//        }
+//        for (Document d : iterable) {
+//            ResultSet timeSeries = new ResultSet();
+//            timeSeries.id = (Integer) d.get(Constants.Artifact.ID_FIELD);
+//            timeSeries.name = (String) d.get(Constants.Artifact.NAME_FIELD);
+//            timeSeries.description = (String) d.get(Constants.Artifact.DESCRIPTION_FIELD);
+//            timeSeries.uploaderId = (String) d.get(Constants.Artifact.USER);
+//            return timeSeries;
+//        }
+//        return null;
+//    }
+
+
     public ResultSet individualFile(int timeSeriesId, String user) {
         MongoConnection con = MongoConnection.getInstance();
         Document query = new Document(Constants.Artifact.ID_FIELD, timeSeriesId);
@@ -541,7 +561,10 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    Object userId = resultDocument.get(Constants.UPLOADER_ID_FIELD);
+                    if (userId instanceof String) {
+                        resultSet.uploaderId = userId.toString();
+                    }
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = 0;
                     resultSet.timeSeriesId = timeSeriesId;
@@ -551,39 +574,6 @@ public class ArtifactDAO {
         }
         return null;
     }
-
-//    public ResultSet individualFile(int timeSeriesId, int fileId) {
-//        MongoConnection con = MongoConnection.getInstance();
-//        Document query = new Document(Constants.Artifact.ID_FIELD, timeSeriesId);
-//
-//        FindIterable<Document> iterable = con.artifactCol.find(query);
-//        for (Document document : iterable) {
-//            Object resultSetsObject = document.get(Constants.Artifact.FILES);
-//            if (resultSetsObject instanceof List) {
-//                for (Object documentObject : (List)resultSetsObject) {
-//                    Document resultDocument = (Document) documentObject;
-//                    int fId = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
-//                    if (fId == fileId) {
-//                        ResultSet resultSet = new ResultSet();
-//                        try {
-//                            resultSet.dateCreation = format.parse((String) resultDocument.get(Constants.Artifact.DATE_CREATION_FIELD));
-//                        } catch (ParseException e) {
-//                            e.printStackTrace();
-//                        }
-//                        resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
-//                        resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
-//                        resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-//                        resultSet.uploaderId = (Integer) resultDocument.get(Constants.UPLOADER_ID_FIELD);
-//                        resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
-//                        resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get(Constants.File.TIME_SERIES_SEQ_NUMBER_FIELD);
-//                        resultSet.timeSeriesId = (Integer) resultDocument.get(Constants.File.TIME_SERIES_ID_FIELD);
-//                        return resultSet;
-//                    }
-//                }
-//            }
-//        }
-//        return null;
-//    }
 
     public List<ResultSet> individualFiles() {
         MongoConnection con = MongoConnection.getInstance();
@@ -603,7 +593,7 @@ public class ArtifactDAO {
                     resultSet.id = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     resultSet.name = (String) resultDocument.get(Constants.Artifact.NAME_FIELD);
                     resultSet.description = (String) resultDocument.get(Constants.Artifact.DESCRIPTION_FIELD);
-                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
+//                    resultSet.uploaderId = (String) resultDocument.get(Constants.UPLOADER_ID_FIELD);
                     resultSet.fileName = (String) resultDocument.get(Constants.File.FILE_NAME_FIELD);
                     resultSet.timeSeriesSeqNumber = (Integer) resultDocument.get(Constants.File.TIME_SERIES_SEQ_NUMBER_FIELD);
                     resultSet.timeSeriesId = (Integer) resultDocument.get(Constants.File.TIME_SERIES_ID_FIELD);

@@ -43,6 +43,32 @@ public class ConvertPointsToString {
         groupsCol = db.getCollection(GROUPS_COLLECTION);
     }
 
+    public void changeFileUserID() {
+        Iterable<Document> fileDocuments = filesCol.find();
+        for (Document d : fileDocuments) {
+            d.append("uploaderId", "webplotviziu");
+            Document replace = new Document("_id", d.get("_id"));
+//            Iterable<Document> it = artifactCol.find(replace);
+//            for (Document t : it) {
+//                System.out.println(t);
+//            }
+            UpdateResult update = filesCol.replaceOne(replace, d);
+            System.out.println(update);
+        }
+        System.out.println("Changing groups");
+        Iterable<Document> groupDocuments = groupsCol.find();
+        for (Document d : groupDocuments) {
+            d.append("user", "webplotviziu");
+            Document replace = new Document("_id", d.get("_id"));
+//            Iterable<Document> it = groupsCol.find(replace);
+//            for (Document t : it) {
+//                System.out.println(t);
+//            }
+            UpdateResult updateResult = groupsCol.replaceOne(replace, d);
+            System.out.println(updateResult);
+        }
+    }
+
     public void changeUserID() {
         Iterable<Document> fileDocuments = artifactCol.find();
         for (Document d : fileDocuments) {
@@ -112,5 +138,6 @@ public class ConvertPointsToString {
         cpts.createConnection("localhost", 27017);
 
         cpts.changeUserID();
+        cpts.changeFileUserID();
     }
 }
