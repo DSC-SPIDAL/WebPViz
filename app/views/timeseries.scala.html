@@ -23,7 +23,7 @@
             <p class="viz-title" id="plot-title"></p>
             <div class="input-group input-group-shaded effect6">
                 <div class="input-group-btn">
-                    <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
+                    <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset" data-toggle="tooltip" data-placement="bottom" title="Reset Plot Position"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
                 </div>
                 <div class="input-group-btn">
                     <button id="slider-step-backward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Backward"><span id="step-backward-span" class="glyphicon glyphicon-step-backward"></span></button>
@@ -36,11 +36,11 @@
                 </div>
                 <input type="text" id="plot-slider" class="form-control">
                 <div class="input-group-btn">
-                    <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five">
+                    <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five" data-toggle="tooltip" data-placement="bottom" title="Cluster List">
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
-                    <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
-                    <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal"><span class="glyphicon glyphicon-th"></span></button>
+                    <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"  data-toggle="tooltip" data-placement="bottom" title="Save Plot Settings"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
+                    <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal" data-toggle="tooltip" data-placement="bottom" title="Creaet Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
                 </div>
             </div>
         </div>
