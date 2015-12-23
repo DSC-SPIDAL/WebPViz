@@ -36,8 +36,10 @@ var timeSeriesLength;
 var changedGlyphs = {};
 var customclusters = {}
 var pointLabelxKey = {}
-
+var maxClusterId = 0;
 var bufferLoopStarted = false;
+
+var plotPoints = {}
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -498,6 +500,7 @@ function maplabelstokeys(points){
         if (points.hasOwnProperty(key)) {
             var p = points[key.toString()]
             pointLabelxKey[p[3]] = key;
+            plotPoints[key] =  [p[0], p[1], p[2]];
         }
     }
 }
@@ -618,6 +621,7 @@ function loadPlotData(start, end) {
                     clusterCount++;
                     var clusterdata = data.clusters[cid];
                     var clusterid =  parseInt(cid)
+                    setMaxClusterId(clusterid);
                     var clustercolor;
                     if (!colorsLoaded) {
                         clustercolor = {"r": 0, "g": 0, "b": 0};
@@ -757,6 +761,13 @@ function loadPlotData(start, end) {
 }
 
 
+// this function is used to create new cluster id's for custom clusters
+function setMaxClusterId(clusterid){
+    if(clusterid > maxClusterId){
+        maxClusterId = clusterid;
+    }
+}
+
 //Util functions
 function initPlotData() {
     plotRangeSlider.update({max: timeSeriesLength - 1, min: 0, from: 0});
@@ -881,6 +892,7 @@ function updatePlot(index) {
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
 
             currentParticles = particleSets[index];
+            renderCustomCluster();
             var localSection = sectionSets[index];
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
@@ -983,6 +995,8 @@ function changeGlyph(id,shape){
 }
 
 function recolorSection(id, color) {
+    if(id == "cccolor") return;
+
     colorlist[id] = color;
     var tempcolor = new THREE.Color(color);
     trueColorList[id] = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
@@ -1004,7 +1018,6 @@ function recolorSection(id, color) {
 
 }
 
-var customclustercounter = 0;
 function addCustomCluster(){
     var clusterLabel = $('#cclabel').val();
     var shape = $('#ccshape').val();
@@ -1017,15 +1030,111 @@ function addCustomCluster(){
     for(var i=0, len=points.length; i < len; i++){
         p[i] = pointLabelxKey[points[i]]
     }
-    var clusterkey = "_cc_" + customclustercounter;
+    var clusterkey = maxClusterId + 1;
+    setMaxClusterId(clusterkey);
     var cluster = {
-        label: clusterLabel,
-        shape: shape,
-        size: size,
-        color: color,
-        points:p
+        l: clusterLabel,
+        f: shape,
+        s: size,
+        c: color,
+        p: p
     }
-    customclusters[clusterkey] = cluster;
+    customclusters[clusterkey.toString()] = cluster;
+    var currentValue = parseInt($("#plot-slider").prop("value"));
+    updatePlot(currentValue)
+}
+
+function renderCustomCluster(){
+    var geometry = {};
+    var localSections = [];
+    for (var cid in customclusters) {
+        if (customclusters.hasOwnProperty(cid)) {
+            var clusterdata = customclusters[cid];
+            var clusterid =  parseInt(cid)
+            setMaxClusterId(clusterid);
+            var clustercolor;
+            //if (!colorsLoaded) {
+            //    clustercolor = {"r": 0, "g": 0, "b": 0};
+            //    if (clusterdata.r) {
+            //        clustercolor["r"] = clusterdata.r[3];
+            //        clustercolor["g"] = clusterdata.r[2];
+            //        clustercolor["b"] = clusterdata.r[1];
+            //        trueColorList[clusterid] = clustercolor;
+            //    } else {
+            //        trueColorList[clusterid] = {};
+            //    }
+            //} else {
+            //    clustercolor = trueColorList[clusterid];
+            //}
+            //if (clustercolor == null)
+            //    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+
+            if (!geometry.hasOwnProperty(clusterid)) {
+                geometry[clusterid] = new THREE.BufferGeometry();
+                particles[clusterid] = [];
+            }
+
+            if (!colorlist.hasOwnProperty(clusterid))
+                colorlist[clusterid] = clusterdata.c.substring(1);
+
+            var localSection = {
+                "length": clusterdata.p.length,
+                "size": clusterdata.s,
+                "shape": clusterdata.f,
+                "visible": 1,
+                "color": clustercolor,
+                "label": clusterdata.l
+            };
+            if (!sections.hasOwnProperty(clusterid)) {
+                sections[clusterid] = localSection;
+            }
+            localSections[clusterid] = localSection;
+
+            var positions = new Float32Array(clusterdata.p.length * 3);
+            var colorarray = new Float32Array(clusterdata.p.length * 3);
+            var sizes = new Float32Array(clusterdata.p.length);
+            for (var k = 0; k < clusterdata.p.length; k++) {
+                var p = plotPoints[clusterdata.p[k]]
+                if (!p) {
+                    continue;
+                }
+                var p0 = parseFloat(p[0]);
+                var p1 = parseFloat(p[1]);
+                var p2 = parseFloat(p[2]);
+                positions[k * 3 + 0] = p0;
+                positions[k * 3 + 1] = p1;
+                positions[k * 3 + 2] = p2;
+
+                var tempcolor =new THREE.Color(clusterdata.c);
+                colorarray[k * 3 + 0] = tempcolor.r;
+                colorarray[k * 3 + 1] = tempcolor.g;
+                colorarray[k * 3 + 2] = tempcolor.b;
+
+            }
+
+            geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+        }
+    }
+    var tempparticles;
+    for (var key in geometry) {
+        if (geometry.hasOwnProperty(key)) {
+            geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
+            tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
+
+            if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                if (sections[key].size == 1) {
+                    tempparticles.material.size = (localSections[key].size / 200) * controlers.pointsize;
+                } else {
+                    tempparticles.material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                }
+                tempparticles.material.needsUpdate = true;
+            }
+            currentParticles[key] = tempparticles;
+
+        }
+    }
+
 }
 
 function animateTimeSeriesPlay() {
