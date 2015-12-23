@@ -39,6 +39,7 @@ var pointLabelxKey = {}
 var maxClusterId = 0;
 var bufferLoopStarted = false;
 
+var plotPointsSets = {}
 var plotPoints = {}
 
 //Constants
@@ -496,6 +497,7 @@ function generateGraph() {
 
 function maplabelstokeys(points){
     pointLabelxKey = {};
+    plotPoints = {}
     for (var key in points) {
         if (points.hasOwnProperty(key)) {
             var p = points[key.toString()]
@@ -611,7 +613,6 @@ function loadPlotData(start, end) {
             var hsl;
             var geometry = {};
             clusters = data.clusters;
-            maplabelstokeys(data.points)
             fileName = data.file;
 
             var localSections = [];
@@ -734,7 +735,7 @@ function loadPlotData(start, end) {
                     }
                 }
             }
-
+            plotPointsSets[data.seq] = data.points;
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
 
@@ -890,7 +891,7 @@ function updatePlot(index) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
-
+            maplabelstokeys(plotPointsSets[index])
             currentParticles = particleSets[index];
             renderCustomCluster();
             var localSection = sectionSets[index];
