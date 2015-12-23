@@ -333,6 +333,9 @@ function intialSetup(artifact) {
         if(artifact.settings.glyphs){
             changedGlyphs =  artifact.settings.glyphs;
         }
+        if(artifact.settings.customclusters){
+            customclusters = artifact.settings.customclusters;
+        }
         camera.updateProjectionMatrix();
 
         var colors = artifact.settings.clusterColors;
@@ -1093,8 +1096,10 @@ function renderCustomCluster(){
             if (!colorlist.hasOwnProperty(clusterid)){
                 var tempcolor = new THREE.Color(clusterdata.c);
                 clustercolor = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
-                trueColorList[clusterid] = clustercolor;
                 colorlist[clusterid] = clusterdata.c.substring(1);
+                if(!trueColorList.hasOwnProperty(clusterid)) {
+                    trueColorList[clusterid] = clustercolor;
+                }
             }
 
             var localSection = {
@@ -1126,7 +1131,9 @@ function renderCustomCluster(){
                 positions[k * 3 + 1] = p1;
                 positions[k * 3 + 2] = p2;
 
-                var tempcolor =new THREE.Color(clusterdata.c);
+                var tempc = trueColorList[clusterid]
+                tempcolor = new THREE.Color("rgb(" + tempc.r + "," + tempc.g + "," + tempc.b + ")");
+
                 colorarray[k * 3 + 0] = tempcolor.r;
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
@@ -1345,6 +1352,7 @@ function savePlot() {
             obj['glyphSize'] = controlers.glyphsize;
             obj['speed'] = controlers.delay;
             obj['glyphs'] = changedGlyphs;
+            obj['customclusters'] = customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, -1);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};
