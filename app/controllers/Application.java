@@ -6,6 +6,7 @@ import db.ArtifactDAO;
 import db.GroupsDAO;
 import models.*;
 import models.utils.AppException;
+import org.pac4j.play.java.RequiresAuthentication;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;

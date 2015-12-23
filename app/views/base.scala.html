@@ -43,6 +43,23 @@
     </head>
 
     <body>
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId      : '1768458606716540',
+              xfbml      : true,
+              version    : 'v2.5'
+            });
+          };
+
+          (function(d, s, id){
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) {return;}
+             js = d.createElement(s); js.id = id;
+             js.src = "//connect.facebook.net/en_US/sdk.js";
+             fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));
+        </script>
         <!-- Static navbar -->
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container-fluid">

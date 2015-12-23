@@ -2,6 +2,7 @@
 @import helper._
 
 @main("Login", null){
+    <div>
     <link href="@routes.Assets.at("stylesheets/signin.css")" rel="stylesheet">
 
     @form(routes.Application.authenticate(), 'class -> "form-signin"){
@@ -16,4 +17,9 @@
         <input type="hidden" name="targetUrl" value="@from">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
     }
+
+    <div>
+        <a href="@routes.LoggingController.facebookIndex()">Facebook</a>
+    </div>
+    </div>
 }

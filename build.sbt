@@ -16,7 +16,15 @@ libraryDependencies ++= Seq(
   "org.mongodb" % "mongo-java-driver" % "3.0.4",
   "mysql" % "mysql-connector-java" % "5.1.21",
   "com.google.code.gson" % "gson" % "2.5",
-  javaWs
+  javaWs,
+  "org.pac4j" % "play-pac4j_java" % "1.4.0",
+  "org.pac4j" % "pac4j-http" % "1.7.0",
+  "org.pac4j" % "pac4j-cas" % "1.7.0",
+  "org.pac4j" % "pac4j-openid" % "1.7.0",
+  "org.pac4j" % "pac4j-oauth" % "1.7.0",
+  "org.pac4j" % "pac4j-saml" % "1.7.0",
+  "org.pac4j" % "pac4j-oidc" % "1.7.0",
+  "com.typesafe.play" % "play-cache_2.11" % "2.3.0"
 )
 
 resolvers ++= Seq(

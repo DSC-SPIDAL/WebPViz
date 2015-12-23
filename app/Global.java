@@ -20,9 +20,13 @@
 import db.MongoConnection;
 import models.User;
 import models.utils.AppException;
+import org.pac4j.core.client.Clients;
+import org.pac4j.oauth.client.FacebookClient;
+import org.pac4j.play.Config;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.Play;
 import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -43,6 +47,7 @@ public class Global extends GlobalSettings{
         // create the group dao
         MongoConnection con = MongoConnection.getInstance();
         con.initGroupsCollection();
+        fbLoging();
     }
 
     private void registerAdmins() throws AppException {
@@ -54,5 +59,17 @@ public class Global extends GlobalSettings{
         } else {
             Logger.warn(String.format("User with email %s already exists.", email));
         }
+    }
+
+    private void fbLoging() {
+        final String fbId = Play.application().configuration().getString("fbId");
+        final String fbSecret = Play.application().configuration().getString("fbSecret");
+        final String baseUrl = Play.application().configuration().getString("baseUrl");
+
+        // OAuth
+        final FacebookClient facebookClient = new FacebookClient(fbId, fbSecret);
+
+        final Clients clients = new Clients(baseUrl + "/callback", facebookClient); // , casProxyReceptor);
+        Config.setClients(clients);
     }
 }
