@@ -967,8 +967,8 @@ function updatePlot(index) {
                 if (clusters && Object.keys(clusters).length < 100) {
                     $('.color-pic1').colorpicker();
                     $('.color_enable').prop('checked', true);
+                    colorPickersLoaded = true;
                 }
-                colorPickersLoaded = true;
             }
             return true;
     } else {
