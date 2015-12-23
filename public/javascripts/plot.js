@@ -1235,6 +1235,14 @@ function bufferLoop(){
                 delete bufferRequestMade[i];
                 particleSets[i] = null;
             }
+            if (plotPointsSets[i]){
+                delete plotPointsSets[i];
+                plotPointsSets[i] = null
+            }
+            if (pointLabelxKeySets[i]){
+                delete pointLabelxKeySets[i];
+                pointLabelxKeySets[i] = null
+            }
             if (sectionSets[i]) {
                 delete sectionSets[i];
                 sectionSets[i] = null;
