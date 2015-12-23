@@ -471,9 +471,10 @@ function generateGraph() {
         addParticlesToScence();
 
         drawEdges(data.edges,points,pointcolors);
-
-        $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-        $("#plot-clusters").html(generateClusterList(sections, colorlist));
+        document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+        document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
+        //$("#plot-clusters").html(generateClusterList(sections, colorlist));
         var cls = $("#plot-clusters").isotope({
             itemSelector: '.element-item',
             layoutMode: 'fitRows',
@@ -507,9 +508,9 @@ function generateGraph() {
 }
 
 function addParticlesToScence(){
-
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
+            scene3d.remove(currentParticles[key]);
             scene3d.add(currentParticles[key]);
         }
     }
@@ -956,8 +957,10 @@ function updatePlot(index) {
                     }
                 }
             }
-            $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-            $("#plot-clusters").html(generateClusterList(sections, colorlist));
+            document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+            document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+            //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
+            //$("#plot-clusters").html(generateClusterList(sections, colorlist));
             sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             render();
@@ -1074,8 +1077,10 @@ function addCustomCluster(isSingle){
         updatePlot(currentValue)
     }else{
         renderCustomCluster()
-        $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-        $("#plot-clusters").html(generateClusterList(sections, colorlist));
+        document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+        document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
+        //$("#plot-clusters").html(generateClusterList(sections, colorlist));
         addParticlesToScence()
     }
 }
