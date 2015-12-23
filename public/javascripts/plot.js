@@ -458,15 +458,20 @@ function generateGraph() {
         ymeantotal = ymeantotal/clusterCount;
         zmeantotal = zmeantotal/clusterCount;
 
-        drawEdges(data.edges,points,pointcolors);
+        scene3d = new THREE.Scene();
+        scene3d.add(camera);
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
             }
         }
-        renderCustomCluster()
-        addParticlesToScence()
+
+        renderCustomCluster();
+        addParticlesToScence();
+
+        drawEdges(data.edges,points,pointcolors);
+
         $("#cluster_table_div").html(generateCheckList(sections, colorlist));
         $("#plot-clusters").html(generateClusterList(sections, colorlist));
         var cls = $("#plot-clusters").isotope({
@@ -502,8 +507,7 @@ function generateGraph() {
 }
 
 function addParticlesToScence(){
-    scene3d = new THREE.Scene();
-    scene3d.add(camera);
+
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
