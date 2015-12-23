@@ -67,7 +67,7 @@
                     <h4 class="modal-title">Custom Clusters</h4>
                 </div>
                 <div class="modal-body">
-                    <form role="form" onsubmit="addCustomCluster(this)">
+                    <form role="form">
                         <div class="form-group">
                             <label for="cluster-label">Cluster Label</label>
                             <input type="text" class="form-control" id="cclabel" placeholder="Enter cluster label">
@@ -113,15 +113,13 @@
     <script>
     $(function(){
         $('.color-pic').colorpicker();
-         $("#addcluster").on("click", function(e) {
-    e.preventDefault();
-    addCustomCluster()
-    $('#cluster-modal').modal('hide');
+        $("#addcluster").on("click", function(e) {
+            e.preventDefault();
+            addCustomCluster(false)
+            $('#cluster-modal').modal('hide');
+        });
     });
-    });
-
-
-</script>
+    </script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>

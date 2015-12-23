@@ -36,6 +36,7 @@ var timeSeriesLength;
 var changedGlyphs = {};
 var customclusters = {}
 var pointLabelxKey = {}
+var pointLabelxKeySets = {}
 var maxClusterId = 0;
 var bufferLoopStarted = false;
 
@@ -373,6 +374,7 @@ function generateGraph() {
                 clusterCount++;
                 var clusterdata = data.clusters[cid];
                 var clusterid = parseInt(cid);
+                setMaxClusterId(clusterid);
                 var clustercolor;
                 if (!colorsLoaded) {
                     clustercolor = {"r": 255, "g": 255, "b": 255};
@@ -458,9 +460,10 @@ function generateGraph() {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size,sections[key].shape, false));
-                scene3d.add(currentParticles[key]);
             }
         }
+        renderCustomCluster()
+        addParticlesToScence()
         $("#cluster_table_div").html(generateCheckList(sections, colorlist));
         $("#plot-clusters").html(generateClusterList(sections, colorlist));
         var cls = $("#plot-clusters").isotope({
@@ -495,6 +498,15 @@ function generateGraph() {
     animate();
 }
 
+function addParticlesToScence(){
+    scene3d = new THREE.Scene();
+    scene3d.add(camera);
+    for (var key in currentParticles) {
+        if (currentParticles.hasOwnProperty(key)) {
+            scene3d.add(currentParticles[key]);
+        }
+    }
+}
 function maplabelstokeys(points){
     pointLabelxKey = {};
     plotPoints = {}
@@ -610,6 +622,8 @@ function loadPlotData(start, end) {
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
+            plotPoints = {}
+            pointLabelxKey = {}
             var hsl;
             var geometry = {};
             clusters = data.clusters;
@@ -676,6 +690,8 @@ function loadPlotData(start, end) {
                         var p0 = parseFloat(p[0]);
                         var p1 = parseFloat(p[1]);
                         var p2 = parseFloat(p[2]);
+                        plotPoints[clusterdata.p[k]] =  [p[0], p[1], p[2]];
+                        pointLabelxKey[p[3]] = clusterdata.p[k];
                         positions[k * 3 + 0] = p0;
                         positions[k * 3 + 1] = p1;
                         positions[k * 3 + 2] = p2;
@@ -735,7 +751,8 @@ function loadPlotData(start, end) {
                     }
                 }
             }
-            plotPointsSets[data.seq] = data.points;
+            plotPointsSets[data.seq] = plotPoints;
+            pointLabelxKeySets[data.seq] = pointLabelxKey;
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
 
@@ -891,8 +908,10 @@ function updatePlot(index) {
             scene3d = new THREE.Scene();
             scene3d.add(camera);
             //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
-            maplabelstokeys(plotPointsSets[index])
+          //  maplabelstokeys(plotPointsSets[index])
             currentParticles = particleSets[index];
+            plotPoints = plotPointsSets[index];
+            pointLabelxKey = pointLabelxKeySets[index];
             renderCustomCluster();
             var localSection = sectionSets[index];
             for (var key in currentParticles) {
@@ -1019,18 +1038,18 @@ function recolorSection(id, color) {
 
 }
 
-function addCustomCluster(){
+function addCustomCluster(isSingle){
     var clusterLabel = $('#cclabel').val();
     var shape = $('#ccshape').val();
     var size = $('#ccsize').val();
     var color = $('#cccolor').val();
     var points = ($('#ccpoints').val()).split(",");
 
-    var p = new Array(points.length)
-    var point
-    for(var i=0, len=points.length; i < len; i++){
-        p[i] = pointLabelxKey[points[i]]
-    }
+    var p = points;
+   // var point
+    //for(var i=0, len=points.length; i < len; i++){
+    //    p[i] = pointLabelxKey[points[i]]
+    //}
     var clusterkey = maxClusterId + 1;
     setMaxClusterId(clusterkey);
     var cluster = {
@@ -1041,9 +1060,17 @@ function addCustomCluster(){
         p: p
     }
     customclusters[clusterkey.toString()] = cluster;
-    var currentValue = parseInt($("#plot-slider").prop("value"));
-    updatePlot(currentValue)
+
+    if(!isSingle){
+        var currentValue = parseInt($("#plot-slider").prop("value"));
+        updatePlot(currentValue)
+    }else{
+        renderCustomCluster()
+        addParticlesToScence()
+    }
 }
+
+
 
 function renderCustomCluster(){
     var geometry = {};
@@ -1095,7 +1122,8 @@ function renderCustomCluster(){
             var colorarray = new Float32Array(clusterdata.p.length * 3);
             var sizes = new Float32Array(clusterdata.p.length);
             for (var k = 0; k < clusterdata.p.length; k++) {
-                var p = plotPoints[clusterdata.p[k]]
+                var key = pointLabelxKey[clusterdata.p[k]]
+                var p = plotPoints[key]
                 if (!p) {
                     continue;
                 }
