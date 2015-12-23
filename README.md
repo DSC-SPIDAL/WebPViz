@@ -1,7 +1,40 @@
 WebPlotViz
-=======
+-------
 
 [PlotViz](http://salsahpc.indiana.edu/plotviz/) for web. Build using [Three.js](http://threejs.org) and [Play Framework](https://www.playframework.com).
+
+How to Install and Run
+-------
+
+You can download the source code and use the command 
+
+```
+./activator run
+```
+
+To start the web server locally. By default the server will start on port 9000.
+
+```
+https://localhost:9000/
+```
+
+Create a Distribution
+--------
+
+You can create a distribution by using command
+
+```
+./activator dist
+```
+
+This will create a zip file in target/universal directory. Unzip this and go to the bin directory.
+
+```
+./webpviz 
+```
+
+will start the server.
+
 
 WebPlotViz Input Format
 -------
