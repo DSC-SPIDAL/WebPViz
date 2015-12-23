@@ -912,8 +912,9 @@ function updatePlot(index) {
             currentParticles = particleSets[index];
             plotPoints = plotPointsSets[index];
             pointLabelxKey = pointLabelxKeySets[index];
-            renderCustomCluster();
             var localSection = sectionSets[index];
+            sections = localSection
+            renderCustomCluster();
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
 
@@ -948,8 +949,8 @@ function updatePlot(index) {
                     }
                 }
             }
-            $("#cluster_table_div").html(generateCheckList(localSection, colorlist));
-            $("#plot-clusters").html(generateClusterList(localSection, colorlist));
+            $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+            $("#plot-clusters").html(generateClusterList(sections, colorlist));
             sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             render();
