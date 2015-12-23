@@ -957,10 +957,15 @@ function updatePlot(index) {
                     }
                 }
             }
-            document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+            // change only when the setting dispaly is on
+            if (settingOn) {
+                document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+                $('.color-pic1').colorpicker();
+            }
             document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
             //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
             //$("#plot-clusters").html(generateClusterList(sections, colorlist));
+            // $('.color_enable').prop('checked', false);
             sections = localSection;
             window.addEventListener('resize', onWindowResize, false);
             render();
@@ -978,6 +983,19 @@ function updatePlot(index) {
         return false;
     }
     return false;
+}
+
+var settingOn = false;
+
+function showSettings() {
+    settingOn = true;
+    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    $('.color_enable').prop('checked', true);
+    $('.color-pic1').colorpicker();
+}
+
+function hideSettings() {
+    settingOn = false;
 }
 
 function animate() {

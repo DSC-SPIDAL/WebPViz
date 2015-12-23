@@ -198,16 +198,20 @@
 
                 $('#settings-toggle').click(function () {
                     var settingsdiv = $("#settingDiv");
-
                     if(settingsdiv.hasClass("settinghidden")){
+                        showSettings();
                         enablesearch()
+
                         settingsdiv.removeClass("settinghidden")
                     }else{
                         settingsdiv.addClass("settinghidden")
+                        hideSettings();
                     }
                 });
 
                 $('#settings-div-close').click(function () {
+                    hideSettings();
+
                    var settingsdiv = $("#settingDiv");
 
                     if(settingsdiv.hasClass("settinghidden")){
