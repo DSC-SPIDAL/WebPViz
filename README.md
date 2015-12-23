@@ -92,6 +92,10 @@ An edge defines a line through points. Each edge has a set of vertices. These ve
 Example File
 ---------
 
+Fex examples can be found in the samples folder.
+
+Here is a small example.
+
 ```xml
 <plotviz>
   <plot>
