@@ -968,6 +968,7 @@ function updatePlot(index) {
                     $('.color-pic1').colorpicker();
                     $('.color_enable').prop('checked', true);
                 }
+                colorPickersLoaded = true;
             }
             return true;
     } else {
