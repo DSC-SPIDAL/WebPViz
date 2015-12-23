@@ -1066,6 +1066,8 @@ function addCustomCluster(isSingle){
         updatePlot(currentValue)
     }else{
         renderCustomCluster()
+        $("#cluster_table_div").html(generateCheckList(sections, colorlist));
+        $("#plot-clusters").html(generateClusterList(sections, colorlist));
         addParticlesToScence()
     }
 }
@@ -1081,29 +1083,18 @@ function renderCustomCluster(){
             var clusterid =  parseInt(cid)
             setMaxClusterId(clusterid);
             var clustercolor;
-            //if (!colorsLoaded) {
-            //    clustercolor = {"r": 0, "g": 0, "b": 0};
-            //    if (clusterdata.r) {
-            //        clustercolor["r"] = clusterdata.r[3];
-            //        clustercolor["g"] = clusterdata.r[2];
-            //        clustercolor["b"] = clusterdata.r[1];
-            //        trueColorList[clusterid] = clustercolor;
-            //    } else {
-            //        trueColorList[clusterid] = {};
-            //    }
-            //} else {
-            //    clustercolor = trueColorList[clusterid];
-            //}
-            //if (clustercolor == null)
-            //    clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
             if (!geometry.hasOwnProperty(clusterid)) {
                 geometry[clusterid] = new THREE.BufferGeometry();
                 particles[clusterid] = [];
             }
 
-            if (!colorlist.hasOwnProperty(clusterid))
+            if (!colorlist.hasOwnProperty(clusterid)){
+                var tempcolor = new THREE.Color(clusterdata.c);
+                clustercolor = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
+                trueColorList[clusterid] = clustercolor;
                 colorlist[clusterid] = clusterdata.c.substring(1);
+            }
 
             var localSection = {
                 "length": clusterdata.p.length,
