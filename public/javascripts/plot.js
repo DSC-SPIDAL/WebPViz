@@ -179,17 +179,25 @@ function generateCheckList(list, initcolors) {
 
     var emptyList = [];
     var nonEmptyList = [];
+    var glyphList = [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var aCol = trueColorList[key];
-        if ($.isEmptyObject(aCol)) {
-            emptyList.push(key);
-        } else {
-            nonEmptyList.push(key);
+        var sprite = getGlyphName(list[key])
+        if(sprite != null){
+            glyphList.push(key);
+        }else{
+            var aCol = trueColorList[key];
+            if ($.isEmptyObject(aCol)) {
+                emptyList.push(key);
+            } else {
+                nonEmptyList.push(key);
+            }
         }
+
     }
 
-    keys = nonEmptyList.concat(emptyList);
+    keys = glyphList.concat(nonEmptyList);
+    keys = keys.concat(emptyList);
 
     var tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
         + "<thead>"
