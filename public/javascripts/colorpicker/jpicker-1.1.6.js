@@ -1657,6 +1657,7 @@
             initialize =
               function()
               {
+                settings.color.mode = 's'
                 var win = settings.window,
                     popup = win.expandable ? $($this).next().find('.Container:first') : null;
                 container = win.expandable ? $('<div/>') : $($this);
