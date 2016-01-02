@@ -205,7 +205,7 @@ table.jPicker {
   width: 30px;
 }
 .jPicker td[class="Text"] input {
-  height: 15px;
+  height: 20px;
 }
 .jPicker tr.Hex td.Text input.Hex {
   width: 50px;

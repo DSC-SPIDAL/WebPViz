@@ -1764,7 +1764,7 @@
                     setImg.call($this, colorBarL2, images.clientPath + 'Bars.png');
                     setImg.call($this, colorBarL3, images.clientPath + 'Bars.png');
                     setImg.call($this, colorBarL4, images.clientPath + 'Bars.png');
-                    setImg.call($this, colorBarL5, images.clientPath + 'bar-opacity.png');
+                   // setImg.call($this, colorBarL5, images.clientPath + 'bar-opacity.png');
                     setImg.call($this, colorBarL6, images.clientPath + 'AlphaBar.png');
                     setImg.call($this, preview.find('div:first'), images.clientPath + 'preview-opacity.png');
                   }, 0);
@@ -1783,7 +1783,7 @@
                     var quickHex = color.quickList[i].val('hex');
                     html+='<span class="QuickColor"' + (ahex && ' title="#' + ahex + '"' || '') + ' style="background-color:' + (quickHex && '#' + quickHex || '') + ';' + (quickHex ? '' : 'background-image:url(' + images.clientPath + 'NoColor.png)') + (win.alphaSupport && alpha && alpha < 255 ? ';opacity:' + Math.precision(alpha / 255, 4) + ';filter:Alpha(opacity=' + Math.precision(alpha / 2.55, 4) + ')' : '') + '">&nbsp;</span>';
                   }
-                  setImg.call($this, grid, images.clientPath + 'bar-opacity.png');
+                //  setImg.call($this, grid, images.clientPath + 'bar-opacity.png');
                   grid.html(html);
                   grid.find('.QuickColor').click(quickPickClicked);
                 }
@@ -1797,7 +1797,7 @@
                   $this.icon = popup.parents('.Icon:first');
                   iconColor = $this.icon.find('.Color:first').css({ backgroundColor: hex && '#' + hex || 'transparent' });
                   iconAlpha = $this.icon.find('.Alpha:first');
-                  setImg.call($this, iconAlpha, images.clientPath + 'bar-opacity.png');
+                //  setImg.call($this, iconAlpha, images.clientPath + 'bar-opacity.png');
                   setAlpha.call($this, iconAlpha, Math.precision(((255 - (all != null ? all.a : 0)) * 100) / 255, 4));
                   iconImage = $this.icon.find('.Image:first').css(
                     {
