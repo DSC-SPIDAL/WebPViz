@@ -326,17 +326,9 @@ function intialSetup(artifact) {
             //camera.zoom = c.zoom;
             //camera.updateProjectionMatrix ();
         }
-        if (artifact.settings.lookVector) {
-            var look = artifact.settings.lookVector;
-            var vector = new THREE.Vector3(look.x, look.y, look.z);
-            camera.lookAt(vector);
-        }
-        if (artifact.settings.cameraPosition) {
-            var pos = artifact.settings.cameraPosition;
-            camera.position.set(pos.x, pos.y, pos.z);
-        }
-        if (artifact.settings.zoom) {
-            camera.zoom = artifact.settings.zoom;
+        if (artifact.settings.cameraup) {
+            var up = artifact.settings.cameraup;
+            camera.up.set(up.x, up.y, up.z);
         }
         if(artifact.settings.glyphs){
             changedGlyphs =  artifact.settings.glyphs;
@@ -344,8 +336,12 @@ function intialSetup(artifact) {
         if(artifact.settings.customclusters){
             customclusters = artifact.settings.customclusters;
         }
+        if(artifact.settings.camerastate){
+            var cameraState = artifact.settings.camerastate;
+            camera.matrix.fromArray(JSON.parse(cameraState));
+            camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
+        }
         camera.updateProjectionMatrix();
-
         var colors = artifact.settings.clusterColors;
         if (colors) {
             var count = 0;
@@ -467,7 +463,9 @@ function generateGraph() {
         zmeantotal = zmeantotal/clusterCount;
 
         scene3d = new THREE.Scene();
+
         scene3d.add(camera);
+
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal,-ymeantotal,-zmeantotal);
@@ -512,6 +510,9 @@ function generateGraph() {
         itemsLoaded = totalItemsToLoad;
         $( "#progress" ).css({display : "none"});
     });
+
+
+
     animate();
 }
 
@@ -1000,6 +1001,7 @@ function showSettings() {
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
     $('.color_enable').prop('checked', true);
     $('.color-pic1').colorpicker();
+    //$('.color-pic1').jPicker();
 }
 
 function hideSettings() {
@@ -1389,7 +1391,7 @@ function savePlot() {
             obj['speed'] = controlers.delay;
             obj['glyphs'] = changedGlyphs;
             obj['customclusters'] = customclusters;
-            var lookAtVector = new THREE.Vector3(0, 0, -1);
+            var lookAtVector = new THREE.Vector3(0, 0, 0);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};
             lookAtJson.x = lookAtVector.x;
@@ -1398,7 +1400,11 @@ function savePlot() {
             obj['clusterColors'] = trueColorList;
             obj['lookVector'] = lookAtJson;
             obj['cameraPosition'] = camera.position;
+            obj['cameraup'] = camera.up;
+            obj['rotation'] = camera.rotation;
             obj['zoom'] = camera.zoom;
+            obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
+            obj['controltarget'] = controls.target;
             $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
