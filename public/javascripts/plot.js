@@ -229,7 +229,7 @@ function generateCheckList(list, initcolors) {
             var sprite = getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
-                + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' id='color-box" + key + "'>"
+                + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
                 + "<span id='color-picker-addon' value='"+ key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] +"'></span>"
                 + "</div>"
                 + "</td>";
@@ -1065,7 +1065,7 @@ function changeGlyph(id,shape){
 
 function recolorSection(id, color) {
     if(id == "cccolor") return;
-
+    color = "#"+color
     colorlist[id] = color;
     var tempcolor = new THREE.Color(color);
     trueColorList[id] = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};

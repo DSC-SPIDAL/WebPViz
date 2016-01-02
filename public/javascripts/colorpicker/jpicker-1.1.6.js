@@ -1530,6 +1530,7 @@
               function()
               {
                 commitColor.call($this);
+                recolorSection($this.attributes.key.value, $this.value);
                 settings.window.expandable && hide.call($this);
                 $.isFunction(commitCallback) && commitCallback.call($this, color.active, okButton);
               },
