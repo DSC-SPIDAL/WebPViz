@@ -1899,7 +1899,7 @@
           position:
           {
             x: 'screenCenter', /* acceptable values "left", "center", "right", "screenCenter", or relative px value */
-            y: 'center' /* acceptable values "top", "bottom", "center", or relative px value */
+            y: '1' /* acceptable values "top", "bottom", "center", or relative px value */
           },
           expandable: false, /* default to large static picker - set to true to make an expandable picker (small icon with popup) - set automatically when binded to input element */
           liveUpdate: true, /* set false if you want the user to have to click "OK" before the binded input box updates values (always "true" for expandable picker) */
