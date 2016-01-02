@@ -70,6 +70,18 @@ $(function () {
 });
 
 $(function () {
+    $('#cluster_table_div').on('click','span', function() {
+        if( $(this).hasClass('color-picker-addon')){
+            $(this).addClass('settinghidden');
+        }
+        var key = $(this).attr('value');
+        var id = "#color-box"+key
+        $(id).jPicker();
+    });
+});
+
+
+$(function () {
     $('#cluster_table_div').on('change','select',function() {
         var id = $(this).attr('id');
         changeGlyph(id,$(this).val());

@@ -386,10 +386,13 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .color-picker-addon{
-    padding: 0;
-    background: transparent;
+    width: 25px;
+    height: 25px;
     border: none;
+    background-color: red;
+    position: absolute;
 }
+
 
 .modal-backdrop.in {
     opacity: 0.1 !important;

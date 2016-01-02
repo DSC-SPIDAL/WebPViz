@@ -228,9 +228,9 @@ function generateCheckList(list, initcolors) {
             }
             var sprite = getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
-                + "<div class='input-group color-pic1' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
-                + "<input value='" + initcolors[key] + "' class='form-control' type='hidden' id='" + key + "'>"
-                + "<span class='input-group-addon color-picker-addon'><i style='background-color: rgb(1, 343, 69);'></i></span>"
+                + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
+                + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' id='color-box" + key + "'>"
+                + "<span id='color-picker-addon' value='"+ key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] +"'></span>"
                 + "</div>"
                 + "</td>";
             if(sprite != null){
@@ -1009,7 +1009,7 @@ function showSettings() {
     settingOn = true;
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
     $('.color_enable').prop('checked', true);
-    $('.color-pic1').colorpicker();
+    //$('.color-pic1').colorpicker();
     //$('.color-pic1').jPicker();
 }
 
