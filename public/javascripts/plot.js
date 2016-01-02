@@ -23,6 +23,8 @@ var clusters;
 var resultSetId;
 var timeseriesId;
 var resultData;
+var fileName;
+var uploader;
 
 //Time Series Vars
 var particleSets = {};
@@ -39,6 +41,7 @@ var pointLabelxKey = {}
 var pointLabelxKeySets = {}
 var maxClusterId = 0;
 var bufferLoopStarted = false;
+var plotDesc;
 
 var plotPointsSets = {}
 var plotPoints = {}
@@ -368,7 +371,9 @@ function generateGraph() {
     var hsl;
 
     $.getJSON(clusterUrl, function (data) {
-        fileName = data.fileName;
+        fileName = data.file;
+        plotDesc =  data.desc;
+        uploader = data.uploader;
         maplabelstokeys(data.points)
         //temp only till data change
         var points = {};
@@ -479,6 +484,7 @@ function generateGraph() {
         drawEdges(data.edges,points,pointcolors);
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
         document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        populatePlotInfo();
         //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
         //$("#plot-clusters").html(generateClusterList(sections, colorlist));
         var cls = $("#plot-clusters").isotope({
@@ -510,7 +516,6 @@ function generateGraph() {
         itemsLoaded = totalItemsToLoad;
         $( "#progress" ).css({display : "none"});
     });
-
 
 
     animate();
@@ -1373,6 +1378,12 @@ function changeGlyphSize(){
         }
     }
     render();
+}
+
+function populatePlotInfo(){
+    document.getElementById('plot-info-description').innerHTML = "<b>Name: </b>" + fileName + "</br>" +
+            "<b>Desc: </b>" + plotDesc +"</br>" +
+            "<b>Uploader: </b>" + uploader
 }
 
 function savePlot() {

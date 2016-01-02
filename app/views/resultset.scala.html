@@ -63,41 +63,41 @@
                         </a>
                     </div>
                     <div id="sectionOne" class="accordion-body">
-                        <div class="accordion-inner-small">
+                        <div id="plot-info-description" class="accordion-inner-small plot-info-description">
                            Plot Description goes here<br/>
                             <br/>
                             Sample description
                         </div>
                     </div>
                 </div>
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle-small" data-toggle="collapse" data-parent="#accordianParent" href="#sectionTwo">
-                            Section Two
-                        </a>
-                    </div>
-                    <div id="sectionTwo" class="accordion-body collapse">
-                        <div class="accordion-inner-small">
-                            Here is all the wonderful stuff in section TWO.<br/>
-                            <br/>
-                            Sample text
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle-small" data-parent="#accordianParent" data-toggle="collapse" href="#sectionThree">
-                            Section Three
-                        </a>
-                    </div>
-                    <div id="sectionThree" class="accordion-body collapse">
-                        <div class="accordion-inner-small">
-                            Here is all the wonderful stuff in section THREE.<br/>
-                            <br/>
-                                Sample text
-                        </div>
-                    </div>
-                </div>
+                @*<div class="accordion-group">*@
+                    @*<div class="accordion-heading">*@
+                        @*<a class="accordion-toggle-small" data-toggle="collapse" data-parent="#accordianParent" href="#sectionTwo">*@
+                            @*Section Two*@
+                        @*</a>*@
+                    @*</div>*@
+                    @*<div id="sectionTwo" class="accordion-body collapse">*@
+                        @*<div class="accordion-inner-small">*@
+                            @*Here is all the wonderful stuff in section TWO.<br/>*@
+                            @*<br/>*@
+                            @*Sample text*@
+                        @*</div>*@
+                    @*</div>*@
+                @*</div>*@
+                @*<div class="accordion-group">*@
+                    @*<div class="accordion-heading">*@
+                        @*<a class="accordion-toggle-small" data-parent="#accordianParent" data-toggle="collapse" href="#sectionThree">*@
+                            @*Section Three*@
+                        @*</a>*@
+                    @*</div>*@
+                    @*<div id="sectionThree" class="accordion-body collapse">*@
+                        @*<div class="accordion-inner-small">*@
+                            @*Here is all the wonderful stuff in section THREE.<br/>*@
+                            @*<br/>*@
+                                @*Sample text*@
+                        @*</div>*@
+                    @*</div>*@
+                @*</div>*@
             </div>
         </div>
         <button id="toggleSidebar" type="button" class="btn btn-default btn-sm">
@@ -308,8 +308,8 @@
                     });
                     $('#mapCanvas').width($('#mapCanvas').parent().width());
                     $('#mapCanvas').height($(window).height() - 50);
-                    $('#sidebar').height($(window).height() - 50);
-                    return google.maps.event.trigger($.asm.theMap, 'resize');
+                   // $('#sidebar').height($(window).height() - 50);
+                   // return google.maps.event.trigger($.asm.theMap, 'resize');
                 }
             };
 
