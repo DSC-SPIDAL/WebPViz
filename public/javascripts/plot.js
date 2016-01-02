@@ -650,6 +650,8 @@ function loadPlotData(start, end) {
             var geometry = {};
             clusters = data.clusters;
             fileName = data.file;
+            plotDesc =  data.desc;
+            uploader = data.uploader;
 
             var localSections = [];
             var clusterCount = 0;
@@ -977,6 +979,8 @@ function updatePlot(index) {
                 $('.color-pic1').colorpicker();
             }
             document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+            fileName = fileNames[index]
+            populatePlotInfo()
             //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
             //$("#plot-clusters").html(generateClusterList(sections, colorlist));
             // $('.color_enable').prop('checked', false);
