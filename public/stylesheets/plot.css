@@ -503,6 +503,12 @@ input[type=range]:focus::-ms-fill-upper {
 
 .plot-info-description b{
     color: crimson;
+    white-space: pre-line;
+}
+
+.plot-info-description{
+    white-space: pre-line;
+    word-wrap: break-word;
 }
 
 .glyphicon-info-sign{
