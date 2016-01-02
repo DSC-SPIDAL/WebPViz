@@ -23,10 +23,25 @@
     color: #ffffff;
 }
 
+.viz-title-single {
+    position: absolute;
+    left: 23px;
+    bottom: 50px;
+    color: #ffffff;
+}
+
 .plot-controls{
     position: absolute;
     right: 20px;
     bottom: 110px;
+    color: #000000;
+    z-index: 1001;
+}
+
+.plot-controls-single{
+    position: absolute;
+    right: 20px;
+    bottom: 75px;
     color: #000000;
     z-index: 1001;
 }
@@ -418,3 +433,72 @@ input[type=range]:focus::-ms-fill-upper {
     /*left: 10px;*/
     /*top: 10px;*/
 /*}*/
+
+#content {
+    margin-left: 5px;
+    z-index: 1020;
+}
+
+#mapCanvas img {
+    max-width: none;
+    z-index: 1020;
+}
+
+.accordion-heading .accordion-toggle-small {
+    display: block;
+    padding: 4px 8px; /*8px 15px;*/
+    z-index: 1020;
+}
+
+.accordion-inner-small {
+    padding: 4px 8px;  /*9px 15px;*/
+    border-top: 1px solid #e5e5e5;
+    z-index: 1020;
+}
+
+.no-sidebar {
+    margin-left:0 !important;
+    z-index: 1020;
+}
+
+#sidebar {
+    xbackground: white;
+    position: fixed;
+    top: 20%;
+    left: -310px;
+    width: 400px;
+    opacity: 0.7;
+    z-index: 1020;
+}
+
+#sidebar-content {
+    width: 80%;
+    float: left;
+    background-color: #99a4ac;
+    opacity: 0.7;
+    z-index: 1020;
+}
+
+#toggleSidebar {
+    float: left;
+    height: 60px;
+    width: 50px;
+    margin-top: 41px;
+    z-index: 1020;
+    opacity: 0.7;
+    margin-left: 5px;
+    //background-color: rgba(51, 122, 183, 0.36);
+}
+
+.information-tab{
+    position: relative;
+    float: right;
+    width: 20px;
+    height: 60px;
+    padding-left: 60px;
+
+}
+
+.glyphicon-info-sign{
+    font-size: 1.5em;
+}
