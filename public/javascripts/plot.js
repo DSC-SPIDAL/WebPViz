@@ -163,13 +163,13 @@ function getGlyphName(key){
     return glyph;
 }
 
-function colorEnable(check) {
-    if (check) {
-        $('.color-pic1').colorpicker();
-    } else {
-        $('.color-pic1').colorpicker('destroy');
-    }
-}
+//function colorEnable(check) {
+//    if (check) {
+//        $('.color-pic1').colorpicker();
+//    } else {
+//        $('.color-pic1').colorpicker('destroy');
+//    }
+//}
 
 //Generate the check box list for clusters
 function generateCheckList(list, initcolors) {
@@ -506,10 +506,10 @@ function generateGraph() {
         // stats.domElement.style.position = 'absolute';
         // document.getElementById("stats").appendChild(stats.domElement);
         window.addEventListener('resize', onWindowResize, true);
-        if (clusters && clusterCount < 100) {
-            $('.color-pic1').colorpicker();
-            $('.color_enable').prop('checked', true);
-        }
+        //if (clusters && clusterCount < 100) {
+        //    $('.color-pic1').colorpicker();
+        //    $('.color_enable').prop('checked', true);
+        //}
         changeGlyphSize();
         changePointSize();
         animate();
@@ -779,21 +779,6 @@ function loadPlotData(start, end) {
             pointLabelxKeySets[data.seq] = pointLabelxKey;
             sectionSets[data.seq] = localSections;
             fileNames[data.seq] = data.file;
-
-            //if (!colorPickersLoaded) {
-            //    $("#cluster_table_div").html(generateCheckList(sections, colorlist));
-            //    $("#plot-clusters").html(generateClusterList(sections, colorlist));
-            //    var cls = $("#plot-clusters").isotope({
-            //        itemSelector: '.element-item',
-            //        layoutMode: 'fitRows',
-            //        containerStyle: null
-            //    });
-            //    if (clusters && clusterCount < 100) {
-            //        $('.color-pic1').colorpicker();
-            //        $('.color_enable').prop('checked', true);
-            //    }
-            //    colorPickersLoaded = true;
-            //}
         }).fail(function() {
             bufferRequestMade[i] = false;
         });
@@ -976,7 +961,6 @@ function updatePlot(index) {
             // change only when the setting dispaly is on
             if (settingOn) {
                 document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-                $('.color-pic1').colorpicker();
             }
             document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
             fileName = fileNames[index]
@@ -989,13 +973,13 @@ function updatePlot(index) {
             render();
             animate();
             $("#plot-title").text(fileNames[index]);
-            if (!colorPickersLoaded) {
-                if (clusters && Object.keys(clusters).length < 100) {
-                    $('.color-pic1').colorpicker();
-                    $('.color_enable').prop('checked', true);
-                    colorPickersLoaded = true;
-                }
-            }
+            //if (!colorPickersLoaded) {
+            //    if (clusters && Object.keys(clusters).length < 100) {
+            //        $('.color-pic1').colorpicker();
+            //        $('.color_enable').prop('checked', true);
+            //        colorPickersLoaded = true;
+            //    }
+            //}
             return true;
     } else {
         return false;
@@ -1008,9 +992,7 @@ var settingOn = false;
 function showSettings() {
     settingOn = true;
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-    $('.color_enable').prop('checked', true);
-    //$('.color-pic1').colorpicker();
-    //$('.color-pic1').jPicker();
+    //$('.color_enable').prop('checked', true);
 }
 
 function hideSettings() {
@@ -1065,8 +1047,8 @@ function changeGlyph(id,shape){
 
 function recolorSection(id, color) {
     if(id == "cccolor") return;
-    color = "#"+color
     colorlist[id] = color;
+    color = "#"+color
     var tempcolor = new THREE.Color(color);
     trueColorList[id] = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
     var colorattri = currentParticles[id].geometry.getAttribute('color');
