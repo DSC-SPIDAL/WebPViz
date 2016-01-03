@@ -870,7 +870,7 @@ function changeColorScheme(scheme) {
     }
 
     if (scheme == 'custom') {
-        colorlist = currentCustomColorScheme;
+        colorlist = jQuery.extend({}, currentCustomColorScheme);;
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
                 var tempcolor = new THREE.Color("#"+colorlist[key]);
@@ -1117,7 +1117,13 @@ function changeGlyph(id,shape){
 
 function recolorSection(id, color) {
     if(id == "cccolor") return;
+
     colorlist[id] = color;
+
+    //change to custom color scheme since a color change has been made
+    currentCustomColorScheme = colorlist;
+    $("#color-scheme").val('custom');
+
     color = "#"+color
     var tempcolor = new THREE.Color(color);
     trueColorList[id] = {"r": tempcolor.toArray()[0] * 255, "g": tempcolor.toArray()[1] * 255, "b": tempcolor.toArray()[2] * 255};
