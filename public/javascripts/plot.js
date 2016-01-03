@@ -16,6 +16,7 @@ var sections = [];
 var sprites = {};
 var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
 var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
+var colorSchemes = {};
 
 //Single Plot Varibles
 var clusterUrl;
@@ -845,6 +846,7 @@ function setupThreeJs() {
     controls.staticMoving = true;
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
+    initColorSchemes()
     // stats.domElement.style.position = 'absolute';
     //document.getElementById("stats").appendChild(stats.domElement);
     sprites["0"] =  THREE.ImageUtils.loadTexture(ImageEnum.DISC);
@@ -855,6 +857,10 @@ function setupThreeJs() {
     sprites["5"] =  THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     sprites["6"] =  THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
+}
+
+function initColorSchemes() {
+    colorSchemes['mathlab50'] = ["#ffffff","#ff0000","#00ff00","#ff1ab9","#ffd300","#0084f6","#008d46","#a7613e","#00fff6","#3e7b8d","#eda7ff","#d3ff95","#b94fff","#e51a58","#848400","#00ff95","#ffedff","#f68412","#caff00","#0035c1","#ffca84","#9e728d","#4fb912","#9ec1ff","#959e7b","#ff7bb0","#9e0900","#ffb9b9","#8461ca","#9e0072","#84dca7","#ff00f6","#00d3ff","#ff7258","#583e35","#d3d3d3","#dc61dc","#6172b0","#b9ca2c","#545454","#5800ca","#95c1ca","#d39e23","#84b058","#e5edb9","#f6d3ff","#8d09a7","#6a4f00","#003e9e","#7b3e7b"]
 }
 
 function loadMatrial(size, shape, isglyph) {
@@ -1319,6 +1325,7 @@ var controlers = {
     loadSize: 10,
     maxPlotsStored: 20
 };
+
 
 function setupGuiSingle() {
     var gui = new dat.GUI({ autoPlace: false });
