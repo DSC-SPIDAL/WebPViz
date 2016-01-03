@@ -93,6 +93,9 @@
     padding-right: 45px;
 }
 
+.color-palette-div{
+    float: left;
+}
 .plot {
     margin-left: 0;
     margin-right: 0;
