@@ -80,6 +80,12 @@ $(function () {
     });
 });
 
+$(function () {
+    $('#color-palette-div').on('change','select',function() {
+        changeColorScheme($(this).val());
+    });
+
+});
 
 $(function () {
     $('#cluster_table_div').on('change','select',function() {
