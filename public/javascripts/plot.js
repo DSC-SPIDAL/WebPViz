@@ -862,6 +862,9 @@ function setupThreeJs() {
 
 function initColorSchemes() {
     colorSchemes['mathlab50'] = ["#ffffff","#ff0000","#00ff00","#ff1ab9","#ffd300","#0084f6","#008d46","#a7613e","#00fff6","#3e7b8d","#eda7ff","#d3ff95","#b94fff","#e51a58","#848400","#00ff95","#ffedff","#f68412","#caff00","#0035c1","#ffca84","#9e728d","#4fb912","#9ec1ff","#959e7b","#ff7bb0","#9e0900","#ffb9b9","#8461ca","#9e0072","#84dca7","#ff00f6","#00d3ff","#ff7258","#583e35","#d3d3d3","#dc61dc","#6172b0","#b9ca2c","#545454","#5800ca","#95c1ca","#d39e23","#84b058","#e5edb9","#f6d3ff","#8d09a7","#6a4f00","#003e9e","#7b3e7b"]
+    colorSchemes['colorbrewer9'] = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65428","#f781bf","#999999"]
+    colorSchemes['colorbrewerpaired12'] = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928"]
+    colorSchemes['salsa17'] = ["#0000ff","#ffaaff","#aa5500","#aa55ff","#00ffdb","#ffff7f","#778899","#55aa7f","#49ff00","#550000","#dbff00","#ffdb00","#ff9200","#aaffff","#ff0000","#c0c0c0","#ffffff"]
 }
 
 function changeColorScheme(scheme) {
@@ -888,11 +891,38 @@ function changeColorScheme(scheme) {
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                recoloredclusters[key] = new THREE.Color("#"+colorlist[key]);
+                recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
             }
         }
-    } else {
+    }else if(scheme == 'rainbow') {
+       clusterCount =  Object.keys(currentParticles).length;
+        var count = 0;
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                var tempcolor = new THREE.Color(rainBowColors(count,clusterCount));
+                colorlist[key] = tempcolor.getHexString();
+                trueColorList[key] = {
+                    "r": tempcolor.toArray()[0] * 255,
+                    "g": tempcolor.toArray()[1] * 255,
+                    "b": tempcolor.toArray()[2] * 255
+                };
+
+                var colorattri = currentParticles[key].geometry.getAttribute('color');
+                var colorsd = new Float32Array(colorattri.length);
+                for (var k = 0; k < colorattri.length / 3; k++) {
+                    colorsd[k * 3 + 0] = tempcolor.r;
+                    colorsd[k * 3 + 1] = tempcolor.g;
+                    colorsd[k * 3 + 2] = tempcolor.b;
+                }
+                currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+                recoloredclusters[key] = tempcolor
+                currentParticles[key].geometry.colorsNeedUpdate = true;
+                count += 1;
+            }
+        }
+
+    }else{
         var colorScheme = colorSchemes[scheme];
         if (colorScheme == undefined || colorScheme == null) return
 
@@ -916,7 +946,7 @@ function changeColorScheme(scheme) {
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                recoloredclusters[key] = new THREE.Color(colorScheme[count % colorSchemeLength]);
+                recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
                 count += 1;
             }
@@ -924,6 +954,16 @@ function changeColorScheme(scheme) {
     }
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
 
+
+}
+
+function rainBowColors(length, maxLength){
+
+    var i = (length * 255 / maxLength);
+    var r = Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
+    var g = Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
+    var b = Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
 
 }
 
