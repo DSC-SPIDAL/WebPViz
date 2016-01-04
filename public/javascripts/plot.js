@@ -230,7 +230,7 @@ function generateCheckList(list, initcolors) {
             }
             var sprite = getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
-                + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; padding-left: 20px;padding-top: 2px'>"
+                + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                 + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
                 + "<span id='color-picker-addon' value='"+ key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] +"'></span>"
                 + "</div>"

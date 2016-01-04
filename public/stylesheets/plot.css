@@ -392,7 +392,6 @@ input[type=range]:focus::-ms-fill-upper {
     width: 25px;
     height: 25px;
     border: none;
-    background-color: red;
     position: absolute;
 }
 
