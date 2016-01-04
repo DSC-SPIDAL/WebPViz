@@ -873,10 +873,10 @@ function changeColorScheme(scheme) {
     }
 
     if (scheme == 'custom') {
-        colorlist = jQuery.extend({}, currentCustomColorScheme);;
+        colorlist = jQuery.extend({}, currentCustomColorScheme);
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
-                var tempcolor = new THREE.Color("#"+colorlist[key]);
+                var tempcolor = new THREE.Color("#" + colorlist[key]);
                 trueColorList[key] = {
                     "r": tempcolor.toArray()[0] * 255,
                     "g": tempcolor.toArray()[1] * 255,
@@ -895,12 +895,17 @@ function changeColorScheme(scheme) {
                 currentParticles[key].geometry.colorsNeedUpdate = true;
             }
         }
-    }else if(scheme == 'rainbow') {
-       clusterCount =  Object.keys(currentParticles).length;
-        var count = 0;
+    } else if (scheme == 'rainbow' || scheme == 'rainbowrev') {
+        clusterCount = Object.keys(currentParticles).length;
+        var count;
+        if (scheme == 'rainbow') {
+            count = 0
+        } else {
+            count = clusterCount - 1;
+        }
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
-                var tempcolor = new THREE.Color(rainBowColors(count,clusterCount));
+                var tempcolor = new THREE.Color(rainBowColors(count, clusterCount));
                 colorlist[key] = tempcolor.getHexString();
                 trueColorList[key] = {
                     "r": tempcolor.toArray()[0] * 255,
@@ -918,11 +923,14 @@ function changeColorScheme(scheme) {
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                 recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
-                count += 1;
+                if (scheme == 'rainbow') {
+                    count += 1;
+                } else {
+                    count -= 1;
+                }
             }
         }
-
-    }else{
+    } else {
         var colorScheme = colorSchemes[scheme];
         if (colorScheme == undefined || colorScheme == null) return
 
