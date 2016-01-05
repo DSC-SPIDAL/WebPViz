@@ -8,6 +8,11 @@ body {
 h1,h2,h3,h4,h5,h6{
   font-family: 'PT Sans Narrow', sans-serif;
 }
+
+select {
+  color: black;
+}
+
 /* Custom footer background */
 .footer {
   margin-top: 10px;

@@ -236,7 +236,6 @@ public class Application extends Controller {
         JsonNode json = request().body().asJson();
         String body = Json.stringify(json);
         int timeSeriesId = 0;
-        JsonNode camera = json.get("camera");
         TimeSeries tid = new TimeSeries();
         String timeSeries = json.get("tid").asText();
         if (timeSeries != null) {
@@ -244,9 +243,9 @@ public class Application extends Controller {
             tid.uploaderId = loggedInUser.email;
             tid.id = timeSeriesId;
             db.updateArtifactSetting(tid, body);
-            return ok("success");
+            return ok("{status: 'success'}").as("application/json");
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest("{status: 'fail'}").as("application/json");
         }
     }
 
@@ -335,7 +334,7 @@ public class Application extends Controller {
         if (r != null) {
             return ok(r).as("application/json");
         } else {
-            return notFound("{found: false}");
+            return notFound("{found: false}").as("application/json");
         }
     }
 

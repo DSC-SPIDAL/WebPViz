@@ -38,15 +38,15 @@ var recoloredclusters = [];
 var timeSeriesLength;
 
 var changedGlyphs = {};
-var customclusters = {}
-var pointLabelxKey = {}
-var pointLabelxKeySets = {}
+var customclusters = {};
+var pointLabelxKey = {};
+var pointLabelxKeySets = {};
 var maxClusterId = 0;
 var bufferLoopStarted = false;
 var plotDesc;
 
-var plotPointsSets = {}
-var plotPoints = {}
+var plotPointsSets = {};
+var plotPoints = {};
 
 //Constants
 var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
@@ -289,7 +289,8 @@ function visualize(resultSetUrl, artifact, fid, tid) {
     resultSetId = fid;
     timeseriesId = tid;
     setupThreeJs();
-    intialSetup(artifact);
+    $("#progress").css({ display: "block" });
+    intialSetup(artifact.settings);
     generateGraph();
     setupGuiSingle();
     animate();
@@ -304,50 +305,65 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub) {
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
     setupThreeJs();
-    intialSetup(artifact);
+    $("#progress").css({ display: "block" });
+    intialSetup(artifact.settings);
     initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
 }
 
-function intialSetup(artifact) {
-    $("#progress").css({ display: "block" });
+// keep the settings object around
+var allSettings = {};
+
+function intialSetup(settings) {
     // check weather we have camera
-    if (artifact.settings) {
-        if (artifact.settings.glyphSize) {
-            glyphSize = artifact.settings.glyphSize;
+    if (settings) {
+        var sett = settings;
+        if (sett.selected) {
+            // new settings
+            sett = settings.settings[sett.selected];
+            allSettings = settings;
+        } else {
+            allSettings['tid'] = timeseriesId;
+            allSettings['fid'] = resultSetId;
+            allSettings['settings'] = {};
+            allSettings['settings']['original'] = sett;
+            allSettings['selected'] = 'original';
         }
-        if (artifact.settings.pointSize) {
-            pointSize = artifact.settings.pointSize;
+        if (sett.glyphSize) {
+            glyphSize = sett.glyphSize;
         }
-        if (artifact.settings.speed) {
-            speed = artifact.settings.speed;
+        if (sett.pointSize) {
+            pointSize = sett.pointSize;
         }
-        if (artifact.settings.camera) {
-            var c = artifact.settings.camera;
+        if (sett.speed) {
+            speed = sett.speed;
+        }
+        if (sett.camera) {
+            var c = sett.camera;
             //camera.aspect = c.aspect;
             //camera.far = c.far;
             //camera.near = c.near;
             //camera.zoom = c.zoom;
             //camera.updateProjectionMatrix ();
         }
-        if (artifact.settings.cameraup) {
-            var up = artifact.settings.cameraup;
+        if (sett.cameraup) {
+            var up = sett.cameraup;
             camera.up.set(up.x, up.y, up.z);
         }
-        if(artifact.settings.glyphs){
-            changedGlyphs =  artifact.settings.glyphs;
+        if(sett.glyphs){
+            changedGlyphs =  sett.glyphs;
         }
-        if(artifact.settings.customclusters){
-            customclusters = artifact.settings.customclusters;
+        if(sett.customclusters){
+            customclusters = sett.customclusters;
         }
-        if(artifact.settings.camerastate){
-            var cameraState = artifact.settings.camerastate;
+        if(sett.camerastate){
+            var cameraState = sett.camerastate;
             camera.matrix.fromArray(JSON.parse(cameraState));
             camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
         }
         camera.updateProjectionMatrix();
-        var colors = artifact.settings.clusterColors;
+        var colors = sett.clusterColors;
         if (colors) {
             var count = 0;
             for (var key in colors) {
@@ -360,11 +376,18 @@ function intialSetup(artifact) {
             }
             colorsLoaded = true;
         }
+    } else {
+        allSettings['tid'] = timeseriesId;
+        allSettings['fid'] = resultSetId;
+        allSettings['settings'] = {};
+        allSettings['settings']['original'] = {};
+        allSettings['selected'] = 'original';
     }
 
     controlers.pointsize = pointSize;
     controlers.glyphsize = glyphSize;
     controlers.delay = speed;
+    controlers.settings = allSettings.selected;
 }
 
 function generateGraph() {
@@ -1441,26 +1464,52 @@ var controlers = {
     pointsize: 1,
     glyphsize: 1,
     loadSize: 10,
-    maxPlotsStored: 20
+    maxPlotsStored: 20,
+    settings: "chrome"
 };
 
+var gui;
+
+function updateSingleGui() {
+    var kys = Object.keys(allSettings.settings);
+    gui.__controllers[2].remove();
+    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+}
+
+function updateTimeSeriesGui() {
+    var kys = Object.keys(allSettings.settings);
+    gui.__controllers[3].remove();
+    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+}
 
 function setupGuiSingle() {
-    var gui = new dat.GUI({ autoPlace: false });
+    var kys = Object.keys(allSettings.settings);
+    gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
     gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
     //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
 }
 
 function setupGuiTimeSeries() {
-    var gui = new dat.GUI({ autoPlace: false });
+    var kys = Object.keys(allSettings.settings);
+    gui = new dat.GUI({ autoPlace: false });
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'delay', 10.0, 2000.0, speed).name( "Play Delay(ms)");
     gui.add(controlers, 'pointsize', 0.01, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
     gui.add(controlers, 'glyphsize', 0.01, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+}
+
+function settingChange() {
+    allSettings.selected = controlers.settings;
+    intialSetup(allSettings);
+    changeGlyphSize();
+    changePointSize();
+    animate();
 }
 
 function changePointSize(){
@@ -1499,45 +1548,75 @@ function populatePlotInfo(){
 
 function savePlot() {
     var res = false;
-    bootbox.confirm("You are about to save the current plot configuration. Continue?", function(result) {
-        res = result;
-        if (res) {
-            var url = '/timeseries/save ';
-            var c = camera.toJSON();
-            var obj = {};
-            obj['camera'] = camera.toJSON();
-            obj['tid'] = timeseriesId;
-            obj['fid'] = resultSetId;
-            obj['pointSize'] = controlers.pointsize;
-            obj['glyphSize'] = controlers.glyphsize;
-            obj['speed'] = controlers.delay;
-            obj['glyphs'] = changedGlyphs;
-            obj['customclusters'] = customclusters;
-            var lookAtVector = new THREE.Vector3(0, 0, 0);
-            lookAtVector.applyQuaternion(camera.quaternion);
-            var lookAtJson = {};
-            lookAtJson.x = lookAtVector.x;
-            lookAtJson.y = lookAtVector.y;
-            lookAtJson.z = lookAtVector.z;
-            obj['clusterColors'] = trueColorList;
-            obj['lookVector'] = lookAtJson;
-            obj['cameraPosition'] = camera.position;
-            obj['cameraup'] = camera.up;
-            obj['rotation'] = camera.rotation;
-            obj['zoom'] = camera.zoom;
-            obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
-            obj['controltarget'] = controls.target;
-            $.ajax({
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(obj),
-                url: url,
-                success: function (data) {
-                    console.log(data);
-                }
-            });
+    $('#setting-exist')
+        .find('option')
+        .remove()
+        .end();
+    var kys = Object.keys(allSettings.settings);
+    var selectKey = allSettings.selected;
+    $.each(kys, function (i, item) {
+        $('#setting-exist').append($('<option>', {
+            value: item,
+            text : item
+        }));
+    });
+    $('#setting-exist').append($('<option>', {
+        value: 'new',
+        text : 'New Settings'
+    }));
+    $('#setting-exist').val(selectKey);
+    $('#saveModal').modal('show');
+}
+
+function callSave() {
+    var url = '/timeseries/save ';
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(allSettings),
+        url: url,
+        success: function (data) {
+            $('#saveModal').modal('hide');
+        },
+        error: function (data) {
+            $('#saveModal').modal('hide');
         }
     });
+}
+function savePlotSettings(result) {
+    res = result;
+    if (res) {
+        controlers.settings = result;
+        allSettings['tid'] = timeseriesId;
+        allSettings['fid'] = resultSetId;
+        var sett = allSettings.settings;
+        allSettings['selected'] = res;
+        var c = camera.toJSON();
+        var obj = {};
+        obj['camera'] = camera.toJSON();
+        obj['tid'] = timeseriesId;
+        obj['fid'] = resultSetId;
+        obj['pointSize'] = controlers.pointsize;
+        obj['glyphSize'] = controlers.glyphsize;
+        obj['speed'] = controlers.delay;
+        obj['glyphs'] = changedGlyphs;
+        obj['customclusters'] = customclusters;
+        var lookAtVector = new THREE.Vector3(0, 0, 0);
+        lookAtVector.applyQuaternion(camera.quaternion);
+        var lookAtJson = {};
+        lookAtJson.x = lookAtVector.x;
+        lookAtJson.y = lookAtVector.y;
+        lookAtJson.z = lookAtVector.z;
+        obj['clusterColors'] = trueColorList;
+        obj['lookVector'] = lookAtJson;
+        obj['cameraPosition'] = camera.position;
+        obj['cameraup'] = camera.up;
+        obj['rotation'] = camera.rotation;
+        obj['zoom'] = camera.zoom;
+        obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
+        obj['controltarget'] = controls.target;
+        sett[res] = obj;
+    }
 }
 
