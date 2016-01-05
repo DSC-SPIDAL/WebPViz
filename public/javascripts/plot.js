@@ -329,6 +329,7 @@ function intialSetup(settings) {
             allSettings['settings'] = {};
             allSettings['settings']['original'] = sett;
             allSettings['selected'] = 'original';
+            savePlotSettings('original');
         }
         if (sett.glyphSize) {
             glyphSize = sett.glyphSize;
@@ -382,6 +383,7 @@ function intialSetup(settings) {
         allSettings['settings'] = {};
         allSettings['settings']['original'] = {};
         allSettings['selected'] = 'original';
+        savePlotSettings('original');
     }
 
     controlers.pointsize = pointSize;
