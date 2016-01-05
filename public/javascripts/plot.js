@@ -1170,7 +1170,9 @@ function recolorSection(id, color) {
 
     //change to custom color scheme since a color change has been made
     currentCustomColorScheme = colorlist;
-    $("#color-scheme").val('custom');
+    if($("#color-scheme").val() != "custom") {
+        $("#color-scheme").val('custom');
+    }
 
     color = "#"+color
     var tempcolor = new THREE.Color(color);
@@ -1184,7 +1186,7 @@ function recolorSection(id, color) {
     }
     currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
     // update the lables
-    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    //document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
     //for (var i in colors[id]) {
     //    colors[id][i] = new THREE.Color(color);
     //}
