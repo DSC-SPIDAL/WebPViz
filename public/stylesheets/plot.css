@@ -407,7 +407,7 @@ input[type=range]:focus::-ms-fill-upper {
 
 .cluster_table_div {
     overflow: auto;
-    max-height: 86%;
+    max-height: 83%;
 }
 
 .color-pic1 {

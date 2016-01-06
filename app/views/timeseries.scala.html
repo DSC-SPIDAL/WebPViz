@@ -81,6 +81,21 @@
         <div class="settingdiv-header">
             <h4>Visualization Settings</h4>
         </div>
+        <div id="multirow-operations" class="multirow-operations">
+            <h5>Multi Row Operations: </h5>
+            <p>Color:</p>
+            <input id="multirowcolor" class="multirowcolor" type="hidden" value="ff0000" key="multi" />
+            @*<p>Glyph:</p>*@
+            @*<select class="multirowglyphselect" id="multirowglyphselect">*@
+            @*<option value="0">Disc</option>*@
+            @*<option value="1">Ball</option>*@
+            @*<option value="2">Star</option>*@
+            @*<option value="3" selected="">Cube</option>*@
+            @*<option value="4">Pyramid</option>*@
+            @*<option value="5">Cone</option>*@
+            @*<option value="6">Cylinder</option>*@
+            @*</select>*@
+        </div>
         <div id="cluster_table_div" class="cluster_table_div">
 
         </div>
@@ -206,7 +221,16 @@
     </div>
     <script>
     $(function(){
-        $('.color-pic').colorpicker();
+        $('#multirowcolor').jPicker({
+            window:
+            {
+                position:
+                {
+                    x: 'screenCenter',
+                    y: 300
+                }
+            }
+        });
         $("#addcluster").on("click", function(e) {
             e.preventDefault();
             addCustomCluster(false)
@@ -232,6 +256,7 @@
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
     <script>
             $(function() {
                  $('.color_enable').click(function() {
@@ -331,24 +356,27 @@
             var asInitVals = new Array();
             var oTable;
             function enablesearch() {
-            if ( $.fn.dataTable.isDataTable( '#cluster_table' ) ) {
+                if ( $.fn.dataTable.isDataTable( '#cluster_table' ) ) {
                     oTable = $('#cluster_table').DataTable();
                 }
                 else {
                     oTable = $('#cluster_table').dataTable({
-                    "oLanguage": {
-                        "sSearch": "Search all columns:"
-                    },
-                    'iDisplayLength': 25,
-                    "bInfo": false,
-                    "ordering": false,
-                     "columns": [
-                                { "width": "20%" },
-                                { "width": "40%" },
-                                { "width": "40%" },
-                                ],
-                    "sPaginationType": "full_numbers"
-                });
+                        "oLanguage": {
+                            "sSearch": "Search all columns:"
+                        },
+                        'iDisplayLength': 25,
+                        "bInfo": false,
+                        "ordering": false,
+                        "columns": [
+                            { "width": "20%" },
+                            { "width": "40%" },
+                            { "width": "40%" },
+                        ],
+                        "sPaginationType": "full_numbers",
+                        select: {
+                            style: 'os'
+                        }
+                    });
                 }
 
                 $("tfoot input").keyup(function () {
