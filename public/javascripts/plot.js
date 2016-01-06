@@ -509,6 +509,7 @@ function generateGraph() {
         drawEdges(data.edges,points,pointcolors);
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
         document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        enablesearch()
         populatePlotInfo();
         //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
         //$("#plot-clusters").html(generateClusterList(sections, colorlist));
@@ -985,7 +986,7 @@ function changeColorScheme(scheme) {
         }
     }
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-
+    enablesearch()
 
 }
 
@@ -1103,6 +1104,7 @@ function updatePlot(index) {
             // change only when the setting dispaly is on
             if (settingOn) {
                 document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+                enablesearch()
             }
             document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
             fileName = fileNames[index]
@@ -1190,6 +1192,10 @@ function changeGlyph(id,shape){
 
 function recolorSection(id, color) {
     if(id == "cccolor") return;
+    if(id == "multi"){
+        recolorMultipleSections(color)
+        return;
+    }
 
     colorlist[id] = color;
 
@@ -1215,9 +1221,24 @@ function recolorSection(id, color) {
     //for (var i in colors[id]) {
     //    colors[id][i] = new THREE.Color(color);
     //}
+    document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+
     recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].geometry.colorsNeedUpdate = true;
 
+}
+
+function recolorMultipleSections(color){
+    var rows = $('#cluster_table tr.selected');
+    for (var key in rows) {
+        if (rows.hasOwnProperty(key)) {
+            var rowdata = rows[key]
+            var id = rowdata.id;
+            if(id != undefined || id != null) recolorSection(id,color);
+        }
+    }
+    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    enablesearch()
 }
 
 function addCustomCluster(isSingle){
@@ -1250,6 +1271,7 @@ function addCustomCluster(isSingle){
         renderCustomCluster()
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
         document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        enablesearch()
         //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
         //$("#plot-clusters").html(generateClusterList(sections, colorlist));
         addParticlesToScence()

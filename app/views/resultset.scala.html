@@ -72,6 +72,21 @@
         <div class="settingdiv-header">
             <h4>Visualization Settings</h4>
         </div>
+        <div id="multirow-operations" class="multirow-operations">
+            <h5>Multi Row Operations: </h5>
+            <p>Color:</p>
+            <input id="multirowcolor" class="multirowcolor" type="hidden" value="ff0000" key="multi" />
+            @*<p>Glyph:</p>*@
+            @*<select class="multirowglyphselect" id="multirowglyphselect">*@
+                @*<option value="0">Disc</option>*@
+                @*<option value="1">Ball</option>*@
+                @*<option value="2">Star</option>*@
+                @*<option value="3" selected="">Cube</option>*@
+                @*<option value="4">Pyramid</option>*@
+                @*<option value="5">Cone</option>*@
+                @*<option value="6">Cylinder</option>*@
+            @*</select>*@
+        </div>
         <div id="cluster_table_div" class="cluster_table_div">
 
         </div>
@@ -196,7 +211,17 @@
     </div>
     <script>
     $(function(){
-        $('.color-pic').colorpicker();
+        $('#multirowcolor').jPicker({
+            window:
+            {
+                position:
+                {
+                    x: 'screenCenter',
+                    y: 300
+                }
+            }
+        });
+
         $("#addcluster").on("click", function(e) {
             e.preventDefault();
             addCustomCluster(true)

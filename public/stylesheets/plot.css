@@ -67,6 +67,32 @@
     border-bottom: 1px solid #e5e5e5
 }
 
+.multirow-operations{
+    min-height: 16px;
+    padding: 5px;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #F9F9F9;
+}
+
+.multirow-operations h5{
+    display: inline;
+}
+
+.multirow-operations p{
+    display: inline;
+    padding-left: 9%;
+    padding-right: 3px;
+}
+
+.multirowglyphselect{
+    float: right;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+.multirowcolor{
+    float: right;
+}
 .settingdiv-header h4{
     margin-left: 10px
 }
@@ -426,6 +452,10 @@ input[type=range]:focus::-ms-fill-upper {
 
 .col-sm-7{
  width: 98%;
+}
+
+.dataTables_wrapper .dataTables_length{
+    padding-top: 20px;
 }
 #progressbar {
     text-align: center;
