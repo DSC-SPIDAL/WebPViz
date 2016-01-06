@@ -329,7 +329,6 @@ function intialSetup(settings) {
             allSettings['settings'] = {};
             allSettings['settings']['original'] = sett;
             allSettings['selected'] = 'original';
-            savePlotSettings('original');
         }
         if (sett.glyphSize) {
             glyphSize = sett.glyphSize;
@@ -383,7 +382,6 @@ function intialSetup(settings) {
         allSettings['settings'] = {};
         allSettings['settings']['original'] = {};
         allSettings['selected'] = 'original';
-        savePlotSettings('original');
     }
 
     controlers.pointsize = pointSize;
@@ -540,6 +538,7 @@ function generateGraph() {
         changeGlyphSize();
         changePointSize();
         animate();
+        savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $( "#progress" ).css({display : "none"});
     });
@@ -1123,6 +1122,7 @@ function updatePlot(index) {
             //        colorPickersLoaded = true;
             //    }
             //}
+            savePlotSettings(controlers.settings);
             return true;
     } else {
         return false;
