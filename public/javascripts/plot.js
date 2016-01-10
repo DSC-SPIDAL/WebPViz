@@ -671,8 +671,8 @@ function loadPlotData(start, end) {
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
-            plotPoints = {}
-            pointLabelxKey = {}
+            plotPoints = {};
+            pointLabelxKey = {};
             var hsl;
             var geometry = {};
             clusters = data.clusters;
@@ -1407,7 +1407,7 @@ function initBufferAndLoad() {
             $( "#progress" ).css({display : "none"});
             if (!bufferLoopStarted) {
                 bufferLoopStarted = true;
-                bufferLoop();
+                bufferLoop(null);
             }
         }
     }, controlers.delay);
@@ -1416,7 +1416,7 @@ function initBufferAndLoad() {
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
-function bufferLoop(){
+function bufferLoop(indx){
     setTimeout(function () {
         var currentIndex = parseInt($("#plot-slider").prop("value"));
         var loadend = timeSeriesLength;
@@ -1463,10 +1463,12 @@ function bufferLoop(){
 
         loadPlotData(loadStartIndex, loadend);
         if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
-            updatePlot(currentIndex);
-            currentPlotUpdated = true;
+            if (indx && indx != currentIndex) {
+                updatePlot(currentIndex);
+                currentPlotUpdated = true;
+            }
         }
-        bufferLoop();
+        bufferLoop(indx);
 
     }, controlers.delay / 2);
 }
