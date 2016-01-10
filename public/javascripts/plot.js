@@ -1477,6 +1477,10 @@ function bufferLoop(indx){
                 }
                 delete particleSets[i];
             }
+            if (plotPointsSets[i]){
+                delete plotPointsSets[i];
+                plotPointsSets[i] = null
+            }
             if (sectionSets[i]) {
                 delete sectionSets[i];
             }
