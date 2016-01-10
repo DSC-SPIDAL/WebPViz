@@ -1480,6 +1480,10 @@ function bufferLoop(indx){
             if (sectionSets[i]) {
                 delete sectionSets[i];
             }
+            if (pointLabelxKeySets[i]){
+                delete pointLabelxKeySets[i];
+                pointLabelxKeySets[i] = null
+            }
         }
 
         loadPlotData(loadStartIndex, loadend);
