@@ -111,25 +111,35 @@ function generateClusterList(list, initcolors) {
         }
     }
     var grid = "";
-
+    var found = false;
     if (list && nonEmptyList.length < 50) {
         for (var i = 0; i < nonEmptyList.length; i++) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
-                var colorWithouthHash = initcolors[key].replace(/#/g, '')
+                var colorWithouthHash = initcolors[key].replace(/#/g, '');
                 var sprite = getGlyphName(list[key]);
-                if (sprite != null ) {
-                    grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
-                        "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + ")" + "</span>:" + list[key].length + "</p></div>"
+                // try to find the element first
+                if ($("#plot-clusters > #" + key).length) {
+                    $("#plot-clusters > #" + key).css("background-color","#" + colorWithouthHash);
+                    if ($("#plot-clusters > #" + key + " span").length) {
+                        $("#plot-clusters > #" + key + " span").text(list[key].label + "(" + sprite + "):" + list[key].length);
+                    }
+                    found = true;
                 } else {
-
-                    grid += "<div class='element-item transition metal' data-category='transition' style='background-color: #" + colorWithouthHash + " '>" +
-                        "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "</span>:" + list[key].length + "</p></div>"
+                    if (sprite != null) {
+                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + "):" + list[key].length + "</span></p></div>"
+                    } else {
+                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
+                    }
                 }
             }
         }
     }
-
+    if (!found) {
+        document.getElementById('plot-clusters').innerHTML = grid;
+    }
     return grid;
 }
 
@@ -508,7 +518,7 @@ function generateGraph() {
 
         drawEdges(data.edges,points,pointcolors);
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-        document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        generateClusterList(sections, colorlist);
         enablesearch()
         populatePlotInfo();
         //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
@@ -1106,7 +1116,8 @@ function updatePlot(index) {
                 document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
                 enablesearch()
             }
-            document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+            //document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+            generateClusterList(sections, colorlist);
             fileName = fileNames[index];
             populatePlotInfo();
             //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
@@ -1221,7 +1232,7 @@ function recolorSection(id, color) {
     //for (var i in colors[id]) {
     //    colors[id][i] = new THREE.Color(color);
     //}
-    document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+    generateClusterList(sections, colorlist);
 
     recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].geometry.colorsNeedUpdate = true;
@@ -1270,7 +1281,7 @@ function addCustomCluster(isSingle){
     }else{
         renderCustomCluster()
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-        document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
+        generateClusterList(sections, colorlist);
         enablesearch()
         //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
         //$("#plot-clusters").html(generateClusterList(sections, colorlist));
@@ -1499,7 +1510,7 @@ function bufferLoop(indx){
         }
         bufferLoop(indx);
 
-    }, controlers.delay / 2);
+    }, controlers.delay);
 }
 
 function animateTimeSeriesPause() {
