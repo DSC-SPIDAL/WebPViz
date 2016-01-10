@@ -558,10 +558,10 @@ function addParticlesToScence(){
 }
 function maplabelstokeys(points){
     pointLabelxKey = {};
-    plotPoints = {}
+    plotPoints = {};
     for (var key in points) {
         if (points.hasOwnProperty(key)) {
-            var p = points[key.toString()]
+            var p = points[key.toString()];
             pointLabelxKey[p[3]] = key;
             plotPoints[key] =  [p[0], p[1], p[2]];
         }
@@ -671,7 +671,7 @@ function loadPlotData(start, end) {
         $.getJSON(clusterUrl, function (data) {
             particles = {};
             colors = {};
-            plotPoints = {};
+            var plotPoints = {};
             pointLabelxKey = {};
             var hsl;
             var geometry = {};
@@ -1065,7 +1065,7 @@ function updatePlot(index) {
             plotPoints = plotPointsSets[index];
             pointLabelxKey = pointLabelxKeySets[index];
             var localSection = sectionSets[index];
-            sections = localSection
+            sections = localSection;
             renderCustomCluster();
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
@@ -1107,8 +1107,8 @@ function updatePlot(index) {
                 enablesearch()
             }
             document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
-            fileName = fileNames[index]
-            populatePlotInfo()
+            fileName = fileNames[index];
+            populatePlotInfo();
             //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
             //$("#plot-clusters").html(generateClusterList(sections, colorlist));
             // $('.color_enable').prop('checked', false);
@@ -1261,7 +1261,7 @@ function addCustomCluster(isSingle){
         s: size,
         c: color,
         p: p
-    }
+    };
     customclusters[clusterkey.toString()] = cluster;
 
     if(!isSingle){
@@ -1322,7 +1322,7 @@ function renderCustomCluster(){
             var sizes = new Float32Array(clusterdata.p.length);
             for (var k = 0; k < clusterdata.p.length; k++) {
                 var key = pointLabelxKey[clusterdata.p[k]]
-                var p = plotPoints[key]
+                var p = plotPoints[key];
                 if (!p) {
                     continue;
                 }
@@ -1431,9 +1431,19 @@ function bufferLoop(indx){
             if (bufferRequestMade[i]) {
                 delete bufferRequestMade[i];
             }
-            delete particleSets[i];
             if (particleSets[i]) {
-                delete bufferRequestMade[i];
+                var cp = particleSets[i];
+                for (var key in cp) {
+                    if (cp.hasOwnProperty(key)) {
+                        if (cp[key].material) {
+                            cp[key].material.dispose();
+                        }
+                        if (cp[key].geometry) {
+                            cp[key].geometry.dispose();
+                        }
+                    }
+                }
+                delete particleSets[i];
                 particleSets[i] = null;
             }
             if (plotPointsSets[i]){
@@ -1454,6 +1464,17 @@ function bufferLoop(indx){
                 delete bufferRequestMade[i];
             }
             if (particleSets[i]) {
+                var cp = particleSets[i];
+                for (var key in cp) {
+                    if (cp.hasOwnProperty(key)) {
+                        if (cp[key].material) {
+                            cp[key].material.dispose();
+                        }
+                        if (cp[key].geometry) {
+                            cp[key].geometry.dispose();
+                        }
+                    }
+                }
                 delete particleSets[i];
             }
             if (sectionSets[i]) {
