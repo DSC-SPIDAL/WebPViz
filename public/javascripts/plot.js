@@ -1,60 +1,55 @@
-/* varibles*/
-//TODO need to add reply option to make the slider go back to the start and reload data from the start
-//TODO try to remove all other collections possible and work with sections object
+//Constants
+var MAX_PLOTS_STORED = 20;
 
+/* varibles*/
 //Three js global varibles
-var camera, scene, renderer, sprite, colors = [], particles = [], controls, light, currentParticles = [];
+var camera, scene, renderer, controls, light
 var container, stats;
-var heus = [0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.05, 0.3, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
 var scene3d;
+
+// Color controls
 var colors = [];
 var colorlist = {};
 var trueColorList = {};
 var colorsLoaded = false;
-var colorPickersLoaded = false;
-var sections = [];
-var sprites = {};
-var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
-var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
 var colorSchemes = {};
 var currentCustomColorScheme = null;
+
+// Particle
+var sections = [], particles = [], currentParticles = [];;
+var sprites = {};
+var particleSets = {};
+var sectionSets = {};
+var changedGlyphs = {};
+var customclusters = {};
+var pointLabelxKey = {};
+var pointLabelxKeySets = {};
+var maxClusterId = 0;
+var plotPointsSets = {};
+var plotPoints = {};
+
+var xmeantotal = 0,ymeantotal = 0,zmeantotal = 0;
+var xmean = 0,ymean = 0,zmean = 0, cameraCenter, calculatedmeans = false;
 
 //Single Plot Varibles
 var clusterUrl;
 var clusters;
 var resultSetId;
 var timeseriesId;
-var resultData;
 var fileName;
 var uploader;
 
 //Time Series Vars
-var particleSets = {};
-var sectionSets = {};
 var fileNames = {};
 var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
 var timeSeriesLength;
-
-var changedGlyphs = {};
-var customclusters = {};
-var pointLabelxKey = {};
-var pointLabelxKeySets = {};
-var maxClusterId = 0;
-var bufferLoopStarted = false;
 var plotDesc;
 
-var plotPointsSets = {};
-var plotPoints = {};
-
-//Constants
-var TIME_BETWEEN_PLOTS_IN_MILLS = 300;
-var MAX_PLOTS_STORED = 20;
-var LOAD_SIZE = 5;
-
+//Play controls
+var bufferLoopStarted = false;
 var plotRangeSlider = {};
-
 var speed = 300;
 var glyphSize = 1.0;
 var pointSize = 1.0;
@@ -64,7 +59,6 @@ var playEnum = {
     PLAY: "play",
     PAUSE: "pause"
 };
-
 var playStatus = playEnum.INIT;
 
 $(function () {
@@ -407,7 +401,6 @@ function intialSetup(settings) {
 function generateGraph() {
     var cluster;
     var geometry = {};
-    var hsl;
 
     $.getJSON(clusterUrl, function (data) {
         fileName = data.file;
@@ -687,7 +680,6 @@ function loadPlotData(start, end) {
             colors = {};
             var plotPoints = {};
             pointLabelxKey = {};
-            var hsl;
             var geometry = {};
             clusters = data.clusters;
             fileName = data.file;
@@ -719,7 +711,6 @@ function loadPlotData(start, end) {
                     if (clustercolor == null)
                         clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
-                    hsl = [heus[clusterid], 1, 0.8];
                     if (!geometry.hasOwnProperty(clusterid)) {
                         geometry[clusterid] = new THREE.BufferGeometry();
                         particles[clusterid] = [];
