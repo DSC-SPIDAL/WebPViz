@@ -298,6 +298,7 @@
                         }
                         plotRangeSlider.update({from: currentval});
                         currentPlotUpdated = false;
+                        updatePlot(currentval)
                     }
                 });
 
@@ -308,6 +309,7 @@
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
                         plotRangeSlider.update({from: currentval});
+                        updatePlot(currentval)
                         currentPlotUpdated = false;
                     }
                 });
