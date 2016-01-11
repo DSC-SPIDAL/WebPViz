@@ -97,7 +97,7 @@ $(function () {
 var totalItemsToLoad = 1;
 var itemsLoaded = 1;
 
-//Plot functions - These are the methods that are first called when a polt is generated
+//Plot functions - These are the methods that are first called when a plot is generated
 function visualize(resultSetUrl, artifact, fid, tid) {
     clusterUrl = resultSetUrl;
     resultSetId = fid;
@@ -622,8 +622,6 @@ function loadMatrial(size, shape, isglyph) {
     var sprite;
     if (!isglyph) {
         sprite = null;
-    } else {
-        //   sprite = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     }
 
     if (size > 1) {
@@ -675,8 +673,6 @@ function updatePlot(index) {
     if (index in particleSets && particleSets[index]) {
         scene3d = new THREE.Scene();
         scene3d.add(camera);
-        //$("#plot-slider").attr("value", $("#plot-slider").attr("value"));
-        //  maplabelstokeys(plotPointsSets[index])
         currentParticles = particleSets[index];
         plotPoints = plotPointsSets[index];
         pointLabelxKey = pointLabelxKeySets[index];
@@ -722,25 +718,14 @@ function updatePlot(index) {
             document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
             enablesearch()
         }
-        //document.getElementById('plot-clusters').innerHTML = generateClusterList(sections, colorlist);
         generateClusterList(sections, colorlist);
         fileName = fileNames[index];
         populatePlotInfo();
-        //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
-        //$("#plot-clusters").html(generateClusterList(sections, colorlist));
-        // $('.color_enable').prop('checked', false);
         sections = localSection;
         window.addEventListener('resize', onWindowResize, false);
         render();
         animate();
         $("#plot-title").text(fileNames[index]);
-        //if (!colorPickersLoaded) {
-        //    if (clusters && Object.keys(clusters).length < 100) {
-        //        $('.color-pic1').colorpicker();
-        //        $('.color_enable').prop('checked', true);
-        //        colorPickersLoaded = true;
-        //    }
-        //}
         savePlotSettings(controlers.settings);
         return true;
     } else {
@@ -889,7 +874,6 @@ function animateTimeSeriesPause() {
 
 function resetSlider() {
     playStatus = playEnum.PAUSE;
-    //$("#plot-slider").attr("value", 0);
     plotRangeSlider.update({from: 0});
 }
 
@@ -1071,7 +1055,6 @@ function generateCheckList(list, initcolors) {
 
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        //if (list.hasOwnProperty(key)) {
         tablerows += "<tr class='even pointer' id='" + key + "'>"
             + "<td class='a-center'>";
         if (!(removedclusters.hasOwnProperty(key))) {
@@ -1103,7 +1086,6 @@ function generateCheckList(list, initcolors) {
         }
         tablerows += "<td class='l1'>" + list[key].length + "</td>"
             + "</tr>";
-        //}
     }
 
     var tableend = "</tbody>"
@@ -1113,7 +1095,12 @@ function generateCheckList(list, initcolors) {
     return tabletop + tablerows + tableend;
 }
 
-//Generates the cluster table
+/**
+ * Geneates the cluster list
+ * @param list
+ * @param initcolors
+ * @returns {string} generated list in HTML
+ */
 function generateClusterList(list, initcolors) {
     var keys = [];
     for (var k in trueColorList) {
@@ -1169,6 +1156,7 @@ function generateClusterList(list, initcolors) {
     }
     return grid;
 }
+
 //Control Utils
 
 function resetView() {
@@ -1206,11 +1194,6 @@ function recolorSection(id, color) {
         colorsd[k * 3 + 2] = tempcolor.b;
     }
     currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-    // update the lables
-    //document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
-    //for (var i in colors[id]) {
-    //    colors[id][i] = new THREE.Color(color);
-    //}
     generateClusterList(sections, colorlist);
 
     recoloredclusters[id] = new THREE.Color(color);
@@ -1231,6 +1214,10 @@ function recolorMultipleSections(color) {
     enablesearch()
 }
 
+/**
+ * Changes the current color scheme of the cluster. Saves the Custom color scheme
+ * @param scheme
+ */
 function changeColorScheme(scheme) {
     if (currentCustomColorScheme == null) {
         currentCustomColorScheme = jQuery.extend({}, colorlist);
@@ -1325,6 +1312,7 @@ function changeColorScheme(scheme) {
         }
     }
     document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    generateClusterList(sections, colorlist);
     enablesearch()
 
 }
@@ -1365,10 +1353,6 @@ function addCustomCluster(isSingle) {
     var points = ($('#ccpoints').val()).split(",");
 
     var p = points;
-    // var point
-    //for(var i=0, len=points.length; i < len; i++){
-    //    p[i] = pointLabelxKey[points[i]]
-    //}
     var clusterkey = maxClusterId + 1;
     setMaxClusterId(clusterkey);
     var cluster = {
@@ -1388,13 +1372,13 @@ function addCustomCluster(isSingle) {
         document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
         enablesearch()
-        //$("#cluster_table_div").html(generateCheckList(sections, colorlist));
-        //$("#plot-clusters").html(generateClusterList(sections, colorlist));
         addParticlesToScence()
     }
 }
 
-
+/**
+ * Renders the custom cluster created and updates the plot
+ */
 function renderCustomCluster() {
     var geometry = {};
     var localSections = [];
@@ -1595,7 +1579,10 @@ function randomRBG() {
     return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
 }
 
-// this function is used to create new cluster id's for custom clusters
+/**
+ * Used to create new cluster id's for custom clusters
+ * @param clusterid
+ */
 function setMaxClusterId(clusterid) {
     if (clusterid > maxClusterId) {
         maxClusterId = clusterid;
@@ -1613,6 +1600,10 @@ function rainBowColors(length, maxLength) {
 }
 
 //Three js Control methods
+
+/**
+ * Used to animate the plot
+ */
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -1649,7 +1640,6 @@ function setupGuiSingle() {
     gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
     gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
     gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
-    //h.add( effectController, "shininess", 1.0, 400.0, 1.0 ).name( "shininess" ).onChange( render );
 }
 
 function setupGuiTimeSeries() {
