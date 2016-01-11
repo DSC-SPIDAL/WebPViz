@@ -122,7 +122,11 @@ function generateClusterList(list, initcolors) {
                 if ($("#plot-clusters > #" + key).length) {
                     $("#plot-clusters > #" + key).css("background-color","#" + colorWithouthHash);
                     if ($("#plot-clusters > #" + key + " span").length) {
-                        $("#plot-clusters > #" + key + " span").text(list[key].label + "(" + sprite + "):" + list[key].length);
+                        if(sprite != null){
+                            $("#plot-clusters > #" + key + " span").text(list[key].label + "(" + sprite + "):" + list[key].length);
+                        }else{
+                            $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
+                        }
                     }
                     found = true;
                 } else {
