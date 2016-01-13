@@ -421,6 +421,10 @@ input[type=range]:focus::-ms-fill-upper {
     position: absolute;
 }
 
+.clusterlistimage{
+    width: 13px;
+    height: 13px;
+}
 
 .modal-backdrop.in {
     opacity: 0.1 !important;

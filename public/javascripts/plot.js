@@ -1127,13 +1127,14 @@ function generateClusterList(list, initcolors) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
-                var sprite = getGlyphName(list[key]);
+                var sprite = getGlyphImage(list[key]);
                 // try to find the element first
                 if ($("#plot-clusters > #" + key).length) {
                     $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
-                            $("#plot-clusters > #" + key + " span").text(list[key].label + "(" + sprite + "):" + list[key].length);
+                            $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
+                            $("#plot-clusters > #" + key + " span").append("<img class='clusterlistimage' src='" + sprite +"'/>");
                         } else {
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
                         }
@@ -1142,7 +1143,7 @@ function generateClusterList(list, initcolors) {
                 } else {
                     if (sprite != null) {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + "(" + sprite + "):" + list[key].length + "</span></p></div>"
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "   <img class='clusterlistimage' src='" + sprite +"'/></span></p></div>"
                     } else {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
@@ -1513,6 +1514,38 @@ function progress() {
     var bar = 250;
     bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
     $("#bar").css({width: bar + "px"});
+}
+
+function getGlyphImage(key) {
+    var glyph = null;
+    if (key.size > 1) {
+        switch (parseInt(key.shape)) {
+            case 0:
+                glyph = ImageEnum.DISC;
+                break;
+            case 1:
+                glyph = ImageEnum.BALL;
+                break;
+            case 2:
+                glyph = ImageEnum.STAR;
+                break;
+            case 3:
+                glyph = ImageEnum.CUBE;
+                break;
+            case 4:
+                glyph = ImageEnum.PYRAMID;
+                break;
+            case 5:
+                glyph = ImageEnum.CONE;
+                break;
+            case 6:
+                glyph = ImageEnum.CYLINDER;
+                break;
+            default :
+                glyph = ImageEnum.CUBE;
+        }
+    }
+    return glyph;
 }
 
 function getGlyphName(key) {
