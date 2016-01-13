@@ -376,7 +376,7 @@ function generateGraph() {
         renderCustomCluster();
         addParticlesToScence();
         drawEdges(data.edges, points, pointcolors);
-        document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+        generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
         enablesearch()
         populatePlotInfo();
@@ -719,7 +719,7 @@ function updatePlot(index) {
         }
         // change only when the setting dispaly is on
         if (settingOn) {
-            document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+            generateCheckList(sections, colorlist);
             enablesearch()
         }
         generateClusterList(sections, colorlist);
@@ -1042,8 +1042,10 @@ function generateCheckList(list, initcolors) {
 
     keys = glyphList.concat(nonEmptyList);
     keys = keys.concat(emptyList);
+    var found = false;
+    var tabletop,tablerows,tableend
 
-    var tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
+    tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
         + "<thead>"
         + "<tr class='headings'>"
         + "<th>"
@@ -1055,47 +1057,67 @@ function generateCheckList(list, initcolors) {
         + "</thead>"
         + "<tbody>";
 
-    var tablerows = "";
+    if($("#cluster_table").length){
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (!(removedclusters.hasOwnProperty(key))) {
+                $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
+            } else {
+                $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
+            }
+            var sprite = getGlyphName(list[key]);
+            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
+        }
 
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        tablerows += "<tr class='even pointer' id='" + key + "'>"
-            + "<td class='a-center'>";
-        if (!(removedclusters.hasOwnProperty(key))) {
-            tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
-        } else {
-            tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
+
+        found =  true;
+    }else {
+
+
+        tablerows = "";
+
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            tablerows += "<tr class='even pointer' id='" + key + "'>"
+                + "<td class='a-center'>";
+            if (!(removedclusters.hasOwnProperty(key))) {
+                tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
+            } else {
+                tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
+            }
+            var sprite = getGlyphName(list[key]);
+            tablerows += "<label class='color-box-label'>" + key + "</label> "
+                + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
+                + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
+                + "<span id='color-picker-addon' value='" + key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
+                + "</div>"
+                + "</td>";
+            if (sprite != null) {
+                tablerows += "<td class=' '><span>" + list[key].label + "</span>"
+                    + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
+                    + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
+                    + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
+                    + "<option value='2'" + checkIfSelected("2", list[key].shape, key) + ">Star</option>"
+                    + "<option value='3'" + checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
+                    + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
+                    + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
+                    + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
+                    + "</select>"
+                "</td>";
+            } else {
+                tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
+            }
+            tablerows += "<td class='l1'>" + list[key].length + "</td>"
+                + "</tr>";
         }
-        var sprite = getGlyphName(list[key]);
-        tablerows += "<label class='color-box-label'>" + key + "</label> "
-            + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
-            + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
-            + "<span id='color-picker-addon' value='" + key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
-            + "</div>"
-            + "</td>";
-        if (sprite != null) {
-            tablerows += "<td class=' '><span>" + list[key].label + "</span>"
-                + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
-                + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
-                + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
-                + "<option value='2'" + checkIfSelected("2", list[key].shape, key) + ">Star</option>"
-                + "<option value='3'" + checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
-                + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
-                + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
-                + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
-                + "</select>"
-            "</td>";
-        } else {
-            tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
-        }
-        tablerows += "<td class='l1'>" + list[key].length + "</td>"
-            + "</tr>";
+
+        tableend = "</tbody>"
+            + "</table>";
     }
 
-    var tableend = "</tbody>"
-        + "</table>";
-
-
+    if(!found){
+        document.getElementById('cluster_table_div').innerHTML = tabletop + tablerows + tableend;
+    }
     return tabletop + tablerows + tableend;
 }
 
@@ -1220,7 +1242,7 @@ function recolorMultipleSections(color) {
             if (id != undefined || id != null) recolorSection(id, color);
         }
     }
-    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    generateCheckList(sections, colorlist);
     enablesearch()
 }
 
@@ -1321,7 +1343,7 @@ function changeColorScheme(scheme) {
             }
         }
     }
-    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    generateCheckList(sections, colorlist);
     generateClusterList(sections, colorlist);
     enablesearch()
 
@@ -1379,7 +1401,7 @@ function addCustomCluster(isSingle) {
         updatePlot(currentValue)
     } else {
         renderCustomCluster()
-        document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+        generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
         enablesearch()
         addParticlesToScence()
@@ -1490,7 +1512,7 @@ function changeGlyph(id, shape) {
 
 function showSettings() {
     settingOn = true;
-    document.getElementById('cluster_table_div').innerHTML = generateCheckList(sections, colorlist);
+    generateCheckList(sections, colorlist);
 }
 
 function hideSettings() {
