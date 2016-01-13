@@ -366,6 +366,10 @@ function generateGraph() {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+                if (changedGlyphs.hasOwnProperty(key)) {
+                    currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                    currentParticles[key].material.needsUpdate = true;
+                }
             }
         }
 
@@ -1127,7 +1131,12 @@ function generateClusterList(list, initcolors) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
-                var sprite = getGlyphImage(list[key]);
+                var sprite;
+                if (changedGlyphs.hasOwnProperty(key)) {
+                    sprite = getGlyphImageByShape(changedGlyphs[key]);
+                }else{
+                    sprite = getGlyphImage(list[key]);
+                }
                 // try to find the element first
                 if ($("#plot-clusters > #" + key).length) {
                     $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
@@ -1476,6 +1485,7 @@ function changeGlyph(id, shape) {
     changedGlyphs[id] = shape;
     currentParticles[id].material.map = sprites[shape];
     currentParticles[id].material.needsUpdate = true;
+    generateClusterList(sections, colorlist);
 }
 
 function showSettings() {
@@ -1544,6 +1554,36 @@ function getGlyphImage(key) {
             default :
                 glyph = ImageEnum.CUBE;
         }
+    }
+    return glyph;
+}
+
+function getGlyphImageByShape(shape) {
+    var glyph = null;
+    switch (parseInt(shape)) {
+            case 0:
+                glyph = ImageEnum.DISC;
+                break;
+            case 1:
+                glyph = ImageEnum.BALL;
+                break;
+            case 2:
+                glyph = ImageEnum.STAR;
+                break;
+            case 3:
+                glyph = ImageEnum.CUBE;
+                break;
+            case 4:
+                glyph = ImageEnum.PYRAMID;
+                break;
+            case 5:
+                glyph = ImageEnum.CONE;
+                break;
+            case 6:
+                glyph = ImageEnum.CYLINDER;
+                break;
+            default :
+                glyph = ImageEnum.CUBE;
     }
     return glyph;
 }
