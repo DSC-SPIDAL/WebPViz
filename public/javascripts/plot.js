@@ -1070,14 +1070,18 @@ function generateCheckList(list, initcolors) {
                 $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
             }
             var sprite = getGlyphName(list[key]);
+            var currentshape;
+            if (changedGlyphs.hasOwnProperty(key)) {
+                currentshape = changedGlyphs[key];
+            }else{
+                currentshape = list[key];
+            }
             $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
             if(sprite != null){
-                $("#cluster_table > tbody > #" + key + " select").val(list[key].shape);
+                $("#cluster_table > tbody > #" + key + " select").val(currentshape);
             }
-            $("#cluster_table > tbody > #" + key + " td.#cluster-size").text(list[key].length)
+            $("#cluster_table > tbody > #" + key + " td#cluster-size").text(list[key].length)
         }
-
-
         found =  true;
     }else {
 
