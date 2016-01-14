@@ -1749,8 +1749,8 @@ function setupGuiSingle() {
     gui = new dat.GUI({autoPlace: false});
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
     gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
@@ -1760,8 +1760,8 @@ function setupGuiTimeSeries() {
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-    gui.add(controlers, 'pointsize', 0.01, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.01, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
     gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
