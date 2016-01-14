@@ -27,6 +27,8 @@ var particleSets = {};
 var sectionSets = {};
 var changedGlyphs = {};
 var customclusters = {};
+var customclusternotadded = false;
+var customclusternotaddedtolist = false;
 var pointLabelxKey = {};
 var pointLabelxKeySets = {};
 var maxClusterId = 0;
@@ -381,7 +383,6 @@ function generateGraph() {
         addParticlesToScence();
         drawEdges(data.edges, points, pointcolors);
         generateClusterList(sections, colorlist);
-        enablesearch()
         populatePlotInfo();
         var cls = $("#plot-clusters").isotope({
             itemSelector: '.element-item',
@@ -723,7 +724,6 @@ function updatePlot(index) {
         // change only when the setting dispaly is on
         if (settingOn) {
             generateCheckList(sections, colorlist);
-            enablesearch()
         }
         generateClusterList(sections, colorlist);
         fileName = fileNames[index];
@@ -1061,7 +1061,7 @@ function generateCheckList(list, initcolors) {
         + "<tbody>";
 
         var ss = $("#cluster_table");
-    if($("#cluster_table").length){
+    if($("#cluster_table").length && !customclusternotadded){
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             if (!(removedclusters.hasOwnProperty(key))) {
@@ -1074,7 +1074,7 @@ function generateCheckList(list, initcolors) {
             if (changedGlyphs.hasOwnProperty(key)) {
                 currentshape = changedGlyphs[key];
             }else{
-                currentshape = list[key];
+                currentshape = list[key].shape;
             }
             $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
             if(sprite != null){
@@ -1085,9 +1085,7 @@ function generateCheckList(list, initcolors) {
         found =  true;
     }else {
 
-
         tablerows = "";
-
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             tablerows += "<tr class='even pointer' id='" + key + "'>"
@@ -1125,10 +1123,12 @@ function generateCheckList(list, initcolors) {
 
         tableend = "</tbody>"
             + "</table>";
+        customclusternotadded = false;
     }
 
     if(!found){
         document.getElementById('cluster_table_div').innerHTML = tabletop + tablerows + tableend;
+        enablesearch()
     }
     return tabletop + tablerows + tableend;
 }
@@ -1172,7 +1172,7 @@ function generateClusterList(list, initcolors) {
                     sprite = getGlyphImage(list[key]);
                 }
                 // try to find the element first
-                if ($("#plot-clusters > #" + key).length) {
+                if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
                     $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
@@ -1184,6 +1184,7 @@ function generateClusterList(list, initcolors) {
                     }
                     found = true;
                 } else {
+                    found = false;
                     if (sprite != null) {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "   <img class='clusterlistimage' src='" + sprite +"'/></span></p></div>"
@@ -1197,6 +1198,7 @@ function generateClusterList(list, initcolors) {
     }
     if (!found) {
         document.getElementById('plot-clusters').innerHTML = grid;
+        customclusternotaddedtolist = false;
     }
     return grid;
 }
@@ -1216,6 +1218,11 @@ function recolorSection(id, color) {
     }
 
     colorlist[id] = color;
+
+    //remove the color jpicker binding
+    $("#cluster_table tbody > #" + id +" span.jPicker").remove();
+    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color)
+    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
 
     //change to custom color scheme since a color change has been made
     currentCustomColorScheme = colorlist;
@@ -1255,7 +1262,6 @@ function recolorMultipleSections(color) {
         }
     }
     generateCheckList(sections, colorlist);
-    enablesearch()
 }
 
 /**
@@ -1357,7 +1363,6 @@ function changeColorScheme(scheme) {
     }
     generateCheckList(sections, colorlist);
     generateClusterList(sections, colorlist);
-    enablesearch()
 
 }
 
@@ -1407,7 +1412,8 @@ function addCustomCluster(isSingle) {
         p: p
     };
     customclusters[clusterkey.toString()] = cluster;
-
+    customclusternotadded = true;
+    customclusternotaddedtolist = true;
     if (!isSingle) {
         var currentValue = parseInt($("#plot-slider").prop("value"));
         updatePlot(currentValue)
@@ -1415,7 +1421,6 @@ function addCustomCluster(isSingle) {
         renderCustomCluster()
         generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
-        enablesearch()
         addParticlesToScence()
     }
 }

@@ -184,8 +184,7 @@
                         <div class="form-group">
                             <label for="shape">Shape</label>
                             <select id="ccshape" data-size="8">
-                                <option selected value="-1">Point</option>
-                                <option value="0">Disc</option>
+                                <option selected value="0">Disc</option>
                                 <option value="1">Ball</option>
                                 <option value="2">Star</option>
                                 <option value="3">Cube</option>
@@ -322,8 +321,6 @@
                     var settingsdiv = $("#settingDiv");
                     if(settingsdiv.hasClass("settinghidden")){
                         showSettings();
-                        enablesearch()
-
                         settingsdiv.removeClass("settinghidden")
                     }else{
                         settingsdiv.addClass("settinghidden")
