@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<metadata>Copyright (C) 2016 by original authors @ fontello.com</metadata>
+<defs>
+<font id="fontello" horiz-adv-x="1000" >
+<font-face font-family="fontello" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="cylinder" unicode="&#xe800;" d="m22 669c143 119 215 159 358 159 144 0 216-40 359-159l0-638c-143-119-215-159-359-159-143 0-215 40-358 159l0 638m0 0c143-120 215-160 358-160 144 0 216 40 359 160" horiz-adv-x="761" />
+<glyph glyph-name="cube-1" unicode="&#xe801;" d="m281 570l475 0 0-439-475 0z m0 0l0 0 121 122 476 0-122-122z m0 0l475 0 122 122 0-440-122-121z m475 0" horiz-adv-x="1037" />
+<glyph glyph-name="circle" unicode="&#xe802;" d="m857 350q0-117-57-215t-156-156-215-58-216 58-155 156-58 215 58 215 155 156 216 58 215-58 156-156 57-215z" horiz-adv-x="857.1" />
+<glyph glyph-name="disc" unicode="&#xe803;" d="m22 665c454 122 680 163 1134 163 453 0 680-41 1133-163l0-652c-453-122-680-163-1133-163-454 0-680 41-1134 163l0 652m0 0c454-122 680-163 1134-163 453 0 680 41 1133 163" horiz-adv-x="2311" />
+<glyph glyph-name="pyramid" unicode="&#xe804;" d="m534 845l-3-993m4 989l-527-793 528-193 520 192z" horiz-adv-x="1064" />
+<glyph glyph-name="cone" unicode="&#xe805;" d="m413 846l-411-839c303-217 559-197 795 0z" horiz-adv-x="799" />
+<glyph glyph-name="ball" unicode="&#xe806;" d="m1149 349c0-265-253-480-564-480-312 0-564 215-564 480 0 265 252 480 564 480 311 0 564-215 564-480" horiz-adv-x="1167" />
+<glyph glyph-name="cube" unicode="&#xe82b;" d="m500-59l357 195v355l-357-130v-420z m-36 483l390 141-390 142-389-142z m465 140v-428q0-20-10-37t-28-26l-393-214q-15-9-34-9t-34 9l-393 214q-17 10-27 26t-10 37v428q0 23 13 41t34 26l393 143q12 5 24 5t25-5l393-143q21-8 34-26t13-41z" horiz-adv-x="1000" />
+<glyph glyph-name="star-1" unicode="&#xe82c;" d="m440 790l120-336 320 0-262-196 94-348-272 208-272-208 94 348-262 196 320 0z" horiz-adv-x="880" />
+</font>
+</defs>
+</svg>
