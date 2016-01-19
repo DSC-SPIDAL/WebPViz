@@ -1179,7 +1179,7 @@ function generateClusterList(list, initcolors) {
                         if (sprite != null) {
                             $("#plot-clusters > #" + key).css("background-color", "#ffffff");
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
-                            $("#plot-clusters > #" + key + " span").append("<i font-size: 32px; class='demo-icon " + sprite + "' style='color:#"+ colorWithouthHash +"'></i>");
+                            $("#plot-clusters > #" + key + " span").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
                         } else {
                             $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
@@ -1190,7 +1190,7 @@ function generateClusterList(list, initcolors) {
                     found = false;
                     if (sprite != null) {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #ffffff'>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i font-size: 32px; class='demo-icon " + sprite + "' style='color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
                     } else {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
