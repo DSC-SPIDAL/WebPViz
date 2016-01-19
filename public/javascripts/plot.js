@@ -1029,7 +1029,7 @@ function generateCheckList(list, initcolors) {
     var glyphList = [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var sprite = getGlyphName(list[key])
+        var sprite = getGlyphName(list[key]);
         if (sprite != null) {
             glyphList.push(key);
         } else {
@@ -1165,20 +1165,23 @@ function generateClusterList(list, initcolors) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
-                var sprite;
+                var sprite = null;
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    sprite = getGlyphImageByShape(changedGlyphs[key]);
-                }else{
-                    sprite = getGlyphImage(list[key]);
+                    sprite = getFontIconByShape(changedGlyphs[key]);
+                } else{
+                    if (list[key].size > 1) {
+                        sprite = getFontIconByShape(list[key].shape);
+                    }
                 }
                 // try to find the element first
                 if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
-                    $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
+                            $("#plot-clusters > #" + key).css("background-color", "#ffffff");
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
-                            $("#plot-clusters > #" + key + " span").append("<img class='clusterlistimage' src='" + sprite +"'/>");
+                            $("#plot-clusters > #" + key + " span").append("<i font-size: 32px; class='demo-icon " + sprite + "' style='color:#"+ colorWithouthHash +"'></i>");
                         } else {
+                            $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
                         }
                     }
@@ -1186,8 +1189,8 @@ function generateClusterList(list, initcolors) {
                 } else {
                     found = false;
                     if (sprite != null) {
-                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "   <img class='clusterlistimage' src='" + sprite +"'/></span></p></div>"
+                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #ffffff'>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i font-size: 32px; class='demo-icon " + sprite + "' style='color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
                     } else {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
@@ -1593,6 +1596,36 @@ function getGlyphImage(key) {
             default :
                 glyph = ImageEnum.CUBE;
         }
+    }
+    return glyph;
+}
+
+function getFontIconByShape(shape) {
+    var glyph = null;
+    switch (parseInt(shape)) {
+        case 0:
+            glyph = 'icon-disc';
+            break;
+        case 1:
+            glyph = 'icon-circle';
+            break;
+        case 2:
+            glyph = 'icon-star-1';
+            break;
+        case 3:
+            glyph = 'icon-cube';
+            break;
+        case 4:
+            glyph = 'icon-pyramid';
+            break;
+        case 5:
+            glyph = 'icon-cone';
+            break;
+        case 6:
+            glyph = 'icon-cylinder';
+            break;
+        default :
+            glyph = 'icon-cylinder';
     }
     return glyph;
 }
