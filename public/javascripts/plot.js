@@ -941,8 +941,17 @@ function savePlot() {
         value: 'new',
         text: 'New Settings'
     }));
+    $('#setting-new').prop("disabled", true);
     $('#setting-exist').val(selectKey);
     $('#saveModal').modal('show');
+}
+
+function saveSettingSelectChange() {
+    if ($('#setting-exist').val() === "new") {
+        $('#setting-new').prop("disabled", false);
+    } else {
+        $('#setting-new').prop("disabled", true);
+    }
 }
 
 function callSave() {
