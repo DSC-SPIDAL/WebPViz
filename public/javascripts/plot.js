@@ -1190,6 +1190,12 @@ function generateClusterList(list, initcolors) {
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
                             $("#plot-clusters > #" + key + " span").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
                         } else {
+                            var rgb = hexToRgb("#" + colorWithouthHash);
+                            var tex = "ffffff";
+                            if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                                tex = "000000";
+                            }
+                            $("#plot-clusters > #" + key).css("color", "#" + tex);
                             $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
                         }
@@ -1201,8 +1207,13 @@ function generateClusterList(list, initcolors) {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #ffffff'>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
                     } else {
+                        var rgb = hexToRgb("#" + colorWithouthHash);
+                        var tex = "ffffff";
+                        if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                            tex = "000000";
+                        }
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
                     }
                 }
             }
@@ -1213,6 +1224,15 @@ function generateClusterList(list, initcolors) {
         customclusternotaddedtolist = false;
     }
     return grid;
+}
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
 
 //Control Utils
