@@ -1589,6 +1589,18 @@ function changeSingleGlyphSize(id, size){
     changedSizes[id] = size;
 }
 
+function changeMultipleGlyphSizes(size){
+    var rows = $('#cluster_table tr.selected');
+    for (var key in rows) {
+        if (rows.hasOwnProperty(key)) {
+            var rowdata = rows[key]
+            var id = rowdata.id;
+            if (id != undefined || id != null) changeSingleGlyphSize(id, size);
+        }
+    }
+    generateCheckList(sections, colorlist);
+}
+
 function showSettings() {
     settingOn = true;
     generateCheckList(sections, colorlist);

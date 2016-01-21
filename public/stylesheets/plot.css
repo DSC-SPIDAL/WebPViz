@@ -409,6 +409,11 @@ input[type=range]:focus::-ms-fill-upper {
     overflow: auto;
     max-height: 83%;
 }
+.multirowsize{
+    width: 50px;
+    padding-right: 3px;
+    text-align:right;
+}
 
 .glyph-size{
     float: right;
@@ -420,8 +425,16 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .glyph-size-label{
+    padding-right: 2px;
 }
 
+.multi-row-size{
+    display: inline;
+}
+
+.multi-row-color{
+    display: inline;
+}
 .color-pic1 {
     display: inline;
 }

@@ -109,7 +109,17 @@ $(function () {
             changeSingleGlyphSize(key,value)
     });
 
+    $('#multirowsize').on('focusout',function() {
+            var value = $(this).val()
+            changeMultipleGlyphSizes(value)
+    });
 
+    $('#multirowsize').on('keypress', function(e) {
+        if(e.which == 13){
+            var value = $(this).val()
+            changeMultipleGlyphSizes(value)
+        }
+    });
 });
 
 $(function () {
