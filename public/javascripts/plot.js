@@ -26,6 +26,7 @@ var sprites = {};
 var particleSets = {};
 var sectionSets = {};
 var changedGlyphs = {};
+var changedSizes ={};
 var customclusters = {};
 var customclusternotadded = false;
 var customclusternotaddedtolist = false;
@@ -699,6 +700,10 @@ function updatePlot(index) {
                     currentParticles[key].material.needsUpdate = true;
                 }
 
+                if(changedSizes.hasOwnProperty(key)){
+                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
+                }
+
                 if (recoloredclusters.hasOwnProperty(key)) {
                     var tempcolor = recoloredclusters[key]
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -915,6 +920,11 @@ function changeGlyphSize() {
             } else {
                 currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
             }
+
+            if(changedSizes.hasOwnProperty(key)){
+                currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
+            }
+
             currentParticles[key].material.needsUpdate = true;
         }
     }
@@ -1569,9 +1579,10 @@ function changeGlyph(id, shape) {
 }
 
 function changeSingleGlyphSize(id, size){
-    currentParticles[id].material.size = (size / 200) * controlers.pointsize;
+    currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
     currentParticles[id].material.needsUpdate = true;
     sections[id].size = size
+    changedSizes[id] = size;
 }
 
 function showSettings() {

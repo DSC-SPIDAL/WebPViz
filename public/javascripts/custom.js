@@ -102,6 +102,14 @@ $(function () {
         }
     });
 
+    $('#cluster_table_div').on('focusout','input',function() {
+            var id = $(this).attr('id');
+            var key = $(this).attr('key');
+            var value = $(this).val()
+            changeSingleGlyphSize(key,value)
+    });
+
+
 });
 
 $(function () {
