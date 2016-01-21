@@ -941,8 +941,17 @@ function savePlot() {
         value: 'new',
         text: 'New Settings'
     }));
+    $('#setting-new').prop("disabled", true);
     $('#setting-exist').val(selectKey);
     $('#saveModal').modal('show');
+}
+
+function saveSettingSelectChange() {
+    if ($('#setting-exist').val() === "new") {
+        $('#setting-new').prop("disabled", false);
+    } else {
+        $('#setting-new').prop("disabled", true);
+    }
 }
 
 function callSave() {
@@ -1029,7 +1038,7 @@ function generateCheckList(list, initcolors) {
     var glyphList = [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var sprite = getGlyphName(list[key])
+        var sprite = getGlyphName(list[key]);
         if (sprite != null) {
             glyphList.push(key);
         } else {
@@ -1171,20 +1180,29 @@ function generateClusterList(list, initcolors) {
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
-                var sprite;
+                var sprite = null;
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    sprite = getGlyphImageByShape(changedGlyphs[key]);
-                }else{
-                    sprite = getGlyphImage(list[key]);
+                    sprite = getFontIconByShape(changedGlyphs[key]);
+                } else{
+                    if (list[key].size > 1) {
+                        sprite = getFontIconByShape(list[key].shape);
+                    }
                 }
                 // try to find the element first
                 if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
-                    $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
+                            $("#plot-clusters > #" + key).css("background-color", "#ffffff");
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
-                            $("#plot-clusters > #" + key + " span").append("<img class='clusterlistimage' src='" + sprite +"'/>");
+                            $("#plot-clusters > #" + key + " span").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
                         } else {
+                            var rgb = hexToRgb("#" + colorWithouthHash);
+                            var tex = "ffffff";
+                            if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                                tex = "000000";
+                            }
+                            $("#plot-clusters > #" + key).css("color", "#" + tex);
+                            $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
                         }
                     }
@@ -1192,11 +1210,16 @@ function generateClusterList(list, initcolors) {
                 } else {
                     found = false;
                     if (sprite != null) {
-                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "   <img class='clusterlistimage' src='" + sprite +"'/></span></p></div>"
+                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #ffffff'>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
                     } else {
+                        var rgb = hexToRgb("#" + colorWithouthHash);
+                        var tex = "ffffff";
+                        if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                            tex = "000000";
+                        }
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
                     }
                 }
             }
@@ -1207,6 +1230,15 @@ function generateClusterList(list, initcolors) {
         customclusternotaddedtolist = false;
     }
     return grid;
+}
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
 
 //Control Utils
@@ -1609,6 +1641,36 @@ function getGlyphImage(key) {
     return glyph;
 }
 
+function getFontIconByShape(shape) {
+    var glyph = null;
+    switch (parseInt(shape)) {
+        case 0:
+            glyph = 'icon-disc';
+            break;
+        case 1:
+            glyph = 'icon-circle';
+            break;
+        case 2:
+            glyph = 'icon-star-1';
+            break;
+        case 3:
+            glyph = 'icon-cube';
+            break;
+        case 4:
+            glyph = 'icon-pyramid';
+            break;
+        case 5:
+            glyph = 'icon-cone';
+            break;
+        case 6:
+            glyph = 'icon-cylinder';
+            break;
+        default :
+            glyph = 'icon-cylinder';
+    }
+    return glyph;
+}
+
 function getGlyphImageByShape(shape) {
     var glyph = null;
     switch (parseInt(shape)) {
@@ -1761,8 +1823,8 @@ function setupGuiSingle() {
     gui = new dat.GUI({autoPlace: false});
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'pointsize', 0.01, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.01, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
     gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
@@ -1772,8 +1834,8 @@ function setupGuiTimeSeries() {
     var customContainer = document.getElementById('plot-controls');
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-    gui.add(controlers, 'pointsize', 0.01, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.01, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
+    gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
+    gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
     gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 

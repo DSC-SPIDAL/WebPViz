@@ -444,6 +444,10 @@
                 }
             });
 
+            $( "#setting-exist" ).change(function() {
+                saveSettingSelectChange();
+            });
+
             $("#saveSettings").click(function() {
                 var sel = $( "#setting-exist" ).val();
                 var setting = 'original';
