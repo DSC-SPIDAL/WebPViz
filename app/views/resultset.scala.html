@@ -82,16 +82,6 @@
                 <p>Size:</p>
                 <input id="multirowsize" class="multirowsize" type="text" value="10"/>
             </div>
-            @*<p>Glyph:</p>*@
-            @*<select class="multirowglyphselect" id="multirowglyphselect">*@
-                @*<option value="0">Disc</option>*@
-                @*<option value="1">Ball</option>*@
-                @*<option value="2">Star</option>*@
-                @*<option value="3" selected="">Cube</option>*@
-                @*<option value="4">Pyramid</option>*@
-                @*<option value="5">Cone</option>*@
-                @*<option value="6">Cylinder</option>*@
-            @*</select>*@
         </div>
         <div id="cluster_table_div" class="cluster_table_div">
 
@@ -128,40 +118,11 @@
                         </div>
                     </div>
                 </div>
-                @*<div class="accordion-group">*@
-                    @*<div class="accordion-heading">*@
-                        @*<a class="accordion-toggle-small" data-toggle="collapse" data-parent="#accordianParent" href="#sectionTwo">*@
-                            @*Section Two*@
-                        @*</a>*@
-                    @*</div>*@
-                    @*<div id="sectionTwo" class="accordion-body collapse">*@
-                        @*<div class="accordion-inner-small">*@
-                            @*Here is all the wonderful stuff in section TWO.<br/>*@
-                            @*<br/>*@
-                            @*Sample text*@
-                        @*</div>*@
-                    @*</div>*@
-                @*</div>*@
-                @*<div class="accordion-group">*@
-                    @*<div class="accordion-heading">*@
-                        @*<a class="accordion-toggle-small" data-parent="#accordianParent" data-toggle="collapse" href="#sectionThree">*@
-                            @*Section Three*@
-                        @*</a>*@
-                    @*</div>*@
-                    @*<div id="sectionThree" class="accordion-body collapse">*@
-                        @*<div class="accordion-inner-small">*@
-                            @*Here is all the wonderful stuff in section THREE.<br/>*@
-                            @*<br/>*@
-                                @*Sample text*@
-                        @*</div>*@
-                    @*</div>*@
-                @*</div>*@
             </div>
         </div>
         <button id="toggleSidebar" type="button" class="btn btn-default btn-sm">
             <span class="glyphicon glyphicon-info-sign"></span>
         </button>
-        @*<a  href="#" class="toggles"><span class="information-tab glyphicon glyphicon-info-sign"></span></a>*@
     </div>
 
     <div id="cluster-modal" class="modal fade" role="dialog">
@@ -343,10 +304,6 @@
                     });
                 }
 
-//                $('#cluster_table tbody').on( 'click', 'tr', function () {
-//                    $(this).toggleClass('selected');
-//                } );
-
                 $("tfoot input").keyup(function () {
                     /* Filter on the column based on the index of this element's parent <th> */
                     oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
@@ -375,32 +332,22 @@
             function sidebar(panels) {
                 $.asm.panels = panels;
                 if (panels === 1) {
-                    // $('#content').removeClass('span9');
-                    // $('#content').addClass('span12 no-sidebar');
                     $('#sidebar').animate({
                         left: -310,
                     });
                 } else if (panels === 2) {
-                    // $('#content').removeClass('span12 no-sidebar');
-                    // $('#content').addClass('span9');
                     $('#sidebar').animate({
                         left: 20,
                     });
                     $('#mapCanvas').width($('#mapCanvas').parent().width());
                     $('#mapCanvas').height($(window).height() - 50);
-                   // $('#sidebar').height($(window).height() - 50);
-                   // return google.maps.event.trigger($.asm.theMap, 'resize');
                 }
             };
 
             $('#toggleSidebar').click(function() {
                 if ($.asm.panels === 1) {
-                   // $('#toggleSidebar i').addClass('icon-chevron-left');
-                  //  $('#toggleSidebar i').removeClass('icon-chevron-right');
                     return sidebar(2);
                 } else {
-                 //   $('#toggleSidebar i').removeClass('icon-chevron-left');
-                  //  $('#toggleSidebar i').addClass('icon-chevron-right');
                     return sidebar(1);
                 }
             });
