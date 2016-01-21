@@ -1114,11 +1114,17 @@ function generateCheckList(list, initcolors) {
                     + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
                     + "</select>"
                 "</td>";
+
+                tablerows += "<td class='l1' id='cluster-size'>" + list[key].length
+                    + "<input type='text' class='glyph-size-control' value='" + list[key].size + "' key='" + key + "' id='size-box" + key + "'>"
+                    + "</td>"
+                    + "</tr>";
             } else {
                 tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
+                tablerows += "<td class='l1' id='cluster-size'>" + list[key].length + "</td>"
+                    + "</tr>";
             }
-            tablerows += "<td class='l1' id='cluster-size'>" + list[key].length + "</td>"
-                + "</tr>";
+
         }
 
         tableend = "</tbody>"
@@ -1525,6 +1531,12 @@ function changeGlyph(id, shape) {
     currentParticles[id].material.map = sprites[shape];
     currentParticles[id].material.needsUpdate = true;
     generateClusterList(sections, colorlist);
+}
+
+function changeSingleGlyphSize(id, size){
+    currentParticles[id].material.size = (size / 200) * controlers.pointsize;
+    currentParticles[id].material.needsUpdate = true;
+    sections[id].size = size
 }
 
 function showSettings() {

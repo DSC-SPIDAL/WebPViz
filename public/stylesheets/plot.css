@@ -52,7 +52,7 @@
     z-index: 1002;
     right: 20px;
     top: 65px;
-    width: 22%;
+    width: 28%;
     height: 84%;
     background-color: #FFFFFF;
     /*opacity: 0.8;*/
@@ -409,6 +409,14 @@ input[type=range]:focus::-ms-fill-upper {
     overflow: auto;
     max-height: 83%;
 }
+
+.glyph-size-control{
+    width: 50px;
+    float: right;
+    padding-right: 3px;
+    text-align:right;
+}
+
 
 .color-pic1 {
     display: inline;

@@ -93,6 +93,15 @@ $(function () {
         changeGlyph(id,$(this).val());
     });
 
+    $('#cluster_table_div').on('keypress','input',function(e) {
+        if(e.which == 13){
+            var id = $(this).attr('id');
+            var key = $(this).attr('key');
+            var value = $(this).val()
+            changeSingleGlyphSize(key,value)
+        }
+    });
+
 });
 
 $(function () {
