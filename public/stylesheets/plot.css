@@ -410,13 +410,17 @@ input[type=range]:focus::-ms-fill-upper {
     max-height: 83%;
 }
 
+.glyph-size{
+    float: right;
+}
 .glyph-size-control{
     width: 50px;
-    float: right;
     padding-right: 3px;
     text-align:right;
 }
 
+.glyph-size-label{
+}
 
 .color-pic1 {
     display: inline;

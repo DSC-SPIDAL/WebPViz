@@ -1064,7 +1064,7 @@ function generateCheckList(list, initcolors) {
         + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
         + "</th>"
         + "<th class='column-title' >Label</th>"
-        + "<th class='column-title'>Size</th>"
+        + "<th class='column-title'>Cluster Count</th>"
         + "</tr>"
         + "</thead>"
         + "<tbody>";
@@ -1088,8 +1088,11 @@ function generateCheckList(list, initcolors) {
             $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
             if(sprite != null){
                 $("#cluster_table > tbody > #" + key + " select").val(currentshape);
+                $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length)
+                $("#cluster_table > tbody > #" + key + " td#cluster-size input").attr('value',list[key].size)
+            }else{
+                $("#cluster_table > tbody > #" + key + " td#cluster-size label").text(list[key].length)
             }
-            $("#cluster_table > tbody > #" + key + " td#cluster-size").text(list[key].length)
         }
         found =  true;
     }else {
@@ -1124,13 +1127,13 @@ function generateCheckList(list, initcolors) {
                     + "</select>"
                 "</td>";
 
-                tablerows += "<td class='l1' id='cluster-size'>" + list[key].length
-                    + "<input type='text' class='glyph-size-control' value='" + list[key].size + "' key='" + key + "' id='size-box" + key + "'>"
+                tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length
+                    + "</label><div class='glyph-size'><label class='glyph-size-label'>Size</label><input type='text' class='glyph-size-control' value='" + list[key].size + "' key='" + key + "' id='size-box" + key + "'></div>"
                     + "</td>"
                     + "</tr>";
             } else {
                 tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
-                tablerows += "<td class='l1' id='cluster-size'>" + list[key].length + "</td>"
+                tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length + "</label></td>"
                     + "</tr>";
             }
 
