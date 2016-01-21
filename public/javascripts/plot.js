@@ -207,6 +207,9 @@ function intialSetup(settings) {
         if (sett.glyphs) {
             changedGlyphs = sett.glyphs;
         }
+        if (sett.changedSizes) {
+            changedSizes = sett.changedSizes;
+        }
         if (sett.customclusters) {
             customclusters = sett.customclusters;
         }
@@ -996,6 +999,7 @@ function savePlotSettings(result) {
         obj['fid'] = resultSetId;
         obj['pointSize'] = controlers.pointsize;
         obj['glyphSize'] = controlers.glyphsize;
+        obj['changedSizes'] = changedSizes;
         obj['speed'] = controlers.delay;
         obj['glyphs'] = changedGlyphs;
         obj['customclusters'] = customclusters;
