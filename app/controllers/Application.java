@@ -107,6 +107,15 @@ public class Application extends Controller {
         }
     }
 
+    public static Result publicInfo() {
+        return ok(info.render(null));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result info() {
+        return ok(info.render(null));
+    }
+
     public static Result groupDashboardPublic(String group) {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
