@@ -2,6 +2,14 @@
 @import helper._
 
 @main("About", user){
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/OrbitControls.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/stats.min.js")"></script>
+
     <div class="row">
         <div class="col-lg-6">
             <div class="panel panel-default">
@@ -71,6 +79,7 @@
                     <i class="fa fa-bell fa-fw"></i> Preview
                 </div>
                 <div class="panel-body">
+                    <canvas id="canvas3d" class="effect6"></canvas>
                     <a href="#" class="btn btn-default btn-block">Full View</a>
                 </div>
             </div>
