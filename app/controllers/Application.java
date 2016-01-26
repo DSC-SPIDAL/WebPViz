@@ -107,12 +107,12 @@ public class Application extends Controller {
         }
     }
 
-    public static Result publicInfo() {
+    public static Result publicInfo(int id) {
         return ok(info.render(null));
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result info() {
+    public static Result info(int id) {
         return ok(info.render(null));
     }
 

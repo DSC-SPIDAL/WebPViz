@@ -70,6 +70,9 @@ POST        /groups/update                      controllers.GroupController.upda
 
 POST        /timeseries/save                    controllers.Application.savePlot()
 
-GET         /publicinfo                         controllers.Application.publicInfo()
+GET         /publicinfo/:id                     controllers.Application.publicInfo(id: Integer)
 
-GET         /info                               controllers.Application.info()
+GET         /info/:id                           controllers.Application.info(id: Integer)
+
+GET         /artifact/:id/experiment            controllers.ExperimentController.getExperiment(id: Integer)
+POST        /artifact/experiment                controllers.ExperimentController.updateExperiment()
