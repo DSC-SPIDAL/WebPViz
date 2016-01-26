@@ -14,6 +14,7 @@ public class MongoConnection {
     public final MongoCollection<Document> filesCol;
     public final MongoCollection<Document> groupsCol;
     public final MongoCollection<Document> experimentCol;
+    public final MongoCollection<Document> commentCol;
 
     public static MongoConnection con = new MongoConnection();
 
@@ -41,6 +42,7 @@ public class MongoConnection {
         filesCol = db.getCollection(Constants.DB.FILES_COLLECTION);
         groupsCol = db.getCollection(Constants.DB.GROUPS_COLLECTION);
         experimentCol = db.getCollection(Constants.DB.EXP_COLLECTION);
+        commentCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
     }
 
     public void initGroupsCollection() {

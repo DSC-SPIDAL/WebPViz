@@ -80,12 +80,14 @@ public class Constants {
         public static final String PROPERTIES = "props";
         public static final String KEY = "k";
         public static final String VALUE = "v";
+        public static final String EXP = "exp";
     }
 
     public static class Comment {
         public static final String ID_FIELD = "id";
         public static final String TIME_SERIES_ID_FIELD = "tid";
         public static final String USER = "uploader";
+        public static final String COMMENTS = "comments";
         public static final String TEXT = "text";
         public static final String DATE = "date";
     }
