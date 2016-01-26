@@ -74,6 +74,22 @@ public class Constants {
         public static final boolean PUBLIC_FALSE = false;
     }
 
+    public static class Experiment {
+        public static final String USER = "uploader";
+        public static final String TIME_SERIES_ID_FIELD = "tid";
+        public static final String PROPERTIES = "props";
+        public static final String KEY = "k";
+        public static final String VALUE = "v";
+    }
+
+    public static class Comment {
+        public static final String ID_FIELD = "id";
+        public static final String TIME_SERIES_ID_FIELD = "tid";
+        public static final String USER = "uploader";
+        public static final String TEXT = "text";
+        public static final String DATE = "date";
+    }
+
     public static class Group {
         public static final String DEFAULT_GROUP = "default";
         public static final String NAME = "name";
@@ -89,5 +105,7 @@ public class Constants {
         public static final String FILES_COLLECTION = "files";
         public static final String DB_NAME = "pviz2";
         public static final String GROUPS_COLLECTION = "groups";
+        public static final String EXP_COLLECTION = "exp";
+        public static final String COMMENT_COLLECTION = "comment";
     }
 }
