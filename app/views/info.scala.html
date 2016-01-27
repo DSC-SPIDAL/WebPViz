@@ -12,6 +12,7 @@
 
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/info.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/dat.gui.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/docs.js")"></script>
@@ -105,31 +106,20 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu pull-right" role="menu">
-                                <li><a href="javascript:void(0);" class="add-exp-val" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Add</a>
-                                </li>
+                                <li><a href="javascript:void(0);" class="add-exp-val" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Add Property</a></li>
+                                <li><a href="javascript:void(0);" class="edit-exp-desc" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Edit Description</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
+
                     <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover table-striped">
+                                <table class="table table-bordered table-hover table-striped" id="expTable">
                                     <tbody>
-                                        <tr>
-                                            <td>Data Set</td>
-                                            <td>2004 to 2014</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Origin</td>
-                                            <td>WRDS</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -321,7 +311,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Edit File</h4>
+                    <h4 class="modal-title" id="myModalLabel">Add Property</h4>
                 </div>
                 <div class="modal-body" id="upload_file_div">
                 <div class="form-group">
@@ -440,7 +430,7 @@
                     }
                  });
 
-                  $('.add-exp-val').click(function(e) {
+                 $('.add-exp-val').click(function(e) {
                     e.preventDefault();
                     var id = $(this).data('id');
                     $("#artifactId").val(id);
@@ -449,10 +439,14 @@
 
                  $('#add_sub').click(function(e) {
                     e.preventDefault();
-                    var id = $(this).data('id');
-                    $("#artifactId").val(id);
-                    $('#addExpPropModal').modal('show');
+                    addRowToExp($('#add_key').val(), $('#add_val').val());
+                    var url = "@routes.ExperimentController.updateExperiment()";
+                    var exp = expToJson();
+                    submitExp(url, exp);
                  });
+
+                 var expUrl = "@routes.ExperimentController.getExperiment(t.id)";
+                 loadExp(expUrl);
 
             });
     </script>

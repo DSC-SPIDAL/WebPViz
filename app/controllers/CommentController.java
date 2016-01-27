@@ -20,7 +20,7 @@ public class CommentController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         String comment = CommentDAO.getComments(artifactId, loggedInUser.email);
         if (comment != null) {
-            return ok("{status: 'success'}").as("application/json");
+            return ok(comment).as("application/json");
         } else {
             return badRequest("{status: 'fail'}").as("application/json");
         }

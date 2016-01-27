@@ -21,11 +21,16 @@ public class ExperimentDAO {
     public static String getExperiment(int artifactId, String user) {
         MongoConnection db = MongoConnection.getInstance();
         Document oldGroupDocument = new Document();
-        oldGroupDocument.append(Constants.Artifact.ID_FIELD, artifactId).append(Constants.Artifact.USER, user);
+        oldGroupDocument.append(Constants.Experiment.TIME_SERIES_ID_FIELD, artifactId).append(Constants.Experiment.USER, user);
 
         FindIterable<Document> iterable = db.experimentCol.find(oldGroupDocument);
         for (Document d : iterable) {
-            return JSON.serialize(d);
+            Object exp = d.get(Constants.Experiment.EXP);
+            if (exp != null) {
+                return JSON.serialize(exp);
+            } else {
+                return null;
+            }
         }
         return null;
     }
