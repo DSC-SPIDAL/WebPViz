@@ -1040,11 +1040,17 @@ function savePlotSettings(result) {
  * Generates the Information box content
  */
 function populatePlotInfo() {
-    if (infoPage) return;
-
-    document.getElementById('plot-info-description').innerHTML = "<b>Name: </b>" + fileName + "</br>" +
-        "<b>Desc: </b>" + plotDesc + "</br>" +
-        "<b>Uploader: </b>" + uploader
+    if (!infoPage) {
+        document.getElementById('plot-info-description').innerHTML = "<b>Name: </b>" + fileName + "</br>" +
+            "<b>Desc: </b>" + plotDesc + "</br>" +
+            "<b>Uploader: </b>" + uploader;
+    } else {
+        $("#np").text(Object.keys(plotPoints).length);
+        $("#nc").text(sections.length);
+        if (timeSeriesLength) {
+            $("#nf").text(timeSeriesLength)
+        }
+    }
 }
 
 /**
@@ -1857,6 +1863,9 @@ function render() {
     renderer.render(scene3d, camera);
 }
 
+function updateInfo() {
+
+}
 
 //Control Box Operations
 var gui;
