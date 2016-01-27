@@ -11,6 +11,10 @@ function addRowToExp(key, val) {
     $('#expTable > tbody:last-child').append(tr);
 }
 
+function addDescToExp(val) {
+    $("#exp_desc").text(val);
+}
+
 function expToJson() {
     var expFull = {};
     var exp = {};
@@ -21,7 +25,7 @@ function expToJson() {
         //rows would be accessed using the "row" variable assigned in the for loop
         props[row.cells[0].innerHTML] =  row.cells[1].innerHTML;
     }
-    exp['desc'] = "Hello";
+    exp['desc'] = $("#exp_desc").text();
     exp['props'] = props;
     expFull['tid'] = $('#artifactId').val();
     expFull['exp'] = exp;
@@ -37,9 +41,11 @@ function submitExp(url, exp) {
         url: url,
         success: function (data) {
             $('#addExpPropModal').modal('hide');
+            $('#editExpDescModal').modal('hide');
         },
         error: function (data) {
             $('#addExpPropModal').modal('hide');
+            $('#editExpDescModal').modal('hide');
         }
     });
 }
@@ -52,6 +58,10 @@ function populateTable(data) {
                 addRowToExp(key, props[key]);
             }
         }
+    }
+    var desc = data.desc;
+    if (desc) {
+        addDescToExp(desc);
     }
     registerExpDelete();
 }
