@@ -711,7 +711,16 @@ public class ArtifactDAO {
             TimeSeries timeSeries = new TimeSeries();
             timeSeries.id = (Integer) d.get(Constants.Artifact.ID_FIELD);
             timeSeries.name = (String) d.get(Constants.Artifact.NAME_FIELD);
-            timeSeries.t = (String) d.get(Constants.Artifact.TYPE);
+            Object resultSetsObject = d.get(Constants.Artifact.FILES);
+            if (resultSetsObject != null && resultSetsObject instanceof List) {
+                if (((List)resultSetsObject).size() > 1) {
+                    timeSeries.t = "T";
+                } else {
+                    timeSeries.t = "S";
+                }
+            } else {
+                timeSeries.t = "S";
+            }
             timeSeries.group = (String) d.get(Constants.Artifact.GROUP_FIELD);
             timeSeries.description = (String) d.get(Constants.Artifact.DESC_FIELD);
             timeSeries.uploaderId = (String) d.get(Constants.Artifact.USER);

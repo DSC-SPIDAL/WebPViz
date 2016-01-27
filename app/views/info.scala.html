@@ -191,23 +191,18 @@
                         <div class="input-group-btn">
                             <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset" data-toggle="tooltip" data-placement="bottom" title="Reset Plot Position"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
                         </div>
-                        <div class="input-group-btn">
-                            <button id="slider-step-backward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Backward"><span id="step-backward-span" class="glyphicon glyphicon-step-backward"></span></button>
-                        </div>
-                        <div class="input-group-btn">
-                            <button id="slider-play" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Play"><span id="play-span" class="glyphicon glyphicon-play"></span></button>
-                        </div>
-                        <div class="input-group-btn">
-                            <button id="slider-step-forward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Forward"><span id="step-forward-span" class="glyphicon glyphicon-step-forward"></span></button>
-                        </div>
-                        <input type="text" id="plot-slider" class="form-control">
-                        <div class="input-group-btn">
-                            <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five" data-toggle="tooltip" data-placement="bottom" title="Cluster List">
-                                <span class="glyphicon glyphicon-th-list"></span>
-                            </button>
-                            <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"  data-toggle="tooltip" data-placement="bottom" title="Save Plot Settings"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
-                            <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal" data-toggle="tooltip" data-placement="bottom" title="Creaet Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
-                        </div>
+                        @if(t.t == "T") {
+                            <div class="input-group-btn">
+                                <button id="slider-step-backward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Backward"><span id="step-backward-span" class="glyphicon glyphicon-step-backward"></span></button>
+                            </div>
+                            <div class="input-group-btn">
+                                <button id="slider-play" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Play"><span id="play-span" class="glyphicon glyphicon-play"></span></button>
+                            </div>
+                            <div class="input-group-btn">
+                                <button id="slider-step-forward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Forward"><span id="step-forward-span" class="glyphicon glyphicon-step-forward"></span></button>
+                            </div>
+                            <input type="text" id="plot-slider" class="form-control">
+                        }
                     </div>
                     <a href="#" class="btn btn-default btn-block">Full View</a>
                 </div>
@@ -217,39 +212,6 @@
                 <div class="panel-heading">
                     <i class="fa fa-comments fa-fw"></i>
                     Comments
-                    @*<div class="btn-group pull-right">*@
-                        @*<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">*@
-                            @*<i class="fa fa-chevron-down"></i>*@
-                        @*</button>*@
-                        @*<ul class="dropdown-menu slidedown">*@
-                            @*<li>*@
-                                @*<a href="#">*@
-                                    @*<i class="fa fa-refresh fa-fw"></i> Refresh*@
-                                @*</a>*@
-                            @*</li>*@
-                            @*<li>*@
-                                @*<a href="#">*@
-                                    @*<i class="fa fa-check-circle fa-fw"></i> Available*@
-                                @*</a>*@
-                            @*</li>*@
-                            @*<li>*@
-                                @*<a href="#">*@
-                                    @*<i class="fa fa-times fa-fw"></i> Busy*@
-                                @*</a>*@
-                            @*</li>*@
-                            @*<li>*@
-                                @*<a href="#">*@
-                                    @*<i class="fa fa-clock-o fa-fw"></i> Away*@
-                                @*</a>*@
-                            @*</li>*@
-                            @*<li class="divider"></li>*@
-                            @*<li>*@
-                                @*<a href="#">*@
-                                    @*<i class="fa fa-sign-out fa-fw"></i> Sign Out*@
-                                @*</a>*@
-                            @*</li>*@
-                        @*</ul>*@
-                    @*</div>*@
                 </div>
                     <!-- /.panel-heading -->
                 <div class="panel-body">
@@ -347,7 +309,7 @@
                 //TODO needs to go to seperate page when WebGL is not supported
                 Detector.addGetWebGLMessage({"id":"canvas3d"});
           } else {
-                @if(t.t == "T") {
+                @if(t.t != "S") {
                     @if(!t.pub) {
                         $.getJSON("@routes.Application.getArtifact(t.id)", function (data) {
                             var resultSetUrl = "@routes.Application.getArtifact(t.id)";
@@ -362,7 +324,7 @@
                 } else {
                     @if(!t.pub) {
                         $.getJSON("@routes.Application.getArtifact(t.id)", function (data) {
-                            var resultSetUrl = "@routes.Application.getArtifact(t.id)";
+                            var resultSetUrl = "@routes.Application.getFile(t.id, 0)";
                             visualize(resultSetUrl, data, @t.id, false, true);
                         });
                     } else {
