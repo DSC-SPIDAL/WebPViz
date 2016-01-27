@@ -105,7 +105,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu pull-right" role="menu">
-                                <li><a href="#">Add</a>
+                                <li><a href="javascript:void(0);" class="add-exp-val" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Add</a>
                                 </li>
                             </ul>
                         </div>
@@ -127,42 +127,6 @@
                                         <tr>
                                             <td>Origin</td>
                                             <td>WRDS</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3324</td>
-                                            <td>10/21/2013</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3323</td>
-                                            <td>10/21/2013</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3322</td>
-                                            <td>10/21/2013</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3321</td>
-                                            <td>10/21/2013</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3320</td>
-                                            <td>10/21/2013</td>
-                                            <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
-                                            <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3319</td>
-                                            <td>10/21/2013</td>
                                             <td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>
                                             <td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>
                                         </tr>
@@ -352,6 +316,30 @@
         </div>
     </div>
 
+    <div class="modal fade" id="addExpPropModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit File</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                <div class="form-group">
+                    <label for="edit_file_name">Key</label>
+                    <input type="text" id="add_key" name="add_key" required placeholder="Enter Value">
+                    <input type="hidden" name="artifactId" id="artifactId">
+                </div>
+                <div class="form-group">
+                    <label for="add_val">Value</label>
+                    <textarea rows="2" cols="100" class="form-control" name="desc" id="add_val" placeholder="Enter Value"></textarea>
+                </div>
+                    <button type="submit" id="add_sub" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
           if ( !Detector.webgl ){
                 //TODO needs to go to seperate page when WebGL is not supported
@@ -423,7 +411,7 @@
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
                         plotRangeSlider.update({from: currentval});
-                        updatePlot(currentval)
+                        updatePlot(currentval);
                         currentPlotUpdated = false;
                     }
                 });
@@ -450,6 +438,20 @@
                     if (pub) {
                         $('#edit_file_pub').prop('checked', true);
                     }
+                 });
+
+                  $('.add-exp-val').click(function(e) {
+                    e.preventDefault();
+                    var id = $(this).data('id');
+                    $("#artifactId").val(id);
+                    $('#addExpPropModal').modal('show');
+                 });
+
+                 $('#add_sub').click(function(e) {
+                    e.preventDefault();
+                    var id = $(this).data('id');
+                    $("#artifactId").val(id);
+                    $('#addExpPropModal').modal('show');
                  });
 
             });
