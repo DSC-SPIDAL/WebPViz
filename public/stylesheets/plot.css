@@ -369,7 +369,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .viz {
-    margin-top: -21px ;
+    margin-top: 0px ;
     padding : 0px ;
 }
 

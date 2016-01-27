@@ -711,6 +711,10 @@ public class ArtifactDAO {
             TimeSeries timeSeries = new TimeSeries();
             timeSeries.id = (Integer) d.get(Constants.Artifact.ID_FIELD);
             timeSeries.name = (String) d.get(Constants.Artifact.NAME_FIELD);
+            timeSeries.t = (String) d.get(Constants.Artifact.TYPE);
+            timeSeries.group = (String) d.get(Constants.Artifact.GROUP_FIELD);
+            timeSeries.description = (String) d.get(Constants.Artifact.DESC_FIELD);
+            timeSeries.uploaderId = (String) d.get(Constants.Artifact.USER);
             Object pub = d.get(Constants.Artifact.PUBLIC);
             if (pub != null && pub instanceof Boolean) {
                 timeSeries.pub = (boolean) pub;

@@ -65,6 +65,8 @@ var pointSize = 1.0;
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
+var infoPage = false;
+
 var playEnum = {
     INIT: "init",
     PLAY: "play",
@@ -101,7 +103,9 @@ var totalItemsToLoad = 1;
 var itemsLoaded = 1;
 
 //Plot functions - These are the methods that are first called when a plot is generated
-function visualize(resultSetUrl, artifact, fid, tid) {
+function visualize(resultSetUrl, artifact, fid, tid, info) {
+    info = typeof info !== 'undefined' ? info : false;
+    infoPage = info;
     clusterUrl = resultSetUrl;
     resultSetId = fid;
     timeseriesId = tid;
@@ -114,7 +118,9 @@ function visualize(resultSetUrl, artifact, fid, tid) {
 }
 
 
-function visualizeTimeSeries(resultSetUrl, artifact, id, pub) {
+function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
+    info = typeof info !== 'undefined' ? info : false;
+    infoPage = info;
     clusterUrl = resultSetUrl;
     publicUrl = pub;
     timeseriesId = id;
@@ -135,9 +141,15 @@ function setupThreeJs() {
     particles = [];
     colors = [];
     controls = null;
-    var height = window.innerHeight - 57 - 40 - 40 - 10;
-    $('#canvas3d').width(window.innerWidth - 45);
-    $('#canvas3d').height(height);
+    if (!infoPage) {
+        var height = window.innerHeight - 57 - 40 - 40 - 10;
+        $('#canvas3d').width(window.innerWidth - 45);
+        $('#canvas3d').height(height);
+    } else {
+        var height = (window.innerHeight - 57 - 40 - 40 - 10)/2;
+        $('#canvas3d').width((window.innerWidth - 45)/2 -10);
+        $('#canvas3d').height(height);
+    }
     var canvasWidth = $('#canvas3d').width();
     var canvasHeight = $('#canvas3d').height();
 
@@ -1028,6 +1040,8 @@ function savePlotSettings(result) {
  * Generates the Information box content
  */
 function populatePlotInfo() {
+    if (infoPage) return;
+
     document.getElementById('plot-info-description').innerHTML = "<b>Name: </b>" + fileName + "</br>" +
         "<b>Desc: </b>" + plotDesc + "</br>" +
         "<b>Uploader: </b>" + uploader
@@ -1040,6 +1054,8 @@ function populatePlotInfo() {
  * @returns {string} generated check list in HTML
  */
 function generateCheckList(list, initcolors) {
+    if (infoPage) return;
+
     var keys = [];
     for (var k in trueColorList) {
         if (trueColorList.hasOwnProperty(k)) {
@@ -1172,6 +1188,8 @@ function generateCheckList(list, initcolors) {
  * @returns {string} generated list in HTML
  */
 function generateClusterList(list, initcolors) {
+    if (infoPage) return;
+
     var keys = [];
     for (var k in trueColorList) {
         if (trueColorList.hasOwnProperty(k)) {
@@ -1620,8 +1638,15 @@ function addParticlesToScence() {
 }
 
 function onWindowResize() {
-    var width = window.innerWidth;
-    var height = window.innerHeight - 57 - 40 - 40 - 10;
+    var width;
+    var height;
+    if (!infoPage) {
+        width = window.innerWidth;
+        height = window.innerHeight - 57 - 40 - 40 - 10;
+    } else {
+        width = window.innerWidth / 2 -10;
+        height = (window.innerHeight - 57 - 40 - 40 - 10)/2;
+    }
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width - 45, height);
@@ -1849,6 +1874,8 @@ function updateTimeSeriesGui() {
 }
 
 function setupGuiSingle() {
+    if (infoPage) return;
+
     var kys = Object.keys(allSettings.settings);
     gui = new dat.GUI({autoPlace: false});
     var customContainer = document.getElementById('plot-controls');
@@ -1859,6 +1886,8 @@ function setupGuiSingle() {
 }
 
 function setupGuiTimeSeries() {
+    if (infoPage) return;
+
     var kys = Object.keys(allSettings.settings);
     gui = new dat.GUI({autoPlace: false});
     var customContainer = document.getElementById('plot-controls');

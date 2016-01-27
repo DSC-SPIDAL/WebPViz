@@ -108,12 +108,17 @@ public class Application extends Controller {
     }
 
     public static Result publicInfo(int id) {
-        return ok(info.render(null));
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        TimeSeries timeSeriesProps = db.timeSeries(id, null);
+        return ok(info.render(null, timeSeriesProps));
     }
 
     @Security.Authenticated(Secured.class)
     public static Result info(int id) {
-        return ok(info.render(null));
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        User loggedInUser = User.findByEmail(request().username());
+        TimeSeries timeSeriesProps = db.timeSeries(id, loggedInUser.email);
+        return ok(info.render(loggedInUser, timeSeriesProps));
     }
 
     public static Result groupDashboardPublic(String group) {

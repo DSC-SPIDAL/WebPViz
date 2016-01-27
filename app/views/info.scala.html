@@ -1,14 +1,34 @@
-@(user: User)
+@(user: User, t: TimeSeries)
 @import helper._
 
 @main("About", user){
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/ion-rangeslider/ion.rangeSlider.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/ion-rangeslider/ion.rangeSlider.skinNice.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/bootstrap-colorpicker.min.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/jPicker-1.1.6.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/jPicker.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/plot.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/jquery.dataTables.min.css")">
+
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/dat.gui.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/docs.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/bootstrap-colorpicker.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/jpicker-1.1.6.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/OrbitControls.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/stats.min.js")"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/ion-rangeslider/ion.rangeSlider.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/isotope.pkgd.js")"></script>
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
 
     <div class="row">
         <div class="col-lg-6">
@@ -33,61 +53,48 @@
                     <div class="list-group">
                         <a href="#" class="list-group-item">
                             <i class="fa fa-comment fa-fw"></i> File Name
-                            <span class="pull-right text-muted small"><em>4 minutes ago</em>
+                            <span class="pull-right text-muted small">@t.name</span>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-twitter fa-fw"></i> Uploaded by
+                            <span class="pull-right text-muted small">@t.uploaderId
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-twitter fa-fw"></i> Type
-                            <span class="pull-right text-muted small"><em>12 minutes ago</em>
+                            <span class="pull-right text-muted small">@t.t
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-envelope fa-fw"></i> Collection
-                            <span class="pull-right text-muted small"><em>27 minutes ago</em>
+                            <span class="pull-right text-muted small">@t.group
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-tasks fa-fw"></i> Description
-                            <span class="pull-right text-muted small"><em>43 minutes ago </em>
+                            <span class="pull-right text-muted small">@t.description
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-upload fa-fw"></i> No of Frames
-                            <span class="pull-right text-muted small"><em>11:32 AM</em>
+                            <span id="nf" class="pull-right text-muted small">...
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-bolt fa-fw"></i> No of Points
-                            <span class="pull-right text-muted small"><em>11:13 AM</em>
+                            <span id="np" class="pull-right text-muted small">...
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-warning fa-fw"></i> No of Clusters
-                            <span class="pull-right text-muted small"><em>10:57 AM</em>
+                            <span id="nc" class="pull-right text-muted small">...
                             </span>
                         </a>
                     </div>
                 </div>
                     <!-- /.panel-body -->
             </div>
-                <!-- /.panel -->
-        </div>
-            <!-- /.col-lg-8 -->
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bell fa-fw"></i> Preview
-                </div>
-                <div class="panel-body">
-                    <canvas id="canvas3d" class="effect6"></canvas>
-                    <a href="#" class="btn btn-default btn-block">Full View</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-lg-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart-o fa-fw"></i> Experiment Details
@@ -169,45 +176,80 @@
                     </div>
                 </div>
             </div>
+                <!-- /.panel -->
         </div>
+            <!-- /.col-lg-8 -->
         <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bell fa-fw"></i> Preview
+                </div>
+                <div class="panel-body">
+                    <canvas id="canvas3d" class="effect6"></canvas>
+                    <p class="viz-title" id="plot-title"></p>
+                    <div class="input-group input-group-shaded effect6">
+                        <div class="input-group-btn">
+                            <button id="plot-reset" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Reset" data-toggle="tooltip" data-placement="bottom" title="Reset Plot Position"><span id="plot-reset-span" class="glyphicon glyphicon-screenshot"></span></button>
+                        </div>
+                        <div class="input-group-btn">
+                            <button id="slider-step-backward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Backward"><span id="step-backward-span" class="glyphicon glyphicon-step-backward"></span></button>
+                        </div>
+                        <div class="input-group-btn">
+                            <button id="slider-play" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Play"><span id="play-span" class="glyphicon glyphicon-play"></span></button>
+                        </div>
+                        <div class="input-group-btn">
+                            <button id="slider-step-forward" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Step-Forward"><span id="step-forward-span" class="glyphicon glyphicon-step-forward"></span></button>
+                        </div>
+                        <input type="text" id="plot-slider" class="form-control">
+                        <div class="input-group-btn">
+                            <button type="button"  id="settings-toggle" class="btn btn-default btn-circle margin-right-five" data-toggle="tooltip" data-placement="bottom" title="Cluster List">
+                                <span class="glyphicon glyphicon-th-list"></span>
+                            </button>
+                            <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"  data-toggle="tooltip" data-placement="bottom" title="Save Plot Settings"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
+                            <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal" data-toggle="tooltip" data-placement="bottom" title="Creaet Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-default btn-block">Full View</a>
+                </div>
+            </div>
+
             <div class="chat-panel panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-comments fa-fw"></i>
                     Comments
-                    <div class="btn-group pull-right">
-                        <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-chevron-down"></i>
-                        </button>
-                        <ul class="dropdown-menu slidedown">
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-refresh fa-fw"></i> Refresh
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-check-circle fa-fw"></i> Available
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-times fa-fw"></i> Busy
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-clock-o fa-fw"></i> Away
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-sign-out fa-fw"></i> Sign Out
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    @*<div class="btn-group pull-right">*@
+                        @*<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">*@
+                            @*<i class="fa fa-chevron-down"></i>*@
+                        @*</button>*@
+                        @*<ul class="dropdown-menu slidedown">*@
+                            @*<li>*@
+                                @*<a href="#">*@
+                                    @*<i class="fa fa-refresh fa-fw"></i> Refresh*@
+                                @*</a>*@
+                            @*</li>*@
+                            @*<li>*@
+                                @*<a href="#">*@
+                                    @*<i class="fa fa-check-circle fa-fw"></i> Available*@
+                                @*</a>*@
+                            @*</li>*@
+                            @*<li>*@
+                                @*<a href="#">*@
+                                    @*<i class="fa fa-times fa-fw"></i> Busy*@
+                                @*</a>*@
+                            @*</li>*@
+                            @*<li>*@
+                                @*<a href="#">*@
+                                    @*<i class="fa fa-clock-o fa-fw"></i> Away*@
+                                @*</a>*@
+                            @*</li>*@
+                            @*<li class="divider"></li>*@
+                            @*<li>*@
+                                @*<a href="#">*@
+                                    @*<i class="fa fa-sign-out fa-fw"></i> Sign Out*@
+                                @*</a>*@
+                            @*</li>*@
+                        @*</ul>*@
+                    @*</div>*@
                 </div>
                     <!-- /.panel-heading -->
                 <div class="panel-body">
@@ -290,4 +332,96 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+
+        </div>
+        <div class="col-lg-6">
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+          if ( !Detector.webgl ){
+                //TODO needs to go to seperate page when WebGL is not supported
+                Detector.addGetWebGLMessage({"id":"canvas3d"});
+          } else {
+                @if(t.t == "T") {
+                    @if(!t.pub) {
+                        $.getJSON("@routes.Application.getArtifact(t.id)", function (data) {
+                            var resultSetUrl = "@routes.Application.getArtifact(t.id)";
+                            visualizeTimeSeries(resultSetUrl, data, @t.id, false, true);
+                        });
+                    } else {
+                        $.getJSON("@routes.Application.getPublicArtifact(t.id)", function (data) {
+                            var resultSetUrl = "@routes.Application.getPublicFile(t.id, 0)";
+                            visualizeTimeSeries(resultSetUrl, data, @t.id, true, true);
+                        });
+                    }
+                } else {
+                    @if(!t.pub) {
+                        $.getJSON("@routes.Application.getArtifact(t.id)", function (data) {
+                            var resultSetUrl = "@routes.Application.getArtifact(t.id)";
+                            visualize(resultSetUrl, data, @t.id, false, true);
+                        });
+                    } else {
+                        $.getJSON("@routes.Application.getPublicArtifact(t.id)", function (data) {
+                            var resultSetUrl = "@routes.Application.getPublicFile(t.id, 0)";
+                            visualize(resultSetUrl, data, @t.id, true, true);
+                        });
+                    }
+                }
+            }
+    </script>
+    <script>
+            $(function() {
+                $('#slider-play').click(function () {
+                    var span = $("#play-span");
+
+                    if (span.hasClass("glyphicon-play")) {
+                        currentPlotUpdated = false;
+                        animateTimeSeriesPlay();
+                        span.removeClass("glyphicon-play").addClass("glyphicon-pause");
+                    } else if (span.hasClass("glyphicon-repeat")) {
+                        currentPlotUpdated = false;
+                        resetSlider();
+                        span.removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                    } else {
+                        currentPlotUpdated = false;
+                        animateTimeSeriesPause();
+                        span.removeClass("glyphicon-pause").addClass("glyphicon-play");
+                    }
+                });
+
+                $('#slider-step-backward').click(function () {
+                    var currentval = plotRangeSlider.result.from - 1;
+                    if ((currentval > 0) && playStatus == playEnum.PAUSE) {
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
+                        plotRangeSlider.update({from: currentval});
+                        currentPlotUpdated = false;
+                        updatePlot(currentval)
+                    }
+                });
+
+                $('#slider-step-forward').click(function () {
+                    var currentval = plotRangeSlider.result.from + 1;
+                    if ((currentval < timeSeriesLength) && playStatus == playEnum.PAUSE){
+                        if($("#play-span").hasClass("glyphicon-repeat")){
+                            $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
+                        }
+                        plotRangeSlider.update({from: currentval});
+                        updatePlot(currentval)
+                        currentPlotUpdated = false;
+                    }
+                });
+
+                $('#plot-reset').click(function () {
+                    resetView()
+                });
+
+            });
+    </script>
 }
