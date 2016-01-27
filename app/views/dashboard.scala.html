@@ -109,7 +109,11 @@
                             <tr>
                                 <td>@r.t</td>
                                 <td>@r.group</td>
-                                <td>@r.name</td>
+                                @if(!pub) {
+                                    <td><a href="@routes.Application.info(r.id)">@r.name</a></td>
+                                } else {
+                                    <td><a href="@routes.Application.publicInfo(r.id)">@r.name</a></td>
+                                }
                                 <td>@r.description</td>
                                 <td>@r.uploaderId</td>
                                 <td>@r.dateCreation</td>
@@ -175,7 +179,11 @@
                             <tr>
                                 <td>@r.t</td>
                                 <td>@r.group</td>
-                                <td>@r.name</td>
+                                @if(!pub) {
+                                    <td><a href="@routes.Application.info(r.id)">@r.name</a></td>
+                                } else {
+                                    <td><a href="@routes.Application.publicInfo(r.id)">@r.name</a></td>
+                                }
                                 <td>@r.description</td>
                                 <td>@r.uploaderId</td>
                                 <td>@r.dateCreation</td>
