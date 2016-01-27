@@ -110,7 +110,7 @@ public class Application extends Controller {
     public static Result publicInfo(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         TimeSeries timeSeriesProps = db.timeSeries(id, null);
-        return ok(info.render(null, timeSeriesProps));
+        return ok(info.render(null, timeSeriesProps, GroupsDAO.allGroups(null)));
     }
 
     @Security.Authenticated(Secured.class)
@@ -118,7 +118,7 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         TimeSeries timeSeriesProps = db.timeSeries(id, loggedInUser.email);
-        return ok(info.render(loggedInUser, timeSeriesProps));
+        return ok(info.render(loggedInUser, timeSeriesProps, GroupsDAO.allGroups(loggedInUser.email)));
     }
 
     public static Result groupDashboardPublic(String group) {
@@ -213,6 +213,7 @@ public class Application extends Controller {
         group = form.get("group");
         fromGroup = form.get("from_group");
         pub = form.get("pub");
+        String from = form.get("from");
         boolean pubVal = false;
         if (pub != null && ("on".equals(pub) || "checked".equals(pub))) {
             pubVal = true;
@@ -229,16 +230,19 @@ public class Application extends Controller {
         newTimeSeries.uploaderId = loggedInUser.email;
 
         if (db.timeSeriesExists(oldGroup)) {
-            System.out.println("Exists");
             db.updateTimeSeries(oldGroup, newTimeSeries);
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, group), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, group, false, "Dashboard"));
+                if (from != null && from.equals("info")) {
+                    TimeSeries t = db.timeSeries(oldGroup.id, loggedInUser.email);
+                    return ok(info.render(loggedInUser, t, GroupsDAO.allGroups(loggedInUser.email)));
+                } else {
+                    return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, group), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, group, false, "Dashboard"));
+                }
             }
         } else {
             //
-            System.out.println("non exisits");
             return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
     }
