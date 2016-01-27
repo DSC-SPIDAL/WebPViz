@@ -445,19 +445,11 @@
                     submitExp(url, exp);
                  });
 
-                $(".delete-link").on("click",function() {
-                    var tr = $(this).closest('tr');
-                    tr.css("background-color","#FF3700");
-                    tr.fadeOut(400, function(){
-                        tr.remove();
-                    });
-                    return false;
-                });
+                 registerExpDelete();
 
                  var expUrl = "@routes.ExperimentController.getExperiment(t.id)";
-                 loadExp(expUrl);
-
-
+                 var expUpdateUrl = "@routes.ExperimentController.updateExperiment()";
+                 loadExp(expUrl, expUpdateUrl);
             });
     </script>
 }

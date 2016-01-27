@@ -1,3 +1,4 @@
+var submitUrl;
 
 function addRowToExp(key, val) {
     var tr =
@@ -52,10 +53,26 @@ function populateTable(data) {
             }
         }
     }
+    registerExpDelete();
 }
 
-function loadExp(url) {
+function loadExp(url, updateUrl) {
+    submitUrl = updateUrl;
     $.getJSON(url, function (data) {
         populateTable(data);
+    });
+}
+
+
+function registerExpDelete() {
+    $('.delete-link').click(function() {
+        var tr = $(this).closest('tr');
+        tr.css("background-color","#FF3700");
+        tr.fadeOut(400, function(){
+            tr.remove();
+            var exp = expToJson();
+            submitExp(submitUrl, exp);
+        });
+        return false;
     });
 }
