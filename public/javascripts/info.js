@@ -4,8 +4,8 @@ function addRowToExp(key, val) {
         '<tr>'
         + ' <td>' + key + '</td>'
         + '<td>' + val + '</td>'
-        + '<td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>'
-        + '<td align="center"><a href="" ><i class="glyphicon glyphicon-trash"></i></a></td>'
+        //+ '<td align="center"><a href="javascript:void(0);" class="edit-file-link"><i class="glyphicon glyphicon-edit"></i></a></td>'
+        + '<td align="center"><a class="delete-link" ><i class="glyphicon glyphicon-trash"></i></a></td>'
         + '</tr>';
     $('#expTable > tbody:last-child').append(tr);
 }
