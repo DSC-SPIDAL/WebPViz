@@ -25,7 +25,8 @@ public class ExperimentController extends Controller {
     public static Result updateExperiment() {
         User loggedInUser = User.findByEmail(request().username());
         JsonNode json = request().body().asJson();
-        String body = Json.stringify(json);
+        JsonNode expNode = json.get(Constants.Experiment.EXP);
+        String body = Json.stringify(expNode);
         int timeSeriesId = 0;
         String timeSeries = json.get(Constants.Experiment.TIME_SERIES_ID_FIELD).asText();
         if (timeSeries != null) {

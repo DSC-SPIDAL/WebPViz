@@ -14,21 +14,13 @@ function expToJson() {
     var expFull = {};
     var exp = {};
     var props = {};
-    $('#expTable tr').each(function(){
-        var key = "";
-        var val = "";
-        var count = 0;
-        $(this).find('td').each(function(){
-            //do your stuff, you can use $(this) to get current cell
-            if (count == 0) {
-                key = $(this).html()
-            } else if (count == 1) {
-                val = $(this).html();
-            }
-        });
-        props[key] = val;
-    });
-
+    var table = document.getElementById("expTable");
+    for (var i = 0, row; row = table.rows[i]; i++) {
+        //iterate through rows
+        //rows would be accessed using the "row" variable assigned in the for loop
+        props[row.cells[0].innerHTML] =  row.cells[1].innerHTML;
+    }
+    exp['desc'] = "Hello";
     exp['props'] = props;
     expFull['tid'] = $('#artifactId').val();
     expFull['exp'] = exp;
@@ -52,9 +44,12 @@ function submitExp(url, exp) {
 }
 
 function populateTable(data) {
-    for (var key in data) {
-        if (data.hasOwnProperty(key)) {
-            addRowToExp(key, data[key]);
+    var props = data.props;
+    if (props) {
+        for (var key in props) {
+            if (props.hasOwnProperty(key)) {
+                addRowToExp(key, props[key]);
+            }
         }
     }
 }

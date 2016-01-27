@@ -39,7 +39,7 @@ public class ExperimentDAO {
         MongoConnection db = MongoConnection.getInstance();
         Object data = JSON.parse(experimentJson);
         Document oldGroupDocument = new Document();
-        oldGroupDocument.append(Constants.Experiment.TIME_SERIES_ID_FIELD, artifactId).append(Constants.Experiment.TIME_SERIES_ID_FIELD, user);
+        oldGroupDocument.append(Constants.Experiment.TIME_SERIES_ID_FIELD, artifactId).append(Constants.Experiment.USER, user);
 
         FindIterable<Document> iterable = db.experimentCol.find(oldGroupDocument);
         Document findDocument = null;
@@ -51,7 +51,8 @@ public class ExperimentDAO {
 
         if (findDocument != null) {
             if (findDocument.containsKey(Constants.Experiment.EXP)) {
-                findDocument.replace(Constants.Experiment.EXP, data);
+                findDocument.remove(Constants.Experiment.EXP);
+                findDocument.append(Constants.Experiment.EXP, data);
             } else {
                 findDocument.append(Constants.Experiment.EXP, data);
             }
