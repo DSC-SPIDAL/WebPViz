@@ -184,7 +184,19 @@
                             <input type="text" id="plot-slider" class="form-control">
                         }
                     </div>
-                    <a href="#" class="btn btn-default btn-block">Full View</a>
+                    @if("T".equals(t.t)) {
+                        @if(!t.pub) {
+                            <a href="@routes.Application.timeSeriesPage(t.id)" class="btn btn-default btn-block">Full View</a>
+                        } else {
+                            <a href="@routes.Application.timeSeriesPublicPage(t.id)" class="btn btn-default btn-block">Full View</a>
+                        }
+                    } else {
+                        @if(!t.pub) {
+                            <a href="@routes.Application.singlePage(t.id)" class="btn btn-default btn-block">Full View</a>
+                        } else {
+                            <a href="@routes.Application.singlePublicPage(t.id)" class="btn btn-default btn-block">Full View</a>
+                        }
+                    }
                 </div>
             </div>
 
