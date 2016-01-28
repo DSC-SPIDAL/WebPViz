@@ -86,3 +86,69 @@ function registerExpDelete() {
         return false;
     });
 }
+
+function addComment(comment, user, dtime) {
+    var comment = '<li class="clearfix">'
+        + '<div class="chat-body clearfix">'
+        + '<div class="header">'
+        + '<strong class="primary-font" id="comment_user">' + user + '</strong>'
+        + '<small class="pull-right text-muted" id="comment_time">'
+        + '<i class="fa fa-clock-o fa-fw"></i>' + dtime
+        + '</small>'
+        + '</div>'
+        + '<p id="comment">'+ comment +'</p>'
+        + '</div>'
+        + '</li>';
+    $("#chat_ul").append(comment);
+}
+
+function submitComment(url, id, comment) {
+    var c = {};
+    c['tid'] =id;
+    c['text'] = comment;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+            $('#addExpPropModal').modal('hide');
+            $('#editExpDescModal').modal('hide');
+        },
+        error: function (data) {
+            $('#addExpPropModal').modal('hide');
+            $('#editExpDescModal').modal('hide');
+        }
+    });
+}
+
+function populateComments(data) {
+    var comments = data.comments;
+    if (comments) {
+        for (var key in comments) {
+            if (comments.hasOwnProperty(key)) {
+                var c = comments[key];
+                var d = c.date;
+                var txt = c.text;
+                var user = c.uploader;
+
+                addComment(txt, user, d);
+            }
+        }
+    }
+}
+
+function loadComments(url) {
+    $.getJSON(url, function (data) {
+        populateComments(data);
+    });
+}
+
+function currentTime() {
+    var currentdate = new Date();
+    var datetime = currentdate.getHours() + ":"
+        + currentdate.getMinutes() + ":"
+        + currentdate.getSeconds();
+    return datetime;
+}

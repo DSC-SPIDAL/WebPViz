@@ -189,7 +189,7 @@ body {
 }
 
 .chat li.left .chat-body {
-    margin-left: 60px;
+    margin-left: 0px;
 }
 
 .chat li.right .chat-body {

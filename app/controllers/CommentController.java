@@ -1,17 +1,25 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import db.CommentDAO;
+import db.Constants;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import scala.collection.immutable.Stream;
 
 public class CommentController extends Controller {
 
     @Security.Authenticated(Secured.class)
-    public static Result addComment(int artifactId, String comment) {
+    public static Result addComment() {
         User loggedInUser = User.findByEmail(request().username());
-        CommentDAO.addComment(artifactId, loggedInUser.email, comment);
+
+        JsonNode json = request().body().asJson();
+        String text = json.get(Constants.Comment.TEXT).asText();
+        int artifactId = json.get(Constants.Comment.TIME_SERIES_ID_FIELD).asInt();
+
+        CommentDAO.addComment(artifactId, loggedInUser.email, text);
         return ok("{status: 'success'}").as("application/json");
     }
 

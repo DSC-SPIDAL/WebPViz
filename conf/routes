@@ -76,3 +76,7 @@ GET         /info/:id                           controllers.Application.info(id:
 
 GET         /artifact/:id/experiment            controllers.ExperimentController.getExperiment(id: Integer)
 POST        /artifact/experiment                controllers.ExperimentController.updateExperiment()
+
+POST        /artifact/comment                   controllers.CommentController.addComment()
+GET         /artifact/:id/comment               controllers.CommentController.getComments(id: Integer)
+

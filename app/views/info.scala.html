@@ -190,66 +190,16 @@
                 </div>
                     <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <ul class="chat">
-                        <li class="left clearfix">
-                            <span class="chat-img pull-left">
-                                <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle" />
-                            </span>
+                    <ul class="chat" id="chat_ul">
+                        <li class="clearfix">
                             <div class="chat-body clearfix">
                                 <div class="header">
-                                    <strong class="primary-font">Jack Sparrow</strong>
-                                    <small class="pull-right text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> 12 mins ago
+                                    <strong class="primary-font" id="comment_user"></strong>
+                                    <small class="pull-right text-muted" id="comment_time">
+                                        <i class="fa fa-clock-o fa-fw"></i>
                                     </small>
                                 </div>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
-                                </p>
-                            </div>
-                        </li>
-                        <li class="right clearfix">
-                            <span class="chat-img pull-right">
-                                <img src="http://placehold.it/50/FA6F57/fff" alt="User Avatar" class="img-circle" />
-                            </span>
-                            <div class="chat-body clearfix">
-                                <div class="header">
-                                    <small class=" text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> 13 mins ago</small>
-                                    <strong class="pull-right primary-font">Bhaumik Patel</strong>
-                                </div>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
-                                </p>
-                            </div>
-                        </li>
-                        <li class="left clearfix">
-                            <span class="chat-img pull-left">
-                                <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle" />
-                            </span>
-                            <div class="chat-body clearfix">
-                                <div class="header">
-                                    <strong class="primary-font">Jack Sparrow</strong>
-                                    <small class="pull-right text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> 14 mins ago</small>
-                                </div>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
-                                </p>
-                            </div>
-                        </li>
-                        <li class="right clearfix">
-                            <span class="chat-img pull-right">
-                                <img src="http://placehold.it/50/FA6F57/fff" alt="User Avatar" class="img-circle" />
-                            </span>
-                            <div class="chat-body clearfix">
-                                <div class="header">
-                                    <small class=" text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> 15 mins ago</small>
-                                    <strong class="pull-right primary-font">Bhaumik Patel</strong>
-                                </div>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
-                                </p>
+                                <p id="comment"></p>
                             </div>
                         </li>
                     </ul>
@@ -259,7 +209,7 @@
                     <div class="input-group">
                         <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
                         <span class="input-group-btn">
-                            <button class="btn btn-warning btn-sm" id="btn-chat">
+                            <button class="btn btn-warning btn-sm" id="btn-chat" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
                                 Comment
                             </button>
                         </span>
@@ -275,7 +225,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Edit File</h4>
+                    <h4 class="modal-title" id="myModalLabel">Edit Information</h4>
                 </div>
                 <div class="modal-body" id="upload_file_div">
                 @form(routes.Application.updateFile()){
@@ -499,9 +449,18 @@
 
                  var expUrl = "@routes.ExperimentController.getExperiment(t.id)";
                  var expUpdateUrl = "@routes.ExperimentController.updateExperiment()";
+                 var commentUrl = "@routes.CommentController.getComments(t.id)";
                  loadExp(expUrl, expUpdateUrl);
 
-
+                 loadComments(commentUrl);
+                 var user = "@user.email";
+                 $('#btn-chat').click(function(e) {
+                    var c = $('#btn-input').val();
+                    addComment(c, user, currentTime());
+                    var id = $(this).data('id');
+                    var url = "@routes.CommentController.addComment()";
+                    submitComment(url, id, c);
+                 });
             });
     </script>
 }
