@@ -7,7 +7,6 @@ import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import scala.collection.immutable.Stream;
 
 public class CommentController extends Controller {
 

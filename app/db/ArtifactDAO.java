@@ -712,6 +712,11 @@ public class ArtifactDAO {
             timeSeries.id = (Integer) d.get(Constants.Artifact.ID_FIELD);
             timeSeries.name = (String) d.get(Constants.Artifact.NAME_FIELD);
             Object resultSetsObject = d.get(Constants.Artifact.FILES);
+            try {
+                timeSeries.dateCreation = format.parse((String) d.get(Constants.Artifact.DATE_CREATION_FIELD));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             if (resultSetsObject != null && resultSetsObject instanceof List) {
                 if (((List)resultSetsObject).size() > 1) {
                     timeSeries.t = "T";
