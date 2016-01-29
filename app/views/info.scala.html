@@ -96,6 +96,16 @@
                             <span id="nc" class="pull-right text-muted small">...
                             </span>
                         </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-building fa-fw"></i> Public
+                            @if(t.pub) {
+                                <span id="nc" class="pull-right text-muted small">True
+                                </span>
+                            } else {
+                                <span id="nc" class="pull-right text-muted small">False
+                                </span>
+                            }
+                        </a>
                     </div>
                 </div>
                     <!-- /.panel-body -->
@@ -447,14 +457,16 @@
                  loadExp(expUrl, expUpdateUrl);
 
                  loadComments(commentUrl);
-                 var user = "@user.email";
-                 $('#btn-chat').click(function(e) {
+                 @if(user!=null) {
+                    var user = "@user.email";
+                    $('#btn-chat').click(function(e) {
                     var c = $('#btn-input').val();
                     addComment(c, user, currentTime());
                     var id = $(this).data('id');
                     var url = "@routes.CommentController.addComment()";
                     submitComment(url, id, c);
-                 });
+                    });
+                 }
             });
     </script>
 }

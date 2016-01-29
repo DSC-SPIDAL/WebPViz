@@ -110,7 +110,12 @@ public class Application extends Controller {
     public static Result publicInfo(int id) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         TimeSeries timeSeriesProps = db.timeSeries(id, null);
-        return ok(info.render(null, timeSeriesProps, GroupsDAO.allGroups(null)));
+        String email = session().get("email");
+        User loggedInUser = null;
+        if (email != null) {
+            loggedInUser = User.findByEmail(email);
+        }
+        return ok(info.render(loggedInUser, timeSeriesProps, GroupsDAO.allGroups(null)));
     }
 
     @Security.Authenticated(Secured.class)
