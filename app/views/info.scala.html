@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/jPicker.css")">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/plot.css")">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/jquery.dataTables.min.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/bootstrap-tagsinput.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/tags.css")">
 
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
@@ -19,6 +21,8 @@
     <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/bootstrap-colorpicker.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/jpicker-1.1.6.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/typeahead.bundle.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/OrbitControls.js")"></script>
@@ -29,6 +33,9 @@
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput-angular.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
 
     <div class="row">
@@ -181,7 +188,7 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <p id="exp_desc"></p>
+                    <input type="text" id="tags-input">
                 </div>
             </div>
 
@@ -500,5 +507,38 @@
                     });
                  }
             });
+    </script>
+    <script>
+            var cities = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: '@routes.Assets.at("javascripts/cities.json")'
+            });
+            cities.initialize();
+
+            var elt = $('#tags-input');
+            elt.tagsinput({
+                tagClass: function(item) {
+                    switch (item.continent) {
+                        case 'Europe'   : return 'label label-primary';
+                        case 'America'  : return 'label label-danger label-important';
+                        case 'Australia': return 'label label-success';
+                        case 'Africa'   : return 'label label-default';
+                        case 'Asia'     : return 'label label-warning';
+                    }
+                },
+                itemValue: 'value',
+                itemText: 'text',
+                typeaheadjs: {
+                    name: 'cities',
+                    displayKey: 'text',
+                    source: cities.ttAdapter()
+                }
+            });
+            elt.tagsinput('add', { "value": 1 , "text": "Amsterdam"   , "continent": "Europe"    });
+            elt.tagsinput('add', { "value": 4 , "text": "Washington"  , "continent": "America"   });
+            elt.tagsinput('add', { "value": 7 , "text": "Sydney"      , "continent": "Australia" });
+            elt.tagsinput('add', { "value": 10, "text": "Beijing"     , "continent": "Asia"      });
+            elt.tagsinput('add', { "value": 13, "text": "Cairo"       , "continent": "Africa"    });
     </script>
 }
