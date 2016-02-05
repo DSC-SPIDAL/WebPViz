@@ -4,6 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import models.Group;
+import models.Tag;
 import org.bson.Document;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -15,6 +16,7 @@ public class MongoConnection {
     public final MongoCollection<Document> groupsCol;
     public final MongoCollection<Document> experimentCol;
     public final MongoCollection<Document> commentCol;
+    public final MongoCollection<Document> tagsCol;
 
     public static MongoConnection con = new MongoConnection();
 
@@ -43,6 +45,8 @@ public class MongoConnection {
         groupsCol = db.getCollection(Constants.DB.GROUPS_COLLECTION);
         experimentCol = db.getCollection(Constants.DB.EXP_COLLECTION);
         commentCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
+        tagsCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
+
     }
 
     public void initGroupsCollection() {
@@ -54,4 +58,15 @@ public class MongoConnection {
         }
     }
 
+    public void initTagsCollection() {
+        Tag released = new Tag("webplotviziu", "released", "release tag","lifecycle", true);
+        Tag indevelopment = new Tag("webplotviziu", "in-development", "development tag","lifecycle", true);
+        if (!TagsDAO.tagExistsNonDefault(released)) {
+            TagsDAO.createTag(released);
+        }else if (!TagsDAO.tagExistsNonDefault(indevelopment)) {
+            TagsDAO.createTag(indevelopment);
+        } else {
+            System.out.println("Default Tags exists");
+        }
+    }
 }
