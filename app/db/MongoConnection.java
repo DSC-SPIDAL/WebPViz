@@ -45,7 +45,7 @@ public class MongoConnection {
         groupsCol = db.getCollection(Constants.DB.GROUPS_COLLECTION);
         experimentCol = db.getCollection(Constants.DB.EXP_COLLECTION);
         commentCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
-        tagsCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
+        tagsCol = db.getCollection(Constants.DB.TAGS_COLLECTION);
 
     }
 

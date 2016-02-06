@@ -1,8 +1,10 @@
 package db;
 
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mongodb.client.FindIterable;
-import models.Group;
+import com.mongodb.util.JSON;
 import models.Tag;
 import org.bson.Document;
 
@@ -41,8 +43,8 @@ public class TagsDAO {
     }
 
     public static void createDafaultTags(String user) {
-        Tag released = new Tag("webplotviziu", "released", "release tag","lifecycle", true);
-        Tag indevelopment = new Tag("webplotviziu", "in-development", "development tag","lifecycle", true);
+        Tag released = new Tag(user, "released", "release tag","lifecycle", true);
+        Tag indevelopment = new Tag(user, "in-development", "development tag","lifecycle", true);
         TagsDAO.createTag(released);
         TagsDAO.createTag(indevelopment);
     }
@@ -58,7 +60,7 @@ public class TagsDAO {
         db.tagsCol.insertOne(tagsDocument);
     }
 
-    public static List<Tag> allTags(String uid) {
+    public static String allTags(String uid) {
         MongoConnection db = MongoConnection.getInstance();
         FindIterable<Document> iterable;
         if (uid != null) {
@@ -67,22 +69,21 @@ public class TagsDAO {
             iterable = db.tagsCol.find(new Document(Constants.Tags.PUBLIC, true));
         }
         List<Tag> tags = new ArrayList<Tag>();
+        JsonArray tagsarray = new JsonArray();
+        int tagcount = 1;
         for (Document d : iterable) {
             Tag tag = new Tag();
             String name = (String) d.get(Constants.Tags.NAME);
             String user = (String) d.get(Constants.Tags.USER);
-            tag.description = (String) d.get(Constants.Tags.DESCRIPTION);
-            tag.category = (String) d.get(Constants.Tags.CATEGORY);
-            tag.name = name;
-            tag.userId = user;
-            Object pub = d.get(Constants.Artifact.PUBLIC);
-            if (pub != null && pub instanceof Boolean) {
-                tag.pub = (boolean) pub;
-            }
-            tags.add(tag);
-            System.out.println(tag.name);
+            String category = (String) d.get(Constants.Tags.CATEGORY);
+            JsonObject temp = new JsonObject();
+            temp.addProperty("value",tagcount);
+            temp.addProperty("text",name);
+            temp.addProperty("category",category);
+            tagsarray.add(temp);
+            tagcount++;
         }
-        return tags;
+        return tagsarray.toString();
     }
 
 
