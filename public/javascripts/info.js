@@ -139,6 +139,7 @@ function createTag(url, tagname, desc, category) {
         },
         error: function (data) {
             $('#tags-modal').modal('hide');
+            resetTags()
         }
     });
 }

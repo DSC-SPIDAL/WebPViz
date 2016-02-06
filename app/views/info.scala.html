@@ -556,15 +556,18 @@
             var tags = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
-                remote: {
+                prefetch:{
                     url: '@routes.TagController.getTags()',
-                    filter: function(response) {
-                        return response;
-                    }
+                    cache: false
                 }
             });
             tags.initialize();
 
+            function resetTags(){
+                tags.clear();
+                tags.clearPrefetchCache();
+                tags.initialize(true);
+            }
             var elt = $('#tags-input');
             elt.tagsinput({
                 tagClass: function(item) {
@@ -580,7 +583,7 @@
                 itemValue: 'value',
                 itemText: 'text',
                 typeaheadjs: {
-                    name: 'cities',
+                    name: 'tags',
                     displayKey: 'text',
                     source: tags.ttAdapter()
                 }
