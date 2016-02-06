@@ -46,14 +46,13 @@
                     <h4 class="modal-title" id="myModalLabel">Create new Tag</h4>
                 </div>
                 <div class="modal-body" id="upload_file_div">
-                    <form id="uploadForm" method="post" class="form-horizontal">
                         <div class="form-group">
                             <label for="exampleInputFile">Tag Name</label>
-                            <input type="text" id="name" name="name" required>
+                            <input type="text" id="tagname" name="name" required>
                         </div>
                         <div class="form-group">
                             <label for="exampleInputCategory">Category</label>
-                            <select>
+                            <select id="tagcategory">
                                 <option value="default" selected>None</option>
                                 <option value="lifecycle">Lifecycle</option>
                                 <option value="project">Project</option>
@@ -64,10 +63,9 @@
                         </div>
                         <div class="form-group">
                             <label for="exampleInputDesc">Description</label>
-                            <textarea rows="2" cols="100" class="form-control" name="desc" id="desc" placeholder="Enter description"></textarea>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="tagdesc" placeholder="Enter description"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </form>
+                        <button id="createtag" type="button" class="btn btn-primary">Create</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -445,6 +443,14 @@
                         animateTimeSeriesPause();
                         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
                     }
+                });
+
+                $('#createtag').click(function () {
+                    var tagname = $('#tagname').val()
+                    var tagdesc = $('#tagdesc').val()
+                    var tagcat = $('#tagcategory').val()
+                    var url = "@routes.TagController.createTag()"
+                    createTag(url,tagname,tagdesc,tagcat)
                 });
 
                 $('#slider-step-backward').click(function () {

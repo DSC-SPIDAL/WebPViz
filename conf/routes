@@ -68,7 +68,9 @@ POST        /groups/create                      controllers.GroupController.newG
 
 POST        /groups/update                      controllers.GroupController.updateGroup()
 
-GET         /alltags                               controllers.TagController.getTags()
+GET         /alltags                            controllers.TagController.getTags()
+
+POST         /tags/create                       controllers.TagController.createTag()
 
 POST        /timeseries/save                    controllers.Application.savePlot()
 

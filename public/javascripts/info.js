@@ -123,6 +123,26 @@ function submitComment(url, id, comment) {
     });
 }
 
+function createTag(url, tagname, desc, category) {
+    var c = {};
+    c['name'] = tagname;
+    c['desc'] = desc;
+    c['cat'] = category;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+            $('#tags-modal').modal('hide');
+        },
+        error: function (data) {
+            $('#tags-modal').modal('hide');
+        }
+    });
+}
+
 function populateComments(data) {
     var comments = data.comments;
     if (comments) {
