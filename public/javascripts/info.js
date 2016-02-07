@@ -144,6 +144,23 @@ function createTag(url, tagname, desc, category) {
     });
 }
 
+function addTag(url, tagname, category) {
+    var c = {};
+    c['name'] = tagname;
+    c['cat'] = category;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+        },
+        error: function (data) {
+        }
+    });
+}
+
 function populateComments(data) {
     var comments = data.comments;
     if (comments) {
@@ -165,6 +182,7 @@ function loadComments(url) {
         populateComments(data);
     });
 }
+
 
 function currentTime() {
     var currentdate = new Date();

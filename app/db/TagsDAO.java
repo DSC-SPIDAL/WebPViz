@@ -86,8 +86,57 @@ public class TagsDAO {
         return tagsarray.toString();
     }
 
+    public static void addTag(int artifactId, String user, String tag, String category){
+        MongoConnection db = MongoConnection.getInstance();
+        Document document = new Document();
+        document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);
+
+        FindIterable<Document> iterable = db.plotTagsCol.find(document);
+        Document findDocument = null;
+        boolean create = false;
+        for (Document d : iterable) {
+            findDocument = d;
+            break;
+        }
+
+        if (findDocument == null) {
+            findDocument = new Document(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);
+            create = true;
+        }
+
+        Object tagsObj = findDocument.get(Constants.Tags.TAGS_FIELD);
+        Document tagsdoc ;
+        if (tagsObj == null) {
+            tagsdoc = new Document();
+        } else {
+            tagsdoc = (Document) tagsObj;
+            if(tagsdoc.get(tag) != null) return;
+        }
 
 
+        Document newtag = new Document();
+        newtag.append(Constants.Tags.NAME,tag);
+        newtag.append(Constants.Tags.CATEGORY,category);
+        tagsdoc.append(tag,newtag);
 
+        if (create) {
+            findDocument.append(Constants.Tags.TAGS_FIELD, tagsdoc);
+            db.plotTagsCol.insertOne(findDocument);
+        } else {
+            findDocument.replace(Constants.Tags.TAGS_FIELD, tagsdoc);
+            db.plotTagsCol.replaceOne(document, findDocument);
+        }
+    }
 
+    public static String getTags(int artifactId){
+        MongoConnection db = MongoConnection.getInstance();
+        Document document = new Document();
+        document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);
+
+        FindIterable<Document> iterable = db.plotTagsCol.find(document);
+        for (Document d : iterable) {
+            return JSON.serialize(d);
+        }
+        return JSON.serialize("");
+    }
 }

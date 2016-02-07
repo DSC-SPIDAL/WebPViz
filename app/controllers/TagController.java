@@ -20,7 +20,7 @@ import views.html.info;
 public class TagController extends Controller {
 
     @Security.Authenticated(Secured.class)
-    public static Result getTags() {
+    public static Result getAllTags() {
         User loggedInUser = User.findByEmail(request().username());
         String tags = TagsDAO.allTags(loggedInUser.email);
         if (tags != null) {
@@ -32,15 +32,10 @@ public class TagController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public static Result createTag() {
-        DynamicForm form = Form.form().bindFromRequest();
 
         String tagname, description, category, fromGroup;
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
-
-        if (form.data().size() == 0) {
-            return badRequest("{status: 'fail'}").as("application/json");
-        }
         JsonNode json = request().body().asJson();
         tagname = json.get(Constants.Tags.NAME).asText();
         description = json.get(Constants.Tags.DESCRIPTION).asText();
@@ -50,6 +45,25 @@ public class TagController extends Controller {
             TagsDAO.createTag(tag);
             return ok("{status: 'success'}").as("application/json");
         }else{
+            return badRequest("{status: 'fail'}").as("application/json");
+        }
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result addTag(int artifactId) {
+        User loggedInUser = User.findByEmail(request().username());
+        JsonNode json = request().body().asJson();
+        String tagname = json.get(Constants.Tags.NAME).asText();
+        String category = json.get(Constants.Tags.CATEGORY).asText();
+        TagsDAO.addTag(artifactId,loggedInUser.email,tagname,category);
+        return ok("{status: 'success'}").as("application/json");
+    }
+
+    public static Result getTags(int artifactId) {
+        String tags = TagsDAO.getTags(artifactId);
+        if (tags != null) {
+            return ok(tags).as("application/json");
+        } else {
             return badRequest("{status: 'fail'}").as("application/json");
         }
     }

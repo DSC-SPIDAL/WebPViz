@@ -17,6 +17,7 @@ public class MongoConnection {
     public final MongoCollection<Document> experimentCol;
     public final MongoCollection<Document> commentCol;
     public final MongoCollection<Document> tagsCol;
+    public final MongoCollection<Document> plotTagsCol;
 
     public static MongoConnection con = new MongoConnection();
 
@@ -46,6 +47,7 @@ public class MongoConnection {
         experimentCol = db.getCollection(Constants.DB.EXP_COLLECTION);
         commentCol = db.getCollection(Constants.DB.COMMENT_COLLECTION);
         tagsCol = db.getCollection(Constants.DB.TAGS_COLLECTION);
+        plotTagsCol = db.getCollection(Constants.DB.PLOTS_TAGS_COLLECTION);
 
     }
 

@@ -553,12 +553,14 @@
             });
     </script>
     <script>
+            var addtagurl = "@routes.TagController.addTag(t.id)";
+            var gettagsurl = "@routes.TagController.getTags(t.id)";
+            var tagloadcomplete = false;
             var tags = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 prefetch:{
-                    url: '@routes.TagController.getTags()',
-                    cache: false
+                    url: '@routes.TagController.getAllTags()',
                 }
             });
             tags.initialize();
@@ -569,8 +571,10 @@
                 tags.initialize(true);
             }
             var elt = $('#tags-input');
+
             elt.tagsinput({
                 tagClass: function(item) {
+                    if(tagloadcomplete) addTag(addtagurl,item.text,item.category);
                     switch (item.category) {
                         case 'lifecycle'   : return 'label label-primary';
                         case 'project'  : return 'label label-danger label-important';
@@ -580,7 +584,7 @@
                         default : return 'label label-default';
                     }
                 },
-                itemValue: 'value',
+                itemValue: 'text',
                 itemText: 'text',
                 typeaheadjs: {
                     name: 'tags',
@@ -588,7 +592,23 @@
                     source: tags.ttAdapter()
                 }
             });
-//            elt.tagsinput('add', { "value": 1 , "text": "Amsterdam"   , "continent": "Europe"    });
+
+         //   elt.tagsinput('add', {"text": "Amsterdam"   , "continent": "Europe"    });
+
+            $.getJSON(gettagsurl, function (data) {
+                if(data != ""){
+                    var tags = data.tags
+                    for(var prop in tags){
+                        var text = tags[prop].name;
+                        var cat = tags[prop].cat;
+                        var entry = {}
+                        entry['text'] = text
+                        entry['category'] = cat
+                        elt.tagsinput('add', entry);
+                    }
+                }
+                tagloadcomplete = true;
+            });
 //            elt.tagsinput('add', { "value": 4 , "text": "Washington"  , "continent": "America"   });
 //            elt.tagsinput('add', { "value": 7 , "text": "Sydney"      , "continent": "Australia" });
 //            elt.tagsinput('add', { "value": 10, "text": "Beijing"     , "continent": "Asia"      });

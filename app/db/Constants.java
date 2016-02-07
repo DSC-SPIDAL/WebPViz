@@ -108,6 +108,9 @@ public class Constants {
         public static final String DESCRIPTION = "desc";
         public static final String CATEGORY = "cat";
         public static final String PUBLIC = "public";
+        public static final String TIME_SERIES_ID_FIELD = "tid";
+        public static final String TAGS_FIELD = "tags";
+        public static final String TAGS_SEPERATOR = ",";
     }
 
     public static class DB {
@@ -120,5 +123,6 @@ public class Constants {
         public static final String EXP_COLLECTION = "exp";
         public static final String COMMENT_COLLECTION = "comment";
         public static final String TAGS_COLLECTION = "tags";
+        public static final String PLOTS_TAGS_COLLECTION = "plottags";
     }
 }
