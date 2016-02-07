@@ -555,6 +555,8 @@
     <script>
             var addtagurl = "@routes.TagController.addTag(t.id)";
             var gettagsurl = "@routes.TagController.getTags(t.id)";
+            var removetagurl = "@routes.TagController.removeTag(t.id)";
+
             var tagloadcomplete = false;
             var tags = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
@@ -571,15 +573,13 @@
                 tags.initialize(true);
             }
             var elt = $('#tags-input');
-
             elt.tagsinput({
                 tagClass: function(item) {
-                    if(tagloadcomplete) addTag(addtagurl,item.text,item.category);
                     switch (item.category) {
                         case 'lifecycle'   : return 'label label-primary';
                         case 'project'  : return 'label label-danger label-important';
                         case 'domain': return 'label label-success';
-                        case 'technology'   : return 'label label-default';
+                        case 'technology'   : return 'label label-info';
                         case 'organization'     : return 'label label-warning';
                         default : return 'label label-default';
                     }
@@ -592,8 +592,6 @@
                     source: tags.ttAdapter()
                 }
             });
-
-         //   elt.tagsinput('add', {"text": "Amsterdam"   , "continent": "Europe"    });
 
             $.getJSON(gettagsurl, function (data) {
                 if(data != ""){
@@ -609,9 +607,15 @@
                 }
                 tagloadcomplete = true;
             });
-//            elt.tagsinput('add', { "value": 4 , "text": "Washington"  , "continent": "America"   });
-//            elt.tagsinput('add', { "value": 7 , "text": "Sydney"      , "continent": "Australia" });
-//            elt.tagsinput('add', { "value": 10, "text": "Beijing"     , "continent": "Asia"      });
-//            elt.tagsinput('add', { "value": 13, "text": "Cairo"       , "continent": "Africa"    });
+
+            elt.on('itemAdded', function(event) {
+                if(tagloadcomplete) addTag(addtagurl,event.item.text,event.item.category);
+            });
+
+            elt.on('itemRemoved', function(event) {
+               removeTag(removetagurl,event.item.text);
+            });
+
+
     </script>
 }

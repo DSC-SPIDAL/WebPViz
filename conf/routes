@@ -74,7 +74,9 @@ POST        /tags/create                        controllers.TagController.create
 
 POST        /artifact/tags/add/:id              controllers.TagController.addTag(id: Integer)
 
-GET         /artifact/tags/:id                   controllers.TagController.getTags(id: Integer)
+GET         /artifact/tags/:id                  controllers.TagController.getTags(id: Integer)
+
+POST        /artifact/tags/delete/:id           controllers.TagController.removeTag(id: Integer)
 
 POST        /timeseries/save                    controllers.Application.savePlot()
 

@@ -86,7 +86,7 @@ public class TagsDAO {
         return tagsarray.toString();
     }
 
-    public static void addTag(int artifactId, String user, String tag, String category){
+    public static void addTag(int artifactId, String tag, String category){
         MongoConnection db = MongoConnection.getInstance();
         Document document = new Document();
         document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);
@@ -128,7 +128,40 @@ public class TagsDAO {
         }
     }
 
-    public static String getTags(int artifactId){
+    public static void removeTag(int artifactId, String tagname){
+        MongoConnection db = MongoConnection.getInstance();
+        Document document = new Document();
+        document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);
+
+        FindIterable<Document> iterable = db.plotTagsCol.find(document);
+        Document findDocument = null;
+        for (Document d : iterable) {
+            findDocument = d;
+            break;
+        }
+
+        if (findDocument == null) {
+            return;
+        }
+
+        Object tagsObj = findDocument.get(Constants.Tags.TAGS_FIELD);
+        Document tagsDoc;
+        if (tagsObj == null) {
+            return;
+        } else {
+            tagsDoc = (Document) tagsObj;
+            tagsDoc.remove(tagname);
+            findDocument.replace(Constants.Tags.TAGS_FIELD, tagsDoc);
+            db.plotTagsCol.replaceOne(document, findDocument);
+            return;
+        }
+
+
+
+    }
+
+
+        public static String getTags(int artifactId){
         MongoConnection db = MongoConnection.getInstance();
         Document document = new Document();
         document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);

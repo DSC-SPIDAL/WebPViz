@@ -161,6 +161,22 @@ function addTag(url, tagname, category) {
     });
 }
 
+function removeTag(url, tagname) {
+    var c = {};
+    c['name'] = tagname;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+        },
+        error: function (data) {
+        }
+    });
+}
+
 function populateComments(data) {
     var comments = data.comments;
     if (comments) {

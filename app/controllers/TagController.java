@@ -51,11 +51,18 @@ public class TagController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public static Result addTag(int artifactId) {
-        User loggedInUser = User.findByEmail(request().username());
         JsonNode json = request().body().asJson();
         String tagname = json.get(Constants.Tags.NAME).asText();
         String category = json.get(Constants.Tags.CATEGORY).asText();
-        TagsDAO.addTag(artifactId,loggedInUser.email,tagname,category);
+        TagsDAO.addTag(artifactId,tagname,category);
+        return ok("{status: 'success'}").as("application/json");
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result removeTag(int artifactId) {
+        JsonNode json = request().body().asJson();
+        String tagname = json.get(Constants.Tags.NAME).asText();
+        TagsDAO.removeTag(artifactId,tagname);
         return ok("{status: 'success'}").as("application/json");
     }
 
