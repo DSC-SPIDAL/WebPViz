@@ -161,7 +161,7 @@ public class TagsDAO {
     }
 
 
-        public static String getTags(int artifactId){
+    public static String getTags(int artifactId){
         MongoConnection db = MongoConnection.getInstance();
         Document document = new Document();
         document.append(Constants.Tags.TIME_SERIES_ID_FIELD, artifactId);

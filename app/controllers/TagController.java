@@ -3,19 +3,13 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import db.ArtifactDAO;
 import db.Constants;
-import db.GroupsDAO;
 import db.TagsDAO;
-import models.Group;
 import models.Tag;
 import models.User;
-import play.data.DynamicForm;
-import play.data.Form;
+
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import views.html.dashboard;
-import views.html.groups;
-import views.html.info;
 
 public class TagController extends Controller {
 

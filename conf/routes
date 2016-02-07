@@ -90,3 +90,5 @@ POST        /artifact/experiment                controllers.ExperimentController
 POST        /artifact/comment                   controllers.CommentController.addComment()
 GET         /artifact/:id/comment               controllers.CommentController.getComments(id: Integer)
 
+GET         /search/bytag/:tag                  controllers.SearchController.searchArtifactsByTag(tag: String)
+
