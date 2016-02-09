@@ -4,6 +4,9 @@
 @main(title, user){
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.9/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/dashboard.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/bootstrap-tagsinput.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/tags.css")">
+
     <script type="text/javascript">
             var isPending = false;
             function refreshIfPending(){
@@ -34,6 +37,18 @@
                     <h2 class="section-header">Collection: @groupName</h2>
                 }
             </div>
+        </div>
+
+        <div class="row tagsearch">
+            <div class="col-sm-12 col-md-12 pull-right">
+                <h2 class="section-header">Tag Search</h2>
+                <div class="tagsearch-div">
+                    <input type="text" id="tag-search" class="tagsearch-input">
+                </div>
+                <button class="btn btn-info dropdown-toggle tagsearch-button" type="button" id="tagsearch-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    Search
+                </button>
+              </div>
         </div>
     } else {
         @if(group) {
@@ -397,6 +412,11 @@
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/typeahead.bundle.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput-angular.min.js")"></script>
+
 
     @* can be used if table tools are needed such as save as pdf, print<script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/tools/js/dataTables.tableTools.js")"></script>*@
     <script>
@@ -523,5 +543,63 @@
 
 
             });
+    </script>
+    <script>
+            var tagloadcomplete = false;
+            var tags = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch:{
+                    url: '@routes.TagController.getAllTags()',
+                }
+            });
+            tags.initialize();
+
+            var elt = $('#tag-search');
+            elt.tagsinput({
+                tagClass: function(item) {
+                    switch (item.category) {
+                        case 'lifecycle'   : return 'label label-primary';
+                        case 'project'  : return 'label label-danger label-important';
+                        case 'domain': return 'label label-success';
+                        case 'technology'   : return 'label label-info';
+                        case 'organization'     : return 'label label-warning';
+                        default : return 'label label-default';
+                    }
+                },
+                itemValue: 'text',
+                itemText: 'text',
+                typeaheadjs: {
+                    name: 'tags',
+                    displayKey: 'text',
+                    source: tags.ttAdapter()
+                }
+            });
+
+            $.getJSON(gettagsurl, function (data) {
+                if(data != ""){
+                    var tags = data.tags
+                    for(var prop in tags){
+                        var text = tags[prop].name;
+                        var cat = tags[prop].cat;
+                        var entry = {}
+                        entry['text'] = text
+                        entry['category'] = cat
+                        elt.tagsinput('add', entry);
+                    }
+                }
+                tagloadcomplete = true;
+            });
+
+            $(function () {
+                $('#tagsearch-button').on('click',function() {
+                    var tagname = $("input").tagsinput('items')
+                    var url = '@routes.SearchController.searchArtifactsByTag("")'
+                    url = url + tagname;
+                    window.location.replace(url);
+                });
+
+            });
+
     </script>
 }

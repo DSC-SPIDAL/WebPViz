@@ -1,14 +1,10 @@
 package db;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
-import models.Tag;
 import models.TimeSeries;
 import org.bson.Document;
-import org.h2.command.dml.Query;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -19,3 +19,15 @@
 .viz {
     margin-top: -20px;
 }
+
+.tagsearch-button{
+    display: inline;
+}
+
+.tagsearch-input{
+    display: inline;
+    }
+
+.tagsearch-div{
+    display: inline;
+}
