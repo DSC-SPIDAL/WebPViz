@@ -36,6 +36,27 @@ public class SearchDAO {
         return tidarray.toString();
     }
 
+    public static String getArtifactsByTags(String user,String[] tags){
+        MongoConnection db = MongoConnection.getInstance();
+        ArrayList<Integer> tidarray = new  ArrayList<Integer>();
+        for (String tagname : tags) {
+            Document document = new Document();
+            document.append(Constants.Tags.TAGS_FIELD + "." + tagname + "." + Constants.Tags.NAME,tagname);
+
+            FindIterable<Document> iterable = db.plotTagsCol.find(document);
+
+            for (Document d : iterable) {
+                Integer tid = (Integer) d.get(Constants.Tags.TIME_SERIES_ID_FIELD);
+                tidarray.add(tid);
+            }
+        }
+
+        BasicDBObject obj = new BasicDBObject (Constants.Artifact.ID_FIELD, new BasicDBObject("$in", tidarray));
+        FindIterable<Document> iterableTimesSeries = db.artifactCol.find(obj);
+        List<TimeSeries> timeSeriesList = getTimeSeriesList(iterableTimesSeries);
+        return tidarray.toString();
+    }
+
     public static List<TimeSeries> getTimeSeriesList(FindIterable<Document> iterable) {
         List<TimeSeries> timeSeriesList = new ArrayList<TimeSeries>();
         for (Document document : iterable) {
