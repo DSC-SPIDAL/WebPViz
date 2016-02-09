@@ -1,0 +1,167 @@
+@(user: User, hasError: Boolean, error: String, tags: Array[String], timeSeries : List[TimeSeries])
+@import helper._
+
+@main("Groups", user){
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.9/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/dashboard.css")">
+    <div class="row upload">
+        <div class="col-sm-12 col-md-12">
+            <h2 class="section-header">New Group</h2>
+            <button type="button" data-toggle="modal" data-target="#newGroupModal" class="btn btn-default btn-circle margin-right-five">
+                Create
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <h2 class="section-header">Groups</h2>
+            @if(timeSeries.nonEmpty) {
+                <table id="timeseriesfiles" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for( r <- timeSeries) {
+                        <tr>
+                            <td>@r.name</td>
+                            <td>@r.description</td>
+                            <td><a href="@routes.Application.groupDashboard(r.name)">View</a> </td>
+                            <td align="center"><a href="javascript:void(0);" class="edit-link" data-name="@r.name" data-desc="@r.description"><i class="glyphicon glyphicon-edit"></i></a></td>
+                            <td align="center"><a href="@routes.GroupController.removeGroup(r.name)" ><i class="glyphicon glyphicon-trash"></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            } else {
+                <div class="dataTables_info" id="example_info" style="padding-top: 20px ; float: none">
+                    No Groups to Display</div>
+            }
+        </div>
+    </div>
+
+    <div class="modal fade" id="newGroupModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Create new Group</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                @form(routes.GroupController.newGroup()){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <form id="uploadForm" method="post" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="exampleInputFile">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="desc" placeholder="Enter description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </form>
+                }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editGroupModal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit Group</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                @form(routes.GroupController.updateGroup()){
+                    @if(hasError){
+                        <p class="text-danger">@error</p>
+                    }
+                    <form id="uploadForm" method="post" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="disabledEdit_name">Name</label>
+                            <input type="text" id="disabledEdit_name" name="name" required disabled="disabled">
+                            <input type="hidden" id="edit_name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_desc">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="edit_desc" placeholder="Enter description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
+
+    @* can be used if table tools are needed such as save as pdf, print<script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/tools/js/dataTables.tableTools.js")"></script>*@
+    <script>
+            var asInitVals = new Array();
+            $(document).ready(function () {
+                $('.edit-link').click(function(e) {
+                   e.preventDefault();
+                   n = $(this).data('name');
+                   desc = $(this).data('desc');
+                    $("#disabledEdit_name").val(n);
+                    $("#edit_name").val(n);
+                    $("#edit_desc").val(desc);
+                    $('#editGroupModal').modal('show');
+                 });
+                var oTable = $('#timeseriesfiles').dataTable({
+                    "oLanguage": {
+                        "sSearch": "Search all columns:"
+                    },
+                    'iDisplayLength': 10,
+                    "sPaginationType": "full_numbers",
+                    "order": [[ 0, "desc" ]],
+                    "tableTools": {
+
+                    }
+                });
+                $("tfoot input").keyup(function () {
+                    /* Filter on the column based on the index of this element's parent <th> */
+                    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+                });
+                $("tfoot input").each(function (i) {
+                    asInitVals[i] = this.value;
+                });
+                $("tfoot input").focus(function () {
+                    if (this.className == "search_init") {
+                        this.className = "";
+                        this.value = "";
+                    }
+                });
+                $("tfoot input").blur(function (i) {
+                    if (this.value == "") {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("tfoot input").index(this)];
+                    }
+                });
+
+
+            });
+
+
+    </script>
+}

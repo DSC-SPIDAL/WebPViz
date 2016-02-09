@@ -91,4 +91,5 @@ POST        /artifact/comment                   controllers.CommentController.ad
 GET         /artifact/:id/comment               controllers.CommentController.getComments(id: Integer)
 
 GET         /search/bytag/:tag                  controllers.SearchController.searchArtifactsByTag(tag: String)
+GET         /public/search/bytag/:tag           controllers.SearchController.searchArtifactsByTagPublic(tag: String)
 

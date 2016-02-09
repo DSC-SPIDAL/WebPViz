@@ -18,30 +18,42 @@ import java.util.List;
 public class SearchDAO {
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public static String getArtifactsByTag(String user,String tagname){
+    public static List<TimeSeries> getArtifactsByTag(String user, String tagname) {
         MongoConnection db = MongoConnection.getInstance();
         Document document = new Document();
-        document.append(Constants.Tags.TAGS_FIELD + "." + tagname + "." + Constants.Tags.NAME,tagname);
+        document.append(Constants.Tags.TAGS_FIELD + "." + tagname + "." + Constants.Tags.NAME, tagname);
         FindIterable<Document> iterable = db.plotTagsCol.find(document);
 
-        ArrayList<Integer> tidarray = new  ArrayList<Integer>();
+        ArrayList<Integer> tidarray = new ArrayList<Integer>();
         for (Document d : iterable) {
             Integer tid = (Integer) d.get(Constants.Tags.TIME_SERIES_ID_FIELD);
             tidarray.add(tid);
         }
 
-        BasicDBObject obj = new BasicDBObject (Constants.Artifact.ID_FIELD, new BasicDBObject("$in", tidarray));
-        FindIterable<Document> iterableTimesSeries = db.artifactCol.find(obj);
-        List<TimeSeries> timeSeriesList = getTimeSeriesList(iterableTimesSeries);
-        return tidarray.toString();
+        QueryBuilder query = new QueryBuilder();
+        if (query == null) {
+            query = QueryBuilder.start();
+        }
+        BasicDBObject idfield = new BasicDBObject(Constants.Artifact.ID_FIELD, new BasicDBObject("$in", tidarray));
+        BasicDBObject userfield;
+        if (user != null) {
+            userfield = new BasicDBObject(Constants.Artifact.USER, user);
+        } else {
+            userfield = new BasicDBObject(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE);
+        }
+        BasicDBObject queryobj = (BasicDBObject) query.and(idfield, userfield).get();
+
+        FindIterable<Document> iterableTimesSeries = db.artifactCol.find(queryobj);
+        return getTimeSeriesList(iterableTimesSeries);
     }
 
-    public static String getArtifactsByTags(String user,String[] tags){
+    public static List<TimeSeries> getArtifactsByTags(String user, String[] tags) {
         MongoConnection db = MongoConnection.getInstance();
-        ArrayList<Integer> tidarray = new  ArrayList<Integer>();
+        ArrayList<Integer> tidarray = new ArrayList<Integer>();
         for (String tagname : tags) {
+
             Document document = new Document();
-            document.append(Constants.Tags.TAGS_FIELD + "." + tagname + "." + Constants.Tags.NAME,tagname);
+            document.append(Constants.Tags.TAGS_FIELD + "." + tagname + "." + Constants.Tags.NAME, tagname);
 
             FindIterable<Document> iterable = db.plotTagsCol.find(document);
 
@@ -51,10 +63,21 @@ public class SearchDAO {
             }
         }
 
-        BasicDBObject obj = new BasicDBObject (Constants.Artifact.ID_FIELD, new BasicDBObject("$in", tidarray));
-        FindIterable<Document> iterableTimesSeries = db.artifactCol.find(obj);
-        List<TimeSeries> timeSeriesList = getTimeSeriesList(iterableTimesSeries);
-        return tidarray.toString();
+        QueryBuilder query = new QueryBuilder();
+        if (query == null) {
+            query = QueryBuilder.start();
+        }
+        BasicDBObject idfield = new BasicDBObject(Constants.Artifact.ID_FIELD, new BasicDBObject("$in", tidarray));
+        BasicDBObject userfield;
+        if (user != null) {
+            userfield = new BasicDBObject(Constants.Artifact.USER, user);
+        } else {
+            userfield = new BasicDBObject(Constants.Artifact.PUBLIC, Constants.Artifact.PUBLIC_TRUE);
+        }
+        BasicDBObject queryobj = (BasicDBObject) query.and(idfield, userfield).get();
+
+        FindIterable<Document> iterableTimesSeries = db.artifactCol.find(queryobj);
+        return getTimeSeriesList(iterableTimesSeries);
     }
 
     public static List<TimeSeries> getTimeSeriesList(FindIterable<Document> iterable) {
@@ -81,7 +104,7 @@ public class SearchDAO {
             }
             Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject != null && resultSetsObject instanceof List) {
-                if (((List)resultSetsObject).size() > 1) {
+                if (((List) resultSetsObject).size() > 1) {
                     timeSeries.t = "T";
                 } else {
                     timeSeries.t = "S";
