@@ -43,6 +43,7 @@ public class Global extends GlobalSettings{
         // create the group dao
         MongoConnection con = MongoConnection.getInstance();
         con.initGroupsCollection();
+        con.initTagsCollection();
     }
 
     private void registerAdmins() throws AppException {

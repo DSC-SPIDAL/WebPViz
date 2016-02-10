@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker/jPicker.css")">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/plot.css")">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/jquery.dataTables.min.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/bootstrap-tagsinput.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-tags/tags.css")">
 
     <script type="text/javascript" src="@routes.Assets.at("javascripts/custom.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plot.js")"></script>
@@ -19,6 +21,8 @@
     <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/bootstrap-colorpicker.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/colorpicker/jpicker-1.1.6.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/three.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/typeahead.bundle.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/Detector.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/TrackballControls.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/threeutils/OrbitControls.js")"></script>
@@ -30,6 +34,45 @@
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/jquery.dataTables.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.bootstrap.min.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap-tags/bootstrap-tagsinput-angular.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/datatables/dataTables.select.min.js")"></script>
+
+    <div class="modal fade" id="tags-modal" tabindex="-1" data-backdrop="static" aria-labelledby="uploadModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Create new Tag</h4>
+                </div>
+                <div class="modal-body" id="upload_file_div">
+                        <div class="form-group">
+                            <label for="exampleInputFile">Tag Name</label>
+                            <input type="text" id="tagname" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputCategory">Category</label>
+                            <select id="tagcategory">
+                                <option value="default" selected>None</option>
+                                <option value="lifecycle">Lifecycle</option>
+                                <option value="project">Project</option>
+                                <option value="domain">Domain</option>
+                                <option value="technology">Technology</option>
+                                <option value="organization">Organization</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputDesc">Description</label>
+                            <textarea rows="2" cols="100" class="form-control" name="desc" id="tagdesc" placeholder="Enter description"></textarea>
+                        </div>
+                        <button id="createtag" type="button" class="btn btn-primary">Create</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-lg-6">
@@ -42,10 +85,13 @@
                                 Actions
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu pull-right" role="menu">
-                                <li><a href="javascript:void(0);" class="edit-file-link" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Edit</a>
-                                </li>
+                            @if(user != null) {
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="javascript:void(0);" class="edit-file-link" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
+                                        Edit</a>
+                                    </li>
                             </ul>
+                            }
                         </div>
                     </div>
                 </div>
@@ -78,7 +124,7 @@
                         </a>
                         <a href="#" class="list-group-item">
                             <i class="fa fa-comment fa-fw"></i> Description
-                            <span class="pull-right text-muted small">@t.description
+                            <span class="pull-right text-muted small" style="height: auto">@t.description
                             </span>
                         </a>
                         <a href="#" class="list-group-item">
@@ -120,9 +166,12 @@
                                 Actions
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu pull-right" role="menu">
-                                <li><a href="javascript:void(0);" class="edit-exp-desc" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Edit Description</a></li>
-                            </ul>
+                            @if(user != null) {
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="javascript:void(0);" class="edit-exp-desc" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
+                                        Edit Description</a></li>
+                                </ul>
+                            }
                         </div>
                     </div>
                 </div>
@@ -140,9 +189,12 @@
                                 Actions
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu pull-right" role="menu">
-                                <li><a href="javascript:void(0);" class="add-exp-val" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">Add Property</a></li>
-                            </ul>
+                            @if(user != null) {
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="javascript:void(0);" class="add-exp-val" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
+                                        Add Property</a></li>
+                                </ul>
+                            }
                         </div>
                     </div>
                 </div>
@@ -162,6 +214,26 @@
                             <div id="morris-bar-chart"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <i class="fa fa-tags fa-fw"></i> Tags
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                Actions
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li><a href="#" data-toggle="modal" data-target="#tags-modal">Create New Tag</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <input type="text" id="tags-input">
                 </div>
             </div>
 
@@ -223,12 +295,21 @@
                     <!-- /.panel-body -->
                 <div class="panel-footer">
                     <div class="input-group">
+                    @if(user != null) {
                         <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                            <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn-chat" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
+                                    Comment
+                                </button>
+                            </span>
+                        }else{
+                        <input id="btn-input" type="text" class="form-control input-sm" disabled placeholder="Please Login to View and Place Comments" />
                         <span class="input-group-btn">
-                            <button class="btn btn-warning btn-sm" id="btn-chat" data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
+                            <button class="btn btn-warning btn-sm" id="btn-chat" disabled data-group="@t.group" data-id="@t.id" data-name="@t.name" data-desc="@t.description" data-pub="@t.pub">
                                 Comment
                             </button>
                         </span>
+                    }
                     </div>
                 </div>
                     <!-- /.panel-footer -->
@@ -382,6 +463,14 @@
                     }
                 });
 
+                $('#createtag').click(function () {
+                    var tagname = $('#tagname').val()
+                    var tagdesc = $('#tagdesc').val()
+                    var tagcat = $('#tagcategory').val()
+                    var url = "@routes.TagController.createTag()"
+                    createTag(url,tagname,tagdesc,tagcat)
+                });
+
                 $('#slider-step-backward').click(function () {
                     var currentval = plotRangeSlider.result.from - 1;
                     if ((currentval > 0) && playStatus == playEnum.PAUSE) {
@@ -480,5 +569,71 @@
                     });
                  }
             });
+    </script>
+    <script>
+            var addtagurl = "@routes.TagController.addTag(t.id)";
+            var gettagsurl = "@routes.TagController.getTags(t.id)";
+            var removetagurl = "@routes.TagController.removeTag(t.id)";
+
+            var tagloadcomplete = false;
+            var tags = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch:{
+                    url: '@routes.TagController.getAllTags()',
+                }
+            });
+            tags.initialize();
+
+            function resetTags(){
+                tags.clear();
+                tags.clearPrefetchCache();
+                tags.initialize(true);
+            }
+            var elt = $('#tags-input');
+            elt.tagsinput({
+                tagClass: function(item) {
+                    switch (item.category) {
+                        case 'lifecycle'   : return 'label label-primary';
+                        case 'project'  : return 'label label-danger label-important';
+                        case 'domain': return 'label label-success';
+                        case 'technology'   : return 'label label-info';
+                        case 'organization'     : return 'label label-warning';
+                        default : return 'label label-default';
+                    }
+                },
+                itemValue: 'text',
+                itemText: 'text',
+                typeaheadjs: {
+                    name: 'tags',
+                    displayKey: 'text',
+                    source: tags.ttAdapter()
+                }
+            });
+
+            $.getJSON(gettagsurl, function (data) {
+                if(data != ""){
+                    var tags = data.tags
+                    for(var prop in tags){
+                        var text = tags[prop].name;
+                        var cat = tags[prop].cat;
+                        var entry = {}
+                        entry['text'] = text
+                        entry['category'] = cat
+                        elt.tagsinput('add', entry);
+                    }
+                }
+                tagloadcomplete = true;
+            });
+
+            elt.on('itemAdded', function(event) {
+                if(tagloadcomplete) addTag(addtagurl,event.item.text,event.item.category);
+            });
+
+            elt.on('itemRemoved', function(event) {
+               removeTag(removetagurl,event.item.text);
+            });
+
+
     </script>
 }

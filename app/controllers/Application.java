@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import db.Constants;
 import db.ArtifactDAO;
 import db.GroupsDAO;
+import db.TagsDAO;
 import models.*;
 import models.utils.AppException;
 import play.Logger;
@@ -67,6 +68,7 @@ public class Application extends Controller {
             try {
                 User user = User.create(loginForm.get().email, loginForm.get().password);
                 GroupsDAO.createDafault(user.email);
+                TagsDAO.createDafaultTags(user.email);
             } catch (AppException e) {
                 e.printStackTrace();
             }

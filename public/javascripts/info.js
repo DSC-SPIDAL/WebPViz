@@ -123,6 +123,60 @@ function submitComment(url, id, comment) {
     });
 }
 
+function createTag(url, tagname, desc, category) {
+    var c = {};
+    c['name'] = tagname;
+    c['desc'] = desc;
+    c['cat'] = category;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+            $('#tags-modal').modal('hide');
+        },
+        error: function (data) {
+            $('#tags-modal').modal('hide');
+            resetTags()
+        }
+    });
+}
+
+function addTag(url, tagname, category) {
+    var c = {};
+    c['name'] = tagname;
+    c['cat'] = category;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+        },
+        error: function (data) {
+        }
+    });
+}
+
+function removeTag(url, tagname) {
+    var c = {};
+    c['name'] = tagname;
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(c),
+        url: url,
+        success: function (data) {
+        },
+        error: function (data) {
+        }
+    });
+}
+
 function populateComments(data) {
     var comments = data.comments;
     if (comments) {
@@ -144,6 +198,7 @@ function loadComments(url) {
         populateComments(data);
     });
 }
+
 
 function currentTime() {
     var currentdate = new Date();

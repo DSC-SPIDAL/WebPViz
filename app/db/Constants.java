@@ -100,6 +100,19 @@ public class Constants {
         public static final String PUBLIC = "public";
     }
 
+    public static class Tags {
+        public static final String DEFAULT_RELEASED = "released";
+        public static final String DEFAULT_INDEVELOPMENT = "in-development";
+        public static final String NAME = "name";
+        public static final String USER = "user";
+        public static final String DESCRIPTION = "desc";
+        public static final String CATEGORY = "cat";
+        public static final String PUBLIC = "public";
+        public static final String TIME_SERIES_ID_FIELD = "tid";
+        public static final String TAGS_FIELD = "tags";
+        public static final String TAGS_SEPERATOR = ",";
+    }
+
     public static class DB {
         public static final String MONGO_HOST = "mongo.host";
         public static final String MONGO_PORT = "mongo.port";
@@ -109,5 +122,7 @@ public class Constants {
         public static final String GROUPS_COLLECTION = "groups";
         public static final String EXP_COLLECTION = "exp";
         public static final String COMMENT_COLLECTION = "comment";
+        public static final String TAGS_COLLECTION = "tags";
+        public static final String PLOTS_TAGS_COLLECTION = "plottags";
     }
 }
