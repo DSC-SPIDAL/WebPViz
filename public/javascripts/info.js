@@ -9,6 +9,7 @@ function addRowToExp(key, val) {
         + '<td align="center"><a class="delete-link" ><i class="glyphicon glyphicon-trash"></i></a></td>'
         + '</tr>';
     $('#expTable > tbody:last-child').append(tr);
+    registerExpDelete();
 }
 
 function addDescToExp(val) {
@@ -70,6 +71,7 @@ function loadExp(url, updateUrl) {
     submitUrl = updateUrl;
     $.getJSON(url, function (data) {
         populateTable(data);
+        registerExpDelete();
     });
 }
 
