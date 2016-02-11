@@ -577,7 +577,6 @@
 
             $( '#tagsearch-button' ).click(function() {
                 var values = $('#tag-search').val()
-                var tagname = $('#tag-search').tagsinput('items')
                 var url = '@routes.SearchController.searchArtifactsByTag("")'
                 url = url + values;
                 window.location.replace(url);
@@ -586,19 +585,20 @@
             @if(tagsearch){
             var getalltagsurl = '@routes.TagController.getAllTags()'
             $.getJSON(getalltagsurl, function (data) {
-                if(data != ""){
-                    var tagnames = '@tags'
-                    for(var prop in data){
-                        var text = data[prop].text;
-                        if(text == tagnames){
-                            var entry = {}
-                            entry['text'] = text
-                            entry['category'] = data[prop].category
-                            elt.tagsinput('add', entry);
+                @for( r <- tags) {
+                    if(data != ""){
+                        var tagnames = '@r'
+                        for(var prop in data){
+                            var text = data[prop].text;
+                            if(text == tagnames){
+                                var entry = {}
+                                entry['text'] = text
+                                entry['category'] = data[prop].category
+                                elt.tagsinput('add', entry);
+                            }
                         }
                     }
                 }
-                tagloadcomplete = true;
             });
             }
 
