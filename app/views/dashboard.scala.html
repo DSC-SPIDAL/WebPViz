@@ -59,11 +59,11 @@
             </div>
         }
     }
-    @if(!group) {
+    @if(!group && !tagsearch) {
         <div class="row">
             <div class="col-sm-12 col-md-12">
                 <h2 class="section-header">Collections</h2>
-                @if(groups.nonEmpty) {
+                @if(groups != null && groups.nonEmpty) {
                     <table id="collections" class="table table-striped table-bordered responsive-utilities jambo_table bulk_action">
                         <thead>
                             <tr>
