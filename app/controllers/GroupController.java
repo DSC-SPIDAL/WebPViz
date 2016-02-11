@@ -38,7 +38,7 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "No data", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "No data", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
         name = form.get("name");
         description = form.get("desc");
@@ -49,11 +49,11 @@ public class GroupController extends Controller {
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, name, false, "Dashboard"));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, false, null, name, false, "Dashboard"));
             }
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
     }
 
@@ -66,7 +66,7 @@ public class GroupController extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "No group information", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "No group information", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
         name = form.get("name");
         description = form.get("desc");
@@ -84,11 +84,11 @@ public class GroupController extends Controller {
             if (fromGroup == null) {
                 return GO_DASHBOARD;
             } else {
-                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, name, false, "Dashboard"));
+                return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, name), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, false, null, name, false, "Dashboard"));
             }
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
     }
 
@@ -103,7 +103,7 @@ public class GroupController extends Controller {
             return GO_DASHBOARD;
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Non Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
     }
 }

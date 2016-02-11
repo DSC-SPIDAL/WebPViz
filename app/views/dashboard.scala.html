@@ -1,4 +1,4 @@
-@(user: User, hasError: Boolean, error: String, timeSeries: List[TimeSeries], groups: List[Group], group: Boolean, groupName: String, pub: Boolean, title: String)
+@(user: User, hasError: Boolean, error: String, timeSeries: List[TimeSeries], groups: List[Group], group: Boolean,tagsearch: Boolean, tags: Array[String], groupName: String, pub: Boolean, title: String)
 @import helper._
 
 @main(title, user){
@@ -576,29 +576,12 @@
                 }
             });
 
-            $.getJSON(gettagsurl, function (data) {
-                if(data != ""){
-                    var tags = data.tags
-                    for(var prop in tags){
-                        var text = tags[prop].name;
-                        var cat = tags[prop].cat;
-                        var entry = {}
-                        entry['text'] = text
-                        entry['category'] = cat
-                        elt.tagsinput('add', entry);
-                    }
-                }
-                tagloadcomplete = true;
-            });
-
-            $(function () {
-                $('#tagsearch-button').on('click',function() {
-                    var tagname = $("input").tagsinput('items')
-                    var url = '@routes.SearchController.searchArtifactsByTag("")'
-                    url = url + tagname;
-                    window.location.replace(url);
-                });
-
+            $( '#tagsearch-button' ).click(function() {
+                var values = $('#tag-search').val()
+                var tagname = $('#tag-search').tagsinput('items')
+                var url = '@routes.SearchController.searchArtifactsByTag("")'
+                url = url + values;
+                window.location.replace(url);
             });
 
     </script>
