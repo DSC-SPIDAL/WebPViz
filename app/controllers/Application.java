@@ -208,7 +208,7 @@ public class Application extends Controller {
         System.out.println("Update");
         DynamicForm form = Form.form().bindFromRequest();
 
-        String description, group, id, fromGroup = null, pub;
+        String description, group, id, fromGroup = null, pub, name;
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 
@@ -216,6 +216,7 @@ public class Application extends Controller {
             return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, null, false, "Dashboard"));
         }
         id = form.get("id");
+        name = form.get("name");
         description = form.get("desc");
         group = form.get("group");
         fromGroup = form.get("from_group");
@@ -231,6 +232,7 @@ public class Application extends Controller {
         oldGroup.uploaderId = loggedInUser.email;
 
         TimeSeries newTimeSeries = new TimeSeries();
+        newTimeSeries.name = name;
         newTimeSeries.description = description;
         newTimeSeries.group = group;
         newTimeSeries.pub = pubVal;

@@ -692,6 +692,7 @@ public class ArtifactDAO {
         }
 
         if (findDocument != null) {
+            findDocument.append(Constants.Artifact.NAME_FIELD, newTimeSeries.name);
             findDocument.append(Constants.Artifact.GROUP_FIELD, newTimeSeries.group);
             findDocument.append(Constants.Artifact.DESC_FIELD, newTimeSeries.description);
             findDocument.append(Constants.Artifact.PUBLIC, newTimeSeries.pub);
