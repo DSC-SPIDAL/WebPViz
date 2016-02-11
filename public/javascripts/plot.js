@@ -58,7 +58,7 @@ var plotDesc;
 //Play controls
 var bufferLoopStarted = false;
 var plotRangeSlider = {};
-var speed = 300;
+var speed = 100;
 var glyphSize = 1.0;
 var pointSize = 1.0;
 
@@ -491,6 +491,7 @@ function loadPlotData(start, end) {
         if (particleSets[i] || bufferRequestMade[i]) {
             continue;
         }
+        console.log("load data");
         if (!publicUrl) {
             clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
         } else {
@@ -695,6 +696,7 @@ function loadMatrial(size, shape, isglyph) {
 function updatePlot(index) {
 
     if (index in particleSets && particleSets[index]) {
+        var start = new Date().getTime();
         scene3d = new THREE.Scene();
         scene3d.add(camera);
         currentParticles = particleSets[index];
@@ -749,11 +751,13 @@ function updatePlot(index) {
         fileName = fileNames[index];
         populatePlotInfo();
         sections = localSection;
-        window.addEventListener('resize', onWindowResize, false);
+        //window.addEventListener('resize', onWindowResize, false);
         render();
         animate();
         $("#plot-title").text(fileNames[index]);
-        savePlotSettings(controlers.settings);
+        // savePlotSettings(controlers.settings);
+        var end = new Date().getTime();
+        console.log("Time: " + (end - start));
         return true;
     } else {
         return false;
@@ -772,9 +776,11 @@ function playLoop() {
     var maxValue = timeSeriesLength - 1;
     setTimeout(function () {
         if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
+            console.log("play loop");
             if (updatePlot(currentValue + 1)) {
                 plotRangeSlider.update({from: currentValue + 1});
-                render();
+                // render();
+                $("#plot-slider").clearQueue();
             }
         }
 
@@ -791,6 +797,7 @@ function playLoop() {
 function initBufferAndLoad() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     setTimeout(function () {
+        console.log("init buffer loop");
         if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
             if (timeSeriesLength > MAX_PLOTS_STORED) {
                 loadPlotData(0, MAX_PLOTS_STORED);
@@ -811,6 +818,8 @@ function initBufferAndLoad() {
 
 function bufferLoop(indx) {
     setTimeout(function () {
+        var start = new Date().getTime();
+        console.log("buffer loop");
         var currentIndex = parseInt($("#plot-slider").prop("value"));
         var loadend = timeSeriesLength;
         if (timeSeriesLength > currentIndex + controlers.loadSize) {
@@ -891,8 +900,9 @@ function bufferLoop(indx) {
             }
         }
         bufferLoop(indx);
-
-    }, controlers.delay);
+        var end = new Date().getTime();
+        console.log("buffer loop: " +  (end - start));
+    }, controlers.delay * controlers.loadSize / 2);
 }
 
 function animateTimeSeriesPause() {
