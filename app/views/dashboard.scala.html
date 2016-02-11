@@ -545,7 +545,6 @@
             });
     </script>
     <script>
-            var tagloadcomplete = false;
             var tags = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -583,6 +582,29 @@
                 url = url + values;
                 window.location.replace(url);
             });
+
+            @if(tagsearch){
+            var getalltagsurl = '@routes.TagController.getAllTags()'
+            $.getJSON(getalltagsurl, function (data) {
+                if(data != ""){
+                    var tagnames = '@tags'
+                    for(var prop in data){
+                        var text = data[prop].text;
+                        if(text == tagnames){
+                            var entry = {}
+                            entry['text'] = text
+                            entry['category'] = data[prop].category
+                            elt.tagsinput('add', entry);
+                        }
+                    }
+                }
+                tagloadcomplete = true;
+            });
+            var entry = {}
+            entry['text'] = tagsnames
+            entry['category'] = "domain"
+            elt.tagsinput('add', entry);
+            }
 
     </script>
 }
