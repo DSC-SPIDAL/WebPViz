@@ -36,10 +36,18 @@ public class SearchController extends Controller {
     }
 
     public static Result searchArtifactsByTagPublic(String tagname) {
-        User loggedInUser = User.findByEmail(request().username());
-        List<TimeSeries> tags = SearchDAO.getArtifactsByTag(null,tagname);
-        if (tags != null) {
-            return ok().as("application/json");
+        User loggedInUser = null;
+        List<TimeSeries> taggedtimeseries = null;
+        String[] tagslist;
+        if(tagname.indexOf(",") == -1){
+            taggedtimeseries = SearchDAO.getArtifactsByTag(null,tagname);
+            tagslist = new String[]{tagname};
+        }else{
+            tagslist = tagname.split(",");
+            taggedtimeseries = SearchDAO.getArtifactsByTags(null,tagslist);
+        }
+        if (taggedtimeseries != null) {
+            return ok(dashboard.render(loggedInUser, false, null, taggedtimeseries, GroupsDAO.allGroups(null), false, true, tagslist, null, true, "Public"));
         } else {
             return badRequest("{status: 'fail'}").as("application/json");
         }

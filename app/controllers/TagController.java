@@ -13,10 +13,14 @@ import play.mvc.Security;
 
 public class TagController extends Controller {
 
-    @Security.Authenticated(Secured.class)
     public static Result getAllTags() {
         User loggedInUser = User.findByEmail(request().username());
-        String tags = TagsDAO.allTags(loggedInUser.email);
+        String tags = null;
+        if(loggedInUser == null){
+             tags = TagsDAO.allTags(null);
+        }else {
+             tags = TagsDAO.allTags(loggedInUser.email);
+        }
         if (tags != null) {
             return ok(tags).as("application/json");
         } else {
