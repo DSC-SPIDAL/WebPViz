@@ -3,12 +3,14 @@ package db;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.internal.Streams;
 import com.mongodb.client.FindIterable;
 import com.mongodb.util.JSON;
 import models.Tag;
 import org.bson.Document;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TagsDAO {
@@ -70,18 +72,22 @@ public class TagsDAO {
         }
         List<Tag> tags = new ArrayList<Tag>();
         JsonArray tagsarray = new JsonArray();
+        HashMap<String,String> distinctmap = new HashMap<String,String>();
         int tagcount = 1;
         for (Document d : iterable) {
             Tag tag = new Tag();
             String name = (String) d.get(Constants.Tags.NAME);
             String user = (String) d.get(Constants.Tags.USER);
-            String category = (String) d.get(Constants.Tags.CATEGORY);
-            JsonObject temp = new JsonObject();
-            temp.addProperty("value",tagcount);
-            temp.addProperty("text",name);
-            temp.addProperty("category",category);
-            tagsarray.add(temp);
-            tagcount++;
+            if(!distinctmap.containsKey(name)) {
+                distinctmap.put(name, user);
+                String category = (String) d.get(Constants.Tags.CATEGORY);
+                JsonObject temp = new JsonObject();
+                temp.addProperty("value", tagcount);
+                temp.addProperty("text", name);
+                temp.addProperty("category", category);
+                tagsarray.add(temp);
+                tagcount++;
+            }
         }
         return tagsarray.toString();
     }
