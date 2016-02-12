@@ -749,7 +749,7 @@ function updatePlot(index) {
         }
         generateClusterList(sections, colorlist);
         fileName = fileNames[index];
-        populatePlotInfo();
+        //populatePlotInfo();
         sections = localSection;
         //window.addEventListener('resize', onWindowResize, false);
         render();
@@ -768,9 +768,12 @@ function updatePlot(index) {
 
 
 function animateTimeSeriesPlay() {
+    startTime = new Date().getTime();
     playStatus = playEnum.PLAY;
 }
 
+var startTime = 0;
+var noOfPlots = 0;
 function playLoop() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     var maxValue = timeSeriesLength - 1;
@@ -779,6 +782,13 @@ function playLoop() {
             console.log("play loop");
             if (updatePlot(currentValue + 1)) {
                 plotRangeSlider.update({from: currentValue + 1});
+                noOfPlots++;
+                var end = new Date().getTime();
+                console.log('plots per second: ' + noOfPlots * 1000/ (end - startTime) );
+                if (noOfPlots == 100) {
+                    startTime = 0;
+                    noOfPlots = 0;
+                }
                 // render();
                 $("#plot-slider").clearQueue();
             }
@@ -818,8 +828,8 @@ function initBufferAndLoad() {
 
 function bufferLoop(indx) {
     setTimeout(function () {
-        var start = new Date().getTime();
-        console.log("buffer loop");
+        //var start = new Date().getTime();
+        //console.log("buffer loop");
         var currentIndex = parseInt($("#plot-slider").prop("value"));
         var loadend = timeSeriesLength;
         if (timeSeriesLength > currentIndex + controlers.loadSize) {
@@ -900,8 +910,8 @@ function bufferLoop(indx) {
             }
         }
         bufferLoop(indx);
-        var end = new Date().getTime();
-        console.log("buffer loop: " +  (end - start));
+        //var end = new Date().getTime();
+        //console.log("buffer loop: " +  (end - start));
     }, controlers.delay * controlers.loadSize / 2);
 }
 
@@ -1206,6 +1216,7 @@ function generateCheckList(list, initcolors) {
 function generateClusterList(list, initcolors) {
     if (infoPage) return;
 
+    var end = 0;
     var keys = [];
     for (var k in trueColorList) {
         if (trueColorList.hasOwnProperty(k)) {
@@ -1226,8 +1237,11 @@ function generateClusterList(list, initcolors) {
     }
     var grid = "";
     var found = false;
+    var diff = 0;
+    var start = 0;
     if (list && nonEmptyList.length < 50) {
         for (var i = 0; i < nonEmptyList.length; i++) {
+
             var key = nonEmptyList[i];
             if (list.hasOwnProperty(key)) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
@@ -1239,10 +1253,12 @@ function generateClusterList(list, initcolors) {
                         sprite = getFontIconByShape(list[key].shape);
                     }
                 }
+
                 // try to find the element first
                 if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
+
                             $("#plot-clusters > #" + key).css("background-color", "#ffffff");
                             $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
                             $("#plot-clusters > #" + key + " span").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
@@ -1253,11 +1269,21 @@ function generateClusterList(list, initcolors) {
                                 tex = "000000";
                             }
                             $("#plot-clusters > #" + key).css("color", "#" + tex);
+
                             $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
-                            $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
+                            start = new Date().getTime();
+
+                            var l = list[key].label;
+                            var lenght = list[key].length;
+                            end = new Date().getTime();
+
+                            $("#plot-clusters > #" + key + " span").text(l + ":" + lenght);
+
                         }
+                        console.log("Updating cluter list");
                     }
                     found = true;
+
                 } else {
                     found = false;
                     if (sprite != null) {
@@ -1272,10 +1298,17 @@ function generateClusterList(list, initcolors) {
                         grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
                             "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
                     }
+                    console.log("Creating new cluter list");
                 }
+
+
             }
+
+            diff += end - start;
         }
     }
+    console.log("Cluster time: " + (diff));
+
     if (!found) {
         document.getElementById('plot-clusters').innerHTML = grid;
         customclusternotaddedtolist = false;
