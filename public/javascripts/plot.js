@@ -1278,34 +1278,34 @@ function generateClusterList(list, initcolors) {
                 if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
-                            $("#plot-clusters > #" + key).css("background-color", "#ffffff");
-                            $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length + "   ");
-                            $("#plot-clusters > #" + key + " span").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
+                            $("#pc" + key).css("background-color", "#ffffff");
+                            $("#pcs").text(list[key].label + ":" + list[key].length + "   ");
+                            $("#pcs").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
                         } else {
                             var rgb = hexToRgb("#" + colorWithouthHash);
                             var tex = "ffffff";
                             if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
                                 tex = "000000";
                             }
-                            $("#plot-clusters > #" + key).css("color", "#" + tex);
-                            $("#plot-clusters > #" + key).css("background-color", "#" + colorWithouthHash);
-                            $("#plot-clusters > #" + key + " span").text(list[key].label + ":" + list[key].length);
+                            $("#pc" + key).css("color", "#" + tex);
+                            $("#pcs" + key).css("background-color", "#" + colorWithouthHash);
+                            $("#pcs" + key).text(list[key].label + ":" + list[key].length);
                         }
                     }
                     found = true;
                 } else {
                     found = false;
                     if (sprite != null) {
-                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #ffffff'>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
+                        grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs"+key+"'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
                     } else {
                         var rgb = hexToRgb("#" + colorWithouthHash);
                         var tex = "ffffff";
                         if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
                             tex = "000000";
                         }
-                        grid += "<div class='element-item transition metal' data-category='transition' id='" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
+                        grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
+                            "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "' id='pcs"+key+"'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
                     }
                 }
             }
