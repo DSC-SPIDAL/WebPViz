@@ -121,7 +121,7 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
     intialSetup(artifact.settings);
     generateGraph();
     setupGuiSingle();
-    animate();
+    animate1();
 }
 
 
@@ -142,6 +142,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
+    animate1();
 }
 
 //Init methods
@@ -875,9 +876,11 @@ function bufferLoop(indx) {
                     if (cp.hasOwnProperty(key)) {
                         if (cp[key].material) {
                             cp[key].material.dispose();
+                            cp[key].material = null;
                         }
                         if (cp[key].geometry) {
                             cp[key].geometry.dispose();
+                            cp[key].geometry = null;
                         }
                     }
                 }
@@ -1897,15 +1900,20 @@ function rainBowColors(length, maxLength) {
  * Used to animate the plot
  */
 function animate() {
-    requestAnimationFrame(animate);
+    // we don't do anythin, need to remove this function and its references
+}
+
+function animate1() {
+    requestAnimationFrame(animate1);
     controls.update();
     stats.update();
-    render();
+    // render();
+    var camera = scene3d.getObjectByName('camera');
+    renderer.render(scene3d, camera);
 }
 
 function render() {
-    var camera = scene3d.getObjectByName('camera');
-    renderer.render(scene3d, camera);
+    // we don't do anythin, need to remove this function and its references
 }
 
 function updateInfo() {
