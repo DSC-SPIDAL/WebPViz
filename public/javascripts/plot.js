@@ -174,7 +174,7 @@ function setupThreeJs() {
     controls.staticMoving = true;
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
-    initColorSchemes()
+    initColorSchemes();
     sprites["0"] = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
     sprites["1"] = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
     sprites["2"] = THREE.ImageUtils.loadTexture(ImageEnum.STAR);
@@ -687,6 +687,8 @@ function loadMatrial(size, shape, isglyph) {
     return material;
 }
 
+var scenes = {};
+
 /**
  * This function will try to render the plot with the index
  * If this plot is not loaded yet, it will simply do nothing.
@@ -697,8 +699,19 @@ function updatePlot(index) {
 
     if (index in particleSets && particleSets[index]) {
         var start = new Date().getTime();
+        // destroy the other scenes
+        for (var i = 0; i < index - 1; i++) {
+            var sc = scenes[i];
+            if (sc) {
+                while (sc.children.length > 0) {
+                    sc.remove(sc.children[sc.children.length - 1]);
+                }
+            }
+            scenes[i] = null
+        }
         scene3d = new THREE.Scene();
         scene3d.add(camera);
+        scenes[index] = scene3d;
         currentParticles = particleSets[index];
         plotPoints = plotPointsSets[index];
         pointLabelxKey = pointLabelxKeySets[index];
@@ -785,10 +798,10 @@ function playLoop() {
                 noOfPlots++;
                 var end = new Date().getTime();
                 console.log('plots per second: ' + noOfPlots * 1000/ (end - startTime) );
-                if (noOfPlots == 100) {
-                    startTime = 0;
-                    noOfPlots = 0;
-                }
+                //if (noOfPlots == 100) {
+                //    startTime = 0;
+                //    noOfPlots = 0;
+                //}
                 // render();
                 $("#plot-slider").clearQueue();
             }
@@ -872,6 +885,13 @@ function bufferLoop(indx) {
             }
         }
         for (var i = loadend + 1; i < timeSeriesLength; i++) {
+            sc = scenes[i];
+            if (sc && sectionSets[i]) {
+                sc.remove(sectionSet[i]);
+                delete scenes[i];
+                scenes[i] = null;
+            }
+
             if (bufferRequestMade[i]) {
                 delete bufferRequestMade[i];
             }
