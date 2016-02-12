@@ -774,7 +774,7 @@ function updatePlot(index) {
         // render();
         animate();
         $("#plot-title").text(fileNames[index]);
-        savePlotSettings(controlers.settings);
+        //savePlotSettings(controlers.settings);
         return true;
     } else {
         return false;
@@ -913,7 +913,7 @@ function bufferLoop(indx) {
         }
         bufferLoop(indx);
 
-    }, controlers.delay);
+    }, controlers.delay * controlers.loadSize / 2);
 }
 
 function animateTimeSeriesPause() {
