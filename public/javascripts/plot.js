@@ -705,14 +705,38 @@ var scenes = {};
  */
 function updatePlot(index) {
     if (index in particleSets && particleSets[index]) {
+        // console.log("update plot: " + index);
         for (var i = 0; i < index - 1; i++) {
             var sc = scenes[i];
+
             if (sc) {
+                $.each(sc.children, function(idx, obj) {
+                    if (obj !== undefined) {
+                        if (obj.geometry) {
+                            obj.geometry.dispose();
+                        }
+
+                        if (obj.material) {
+                            if (obj.material instanceof THREE.MeshFaceMaterial) {
+                                $.each(obj.material.materials, function(idx, o) {
+                                    o.dispose();
+                                });
+                            } else {
+                                obj.material.dispose();
+                            }
+                        }
+
+                        if (obj.dispose) {
+                            obj.dispose();
+                        }
+                    }
+                });
+
                 while (sc.children.length > 0) {
                     sc.remove(sc.children[sc.children.length - 1]);
                 }
             }
-            scenes[i] = null
+            scenes[i] = null;
         }
 
         scene3d = new THREE.Scene();
