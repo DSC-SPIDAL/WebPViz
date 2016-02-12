@@ -41,15 +41,37 @@
 
         <div class="row tagsearch">
             <div class="col-sm-12 col-md-12 pull-right">
-                <h2 class="section-header">Tag Search</h2>
-                <div class="tagsearch-div">
-                    <input type="text" id="tag-search" class="tagsearch-input">
+                @*<h2 class="section-header">Tag Search</h2>*@
+                @*<div class="tagsearch-div">*@
+                    @*<input type="text" id="tag-search" class="tagsearch-input">*@
+                @*</div>*@
+                @*<button class="btn btn-info dropdown-toggle tagsearch-button" type="button" id="tagsearch-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">*@
+                    @*Search*@
+                @*</button>*@
+
+                <div class="chat-panel panel panel-info">
+                    <div class="panel-heading">
+                        <i class="fa fa-search fa-fw"></i>
+                        Search by Tag Names
+                    </div>
+                        <!-- /.panel-body -->
+                    <div class="panel-footer">
+                        <div class="input-group">
+                            <input id="tag-search" type="text" class="form-control input-sm tagsearch-input" placeholder="Type the tag name to search..." />
+                            <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm tagsearch-button" id="tagsearch-button" >
+                                    Search
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                        <!-- /.panel-footer -->
                 </div>
-                <button class="btn btn-info dropdown-toggle tagsearch-button" type="button" id="tagsearch-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    Search
-                </button>
-              </div>
+            </div>
+
+
         </div>
+
     } else {
         @if(group) {
             <div class="row upload">

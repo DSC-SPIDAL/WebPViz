@@ -66,6 +66,9 @@ var bufferRequestMade = {};        // track the requests made to get data to be 
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
 var infoPage = false;
+var artifactName = "";
+var desc = "";
+var group = "";
 
 var playEnum = {
     INIT: "init",
@@ -109,6 +112,10 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
     clusterUrl = resultSetUrl;
     resultSetId = fid;
     timeseriesId = tid;
+    artifactName = artifact.name;
+    desc = artifact.desc;
+    group = artifact.group;
+
     setupThreeJs();
     $("#progress").css({display: "block"});
     intialSetup(artifact.settings);
@@ -126,6 +133,9 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     timeseriesId = id;
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
+    artifactName = artifact.name;
+    desc = artifact.desc;
+    group = artifact.group;
     setupThreeJs();
     $("#progress").css({display: "block"});
     intialSetup(artifact.settings);
@@ -686,6 +696,7 @@ function loadMatrial(size, shape, isglyph) {
     return material;
 }
 
+var scenes = {};
 /**
  * This function will try to render the plot with the index
  * If this plot is not loaded yet, it will simply do nothing.
@@ -693,10 +704,20 @@ function loadMatrial(size, shape, isglyph) {
  * @param index
  */
 function updatePlot(index) {
-
     if (index in particleSets && particleSets[index]) {
+        for (var i = 0; i < index - 1; i++) {
+            var sc = scenes[i];
+            if (sc) {
+                while (sc.children.length > 0) {
+                    sc.remove(sc.children[sc.children.length - 1]);
+                }
+            }
+            scenes[i] = null
+        }
+
         scene3d = new THREE.Scene();
         scene3d.add(camera);
+        scenes[index] = scene3d;
         currentParticles = particleSets[index];
         plotPoints = plotPointsSets[index];
         pointLabelxKey = pointLabelxKeySets[index];
@@ -750,7 +771,7 @@ function updatePlot(index) {
         populatePlotInfo();
         sections = localSection;
         window.addEventListener('resize', onWindowResize, false);
-        render();
+        // render();
         animate();
         $("#plot-title").text(fileNames[index]);
         savePlotSettings(controlers.settings);
@@ -774,7 +795,7 @@ function playLoop() {
         if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
             if (updatePlot(currentValue + 1)) {
                 plotRangeSlider.update({from: currentValue + 1});
-                render();
+                // render();
             }
         }
 
@@ -1041,9 +1062,9 @@ function savePlotSettings(result) {
  */
 function populatePlotInfo() {
     if (!infoPage) {
-        document.getElementById('plot-info-description').innerHTML = "<b>Name: </b>" + fileName + "</br>" +
-            "<b>Desc: </b>" + plotDesc + "</br>" +
-            "<b>Uploader: </b>" + uploader;
+        document.getElementById('plot-info-description').innerHTML = "<b>Name: " + artifactName + "</br>" + "<b>Frame: </b>" + fileName + "</br>" +
+            "<b>Desc: </b>" + desc + "</br>" +
+            "<b>Group: </b>" + group;
     } else {
         $("#np").text(Object.keys(plotPoints).length);
         $("#nc").text(sections.length);
