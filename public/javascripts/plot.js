@@ -176,7 +176,7 @@ function setupThreeJs() {
 
     //new THREE.PerspectiveCamera
     cameraCenter = new THREE.Vector3(0, 0, 0);
-    camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, .01, 10000);
     camera.name = 'camera';
     camera.position.set(1, 1, 1);
     camera.lookAt(cameraCenter);
