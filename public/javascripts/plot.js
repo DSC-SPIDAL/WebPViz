@@ -1337,7 +1337,7 @@ function resetView() {
 }
 
 
-function recolorSection(id, color) {
+function recolorSection(id, color, alpha) {
     if (id == "cccolor") return;
     if (id == "multi") {
         recolorMultipleSections(color)
@@ -1345,6 +1345,7 @@ function recolorSection(id, color) {
     }
 
     colorlist[id] = color;
+    var opacity = Math.precision(alpha/255,3)
 
     //remove the color jpicker binding
     $("#cluster_table tbody > #" + id +" span.jPicker").remove();
@@ -1375,7 +1376,11 @@ function recolorSection(id, color) {
     generateClusterList(sections, colorlist);
 
     recoloredclusters[id] = new THREE.Color(color);
+    currentParticles[id].material.opacity = opacity;
+    currentParticles[id].material.transparent = true;
+
     currentParticles[id].geometry.colorsNeedUpdate = true;
+    currentParticles[id].material.needsUpdate = true;
 
 }
 
