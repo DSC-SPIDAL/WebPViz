@@ -78,13 +78,13 @@ var playEnum = {
 var playStatus = playEnum.INIT;
 
 ImageEnum = {
-    BALL: "/assets/images/textures/ball.png",
-    CUBE: "/assets/images/textures/cube.png",
-    DISC: "/assets/images/textures/disc.png",
-    STAR: "/assets/images/textures/star.png",
-    PYRAMID: "/assets/images/textures/pyramid.png",
-    CONE: "/assets/images/textures/cone.png",
-    CYLINDER: "/assets/images/textures/cylinder.png"
+    BALL: "/assets/images/textures1/ball.png",
+    CUBE: "/assets/images/textures1/cube.png",
+    DISC: "/assets/images/textures1/disc.png",
+    STAR: "/assets/images/textures1/star.png",
+    PYRAMID: "/assets/images/textures1/pyramid.png",
+    CONE: "/assets/images/textures1/cone.png",
+    CYLINDER: "/assets/images/textures1/cylinder.png"
 };
 
 $(function () {
