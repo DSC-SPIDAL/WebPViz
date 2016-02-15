@@ -199,18 +199,25 @@ function setupThreeJs() {
 function intialSetup(settings) {
     // check weather we have camera
     if (settings) {
-        var sett = settings;
-        if (sett.selected) {
-            // new settings
-            sett = settings.settings[sett.selected];
+        var sett;
+        if (settings.selected) {
+            if (settings.selected == "original") {
+                // clear the originals
+                settings.settings['original'] = {};
+                sett = settings.settings['original'];
+            } else {
+                // new settings
+                sett = settings.settings[settings.selected];
+            }
             allSettings = settings;
         } else {
             allSettings['tid'] = timeseriesId;
             allSettings['fid'] = resultSetId;
             allSettings['settings'] = {};
-            allSettings['settings']['original'] = sett;
+            allSettings['settings']['original'] = settings['settings']['original'];
             allSettings['selected'] = 'original';
         }
+
         if (sett.glyphSize) {
             glyphSize = sett.glyphSize;
         }
