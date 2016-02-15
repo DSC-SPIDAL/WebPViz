@@ -692,7 +692,7 @@ function loadMatrial(size, shape, isglyph) {
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true,
-        opacity: 0.8
+        opacity: 1.0
     });
     return material;
 }
