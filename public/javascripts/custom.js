@@ -77,6 +77,8 @@ $(function () {
         var key = $(this).attr('value');
         var id = "#color-box"+key
         $(id).jPicker();
+        var match = $.grep($.jPicker.List, function(e) { return e.id == id.substr(1) });
+        match[0].color.active.val('a', 25);
     });
 });
 

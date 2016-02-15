@@ -322,11 +322,12 @@ function generateGraph() {
                 setMaxClusterId(clusterid);
                 var clustercolor;
                 if (!colorsLoaded) {
-                    clustercolor = {"r": 255, "g": 255, "b": 255};
+                    clustercolor = {"r": 255, "g": 255, "b": 255, "a": 255};
                     if (clusterdata.r) {
                         clustercolor["r"] = clusterdata.r[3];
                         clustercolor["g"] = clusterdata.r[2];
                         clustercolor["b"] = clusterdata.r[1];
+                        clustercolor["a"] = clusterdata.r[0];
                         trueColorList[clusterid] = clustercolor;
                     } else {
                         trueColorList[clusterid] = {};
@@ -660,7 +661,7 @@ function loadPlotData(start, end) {
     }
 }
 
-function loadMatrial(size, shape, isglyph) {
+function loadMatrial(size, shape, isglyph, alpha) {
     var sprite;
     if (!isglyph) {
         sprite = null;
@@ -693,13 +694,16 @@ function loadMatrial(size, shape, isglyph) {
                 sprite = sprites["3"];
         }
     }
-
+    var opacity = 1.0;
+    if(alpha != null){
+        opacity = Math.precision(alpha/255,2);
+    }
     var material = new THREE.PointsMaterial({
         size: size / 200,
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true,
-        opacity: 1.0
+        opacity: opacity
     });
     return material;
 }
