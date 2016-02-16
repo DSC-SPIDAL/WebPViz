@@ -1530,7 +1530,8 @@
               function()
               {
                 commitColor.call($this);
-                recolorSection($this.attributes.key.value, $this.value);
+                var alpha = color.active.val('a');
+                recolorSection($this.attributes.key.value, $this.value,alpha);
                 settings.window.expandable && hide.call($this);
                 $.isFunction(commitCallback) && commitCallback.call($this, color.active, okButton);
               },
@@ -1780,9 +1781,9 @@
                     if ((typeof (color.quickList[i])).toString().toLowerCase() == 'string') color.quickList[i] = new Color({ hex: color.quickList[i] });
                     var alpha = color.quickList[i].val('a');
                     var ahex = color.quickList[i].val('ahex');
-                    if (!win.alphaSupport && ahex) ahex = ahex.substring(0, 6) + 'ff';
+                    if (!true && ahex) ahex = ahex.substring(0, 6) + 'ff';
                     var quickHex = color.quickList[i].val('hex');
-                    html+='<span class="QuickColor"' + (ahex && ' title="#' + ahex + '"' || '') + ' style="background-color:' + (quickHex && '#' + quickHex || '') + ';' + (quickHex ? '' : 'background-image:url(' + images.clientPath + 'NoColor.png)') + (win.alphaSupport && alpha && alpha < 255 ? ';opacity:' + Math.precision(alpha / 255, 4) + ';filter:Alpha(opacity=' + Math.precision(alpha / 2.55, 4) + ')' : '') + '">&nbsp;</span>';
+                    html+='<span class="QuickColor"' + (ahex && ' title="#' + ahex + '"' || '') + ' style="background-color:' + (quickHex && '#' + quickHex || '') + ';' + (quickHex ? '' : 'background-image:url(' + images.clientPath + 'NoColor.png)') + (true && alpha && alpha < 255 ? ';opacity:' + Math.precision(alpha / 255, 4) + ';filter:Alpha(opacity=' + Math.precision(alpha / 2.55, 4) + ')' : '') + '">&nbsp;</span>';
                   }
                 //  setImg.call($this, grid, images.clientPath + 'bar-opacity.png');
                   grid.html(html);
