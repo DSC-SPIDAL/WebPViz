@@ -52,6 +52,7 @@ var fileNames = {};
 var resultSets;
 var removedclusters = [];
 var recoloredclusters = [];
+var realpaedclusters = [];
 var timeSeriesLength;
 var plotDesc;
 
@@ -538,11 +539,12 @@ function loadPlotData(start, end) {
                         setMaxClusterId(clusterid);
                         var clustercolor;
                         if (!colorsLoaded) {
-                            clustercolor = {"r": 0, "g": 0, "b": 0};
+                            clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
                             if (clusterdata.r) {
                                 clustercolor["r"] = clusterdata.r[3];
                                 clustercolor["g"] = clusterdata.r[2];
                                 clustercolor["b"] = clusterdata.r[1];
+                                clustercolor["a"] = clusterdata.r[0];
                                 trueColorList[clusterid] = clustercolor;
                             } else {
                                 trueColorList[clusterid] = {};
@@ -551,7 +553,7 @@ function loadPlotData(start, end) {
                             clustercolor = trueColorList[clusterid];
                         }
                         if (clustercolor == null)
-                            clustercolor = {"a": randomRBG(), "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+                            clustercolor = {"a": 255, "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
 
                         if (!geometry.hasOwnProperty(clusterid)) {
                             geometry[clusterid] = new THREE.BufferGeometry();
@@ -785,8 +787,16 @@ function updatePlot(index) {
                         colorsd[k * 3 + 1] = tempcolor.g;
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
+                    var opacity = Math.precision(trueColorList[key].a/255,2)
+                    if(realpaedclusters.hasOwnProperty(key)){
+                        opacity = Math.precision(realpaedclusters[key]/255,2)
+                    }
                     currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                     currentParticles[key].geometry.colorsNeedUpdate = true;
+                    currentParticles[key].material.opacity = opacity;
+                    currentParticles[key].material.transparent = true;
+                    currentParticles[key].material.needsUpdate = true;
+
                 }
 
                 if (changedGlyphs.hasOwnProperty(key)) {
@@ -1181,7 +1191,7 @@ function generateCheckList(list, initcolors) {
                 currentshape = list[key].shape;
             }
             $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
-            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', sections[key].color.a)
+            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a)
             if(sprite != null){
                 $("#cluster_table > tbody > #" + key + " select").val(currentshape);
                 $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length)
@@ -1207,7 +1217,7 @@ function generateCheckList(list, initcolors) {
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                 + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
-                + "<span id='color-picker-addon' value='" + key + "' alpha='"+sections[key].color.a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
+                + "<span id='color-picker-addon' value='" + key + "' alpha='"+trueColorList[key].a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
                 + "</div>"
                 + "</td>";
             if (sprite != null) {
@@ -1391,6 +1401,7 @@ function recolorSection(id, color, alpha) {
     generateClusterList(sections, colorlist);
 
     recoloredclusters[id] = new THREE.Color(color);
+    realpaedclusters[id] = alpha;
     currentParticles[id].material.opacity = opacity;
     currentParticles[id].material.transparent = true;
     currentParticles[id].geometry.colorsNeedUpdate = true;
