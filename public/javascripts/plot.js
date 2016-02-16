@@ -406,7 +406,7 @@ function generateGraph() {
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
                     currentParticles[key].material.needsUpdate = true;
@@ -1181,6 +1181,7 @@ function generateCheckList(list, initcolors) {
                 currentshape = list[key].shape;
             }
             $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
+            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', sections[key].color.a)
             if(sprite != null){
                 $("#cluster_table > tbody > #" + key + " select").val(currentshape);
                 $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length)
@@ -1206,7 +1207,7 @@ function generateCheckList(list, initcolors) {
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                 + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
-                + "<span id='color-picker-addon' value='" + key + "' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
+                + "<span id='color-picker-addon' value='" + key + "' alpha='"+sections[key].color.a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
                 + "</div>"
                 + "</td>";
             if (sprite != null) {
@@ -1351,7 +1352,7 @@ function resetView() {
 function recolorSection(id, color, alpha) {
     if (id == "cccolor") return;
     if (id == "multi") {
-        recolorMultipleSections(color)
+        recolorMultipleSections(color,alpha)
         return;
     }
 
@@ -1361,6 +1362,7 @@ function recolorSection(id, color, alpha) {
     //remove the color jpicker binding
     $("#cluster_table tbody > #" + id +" span.jPicker").remove();
     $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color)
+    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('alpha', alpha)
     $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
 
     //change to custom color scheme since a color change has been made
@@ -1374,7 +1376,8 @@ function recolorSection(id, color, alpha) {
     trueColorList[id] = {
         "r": tempcolor.toArray()[0] * 255,
         "g": tempcolor.toArray()[1] * 255,
-        "b": tempcolor.toArray()[2] * 255
+        "b": tempcolor.toArray()[2] * 255,
+        "a": alpha
     };
     var colorattri = currentParticles[id].geometry.getAttribute('color');
     var colorsd = new Float32Array(colorattri.length);
@@ -1384,24 +1387,24 @@ function recolorSection(id, color, alpha) {
         colorsd[k * 3 + 2] = tempcolor.b;
     }
     currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+    sections[id].color.a = alpha;
     generateClusterList(sections, colorlist);
 
     recoloredclusters[id] = new THREE.Color(color);
     currentParticles[id].material.opacity = opacity;
     currentParticles[id].material.transparent = true;
-
     currentParticles[id].geometry.colorsNeedUpdate = true;
     currentParticles[id].material.needsUpdate = true;
 
 }
 
-function recolorMultipleSections(color) {
+function recolorMultipleSections(color,alpha) {
     var rows = $('#cluster_table tr.selected');
     for (var key in rows) {
         if (rows.hasOwnProperty(key)) {
             var rowdata = rows[key]
             var id = rowdata.id;
-            if (id != undefined || id != null) recolorSection(id, color);
+            if (id != undefined || id != null) recolorSection(id, color,alpha);
         }
     }
     generateCheckList(sections, colorlist);
