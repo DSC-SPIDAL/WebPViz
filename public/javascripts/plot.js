@@ -3,7 +3,7 @@ var MAX_PLOTS_STORED = 20;
 
 /* varibles*/
 //Three js global varibles
-var camera, scene, renderer, controls, light
+var camera, scene, renderer, controls, light;
 var container, stats;
 var scene3d;
 var publicUrl = false;
@@ -21,7 +21,7 @@ var currentCustomColorScheme = null;
 
 // Particle
 var sections = [], particles = [], currentParticles = [];
-;
+
 var sprites = {};
 var particleSets = {};
 var sectionSets = {};
@@ -104,6 +104,8 @@ $(function () {
 
 var totalItemsToLoad = 1;
 var itemsLoaded = 1;
+var isTimeSeries = false;
+var reInitialize = false;
 
 //Plot functions - These are the methods that are first called when a plot is generated
 function visualize(resultSetUrl, artifact, fid, tid, info) {
@@ -115,13 +117,13 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
     artifactName = artifact.name;
     desc = artifact.desc;
     group = artifact.group;
-
+    isTimeSeries = false;
     setupThreeJs();
     $("#progress").css({display: "block"});
-    intialSetup(artifact.settings);
+    intialSetup(artifact.settings, false);
     generateGraph();
     setupGuiSingle();
-    animate1();
+    //animate1();
 }
 
 
@@ -136,13 +138,63 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     artifactName = artifact.name;
     desc = artifact.desc;
     group = artifact.group;
+    isTimeSeries = true;
+
     setupThreeJs();
     $("#progress").css({display: "block"});
-    intialSetup(artifact.settings);
+    intialSetup(artifact.settings, false);
     initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
-    animate1();
+    //animate1();
+}
+
+// we will move the time series to begining
+function reInitGraph() {
+    $("#progress").css({display: "block"});
+    currentParticles = [];
+    colorlist = {};
+    trueColorList = {};
+    setupThreeJs();
+    intialSetup(allSettings, true);
+    // initPlotData();
+    generateGraph();
+    updateSingleGui();
+    reInitialize = false;
+}
+
+// we will move the time series to begining
+function reInitTimeSeries() {
+    plotRangeSlider.update({from: 0});
+    var span = $("#play-span");
+    span.removeClass("glyphicon-pause").addClass("glyphicon-play");
+    $("#progress").css({display: "block"});
+    currentParticles = [];
+    colorlist = [];
+    trueColorList = [];
+    setupThreeJs();
+    intialSetup(allSettings, true);
+    initPlotData();
+    updateTimeSeriesGui();
+    generateTimeSeries(resultSets, true);
+    reInitialize = false;
+    // animate1();
+}
+
+function animate1() {
+    if (!reInitialize) {
+        requestAnimationFrame(animate1);
+        controls.update();
+        stats.update();
+        var camera = scene3d.getObjectByName('camera');
+        renderer.render(scene3d, camera);
+    } else {
+        if (isTimeSeries) {
+            reInitTimeSeries();
+        } else {
+            reInitGraph();
+        }
+    }
 }
 
 //Init methods
@@ -185,7 +237,7 @@ function setupThreeJs() {
     controls.staticMoving = true;
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
-    initColorSchemes()
+    initColorSchemes();
     sprites["0"] = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
     sprites["1"] = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
     sprites["2"] = THREE.ImageUtils.loadTexture(ImageEnum.STAR);
@@ -196,12 +248,13 @@ function setupThreeJs() {
     window.addEventListener('resize', onWindowResize, false);
 }
 
-function intialSetup(settings) {
+function intialSetup(settings, reinit) {
+    colorsLoaded = false;
     // check weather we have camera
     if (settings) {
         var sett;
         if (settings.selected) {
-            if (settings.selected == "original") {
+            if (settings.selected == "original" && !reinit) {
                 // clear the originals
                 settings.settings['original'] = {};
                 sett = settings.settings['original'];
@@ -214,8 +267,9 @@ function intialSetup(settings) {
             allSettings['tid'] = timeseriesId;
             allSettings['fid'] = resultSetId;
             allSettings['settings'] = {};
-            allSettings['settings']['original'] = settings['settings']['original'];
+            allSettings['settings']['original'] = settings;
             allSettings['selected'] = 'original';
+            sett = settings;
         }
 
         if (sett.glyphSize) {
@@ -251,13 +305,13 @@ function intialSetup(settings) {
         camera.updateProjectionMatrix();
         var colors = sett.clusterColors;
         if (colors) {
-            var count = 0;
             for (var key in colors) {
                 if (colors.hasOwnProperty(key)) {
                     var clustercolor = colors[key];
-                    colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
-                    trueColorList[key] = clustercolor;
-                    count += 1;
+                    if (clustercolor) {
+                        colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        trueColorList[key] = clustercolor;
+                    }
                 }
             }
             colorsLoaded = true;
@@ -307,7 +361,7 @@ function generateGraph() {
         fileName = data.file;
         plotDesc = data.desc;
         uploader = data.uploader;
-        maplabelstokeys(data.points)
+        maplabelstokeys(data.points);
         //temp only till data change
         var points = {};
         var pointcolors = {};
@@ -427,7 +481,7 @@ function generateGraph() {
         window.addEventListener('resize', onWindowResize, true);
         changeGlyphSize();
         changePointSize();
-        animate();
+        animate1();
         savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
@@ -437,14 +491,18 @@ function generateGraph() {
 }
 
 //Generates TimeSeries Plots
-function generateTimeSeries(resultSets) {
-    initBufferAndLoad();
+function generateTimeSeries(resultSets, reInit) {
     playStatus = playEnum.PAUSE;
-    playLoop();
+    if (reInit) {
+        clearThreeJS(timeSeriesLength, timeSeriesLength);
+    }
+    initBufferAndLoad();
+    if (!reInit) {
+        playLoop();
+    }
 }
 
 function drawEdges(edges, points, pointcolors) {
-
     if (edges == null || edges == undefined)
         return;
 
@@ -533,7 +591,7 @@ function loadPlotData(start, end) {
                     if (data.clusters.hasOwnProperty(cid)) {
                         clusterCount++;
                         var clusterdata = data.clusters[cid];
-                        var clusterid = parseInt(cid)
+                        var clusterid = parseInt(cid);
                         setMaxClusterId(clusterid);
                         var clustercolor;
                         if (!colorsLoaded) {
@@ -811,7 +869,6 @@ function updatePlot(index) {
     } else {
         return false;
     }
-    return false;
 }
 
 
@@ -853,6 +910,7 @@ function initBufferAndLoad() {
             initBufferAndLoad();
         } else {
             updatePlot(0);
+            animate1();
             $("#progress").css({display: "none"});
             if (!bufferLoopStarted) {
                 bufferLoopStarted = true;
@@ -860,6 +918,73 @@ function initBufferAndLoad() {
             }
         }
     }, controlers.delay);
+}
+
+function clearThreeJS(loadStartIndex, loadend) {
+    for (var i = 0; i < loadStartIndex; i++) {
+        if (bufferRequestMade[i]) {
+            delete bufferRequestMade[i];
+        }
+        if (particleSets[i]) {
+            var cp = particleSets[i];
+            for (var key in cp) {
+                if (cp.hasOwnProperty(key)) {
+                    if (cp[key].material) {
+                        cp[key].material.dispose();
+                        cp[key].material = null;
+                    }
+                    if (cp[key].geometry) {
+                        cp[key].geometry.dispose();
+                        cp[key].geometry = null;
+                    }
+                }
+            }
+            delete particleSets[i];
+            particleSets[i] = null;
+        }
+        if (plotPointsSets[i]) {
+            delete plotPointsSets[i];
+            plotPointsSets[i] = null
+        }
+        if (pointLabelxKeySets[i]) {
+            delete pointLabelxKeySets[i];
+            pointLabelxKeySets[i] = null
+        }
+        if (sectionSets[i]) {
+            delete sectionSets[i];
+            sectionSets[i] = null;
+        }
+    }
+    for (var i = loadend + 1; i < timeSeriesLength; i++) {
+        if (bufferRequestMade[i]) {
+            delete bufferRequestMade[i];
+        }
+        if (particleSets[i]) {
+            var cp = particleSets[i];
+            for (var key in cp) {
+                if (cp.hasOwnProperty(key)) {
+                    if (cp[key].material) {
+                        cp[key].material.dispose();
+                    }
+                    if (cp[key].geometry) {
+                        cp[key].geometry.dispose();
+                    }
+                }
+            }
+            delete particleSets[i];
+        }
+        if (plotPointsSets[i]) {
+            delete plotPointsSets[i];
+            plotPointsSets[i] = null
+        }
+        if (sectionSets[i]) {
+            delete sectionSets[i];
+        }
+        if (pointLabelxKeySets[i]) {
+            delete pointLabelxKeySets[i];
+            pointLabelxKeySets[i] = null
+        }
+    }
 }
 
 function bufferLoop(indx) {
@@ -873,71 +998,7 @@ function bufferLoop(indx) {
         if (currentIndex - controlers.loadSize > 0) {
             loadStartIndex = currentIndex - controlers.loadSize;
         }
-        for (var i = 0; i < loadStartIndex; i++) {
-            if (bufferRequestMade[i]) {
-                delete bufferRequestMade[i];
-            }
-            if (particleSets[i]) {
-                var cp = particleSets[i];
-                for (var key in cp) {
-                    if (cp.hasOwnProperty(key)) {
-                        if (cp[key].material) {
-                            cp[key].material.dispose();
-                            cp[key].material = null;
-                        }
-                        if (cp[key].geometry) {
-                            cp[key].geometry.dispose();
-                            cp[key].geometry = null;
-                        }
-                    }
-                }
-                delete particleSets[i];
-                particleSets[i] = null;
-            }
-            if (plotPointsSets[i]) {
-                delete plotPointsSets[i];
-                plotPointsSets[i] = null
-            }
-            if (pointLabelxKeySets[i]) {
-                delete pointLabelxKeySets[i];
-                pointLabelxKeySets[i] = null
-            }
-            if (sectionSets[i]) {
-                delete sectionSets[i];
-                sectionSets[i] = null;
-            }
-        }
-        for (var i = loadend + 1; i < timeSeriesLength; i++) {
-            if (bufferRequestMade[i]) {
-                delete bufferRequestMade[i];
-            }
-            if (particleSets[i]) {
-                var cp = particleSets[i];
-                for (var key in cp) {
-                    if (cp.hasOwnProperty(key)) {
-                        if (cp[key].material) {
-                            cp[key].material.dispose();
-                        }
-                        if (cp[key].geometry) {
-                            cp[key].geometry.dispose();
-                        }
-                    }
-                }
-                delete particleSets[i];
-            }
-            if (plotPointsSets[i]) {
-                delete plotPointsSets[i];
-                plotPointsSets[i] = null
-            }
-            if (sectionSets[i]) {
-                delete sectionSets[i];
-            }
-            if (pointLabelxKeySets[i]) {
-                delete pointLabelxKeySets[i];
-                pointLabelxKeySets[i] = null
-            }
-        }
-
+        clearThreeJS(loadStartIndex, loadend);
         loadPlotData(loadStartIndex, loadend);
         if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
             if (indx && indx != currentIndex) {
@@ -1910,14 +1971,7 @@ function animate() {
     // we don't do anythin, need to remove this function and its references
 }
 
-function animate1() {
-    requestAnimationFrame(animate1);
-    controls.update();
-    stats.update();
-    // render();
-    var camera = scene3d.getObjectByName('camera');
-    renderer.render(scene3d, camera);
-}
+
 
 function render() {
     // we don't do anythin, need to remove this function and its references
@@ -1932,15 +1986,35 @@ var gui;
 
 function updateSingleGui() {
     var kys = Object.keys(allSettings.settings);
-    gui.__controllers[2].remove();
-    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    //if (gui.__controllers[2]) {
+    //    gui.__controllers[2].remove();
+    //}
+    if (settingsDat) {
+        gui.remove(settingsDat);
+    }
+    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+
+    for (var i in gui.__controllers) {
+        gui.__controllers[i].updateDisplay();
+    }
 }
 
 function updateTimeSeriesGui() {
     var kys = Object.keys(allSettings.settings);
-    gui.__controllers[3].remove();
-    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    //if (gui.__controllers[3]) {
+    //    gui.__controllers[3].remove();
+    //}
+    if (settingsDat) {
+        gui.remove(settingsDat);
+    }
+    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+
+    for (var i in gui.__controllers) {
+        gui.__controllers[i].updateDisplay();
+    }
 }
+
+var settingsDat;
 
 function setupGuiSingle() {
     if (infoPage) return;
@@ -1951,7 +2025,7 @@ function setupGuiSingle() {
     customContainer.appendChild(gui.domElement);
     gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
     gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
-    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
 function setupGuiTimeSeries() {
@@ -1964,13 +2038,17 @@ function setupGuiTimeSeries() {
     gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
     gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
     gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
-    gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
 function settingChange() {
     allSettings.selected = controlers.settings;
-    intialSetup(allSettings);
-    changeGlyphSize();
-    changePointSize();
-    animate();
+    //changeGlyphSize();
+    //changePointSize();
+    reInitialize = true;
+    //if (isTimeSeries) {
+    //    reInitTimeSeries();
+    //} else {
+    //    reInitGraph();
+    //}
 }
