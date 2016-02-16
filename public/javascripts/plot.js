@@ -634,7 +634,7 @@ function loadPlotData(start, end) {
                 for (var key in geometry) {
                     if (geometry.hasOwnProperty(key)) {
                         geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                        particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+                        particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a));
                     }
                 }
 
