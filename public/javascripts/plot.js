@@ -71,6 +71,15 @@ var artifactName = "";
 var desc = "";
 var group = "";
 
+// keep track of the information needed to do trajectories
+var drawTrajectories = false;
+var trajectoryPointLabels = ['IBM', 'MSFT'];
+var trajectoryPoints = {};
+var trajectoryEdges = {};
+
+// raw data sets coming from back-end. these will be converted to threejs format
+var dataSets = {};
+
 var playEnum = {
     INIT: "init",
     PLAY: "play",
@@ -124,7 +133,6 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
     intialSetup(artifact.settings, false);
     generateGraph();
     setupGuiSingle();
-    //animate1();
 }
 
 
@@ -147,7 +155,6 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     initPlotData();
     generateTimeSeries(resultSets);
     setupGuiTimeSeries();
-    //animate1();
 }
 
 // we will move the time series to begining
@@ -179,7 +186,6 @@ function reInitTimeSeries() {
     updateTimeSeriesGui();
     generateTimeSeries(resultSets, true);
     reInitialize = false;
-    // animate1();
 }
 
 function animate1() {
@@ -488,8 +494,6 @@ function generateGraph() {
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
     });
-
-    animate();
 }
 
 //Generates TimeSeries Plots
@@ -563,6 +567,145 @@ function drawEdges(edges, points, pointcolors) {
     scene3d.add(linesegs)
 }
 
+function convertDataToThreeJsFormat(data) {
+    particles = {};
+    colors = {};
+    var plotPoints = {};
+    pointLabelxKey = {};
+    var geometry = {};
+    clusters = data.clusters;
+    fileName = data.file;
+    plotDesc = data.desc;
+    uploader = data.uploader;
+
+    var localSections = [];
+    var clusterCount = 0;
+    for (var cid in clusters) {
+        if (data.clusters.hasOwnProperty(cid)) {
+            clusterCount++;
+            var clusterdata = data.clusters[cid];
+            var clusterid = parseInt(cid);
+            setMaxClusterId(clusterid);
+            var clustercolor;
+            if (!colorsLoaded) {
+                clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
+                if (clusterdata.r) {
+                    clustercolor["r"] = clusterdata.r[3];
+                    clustercolor["g"] = clusterdata.r[2];
+                    clustercolor["b"] = clusterdata.r[1];
+                    clustercolor["a"] = clusterdata.r[0];
+                    trueColorList[clusterid] = clustercolor;
+                } else {
+                    trueColorList[clusterid] = {};
+                }
+            } else {
+                clustercolor = trueColorList[clusterid];
+            }
+            if (clustercolor == null)
+                clustercolor = {"a": 255, "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+
+            if (!geometry.hasOwnProperty(clusterid)) {
+                geometry[clusterid] = new THREE.BufferGeometry();
+                particles[clusterid] = [];
+            }
+
+            if (!colorlist.hasOwnProperty(clusterid))
+                colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+
+            var localSection = {
+                "length": clusterdata.p.length,
+                "size": clusterdata.s,
+                "shape": clusterdata.f,
+                "visible": clusterdata.v,
+                "color": clustercolor,
+                "label": clusterdata.l
+            };
+            if (!sections.hasOwnProperty(clusterid)) {
+                sections[clusterid] = localSection;
+            }
+            localSections[clusterid] = localSection;
+
+            var positions = new Float32Array(clusterdata.p.length * 3);
+            var colorarray = new Float32Array(clusterdata.p.length * 3);
+            var sizes = new Float32Array(clusterdata.p.length);
+            xmean = 0;
+            ymean = 0;
+            zmean = 0;
+            for (var k = 0; k < clusterdata.p.length; k++) {
+                var p = findPoint(data, clusterdata.p[k]);
+                if (!p) {
+                    continue;
+                }
+                var p0 = parseFloat(p[0]);
+                var p1 = parseFloat(p[1]);
+                var p2 = parseFloat(p[2]);
+                plotPoints[clusterdata.p[k]] = [p[0], p[1], p[2]];
+                pointLabelxKey[p[3]] = clusterdata.p[k];
+                positions[k * 3 + 0] = p0;
+                positions[k * 3 + 1] = p1;
+                positions[k * 3 + 2] = p2;
+
+                if (!calculatedmeans) {
+                    xmean += p0;
+                    ymean += p1;
+                    zmean += p2;
+                }
+
+                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+                colorarray[k * 3 + 0] = tempcolor.r;
+                colorarray[k * 3 + 1] = tempcolor.g;
+                colorarray[k * 3 + 2] = tempcolor.b;
+
+            }
+
+            if (!calculatedmeans) {
+                xmean = xmean / clusterdata.p.length;
+                ymean = ymean / clusterdata.p.length;
+                zmean = zmean / clusterdata.p.length;
+
+                xmeantotal += xmean;
+                ymeantotal += ymean;
+                zmeantotal += zmean;
+            }
+
+            geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+        }
+    }
+
+
+    if (!calculatedmeans) {
+        xmeantotal = xmeantotal / clusterCount;
+        ymeantotal = ymeantotal / clusterCount;
+        zmeantotal = zmeantotal / clusterCount;
+        calculatedmeans = true;
+    }
+    for (var key in geometry) {
+        if (geometry.hasOwnProperty(key)) {
+            geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+            particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a));
+        }
+    }
+
+    particleSets[data.seq] = particles;
+    for (var key in particles) {
+        if (particles.hasOwnProperty(key)) {
+            if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                if (sections[key].size == 1) {
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
+                } else {
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                }
+                particles[key].material.needsUpdate = true;
+            }
+        }
+    }
+    plotPointsSets[data.seq] = plotPoints;
+    pointLabelxKeySets[data.seq] = pointLabelxKey;
+    sectionSets[data.seq] = localSections;
+    fileNames[data.seq] = data.file;
+}
+
 function loadPlotData(start, end) {
     for (var i = start; i < end; i++) {
         // check weather we already have a value
@@ -577,147 +720,12 @@ function loadPlotData(start, end) {
         bufferRequestMade[i] = true;
         (function (i) {
             $.getJSON(clusterUrl, function (data) {
-                particles = {};
-                colors = {};
-                var plotPoints = {};
-                pointLabelxKey = {};
-                var geometry = {};
-                clusters = data.clusters;
-                fileName = data.file;
-                plotDesc = data.desc;
-                uploader = data.uploader;
-
-                var localSections = [];
-                var clusterCount = 0;
-                for (var cid in clusters) {
-                    if (data.clusters.hasOwnProperty(cid)) {
-                        clusterCount++;
-                        var clusterdata = data.clusters[cid];
-                        var clusterid = parseInt(cid);
-                        setMaxClusterId(clusterid);
-                        var clustercolor;
-                        if (!colorsLoaded) {
-                            clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
-                            if (clusterdata.r) {
-                                clustercolor["r"] = clusterdata.r[3];
-                                clustercolor["g"] = clusterdata.r[2];
-                                clustercolor["b"] = clusterdata.r[1];
-                                clustercolor["a"] = clusterdata.r[0];
-                                trueColorList[clusterid] = clustercolor;
-                            } else {
-                                trueColorList[clusterid] = {};
-                            }
-                        } else {
-                            clustercolor = trueColorList[clusterid];
-                        }
-                        if (clustercolor == null)
-                            clustercolor = {"a": 255, "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
-
-                        if (!geometry.hasOwnProperty(clusterid)) {
-                            geometry[clusterid] = new THREE.BufferGeometry();
-                            particles[clusterid] = [];
-                        }
-
-                        if (!colorlist.hasOwnProperty(clusterid))
-                            colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
-
-                        var localSection = {
-                            "length": clusterdata.p.length,
-                            "size": clusterdata.s,
-                            "shape": clusterdata.f,
-                            "visible": clusterdata.v,
-                            "color": clustercolor,
-                            "label": clusterdata.l
-                        };
-                        if (!sections.hasOwnProperty(clusterid)) {
-                            sections[clusterid] = localSection;
-                        }
-                        localSections[clusterid] = localSection;
-
-                        var positions = new Float32Array(clusterdata.p.length * 3);
-                        var colorarray = new Float32Array(clusterdata.p.length * 3);
-                        var sizes = new Float32Array(clusterdata.p.length);
-                        xmean = 0;
-                        ymean = 0;
-                        zmean = 0;
-                        for (var k = 0; k < clusterdata.p.length; k++) {
-                            var p = findPoint(data, clusterdata.p[k]);
-                            if (!p) {
-                                continue;
-                            }
-                            var p0 = parseFloat(p[0]);
-                            var p1 = parseFloat(p[1]);
-                            var p2 = parseFloat(p[2]);
-                            plotPoints[clusterdata.p[k]] = [p[0], p[1], p[2]];
-                            pointLabelxKey[p[3]] = clusterdata.p[k];
-                            positions[k * 3 + 0] = p0;
-                            positions[k * 3 + 1] = p1;
-                            positions[k * 3 + 2] = p2;
-
-                            if (!calculatedmeans) {
-                                xmean += p0;
-                                ymean += p1;
-                                zmean += p2;
-                            }
-
-                            var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
-                            colorarray[k * 3 + 0] = tempcolor.r;
-                            colorarray[k * 3 + 1] = tempcolor.g;
-                            colorarray[k * 3 + 2] = tempcolor.b;
-
-                        }
-
-                        if (!calculatedmeans) {
-                            xmean = xmean / clusterdata.p.length;
-                            ymean = ymean / clusterdata.p.length;
-                            zmean = zmean / clusterdata.p.length;
-
-                            xmeantotal += xmean;
-                            ymeantotal += ymean;
-                            zmeantotal += zmean;
-                        }
-
-                        geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
-                        geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
-                    }
-                }
-
-
-                if (!calculatedmeans) {
-                    xmeantotal = xmeantotal / clusterCount;
-                    ymeantotal = ymeantotal / clusterCount;
-                    zmeantotal = zmeantotal / clusterCount;
-                    calculatedmeans = true;
-                }
-                for (var key in geometry) {
-                    if (geometry.hasOwnProperty(key)) {
-                        geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                        particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a));
-                    }
-                }
-
-                particleSets[data.seq] = particles;
-                for (var key in particles) {
-                    if (particles.hasOwnProperty(key)) {
-                        if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
-                            if (sections[key].size == 1) {
-                                particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
-                            } else {
-                                particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
-                            }
-                            particles[key].material.needsUpdate = true;
-                        }
-                    }
-                }
-                plotPointsSets[data.seq] = plotPoints;
-                pointLabelxKeySets[data.seq] = pointLabelxKey;
-                sectionSets[data.seq] = localSections;
-                fileNames[data.seq] = data.file;
+                // convertDataToThreeJsFormat(data);
+                dataSets[data.seq] = data;
             }).fail(function () {
                 bufferRequestMade[i] = false;
             });
         })(i);
-
     }
 }
 
@@ -776,7 +784,8 @@ var scenes = {};
  * @param index
  */
 function updatePlot(index) {
-    if (index in particleSets && particleSets[index]) {
+    if (index in dataSets && dataSets[index]) {
+        convertDataToThreeJsFormat(dataSets[index]);
         // console.log("update plot: " + index);
         for (var i = 0; i < index - 1; i++) {
             var sc = scenes[i];
@@ -915,7 +924,7 @@ function playLoop() {
 function initBufferAndLoad() {
     var currentValue = parseInt($("#plot-slider").prop("value"));
     setTimeout(function () {
-        if (Object.keys(particleSets).length < timeSeriesLength && Object.keys(particleSets).length < MAX_PLOTS_STORED) {
+        if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < MAX_PLOTS_STORED) {
             if (timeSeriesLength > MAX_PLOTS_STORED) {
                 loadPlotData(0, MAX_PLOTS_STORED);
             } else {
@@ -956,6 +965,10 @@ function clearThreeJS(loadStartIndex, loadend) {
             delete particleSets[i];
             particleSets[i] = null;
         }
+        if (dataSets[i]) {
+            delete dataSets[i];
+            dataSets[i] = null;
+        }
         if (plotPointsSets[i]) {
             delete plotPointsSets[i];
             plotPointsSets[i] = null
@@ -986,6 +999,10 @@ function clearThreeJS(loadStartIndex, loadend) {
                 }
             }
             delete particleSets[i];
+        }
+        if (dataSets[i]) {
+            delete dataSets[i];
+            dataSets[i] = null;
         }
         if (plotPointsSets[i]) {
             delete plotPointsSets[i];
@@ -1691,7 +1708,7 @@ function renderCustomCluster() {
             var colorarray = new Float32Array(clusterdata.p.length * 3);
             var sizes = new Float32Array(clusterdata.p.length);
             for (var k = 0; k < clusterdata.p.length; k++) {
-                var key = pointLabelxKey[clusterdata.p[k]]
+                var key = pointLabelxKey[clusterdata.p[k]];
                 var p = plotPoints[key];
                 if (!p) {
                     continue;
@@ -1799,46 +1816,12 @@ function onWindowResize() {
     render();
 }
 
-
-
 //General Util Methods
 
 function progress() {
     var bar = 250;
     bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
     $("#bar").css({width: bar + "px"});
-}
-
-function getGlyphImage(key) {
-    var glyph = null;
-    if (key.size > 1) {
-        switch (parseInt(key.shape)) {
-            case 0:
-                glyph = ImageEnum.DISC;
-                break;
-            case 1:
-                glyph = ImageEnum.BALL;
-                break;
-            case 2:
-                glyph = ImageEnum.STAR;
-                break;
-            case 3:
-                glyph = ImageEnum.CUBE;
-                break;
-            case 4:
-                glyph = ImageEnum.PYRAMID;
-                break;
-            case 5:
-                glyph = ImageEnum.CONE;
-                break;
-            case 6:
-                glyph = ImageEnum.CYLINDER;
-                break;
-            default :
-                glyph = ImageEnum.CUBE;
-        }
-    }
-    return glyph;
 }
 
 function getFontIconByShape(shape) {
@@ -1867,36 +1850,6 @@ function getFontIconByShape(shape) {
             break;
         default :
             glyph = 'icon-cylinder';
-    }
-    return glyph;
-}
-
-function getGlyphImageByShape(shape) {
-    var glyph = null;
-    switch (parseInt(shape)) {
-            case 0:
-                glyph = ImageEnum.DISC;
-                break;
-            case 1:
-                glyph = ImageEnum.BALL;
-                break;
-            case 2:
-                glyph = ImageEnum.STAR;
-                break;
-            case 3:
-                glyph = ImageEnum.CUBE;
-                break;
-            case 4:
-                glyph = ImageEnum.PYRAMID;
-                break;
-            case 5:
-                glyph = ImageEnum.CONE;
-                break;
-            case 6:
-                glyph = ImageEnum.CYLINDER;
-                break;
-            default :
-                glyph = ImageEnum.CUBE;
     }
     return glyph;
 }
