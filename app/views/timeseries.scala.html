@@ -42,7 +42,7 @@
                     </button>
                     <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"  data-toggle="tooltip" data-placement="bottom" title="Save Plot Settings"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
                     <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal" data-toggle="tooltip" data-placement="bottom" title="Create Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
-                    <button id=" " type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Trajectories" data-toggle="modal" data-target="#trajectory-modal" data-toggle="tooltip" data-placement="bottom" title="Create Trajectories"><span class="glyphicon glyphicon-align-right"></span></button>
+                    <button id="trajectory-show" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Trajectories" data-toggle="modal"  data-toggle="tooltip" data-placement="bottom" title="Create Trajectories"><span class="glyphicon glyphicon-align-right"></span></button>
                 </div>
             </div>
         </div>
@@ -453,6 +453,12 @@
             });
     </script>
     <script>
+            $("#trajectory-show").click(function() {
+                $("#trajectoryInput").val(trajectoryPointLabels.toString());
+                $("#trajectoryNumber").val(trajectoryLimit);
+                $('#trajectory-modal').modal('show');
+            });
+
             $("#addTrajectory").click(function() {
                 addTrajectory();
                 $('#trajectory-modal').modal('hide');
