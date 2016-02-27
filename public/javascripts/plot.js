@@ -24,6 +24,7 @@ var sections = [], particles = [], currentParticles = [];
 
 var sprites = {};
 var particleSets = {};
+var lineSets = {};
 var sectionSets = {};
 var changedGlyphs = {};
 var changedSizes ={};
@@ -71,9 +72,12 @@ var artifactName = "";
 var desc = "";
 var group = "";
 
+// save the scenes so that we can free them
+var scenes = {};
+
 // keep track of the information needed to do trajectories
 var drawTrajectories = false;
-var trajectoryPointLabels = ['IBM', 'MSFT'];
+var trajectoryPointLabels = ['IBM'];
 var trajectoryPoints = {};
 var trajectoryEdges = {};
 
@@ -477,7 +481,8 @@ function generateGraph() {
 
         renderCustomCluster();
         addParticlesToScence();
-        drawEdges(data.edges, points, pointcolors);
+        var linesegs = drawEdges(data.edges, points, pointcolors);
+        scene3d.add(linesegs);
         generateClusterList(sections, colorlist);
         populatePlotInfo();
         var cls = $("#plot-clusters").isotope({
@@ -564,7 +569,8 @@ function drawEdges(edges, points, pointcolors) {
     geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
     geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
     var linesegs = line = new THREE.LineSegments(geometry, material);
-    scene3d.add(linesegs)
+    return linesegs;
+    //scene3d.add(linesegs)
 }
 
 function convertDataToThreeJsFormat(data) {
@@ -577,6 +583,12 @@ function convertDataToThreeJsFormat(data) {
     fileName = data.file;
     plotDesc = data.desc;
     uploader = data.uploader;
+    var points = {};
+    var pointcolors = {};
+    var edgeIndex = 0;
+    var edges = {};
+    // we will create a separate point list for trajectories
+    var trajectoryPointIndex = 0;
 
     var localSections = [];
     var clusterCount = 0;
@@ -627,20 +639,21 @@ function convertDataToThreeJsFormat(data) {
 
             var positions = new Float32Array(clusterdata.p.length * 3);
             var colorarray = new Float32Array(clusterdata.p.length * 3);
-            var sizes = new Float32Array(clusterdata.p.length);
             xmean = 0;
             ymean = 0;
             zmean = 0;
-            for (var k = 0; k < clusterdata.p.length; k++) {
-                var p = findPoint(data, clusterdata.p[k]);
+            var k = 0;
+            for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                var p = findPoint(data, clusterdata.p[pointIndex]);
                 if (!p) {
                     continue;
                 }
                 var p0 = parseFloat(p[0]);
                 var p1 = parseFloat(p[1]);
                 var p2 = parseFloat(p[2]);
-                plotPoints[clusterdata.p[k]] = [p[0], p[1], p[2]];
-                pointLabelxKey[p[3]] = clusterdata.p[k];
+                var label = p[3];
+                plotPoints[clusterdata.p[pointIndex]] = [p[0], p[1], p[2]];
+                pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
                 positions[k * 3 + 0] = p0;
                 positions[k * 3 + 1] = p1;
                 positions[k * 3 + 2] = p2;
@@ -656,6 +669,56 @@ function convertDataToThreeJsFormat(data) {
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
 
+                if (trajectoryPointLabels.indexOf(label) >= 0) {
+                    var trajectoryList = trajectoryPoints[label];
+                    var edge = {};
+                    var edgeVerteces = [];
+                    if (!trajectoryList) {
+                        trajectoryList = [];
+                        trajectoryPoints[label] = trajectoryList;
+                    } else {
+                        // we will add some extra points to cluster
+                        for (var c = 0; c < trajectoryList.length; c++) {
+                            k++;
+                            var tp = trajectoryList[c];
+                            if (!tp) {
+                                continue;
+                            }
+                            var pp0 = parseFloat(tp.p[0]);
+                            var pp1 = parseFloat(tp.p[1]);
+                            var pp2 = parseFloat(tp.p[2]);
+                            positions[k * 3 + 0] = p0;
+                            positions[k * 3 + 1] = p1;
+                            positions[k * 3 + 2] = p2;
+
+                            var ptempcolor = new THREE.Color("rgb(" + tp.c.r + "," + tp.c.g + "," + tp.c.b + ")");
+                            colorarray[k * 3 + 0] = ptempcolor.r;
+                            colorarray[k * 3 + 1] = ptempcolor.g;
+                            colorarray[k * 3 + 2] = ptempcolor.b;
+
+                            points[trajectoryPointIndex] = [pp0, pp1, pp2];
+                            pointcolors[trajectoryPointIndex] = ptempcolor;
+                            trajectoryPointIndex++;
+
+                            edgeVerteces.push(trajectoryPointIndex);
+                        }
+                    }
+
+                    points[trajectoryPointIndex] = [p0, p1, p2];
+                    pointcolors[trajectoryPointIndex] = tempcolor;
+                    edgeVerteces.push(trajectoryPointIndex + "");
+                    trajectoryPointIndex++;
+
+                    var trajectory = {};
+                    trajectory['p'] = p;
+                    trajectory['c'] = clustercolor;
+                    trajectoryList[data.seq] = trajectory;
+
+                    edge['v'] = edgeVerteces;
+                    edges[edgeIndex] = edge;
+                    edgeIndex++;
+                }
+                k++;
             }
 
             if (!calculatedmeans) {
@@ -680,12 +743,15 @@ function convertDataToThreeJsFormat(data) {
         zmeantotal = zmeantotal / clusterCount;
         calculatedmeans = true;
     }
+
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
             particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a));
         }
     }
+
+    lineSets[data.seq] = drawEdges(edges, points, pointcolors);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
@@ -700,6 +766,8 @@ function convertDataToThreeJsFormat(data) {
             }
         }
     }
+
+
     plotPointsSets[data.seq] = plotPoints;
     pointLabelxKeySets[data.seq] = pointLabelxKey;
     sectionSets[data.seq] = localSections;
@@ -776,7 +844,6 @@ function loadMatrial(size, shape, isglyph, alpha) {
     return material;
 }
 
-var scenes = {};
 /**
  * This function will try to render the plot with the index
  * If this plot is not loaded yet, it will simply do nothing.
@@ -874,6 +941,9 @@ function updatePlot(index) {
                     scene3d.add(currentParticles[key]);
                 }
             }
+        }
+        if (lineSets[index]) {
+            scene3d.add(lineSets[index]);
         }
         // change only when the setting dispaly is on
         if (settingOn) {

@@ -42,6 +42,7 @@
                     </button>
                     <button id="plot-save" type="button" class="btn btn-default btn-circle margin-left-five plot-save" aria-label="Save"  data-toggle="tooltip" data-placement="bottom" title="Save Plot Settings"><span id="plot-reset-span" class="glyphicon glyphicon-floppy-save"></span></button>
                     <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal" data-toggle="tooltip" data-placement="bottom" title="Create Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
+                    <button id=" " type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Trajectories" data-toggle="modal" data-target="#trajectory-modal" data-toggle="tooltip" data-placement="bottom" title="Create Trajectories"><span class="glyphicon glyphicon-align-right"></span></button>
                 </div>
             </div>
         </div>
@@ -182,6 +183,29 @@
 
         </div>
     </div>
+
+    <div id="trajectory-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Trajectories</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="cluster-label">Trajectory stocks</label>
+                        <input type="text" class="form-control" id="trajectoryInput" placeholder="Enter list of stocks to track separated by ','">
+                    </div>
+                    <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"  class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <script>
     $(function(){
         $('#multirowcolor').jPicker({
@@ -425,6 +449,22 @@
                 updateTimeSeriesGui();
                 animate();
             });
+    </script>
+    <script>
+            $("#addTrajectory").click(function() {
+                addTrajectory();
+                $('#trajectory-modal').modal('hide');
+            });
+
+            function addTrajectory() {
+                var tList = $("#trajectoryInput").val();
+                trajectoryPointLabels = [];
+
+                var trajectoryPointLabels2 = tList.split(",");
+                for (var i = 0; i < trajectoryPointLabels2.length; i++) {
+                    trajectoryPointLabels.push(trajectoryPointLabels2[i]);
+                }
+            }
     </script>
 
 
