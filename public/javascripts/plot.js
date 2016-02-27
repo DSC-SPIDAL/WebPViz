@@ -671,6 +671,8 @@ function convertDataToThreeJsFormat(data) {
                 var trajectoryNumber = 0;
                 if (trajectoryLimit >= 0) {
                     trajectoryNumber = trajectoryLimit;
+                } else {
+                    trajectoryNumber = -1;
                 }
 
                 if (trajectoryPointLabels.indexOf(label) >= 0) {
@@ -1842,7 +1844,7 @@ function changeGlyph(id, shape) {
 function changeSingleGlyphSize(id, size){
     currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
     currentParticles[id].material.needsUpdate = true;
-    sections[id].size = size
+    sections[id].size = size;
     changedSizes[id] = size;
 }
 
