@@ -76,10 +76,9 @@ var group = "";
 var scenes = {};
 
 // keep track of the information needed to do trajectories
-var drawTrajectories = false;
 var trajectoryPointLabels = ['IBM'];
 var trajectoryPoints = {};
-var trajectoryEdges = {};
+var trajectoryLimit = 10;
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -669,6 +668,11 @@ function convertDataToThreeJsFormat(data) {
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
 
+                var trajectoryNumber = 0;
+                if (trajectoryLimit >= 0) {
+                    trajectoryNumber = trajectoryLimit;
+                }
+
                 if (trajectoryPointLabels.indexOf(label) >= 0) {
                     var trajectoryList = trajectoryPoints[label];
                     var edge = {};
@@ -679,6 +683,9 @@ function convertDataToThreeJsFormat(data) {
                     } else {
                         // we will add some extra points to cluster
                         for (var c = 0; c < trajectoryList.length; c++) {
+                            if (c < trajectoryList.length - trajectoryNumber) {
+                                continue;
+                            }
                             k++;
                             var tp = trajectoryList[c];
                             if (!tp) {

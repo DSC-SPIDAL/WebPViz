@@ -195,6 +195,8 @@
                     <div class="form-group">
                         <label for="cluster-label">Trajectory stocks</label>
                         <input type="text" class="form-control" id="trajectoryInput" placeholder="Enter list of stocks to track separated by ','">
+                        <label for="cluster-label">Number of frames to track</label>
+                        <input type="text" class="form-control" id="trajectoryNumber" placeholder="-1">
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
                 </div>
@@ -458,6 +460,9 @@
 
             function addTrajectory() {
                 var tList = $("#trajectoryInput").val();
+                var tNo = $("#trajectoryNumber").val();
+
+                trajectoryLimit = parseInt(tNo);
                 trajectoryPointLabels = [];
 
                 var trajectoryPointLabels2 = tList.split(",");
