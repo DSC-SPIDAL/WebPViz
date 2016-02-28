@@ -636,12 +636,35 @@ function convertDataToThreeJsFormat(data) {
             }
             localSections[clusterid] = localSection;
 
-            var positions = new Float32Array(clusterdata.p.length * 3);
-            var colorarray = new Float32Array(clusterdata.p.length * 3);
             xmean = 0;
             ymean = 0;
             zmean = 0;
             var k = 0;
+            var count = clusterdata.p.length;
+            for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                var p = findPoint(data, clusterdata.p[pointIndex]);
+                if (!p) {
+                    continue;
+                }
+                var label = p[3];
+                if (trajectoryPointLabels.indexOf(label) >= 0) {
+                    var trajectoryList = trajectoryPoints[label];
+                    if (!trajectoryList) {
+
+                    } else {
+                        // we will add some extra points to cluster
+                        for (var c = 0; c < trajectoryList.length; c++) {
+                            if (c < trajectoryList.length - trajectoryNumber) {
+                                continue;
+                            }
+                            count++;
+                        }
+                    }
+                }
+            }
+            var positions = new Float32Array(count * 3);
+            var colorarray = new Float32Array(count * 3);
+
             for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
                 var p = findPoint(data, clusterdata.p[pointIndex]);
                 if (!p) {
@@ -696,9 +719,9 @@ function convertDataToThreeJsFormat(data) {
                             var pp0 = parseFloat(tp.p[0]);
                             var pp1 = parseFloat(tp.p[1]);
                             var pp2 = parseFloat(tp.p[2]);
-                            positions[k * 3 + 0] = p0;
-                            positions[k * 3 + 1] = p1;
-                            positions[k * 3 + 2] = p2;
+                            positions[k * 3 + 0] = pp0;
+                            positions[k * 3 + 1] = pp1;
+                            positions[k * 3 + 2] = pp2;
 
                             var ptempcolor = new THREE.Color("rgb(" + tp.c.r + "," + tp.c.g + "," + tp.c.b + ")");
                             colorarray[k * 3 + 0] = ptempcolor.r;
