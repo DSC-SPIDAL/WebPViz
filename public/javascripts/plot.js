@@ -640,6 +640,12 @@ function convertDataToThreeJsFormat(data) {
             ymean = 0;
             zmean = 0;
             var k = 0;
+            var trajectoryNumber = 0;
+            if (trajectoryLimit >= 0) {
+                trajectoryNumber = trajectoryLimit;
+            } else {
+                trajectoryNumber = -1;
+            }
             var count = clusterdata.p.length;
             for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
                 var p = findPoint(data, clusterdata.p[pointIndex]);
@@ -654,7 +660,7 @@ function convertDataToThreeJsFormat(data) {
                     } else {
                         // we will add some extra points to cluster
                         for (var c = 0; c < trajectoryList.length; c++) {
-                            if (c < trajectoryList.length - trajectoryNumber) {
+                            if (trajectoryNumber >= 0 && c < trajectoryList.length - trajectoryNumber) {
                                 continue;
                             }
                             count++;
@@ -691,13 +697,6 @@ function convertDataToThreeJsFormat(data) {
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
 
-                var trajectoryNumber = 0;
-                if (trajectoryLimit >= 0) {
-                    trajectoryNumber = trajectoryLimit;
-                } else {
-                    trajectoryNumber = -1;
-                }
-
                 if (trajectoryPointLabels.indexOf(label) >= 0) {
                     var trajectoryList = trajectoryPoints[label];
                     var edge = {};
@@ -708,7 +707,7 @@ function convertDataToThreeJsFormat(data) {
                     } else {
                         // we will add some extra points to cluster
                         for (var c = 0; c < trajectoryList.length; c++) {
-                            if (c < trajectoryList.length - trajectoryNumber) {
+                            if (trajectoryNumber >= 0 && c < trajectoryList.length - trajectoryNumber) {
                                 continue;
                             }
                             k++;
