@@ -76,7 +76,7 @@ var group = "";
 var scenes = {};
 
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = ['IBM'];
+var trajectoryPointLabels = [];
 var trajectoryPoints = {};
 var trajectoryLimit = 10;
 
