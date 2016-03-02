@@ -197,6 +197,10 @@
                         <input type="text" class="form-control" id="trajectoryInput" placeholder="Enter list of stocks to track separated by ','">
                         <label for="cluster-label">Number of frames to track</label>
                         <input type="text" class="form-control" id="trajectoryNumber" placeholder="0">
+                        <label for="cluster-label">Size of the trajectory point</label>
+                        <input type="text" class="form-control" id="trajectoryRatio" placeholder="1.0">
+                        <label for="cluster-label">Total trajectory points</label>
+                        <input type="text" class="form-control" id="trajectoryTotal" placeholder="1.0">
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
                 </div>
@@ -456,6 +460,8 @@
             $("#trajectory-show").click(function() {
                 $("#trajectoryInput").val(trajectoryPointLabels.toString());
                 $("#trajectoryNumber").val(trajectoryLimit);
+                $("#trajectoryRatio").val(trajectoryPointSizeRatio);
+                $("#trajectoryTotal").val(totalTrajectoryPoints);
                 $('#trajectory-modal').modal('show');
             });
 
@@ -467,9 +473,13 @@
             function addTrajectory() {
                 var tList = $("#trajectoryInput").val();
                 var tNo = $("#trajectoryNumber").val();
+                var tRatio = $("#trajectoryRatio").val();
+                var tTotal = $("#trajectoryTotal").val();
 
                 trajectoryLimit = parseInt(tNo);
                 trajectoryPointLabels = [];
+                trajectoryPointSizeRatio = parseFloat(tRatio);
+                totalTrajectoryPoints = parseFloat(tTotal);
 
                 var trajectoryPointLabels2 = tList.split(",");
                 for (var i = 0; i < trajectoryPointLabels2.length; i++) {
