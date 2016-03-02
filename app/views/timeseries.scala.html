@@ -199,7 +199,7 @@
                         <input type="text" class="form-control" id="trajectoryNumber" placeholder="0">
                         <label for="cluster-label">Size of the trajectory point</label>
                         <input type="text" class="form-control" id="trajectoryRatio" placeholder="1.0">
-                        <label for="cluster-label">Total trajectory points</label>
+                        <label for="cluster-label">Total trajectory points to display</label>
                         <input type="text" class="form-control" id="trajectoryTotal" placeholder="1.0">
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
@@ -471,7 +471,7 @@
             });
 
             function addTrajectory() {
-                var tList = $("#trajectoryInput").val();
+                var tList = $("#trajectoryInput").val().replace(/\s+/g, '');
                 var tNo = $("#trajectoryNumber").val();
                 var tRatio = $("#trajectoryRatio").val();
                 var tTotal = $("#trajectoryTotal").val();

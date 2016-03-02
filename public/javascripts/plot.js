@@ -80,7 +80,7 @@ var trajectoryPointLabels = ['IBM'];
 var trajectoryPoints = {};
 var trajectoryLimit = 10;
 var totalTrajectoryPoints = 100;
-var trajectoryPointSizeRatio = .5;
+var trajectoryPointSizeRatio = 10;
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -700,6 +700,15 @@ function convertDataToThreeJsFormat(data) {
                 colorarray[k * 3 + 1] = tempcolor.g;
                 colorarray[k * 3 + 2] = tempcolor.b;
 
+                var pointPerElements = 1;
+                if (trajectoryLimit < 0) {
+                    pointPerElements = Math.round(Math.ceil(timeSeriesLength / totalTrajectoryPoints));
+                } else if (totalTrajectoryPoints > trajectoryLimit) {
+                    pointPerElements = 1;
+                } else if (totalTrajectoryPoints < trajectoryLimit) {
+                    pointPerElements = Math.round(Math.ceil(trajectoryLimit / totalTrajectoryPoints));
+                }
+
                 if (trajectoryPointLabels.indexOf(label) >= 0) {
                     var trajectoryList = trajectoryPoints[label];
                     var edge = {};
@@ -728,9 +737,15 @@ function convertDataToThreeJsFormat(data) {
                         }
                         localSections[clusterid + 100] = localSection;
                         var c = 0;
+                        var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
+                        var indexStarted = false;
+                        var startingIndex = 0;
                         for (var z = 0; z < trajectoryList.length; z++) {
                             if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
                                 continue;
+                            } else if (!indexStarted) {
+                                indexStarted = true;
+                                startingIndex = z;
                             }
                             var tp = trajectoryList[z];
                             if (!tp) {
@@ -739,21 +754,23 @@ function convertDataToThreeJsFormat(data) {
                             var pp0 = parseFloat(tp.p[0]);
                             var pp1 = parseFloat(tp.p[1]);
                             var pp2 = parseFloat(tp.p[2]);
-                            positionsTrajec[c * 3 + 0] = pp0;
-                            positionsTrajec[c * 3 + 1] = pp1;
-                            positionsTrajec[c * 3 + 2] = pp2;
-
                             var ptempcolor = new THREE.Color("rgb(" + tp.c.r + "," + tp.c.g + "," + tp.c.b + ")");
-                            colorarrayTrajec[c * 3 + 0] = ptempcolor.r;
-                            colorarrayTrajec[c * 3 + 1] = ptempcolor.g;
-                            colorarrayTrajec[c * 3 + 2] = ptempcolor.b;
+                            if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                                positionsTrajec[c * 3 + 0] = pp0;
+                                positionsTrajec[c * 3 + 1] = pp1;
+                                positionsTrajec[c * 3 + 2] = pp2;
+
+                                colorarrayTrajec[c * 3 + 0] = ptempcolor.r;
+                                colorarrayTrajec[c * 3 + 1] = ptempcolor.g;
+                                colorarrayTrajec[c * 3 + 2] = ptempcolor.b;
+                                c++;
+                            }
 
                             points[trajectoryPointIndex] = [pp0, pp1, pp2];
                             pointcolors[trajectoryPointIndex] = ptempcolor;
                             trajectoryPointIndex++;
 
                             edgeVerteces.push(trajectoryPointIndex);
-                            c++;
                         }
                         geometry[clusterid+100].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                         geometry[clusterid+100].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
