@@ -76,10 +76,10 @@ var group = "";
 var scenes = {};
 
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = ['IBM'];
+var trajectoryPointLabels = [];
 var trajectoryPoints = {};
 var trajectoryLimit = 10;
-var totalTrajectoryPoints = 100;
+var totalTrajectoryPoints = 5;
 var trajectoryPointSizeRatio = 10;
 
 // raw data sets coming from back-end. these will be converted to threejs format
