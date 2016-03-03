@@ -201,6 +201,7 @@
                         <input type="text" class="form-control" id="trajectoryRatio" placeholder="1.0">
                         <label for="cluster-label">Total trajectory points to display</label>
                         <input type="text" class="form-control" id="trajectoryTotal" placeholder="1.0">
+                        <label for="cluster-label" id="errorLabel" class="danger" style="color:red"></label>
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
                 </div>
@@ -466,8 +467,10 @@
             });
 
             $("#addTrajectory").click(function() {
-                addTrajectory();
-                $('#trajectory-modal').modal('hide');
+                $("#errorLabel").text("");
+                if (addTrajectory()) {
+                    $('#trajectory-modal').modal('hide');
+                }
             });
 
             function addTrajectory() {
@@ -476,14 +479,20 @@
                 var tRatio = $("#trajectoryRatio").val();
                 var tTotal = $("#trajectoryTotal").val();
 
-                trajectoryLimit = parseInt(tNo);
-                trajectoryPointLabels = [];
-                trajectoryPointSizeRatio = parseFloat(tRatio);
-                totalTrajectoryPoints = parseFloat(tTotal);
-
                 var trajectoryPointLabels2 = tList.split(",");
-                for (var i = 0; i < trajectoryPointLabels2.length; i++) {
-                    trajectoryPointLabels.push(trajectoryPointLabels2[i]);
+                var labelExists = checkLabelExists(trajectoryPointLabels2);
+                if (labelExists.length == 0) {
+                    trajectoryPointLabels = [];
+                    for (var i = 0; i < trajectoryPointLabels2.length; i++) {
+                        trajectoryPointLabels.push(trajectoryPointLabels2[i]);
+                    }
+                    trajectoryLimit = parseInt(tNo);
+                    trajectoryPointSizeRatio = parseFloat(tRatio);
+                    totalTrajectoryPoints = parseFloat(tTotal);
+                    return true;
+                } else {
+                    $("#errorLabel").text("Invalid labels: " + labelExists.toString());
+                    return false;
                 }
             }
     </script>

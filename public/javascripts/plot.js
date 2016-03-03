@@ -863,6 +863,53 @@ function convertDataToThreeJsFormat(data) {
     fileNames[data.seq] = data.file;
 }
 
+// get the current points and check weather the given label exists
+function checkLabelExists(labelList) {
+    var currentValue = parseInt($("#plot-slider").prop("value"));
+    if (currentValue in dataSets && dataSets[currentValue]) {
+        var data = dataSets[currentValue];
+        var clusters = data.clusters;
+        var upperCaseTrajectoryPointLabels = labelList.map(function(value) {
+            return value.toUpperCase();
+        });
+        var foundLabels = [];
+        for (var cid in clusters) {
+            if (data.clusters.hasOwnProperty(cid)) {
+                var clusterdata = data.clusters[cid];
+                for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                    var p = findPoint(data, clusterdata.p[pointIndex]);
+                    if (!p) {
+                        continue;
+                    }
+                    var label = p[3];
+                    if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) >= 0 && foundLabels.indexOf(label) < 0) {
+                        foundLabels.push(label.toUpperCase());
+                    }
+                }
+            }
+        }
+        return arrDiff(upperCaseTrajectoryPointLabels, foundLabels);
+    }
+}
+
+function arrDiff(a1, a2) {
+    var a = [], diff = [];
+    for (var i = 0; i < a1.length; i++) {
+        a[a1[i]] = true;
+    }
+    for (var i = 0; i < a2.length; i++) {
+        if (a[a2[i]]) {
+            delete a[a2[i]];
+        } else {
+            a[a2[i]] = true;
+        }
+    }
+    for (var k in a) {
+        diff.push(k);
+    }
+    return diff;
+};
+
 function loadPlotData(start, end) {
     for (var i = start; i < end; i++) {
         // check weather we already have a value
