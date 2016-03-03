@@ -594,6 +594,15 @@ function convertDataToThreeJsFormat(data) {
 
     var localSections = [];
     var clusterCount = 0;
+    var currentHighestClusterId = 0;
+    for (var cid in clusters) {
+        if (data.clusters.hasOwnProperty(cid)) {
+            var tempCid = parseInt(cid);
+            if (tempCid > currentHighestClusterId) {
+                currentHighestClusterId = tempCid;
+            }
+        }
+    }
     for (var cid in clusters) {
         if (data.clusters.hasOwnProperty(cid)) {
             clusterCount++;
@@ -717,9 +726,10 @@ function convertDataToThreeJsFormat(data) {
                         trajectoryList = [];
                         trajectoryPoints[label] = trajectoryList;
                     } else {
-                        if (!geometry.hasOwnProperty(clusterid + 100)) {
-                            geometry[clusterid + 100] = new THREE.BufferGeometry();
-                            particles[clusterid + 100] = [];
+                        currentHighestClusterId = currentHighestClusterId + 1;
+                        if (!geometry.hasOwnProperty(currentHighestClusterId)) {
+                            geometry[currentHighestClusterId] = new THREE.BufferGeometry();
+                            particles[currentHighestClusterId] = [];
                         }
                         // we will add some extra points to cluster
                         var positionsTrajec = new Float32Array(trajectoryList.length * 3);
@@ -732,10 +742,10 @@ function convertDataToThreeJsFormat(data) {
                             "color": clustercolor,
                             "label": clusterdata.l
                         };
-                        if (!sections.hasOwnProperty(clusterid + 100)) {
-                            sections[clusterid + 100] = localSection;
+                        if (!sections.hasOwnProperty(currentHighestClusterId)) {
+                            sections[currentHighestClusterId] = localSection;
                         }
-                        localSections[clusterid + 100] = localSection;
+                        localSections[currentHighestClusterId] = localSection;
                         var c = 0;
                         var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
                         var indexStarted = false;
@@ -772,8 +782,8 @@ function convertDataToThreeJsFormat(data) {
 
                             edgeVerteces.push(trajectoryPointIndex);
                         }
-                        geometry[clusterid+100].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
-                        geometry[clusterid+100].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
+                        geometry[currentHighestClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
+                        geometry[currentHighestClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
                     }
 
                     points[trajectoryPointIndex] = [p0, p1, p2];
