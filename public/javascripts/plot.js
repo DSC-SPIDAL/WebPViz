@@ -622,6 +622,10 @@ function convertDataToThreeJsFormat(data) {
             }
         }
     }
+    var upperCaseTrajectoryPointLabels = trajectoryPointLabels.map(function(value) {
+        return value.toUpperCase();
+    });
+
     var highetClusterId = currentHighestClusterId;
     for (var cid in clusters) {
         if (data.clusters.hasOwnProperty(cid)) {
@@ -679,27 +683,6 @@ function convertDataToThreeJsFormat(data) {
                 trajectoryNumber = -1;
             }
             var count = clusterdata.p.length;
-            //for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
-            //    var p = findPoint(data, clusterdata.p[pointIndex]);
-            //    if (!p) {
-            //        continue;
-            //    }
-            //    var label = p[3];
-            //    if (trajectoryPointLabels.indexOf(label) >= 0) {
-            //        var trajectoryList = trajectoryPoints[label];
-            //        if (!trajectoryList) {
-            //
-            //        } else {
-            //            // we will add some extra points to cluster
-            //            for (var c = 0; c < trajectoryList.length; c++) {
-            //                if (trajectoryNumber >= 0 && c < trajectoryList.length - trajectoryNumber) {
-            //                    continue;
-            //                }
-            //                count++;
-            //            }
-            //        }
-            //    }
-            //}
             var positions = new Float32Array(count * 3);
             var colorarray = new Float32Array(count * 3);
 
@@ -738,7 +721,7 @@ function convertDataToThreeJsFormat(data) {
                     pointPerElements = Math.round(Math.ceil(trajectoryLimit / totalTrajectoryPoints));
                 }
 
-                if (trajectoryPointLabels.indexOf(label) >= 0) {
+                if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) >= 0) {
                     var trajectoryList = trajectoryPoints[label];
                     var edge = {};
                     var edgeVerteces = [];
@@ -2136,10 +2119,6 @@ function render() {
     // we don't do anythin, need to remove this function and its references
 }
 
-function updateInfo() {
-
-}
-
 //Control Box Operations
 var gui;
 
@@ -2202,12 +2181,5 @@ function setupGuiTimeSeries() {
 
 function settingChange() {
     allSettings.selected = controlers.settings;
-    //changeGlyphSize();
-    //changePointSize();
     reInitialize = true;
-    //if (isTimeSeries) {
-    //    reInitTimeSeries();
-    //} else {
-    //    reInitGraph();
-    //}
 }
