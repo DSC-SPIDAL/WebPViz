@@ -23,6 +23,7 @@ var currentCustomColorScheme = null;
 var sections = [], particles = [], currentParticles = [];
 
 var sprites = {};
+var trajSprites = {};
 var particleSets = {};
 var lineSets = {};
 var sectionSets = {};
@@ -100,6 +101,16 @@ ImageEnum = {
     PYRAMID: "/assets/images/textures1/pyramid.png",
     CONE: "/assets/images/textures1/cone.png",
     CYLINDER: "/assets/images/textures1/cylinder.png"
+};
+
+ImageTrajEnum = {
+    BALL: "/assets/images/textures1/traj/ball.png",
+    CUBE: "/assets/images/textures1/traj/cube.png",
+    DISC: "/assets/images/textures1/traj/disc.png",
+    STAR: "/assets/images/textures1/traj/star.png",
+    PYRAMID: "/assets/images/textures1/traj/pyramid.png",
+    CONE: "/assets/images/textures1/traj/cone.png",
+    CYLINDER: "/assets/images/textures1/traj/cylinder.png"
 };
 
 $(function () {
@@ -257,6 +268,14 @@ function setupThreeJs() {
     sprites["4"] = THREE.ImageUtils.loadTexture(ImageEnum.PYRAMID);
     sprites["5"] = THREE.ImageUtils.loadTexture(ImageEnum.CONE);
     sprites["6"] = THREE.ImageUtils.loadTexture(ImageEnum.CYLINDER);
+
+    trajSprites["0"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.DISC);
+    trajSprites["1"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.BALL);
+    trajSprites["2"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.STAR);
+    trajSprites["3"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CUBE);
+    trajSprites["4"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.PYRAMID);
+    trajSprites["5"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CONE);
+    trajSprites["6"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
 }
 
@@ -473,7 +492,7 @@ function generateGraph() {
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a));
+                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
                     currentParticles[key].material.needsUpdate = true;
@@ -603,6 +622,7 @@ function convertDataToThreeJsFormat(data) {
             }
         }
     }
+    var highetClusterId = currentHighestClusterId;
     for (var cid in clusters) {
         if (data.clusters.hasOwnProperty(cid)) {
             clusterCount++;
@@ -829,7 +849,11 @@ function convertDataToThreeJsFormat(data) {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a));
+            if (key > highetClusterId) {
+                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
+            } else {
+                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
+            }
         }
     }
 
@@ -879,37 +903,44 @@ function loadPlotData(start, end) {
     }
 }
 
-function loadMatrial(size, shape, isglyph, alpha) {
+function loadMatrial(size, shape, isglyph, alpha, traj) {
     var sprite;
     if (!isglyph) {
         sprite = null;
     }
 
+    var spr = {};
+    if (traj) {
+        spr = trajSprites;
+    } else {
+        spr = sprites;
+    }
+
     if (size > 1) {
         switch (parseInt(shape)) {
             case 0:
-                sprite = sprites["0"];
+                sprite = spr["0"];
                 break;
             case 1:
-                sprite = sprites["1"];
+                sprite = spr["1"];
                 break;
             case 2:
-                sprite = sprites["2"];
+                sprite = spr["2"];
                 break;
             case 3:
-                sprite = sprites["3"];
+                sprite = spr["3"];
                 break;
             case 4:
-                sprite = sprites["4"];
+                sprite = spr["4"];
                 break;
             case 5:
-                sprite = sprites["5"];
+                sprite = spr["5"];
                 break;
             case 6:
-                sprite = sprites["6"];
+                sprite = spr["6"];
                 break;
             default :
-                sprite = sprites["3"];
+                sprite = spr["3"];
         }
     }
     var opacity = 1.0;
@@ -1889,7 +1920,7 @@ function renderCustomCluster() {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false));
+            tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
 
             if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
                 if (sections[key].size == 1) {
