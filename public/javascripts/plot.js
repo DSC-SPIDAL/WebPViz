@@ -737,16 +737,21 @@ function convertDataToThreeJsFormat(data) {
                         // we will add some extra points to cluster
                         var positionsTrajec = new Float32Array(trajectoryList.length * 3);
                         var colorarrayTrajec = new Float32Array(trajectoryList.length * 3);
-                        var localSection = {
+                        localSection = {
                             "length": clusterdata.p.length,
                             "size": trajectoryPointSizeRatio,
                             "shape": clusterdata.f,
                             "visible": clusterdata.v,
                             "color": clustercolor,
-                            "label": clusterdata.l
+                            "label": label,
+                            'traj': true
                         };
                         if (!sections.hasOwnProperty(currentHighestClusterId)) {
                             sections[currentHighestClusterId] = localSection;
+                        }
+                        trueColorList[currentHighestClusterId] = clustercolor;
+                        if (!colorlist.hasOwnProperty(currentHighestClusterId)) {
+                            colorlist[currentHighestClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
                         }
                         localSections[currentHighestClusterId] = localSection;
                         var c = 0;
@@ -1591,7 +1596,7 @@ function generateClusterList(list, initcolors) {
                     }
                 }
                 // try to find the element first
-                if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist) {
+                if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryPointLabels.length == 0) {
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
                             $("#pc" + key).css("background-color", "#ffffff");
@@ -1866,7 +1871,7 @@ function addCustomCluster(isSingle) {
         var currentValue = parseInt($("#plot-slider").prop("value"));
         updatePlot(currentValue)
     } else {
-        renderCustomCluster()
+        renderCustomCluster();
         generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
         addParticlesToScence()
