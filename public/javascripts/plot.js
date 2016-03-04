@@ -597,7 +597,7 @@ function drawEdges(edges, points, pointcolors) {
     //scene3d.add(linesegs)
 }
 
-function convertDataToThreeJsFormat(data) {
+function convertDataToThreeJsFormat2(data) {
     particles = {};
     colors = {};
     var plotPoints = {};
@@ -862,6 +862,340 @@ function convertDataToThreeJsFormat(data) {
                     edgeIndex++;
                 }
                 k++;
+            }
+
+            if (!calculatedmeans) {
+                xmean = xmean / clusterdata.p.length;
+                ymean = ymean / clusterdata.p.length;
+                zmean = zmean / clusterdata.p.length;
+
+                xmeantotal += xmean;
+                ymeantotal += ymean;
+                zmeantotal += zmean;
+            }
+
+            geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+        }
+    }
+
+
+    if (!calculatedmeans) {
+        xmeantotal = xmeantotal / clusterCount;
+        ymeantotal = ymeantotal / clusterCount;
+        zmeantotal = zmeantotal / clusterCount;
+        calculatedmeans = true;
+    }
+
+    for (var key in geometry) {
+        if (geometry.hasOwnProperty(key)) {
+            geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+            if (key > highetClusterId) {
+                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
+            } else {
+                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
+            }
+        }
+    }
+
+    lineSets[data.seq] = drawEdges(edges, points, pointcolors);
+
+    particleSets[data.seq] = particles;
+    for (var key in particles) {
+        if (particles.hasOwnProperty(key)) {
+            if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                if (sections[key].size == 1) {
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
+                } else {
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                }
+                particles[key].material.needsUpdate = true;
+            }
+        }
+    }
+
+
+    plotPointsSets[data.seq] = plotPoints;
+    pointLabelxKeySets[data.seq] = pointLabelxKey;
+    sectionSets[data.seq] = localSections;
+    fileNames[data.seq] = data.file;
+}
+
+function convertDataToThreeJsFormat(data) {
+    particles = {};
+    colors = {};
+    var plotPoints = {};
+    pointLabelxKey = {};
+    var geometry = {};
+    clusters = data.clusters;
+    fileName = data.file;
+    plotDesc = data.desc;
+    uploader = data.uploader;
+    var points = {};
+    var pointcolors = {};
+    var edgeIndex = 0;
+    var edges = {};
+    // we will create a separate point list for trajectories
+    var trajectoryPointIndex = 0;
+
+    var localSections = [];
+    var clusterCount = 0;
+    var currentHighestClusterId = 0;
+    for (var cid in clusters) {
+        if (data.clusters.hasOwnProperty(cid)) {
+            var tempCid = parseInt(cid);
+            if (tempCid > currentHighestClusterId) {
+                currentHighestClusterId = tempCid;
+            }
+        }
+    }
+    var upperCaseTrajectoryPointLabels = trajectoryPointLabels.map(function(value) {
+        return value.toUpperCase();
+    });
+
+    var pointPerElements = 1;
+    if (trajectoryLimit < 0) {
+        pointPerElements = Math.round(Math.ceil(timeSeriesLength / totalTrajectoryPoints));
+    } else if (totalTrajectoryPoints > trajectoryLimit) {
+        pointPerElements = 1;
+    } else if (totalTrajectoryPoints < trajectoryLimit) {
+        pointPerElements = Math.round(Math.ceil(trajectoryLimit / totalTrajectoryPoints));
+    }
+
+    var highetClusterId = currentHighestClusterId;
+    for (var cid in clusters) {
+        if (data.clusters.hasOwnProperty(cid)) {
+            clusterCount++;
+            var clusterdata = data.clusters[cid];
+            var clusterid = parseInt(cid);
+            setMaxClusterId(clusterid);
+            var clustercolor;
+            if (!colorsLoaded) {
+                clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
+                if (clusterdata.r) {
+                    clustercolor["r"] = clusterdata.r[3];
+                    clustercolor["g"] = clusterdata.r[2];
+                    clustercolor["b"] = clusterdata.r[1];
+                    clustercolor["a"] = clusterdata.r[0];
+                    trueColorList[clusterid] = clustercolor;
+                } else {
+                    trueColorList[clusterid] = {};
+                }
+            } else {
+                clustercolor = trueColorList[clusterid];
+            }
+            if (clustercolor == null)
+                clustercolor = {"a": 255, "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+
+            if (!geometry.hasOwnProperty(clusterid)) {
+                geometry[clusterid] = new THREE.BufferGeometry();
+                particles[clusterid] = [];
+            }
+
+            if (!colorlist.hasOwnProperty(clusterid))
+                colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+
+            var localSection = {
+                "length": clusterdata.p.length,
+                "size": clusterdata.s,
+                "shape": clusterdata.f,
+                "visible": clusterdata.v,
+                "color": clustercolor,
+                "label": clusterdata.l,
+                'traj': false
+            };
+            if (!sections.hasOwnProperty(clusterid)) {
+                sections[clusterid] = localSection;
+            }
+            localSections[clusterid] = localSection;
+
+            xmean = 0;
+            ymean = 0;
+            zmean = 0;
+            var k = 0;
+            var trajectoryNumber = 0;
+            if (trajectoryLimit >= 0) {
+                trajectoryNumber = trajectoryLimit;
+            } else {
+                trajectoryNumber = -1;
+            }
+            var count = clusterdata.p.length;
+            // reduce the points that belong to a trajectory
+            for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                var p = findPoint(data, clusterdata.p[pointIndex]);
+                if (!p) {
+                    continue;
+                }
+                var label = p[3];
+                if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) >= 0) {
+                    count--;
+                }
+            }
+            var positions = new Float32Array(count * 3);
+            var colorarray = new Float32Array(count * 3);
+            for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                var p = findPoint(data, clusterdata.p[pointIndex]);
+                if (!p) {
+                    continue;
+                }
+                var p0 = parseFloat(p[0]);
+                var p1 = parseFloat(p[1]);
+                var p2 = parseFloat(p[2]);
+                var label = p[3];
+                var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+
+                // regular point
+                if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) < 0) {
+                    plotPoints[clusterdata.p[pointIndex]] = [p[0], p[1], p[2]];
+                    pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
+                    positions[k * 3 + 0] = p0;
+                    positions[k * 3 + 1] = p1;
+                    positions[k * 3 + 2] = p2;
+
+                    if (!calculatedmeans) {
+                        xmean += p0;
+                        ymean += p1;
+                        zmean += p2;
+                    }
+                    colorarray[k * 3 + 0] = tempcolor.r;
+                    colorarray[k * 3 + 1] = tempcolor.g;
+                    colorarray[k * 3 + 2] = tempcolor.b;
+                    k++;
+                } else {
+                    // trajectory point
+                    var trajectoryList = trajectoryPoints[label];
+                    var edge = {};
+                    var edgeVerteces = [];
+                    var currentClusterId = 0;
+                    // check weather there is a cluster id for this trajectory
+                    if (!trajectoryToClusterId[label.toUpperCase()]) {
+                        currentHighestClusterId = currentHighestClusterId + 1;
+                        currentClusterId = currentHighestClusterId;
+                        trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
+
+                        if (!geometry.hasOwnProperty(currentClusterId)) {
+                            geometry[currentClusterId] = new THREE.BufferGeometry();
+                            particles[currentClusterId] = [];
+                        }
+                        // we will add some extra points to cluster
+                        localSection = {
+                            "length": clusterdata.p.length,
+                            "size": trajectoryPointSizeRatio,
+                            "shape": clusterdata.f,
+                            "visible": clusterdata.v,
+                            "color": clustercolor,
+                            "label": label,
+                            'traj': true
+                        };
+                        if (!sections.hasOwnProperty(currentClusterId)) {
+                            sections[currentClusterId] = localSection;
+                        }
+                        trueColorList[currentClusterId] = clustercolor;
+                        if (!colorlist.hasOwnProperty(currentClusterId)) {
+                            colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        }
+                        localSections[currentClusterId] = localSection;
+                    } else {
+                        currentClusterId = trajectoryToClusterId[label.toUpperCase()];
+                        clustercolor = trueColorList[currentClusterId];
+                    }
+
+                    if (!trajectoryList) {
+                        trajectoryList = [];
+                        trajectoryPoints[label] = trajectoryList;
+                    }
+
+                    var trajectory = {};
+                    trajectory['p'] = p;
+                    trajectory['c'] = clustercolor;
+                    trajectoryList[data.seq] = trajectory;
+
+                    if (!geometry.hasOwnProperty(currentClusterId)) {
+                        geometry[currentClusterId] = new THREE.BufferGeometry();
+                        particles[currentClusterId] = [];
+                    }
+                    // we will add some extra points to cluster
+                    localSection = {
+                        "length": clusterdata.p.length,
+                        "size": trajectoryPointSizeRatio,
+                        "shape": clusterdata.f,
+                        "visible": clusterdata.v,
+                        "color": clustercolor,
+                        "label": label,
+                        'traj': true
+                    };
+                    if (!sections.hasOwnProperty(currentClusterId)) {
+                        sections[currentClusterId] = localSection;
+                    }
+                    trueColorList[currentClusterId] = clustercolor;
+                    if (!colorlist.hasOwnProperty(currentClusterId)) {
+                        colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                    }
+                    localSections[currentClusterId] = localSection;
+                    var c = 0;
+                    var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
+                    var indexStarted = false;
+                    var startingIndex = 0;
+                    var trajectoryPointCount = 0;
+                    for (var z = 0; z < trajectoryList.length; z++) {
+                        if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
+                            continue;
+                        } else if (!indexStarted) {
+                            indexStarted = true;
+                            startingIndex = z;
+                        }
+                        var tp = trajectoryList[z];
+                        if (!tp) {
+                            continue;
+                        }
+                        if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                            trajectoryPointCount++;
+                        }
+                    }
+                    var positionsTrajec = new Float32Array(trajectoryPointCount * 3);
+                    var colorarrayTrajec = new Float32Array(trajectoryPointCount * 3);
+                    for (var z = 0; z < trajectoryList.length; z++) {
+                        if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
+                            continue;
+                        } else if (!indexStarted) {
+                            indexStarted = true;
+                            startingIndex = z;
+                        }
+                        var tp = trajectoryList[z];
+                        if (!tp) {
+                            continue;
+                        }
+                        var pp0 = parseFloat(tp.p[0]);
+                        var pp1 = parseFloat(tp.p[1]);
+                        var pp2 = parseFloat(tp.p[2]);
+                        var ptempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+                        if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                            positionsTrajec[c * 3 + 0] = pp0;
+                            positionsTrajec[c * 3 + 1] = pp1;
+                            positionsTrajec[c * 3 + 2] = pp2;
+
+                            colorarrayTrajec[c * 3 + 0] = ptempcolor.r;
+                            colorarrayTrajec[c * 3 + 1] = ptempcolor.g;
+                            colorarrayTrajec[c * 3 + 2] = ptempcolor.b;
+                            c++;
+                        }
+
+                        points[trajectoryPointIndex] = [pp0, pp1, pp2];
+                        pointcolors[trajectoryPointIndex] = ptempcolor;
+                        edgeVerteces.push(trajectoryPointIndex);
+
+                        trajectoryPointIndex++;
+                    }
+                    geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
+                    geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
+                    points[trajectoryPointIndex] = [p0, p1, p2];
+                    pointcolors[trajectoryPointIndex] = tempcolor;
+                    edgeVerteces.push(trajectoryPointIndex + "");
+                    trajectoryPointIndex++;
+                    edge['v'] = edgeVerteces;
+                    edges[edgeIndex] = edge;
+                    edgeIndex++;
+                }
             }
 
             if (!calculatedmeans) {
