@@ -760,6 +760,20 @@ function convertDataToThreeJsFormat(data) {
                         localSections[currentClusterId] = localSection;
                     } else {
                         currentClusterId = trajectoryToClusterId[label.toUpperCase()];
+                        if (!colorsLoaded) {
+                            clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
+                            if (clusterdata.r) {
+                                clustercolor["r"] = clusterdata.r[3];
+                                clustercolor["g"] = clusterdata.r[2];
+                                clustercolor["b"] = clusterdata.r[1];
+                                clustercolor["a"] = clusterdata.r[0];
+                                trueColorList[currentClusterId] = clustercolor;
+                            } else {
+                                trueColorList[currentClusterId] = {};
+                            }
+                        } else {
+                            clustercolor = trueColorList[currentClusterId];
+                        }
                     }
 
                     if (!trajectoryList) {
@@ -808,7 +822,7 @@ function convertDataToThreeJsFormat(data) {
                             var pp0 = parseFloat(tp.p[0]);
                             var pp1 = parseFloat(tp.p[1]);
                             var pp2 = parseFloat(tp.p[2]);
-                            var ptempcolor = new THREE.Color("rgb(" + tp.c.r + "," + tp.c.g + "," + tp.c.b + ")");
+                            var ptempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                             if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
                                 positionsTrajec[c * 3 + 0] = pp0;
                                 positionsTrajec[c * 3 + 1] = pp1;
@@ -1727,11 +1741,13 @@ function recolorSection(id, color, alpha) {
         "a": alpha
     };
     var colorattri = currentParticles[id].geometry.getAttribute('color');
-    var colorsd = new Float32Array(colorattri.length);
-    for (var k = 0; k < colorattri.length / 3; k++) {
-        colorsd[k * 3 + 0] = tempcolor.r;
-        colorsd[k * 3 + 1] = tempcolor.g;
-        colorsd[k * 3 + 2] = tempcolor.b;
+    if (colorattri) {
+        var colorsd = new Float32Array(colorattri.length);
+        for (var k = 0; k < colorattri.length / 3; k++) {
+            colorsd[k * 3 + 0] = tempcolor.r;
+            colorsd[k * 3 + 1] = tempcolor.g;
+            colorsd[k * 3 + 2] = tempcolor.b;
+        }
     }
     currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
     sections[id].color.a = alpha;
