@@ -1154,6 +1154,14 @@ function convertDataToThreeJsFormat(data) {
                     }
                     var positionsTrajec = new Float32Array(trajectoryPointCount * 3);
                     var colorarrayTrajec = new Float32Array(trajectoryPointCount * 3);
+                    var ptempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+
+                    var startingColor = Color.rgb(clustercolor.r, clustercolor.g, clustercolor.b);
+                    var hsl = startingColor.hslData();
+                    var h = hsl[0];
+                    var s = hsl[1];
+                    var l = hsl[2];
+                    var saturationIncrement = 1.0 / trajectoryPointCount;
                     for (var z = 0; z < trajectoryList.length; z++) {
                         if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
                             continue;
@@ -1168,20 +1176,22 @@ function convertDataToThreeJsFormat(data) {
                         var pp0 = parseFloat(tp.p[0]);
                         var pp1 = parseFloat(tp.p[1]);
                         var pp2 = parseFloat(tp.p[2]);
-                        var ptempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
+                        s = c * saturationIncrement;
+                        var newColor = Color.hsl(h, s, l);
+                        var newRgb = newColor.rgbData();
+
                         if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
                             positionsTrajec[c * 3 + 0] = pp0;
                             positionsTrajec[c * 3 + 1] = pp1;
                             positionsTrajec[c * 3 + 2] = pp2;
-
-                            colorarrayTrajec[c * 3 + 0] = ptempcolor.r;
-                            colorarrayTrajec[c * 3 + 1] = ptempcolor.g;
-                            colorarrayTrajec[c * 3 + 2] = ptempcolor.b;
+                            colorarrayTrajec[c * 3 + 0] = newRgb[0];
+                            colorarrayTrajec[c * 3 + 1] = newRgb[1];
+                            colorarrayTrajec[c * 3 + 2] = newRgb[2];
                             c++;
                         }
 
                         points[trajectoryPointIndex] = [pp0, pp1, pp2];
-                        pointcolors[trajectoryPointIndex] = ptempcolor;
+                        pointcolors[trajectoryPointIndex] =  new THREE.Color("rgb(" + newRgb[0] + "," + newRgb[1] + "," + newRgb[2] + ")");
                         edgeVerteces.push(trajectoryPointIndex);
 
                         trajectoryPointIndex++;
