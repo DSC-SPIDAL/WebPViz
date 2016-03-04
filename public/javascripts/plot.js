@@ -760,20 +760,7 @@ function convertDataToThreeJsFormat(data) {
                         localSections[currentClusterId] = localSection;
                     } else {
                         currentClusterId = trajectoryToClusterId[label.toUpperCase()];
-                        if (!colorsLoaded) {
-                            clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
-                            if (clusterdata.r) {
-                                clustercolor["r"] = clusterdata.r[3];
-                                clustercolor["g"] = clusterdata.r[2];
-                                clustercolor["b"] = clusterdata.r[1];
-                                clustercolor["a"] = clusterdata.r[0];
-                                trueColorList[currentClusterId] = clustercolor;
-                            } else {
-                                trueColorList[currentClusterId] = {};
-                            }
-                        } else {
-                            clustercolor = trueColorList[currentClusterId];
-                        }
+                        clustercolor = trueColorList[currentClusterId];
                     }
 
                     if (!trajectoryList) {
