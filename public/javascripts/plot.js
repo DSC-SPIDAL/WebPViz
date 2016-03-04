@@ -82,6 +82,8 @@ var trajectoryPoints = {};
 var trajectoryLimit = 10;
 var totalTrajectoryPoints = 5;
 var trajectoryPointSizeRatio = 10;
+// keep track of the cluster IDs created for the trajectory
+var trajectoryToClusterId = {};
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -727,14 +729,46 @@ function convertDataToThreeJsFormat(data) {
                     var trajectoryList = trajectoryPoints[label];
                     var edge = {};
                     var edgeVerteces = [];
+                    var currentClusterId = 0;
+                    // check weather there is a cluster id for this trajectory
+                    if (!trajectoryToClusterId[label.toUpperCase()]) {
+                        currentHighestClusterId = currentHighestClusterId + 1;
+                        currentClusterId = currentHighestClusterId;
+                        trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
+
+                        if (!geometry.hasOwnProperty(currentClusterId)) {
+                            geometry[currentClusterId] = new THREE.BufferGeometry();
+                            particles[currentClusterId] = [];
+                        }
+                        // we will add some extra points to cluster
+                        localSection = {
+                            "length": clusterdata.p.length,
+                            "size": trajectoryPointSizeRatio,
+                            "shape": clusterdata.f,
+                            "visible": clusterdata.v,
+                            "color": clustercolor,
+                            "label": label,
+                            'traj': true
+                        };
+                        if (!sections.hasOwnProperty(currentClusterId)) {
+                            sections[currentClusterId] = localSection;
+                        }
+                        trueColorList[currentClusterId] = clustercolor;
+                        if (!colorlist.hasOwnProperty(currentClusterId)) {
+                            colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        }
+                        localSections[currentClusterId] = localSection;
+                    } else {
+                        currentClusterId = trajectoryToClusterId[label.toUpperCase()];
+                    }
+
                     if (!trajectoryList) {
                         trajectoryList = [];
                         trajectoryPoints[label] = trajectoryList;
                     } else {
-                        currentHighestClusterId = currentHighestClusterId + 1;
-                        if (!geometry.hasOwnProperty(currentHighestClusterId)) {
-                            geometry[currentHighestClusterId] = new THREE.BufferGeometry();
-                            particles[currentHighestClusterId] = [];
+                        if (!geometry.hasOwnProperty(currentClusterId)) {
+                            geometry[currentClusterId] = new THREE.BufferGeometry();
+                            particles[currentClusterId] = [];
                         }
                         // we will add some extra points to cluster
                         var positionsTrajec = new Float32Array(trajectoryList.length * 3);
@@ -748,14 +782,14 @@ function convertDataToThreeJsFormat(data) {
                             "label": label,
                             'traj': true
                         };
-                        if (!sections.hasOwnProperty(currentHighestClusterId)) {
-                            sections[currentHighestClusterId] = localSection;
+                        if (!sections.hasOwnProperty(currentClusterId)) {
+                            sections[currentClusterId] = localSection;
                         }
-                        trueColorList[currentHighestClusterId] = clustercolor;
-                        if (!colorlist.hasOwnProperty(currentHighestClusterId)) {
-                            colorlist[currentHighestClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        trueColorList[currentClusterId] = clustercolor;
+                        if (!colorlist.hasOwnProperty(currentClusterId)) {
+                            colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
                         }
-                        localSections[currentHighestClusterId] = localSection;
+                        localSections[currentClusterId] = localSection;
                         var c = 0;
                         var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
                         var indexStarted = false;
@@ -792,8 +826,8 @@ function convertDataToThreeJsFormat(data) {
 
                             edgeVerteces.push(trajectoryPointIndex);
                         }
-                        geometry[currentHighestClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
-                        geometry[currentHighestClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
+                        geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
+                        geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
                     }
 
                     points[trajectoryPointIndex] = [p0, p1, p2];
@@ -1621,7 +1655,7 @@ function generateClusterList(list, initcolors) {
                     if (sprite != null) {
                         if (list[key]['traj']) {
                             grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
-                                "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'><i class='fa fa-ellipsis-h'></i>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
+                                "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'><i class='fa fa-ellipsis-h'></i>" + list[key].label + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
                         } else {
                             grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
                                 "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"

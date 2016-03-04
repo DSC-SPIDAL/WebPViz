@@ -478,6 +478,7 @@
                 var tNo = $("#trajectoryNumber").val();
                 var tRatio = $("#trajectoryRatio").val();
                 var tTotal = $("#trajectoryTotal").val();
+                var currentValue = parseInt($("#plot-slider").prop("value"));
 
                 var trajectoryPointLabels2 = tList.split(",");
                 var labelExists = checkLabelExists(trajectoryPointLabels2);
@@ -489,6 +490,8 @@
                     trajectoryLimit = parseInt(tNo);
                     trajectoryPointSizeRatio = parseFloat(tRatio);
                     totalTrajectoryPoints = parseFloat(tTotal);
+
+                    updatePlot(currentValue);
                     return true;
                 } else {
                     $("#errorLabel").text("Invalid labels: " + labelExists.toString());
