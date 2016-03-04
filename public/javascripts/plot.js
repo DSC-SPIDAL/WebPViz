@@ -785,8 +785,6 @@ function convertDataToThreeJsFormat(data) {
                             particles[currentClusterId] = [];
                         }
                         // we will add some extra points to cluster
-                        var positionsTrajec = new Float32Array(trajectoryList.length * 3);
-                        var colorarrayTrajec = new Float32Array(trajectoryList.length * 3);
                         localSection = {
                             "length": clusterdata.p.length,
                             "size": trajectoryPointSizeRatio,
@@ -808,6 +806,24 @@ function convertDataToThreeJsFormat(data) {
                         var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
                         var indexStarted = false;
                         var startingIndex = 0;
+                        var trajectoryPointCount = 0;
+                        for (var z = 0; z < trajectoryList.length; z++) {
+                            if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
+                                continue;
+                            } else if (!indexStarted) {
+                                indexStarted = true;
+                                startingIndex = z;
+                            }
+                            var tp = trajectoryList[z];
+                            if (!tp) {
+                                continue;
+                            }
+                            if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                                trajectoryPointCount++;
+                            }
+                        }
+                        var positionsTrajec = new Float32Array(trajectoryPointCount * 3);
+                        var colorarrayTrajec = new Float32Array(trajectoryPointCount * 3);
                         for (var z = 0; z < trajectoryList.length; z++) {
                             if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
                                 continue;
@@ -836,9 +852,9 @@ function convertDataToThreeJsFormat(data) {
 
                             points[trajectoryPointIndex] = [pp0, pp1, pp2];
                             pointcolors[trajectoryPointIndex] = ptempcolor;
-                            trajectoryPointIndex++;
-
                             edgeVerteces.push(trajectoryPointIndex);
+
+                            trajectoryPointIndex++;
                         }
                         geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                         geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
