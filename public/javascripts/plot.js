@@ -428,7 +428,8 @@ function generateGraph() {
                         "shape": clusterdata.f,
                         "visible": clusterdata.v,
                         "color": clustercolor,
-                        "label": clusterdata.l
+                        "label": clusterdata.l,
+                        'traj': false
                     };
                 }
 
@@ -665,7 +666,8 @@ function convertDataToThreeJsFormat(data) {
                 "shape": clusterdata.f,
                 "visible": clusterdata.v,
                 "color": clustercolor,
-                "label": clusterdata.l
+                "label": clusterdata.l,
+                'traj': false
             };
             if (!sections.hasOwnProperty(clusterid)) {
                 sections[clusterid] = localSection;
@@ -1617,8 +1619,13 @@ function generateClusterList(list, initcolors) {
                 } else {
                     found = false;
                     if (sprite != null) {
-                        grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
-                            "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs"+key+"'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>" + "</span></p></div>"
+                        if (list[key]['traj']) {
+                            grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
+                                "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'><i class='fa fa-ellipsis-h'></i>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
+                        } else {
+                            grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
+                                "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
+                        }
                     } else {
                         var rgb = hexToRgb("#" + colorWithouthHash);
                         var tex = "ffffff";
