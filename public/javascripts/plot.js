@@ -230,12 +230,12 @@ function setupThreeJs() {
     colors = [];
     controls = null;
     if (!infoPage) {
-        var height = window.innerHeight - 57 - 40 - 40 - 10;
-        $('#canvas3d').width(window.innerWidth - 45);
+        var height = window.innerHeight - 57 - 40 - 40 - 11;
+        $('#canvas3d').width(window.innerWidth - 30);
         $('#canvas3d').height(height);
     } else {
-        var height = (window.innerHeight - 57 - 40 - 40 - 10)/2;
-        $('#canvas3d').width((window.innerWidth - 45)/2 -10);
+        var height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
+        $('#canvas3d').width((window.innerWidth - 30)/2 -10);
         $('#canvas3d').height(height);
     }
     var canvasWidth = $('#canvas3d').width();
@@ -1883,14 +1883,14 @@ function generateCheckList(list, initcolors) {
             }else{
                 currentshape = list[key].shape;
             }
-            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key])
-            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a)
+            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key]);
+            $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a);
             if(sprite != null){
                 $("#cluster_table > tbody > #" + key + " select").val(currentshape);
-                $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length)
-                $("#cluster_table > tbody > #" + key + " td#cluster-size input").attr('value',list[key].size)
+                $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length);
+                $("#cluster_table > tbody > #" + key + " td#cluster-size input").attr('value',list[key].size);
             }else{
-                $("#cluster_table > tbody > #" + key + " td#cluster-size label").text(list[key].length)
+                $("#cluster_table > tbody > #" + key + " td#cluster-size label").text(list[key].length);
             }
         }
         found =  true;
@@ -1923,7 +1923,7 @@ function generateCheckList(list, initcolors) {
                     + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
                     + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
                     + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
-                    + "</select>"
+                    + "</select>"+
                 "</td>";
 
                 tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length
