@@ -201,6 +201,10 @@
                         <input type="text" class="form-control" id="trajectoryRatio" placeholder="1.0">
                         <label for="cluster-label">Total trajectory points to display</label>
                         <input type="text" class="form-control" id="trajectoryTotal" placeholder="1.0">
+                        <label for="cluster-label">Trajectory start line width</label>
+                        <input type="text" class="form-control" id="trajectoryStartLineWidth" placeholder="1.0">
+                        <label for="cluster-label">Trajectory end line width</label>
+                        <input type="text" class="form-control" id="trajectoryEndLineWidth" placeholder="1.0">
                         <label for="cluster-label" id="errorLabel" class="danger" style="color:red"></label>
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
@@ -463,6 +467,8 @@
                 $("#trajectoryNumber").val(trajectoryLimit);
                 $("#trajectoryRatio").val(trajectoryPointSizeRatio);
                 $("#trajectoryTotal").val(totalTrajectoryPoints);
+                $("#trajectoryStartLineWidth").val(trajectoryStartLineWidth);
+                $("#trajectoryEndLineWidth").val(trajectoryEndLineWidth);
                 $('#trajectory-modal').modal('show');
             });
 
@@ -478,6 +484,8 @@
                 var tNo = $("#trajectoryNumber").val();
                 var tRatio = $("#trajectoryRatio").val();
                 var tTotal = $("#trajectoryTotal").val();
+                var tStart = $("#trajectoryStartLineWidth").val();
+                var tEnd = $("#trajectoryEndLineWidth").val();
                 var currentValue = parseInt($("#plot-slider").prop("value"));
 
                 var trajectoryPointLabels2 = tList.split(",");
@@ -490,6 +498,8 @@
                     trajectoryLimit = parseInt(tNo);
                     trajectoryPointSizeRatio = parseFloat(tRatio);
                     totalTrajectoryPoints = parseFloat(tTotal);
+                    trajectoryEndLineWidth = parseFloat(tEnd);
+                    trajectoryStartLineWidth = parseFloat(tStart);
 
                     updatePlot(currentValue);
                     return true;

@@ -84,6 +84,8 @@ var totalTrajectoryPoints = 5;
 var trajectoryPointSizeRatio = 10;
 // keep track of the cluster IDs created for the trajectory
 var trajectoryToClusterId = {};
+var trajectoryEndLineWidth = 5;
+var trajectoryStartLineWidth = 1;
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -535,6 +537,74 @@ function generateTimeSeries(resultSets, reInit) {
     if (!reInit) {
         playLoop();
     }
+}
+
+function drawEdges2(edges, points, pointcolors) {
+    if (edges == null || edges == undefined)
+        return;
+
+    var lines = new THREE.Object3D();
+
+    var positions = [];
+    var colorarray = [];
+
+    for (var key in edges) {
+        if (edges.hasOwnProperty(key)) {
+            var edge = edges[key];
+            var vertices = edge.v;
+            var previousvertex = null;
+            var previouscolor = null;
+
+            if (!vertices || vertices.length <= 0) {
+                return;
+            }
+
+            var width = (trajectoryEndLineWidth - trajectoryStartLineWidth) / vertices.length;
+            for (var i = 0; i < vertices.length; i++) {
+                var pointkey = vertices[i];
+                var point = points[parseInt(pointkey)];
+                var pointcolor = pointcolors[parseInt(pointkey)];
+                var vertex = new THREE.Vector3(point[0], point[1], point[2]);
+
+                if (i >= 1) {
+                    colorarray.push(previouscolor.r);
+                    colorarray.push(previouscolor.g);
+                    colorarray.push(previouscolor.b);
+
+                    colorarray.push(pointcolor.r);
+                    colorarray.push(pointcolor.g);
+                    colorarray.push(pointcolor.b);
+
+                    positions.push(previousvertex.x);
+                    positions.push(previousvertex.y);
+                    positions.push(previousvertex.z);
+
+                    positions.push(vertex.x);
+                    positions.push(vertex.y);
+                    positions.push(vertex.z);
+
+                    var positions32 = new Float32Array(positions.length);
+                    var colorarray32 = new Float32Array(colorarray.length);
+                    positions32.set(positions);
+                    colorarray32.set(colorarray);
+
+                    var geometry = new THREE.BufferGeometry();
+                    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryStartLineWidth + i * width)});
+                    geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
+                    geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
+                    geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                    var linesegs = new THREE.LineSegments(geometry, material);
+                    lines.add(linesegs);
+
+                    positions = [];
+                    colorarray = [];
+                }
+                previousvertex = vertex;
+                previouscolor = pointcolor;
+            }
+        }
+    }
+    return lines;
 }
 
 function drawEdges(edges, points, pointcolors) {
@@ -1242,7 +1312,7 @@ function convertDataToThreeJsFormat(data) {
         }
     }
 
-    lineSets[data.seq] = drawEdges(edges, points, pointcolors);
+    lineSets[data.seq] = drawEdges2(edges, points, pointcolors);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
