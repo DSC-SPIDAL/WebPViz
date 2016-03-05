@@ -612,7 +612,7 @@ function drawEdges(edges, points, pointcolors) {
         return;
 
     var geometry = new THREE.BufferGeometry();
-    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors});
+    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryStartLineWidth});
     var positions = [];
     var colorarray = [];
     for (var key in edges) {
@@ -1312,7 +1312,7 @@ function convertDataToThreeJsFormat(data) {
         }
     }
 
-    lineSets[data.seq] = drawEdges2(edges, points, pointcolors);
+    lineSets[data.seq] = drawEdges(edges, points, pointcolors);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
