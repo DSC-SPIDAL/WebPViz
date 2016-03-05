@@ -84,6 +84,7 @@ var totalTrajectoryPoints = 5;
 var trajectoryPointSizeRatio = 10;
 // keep track of the cluster IDs created for the trajectory
 var trajectoryToClusterId = {};
+var trajectoryClusterIds = [];
 var trajectoryEndLineWidth = 5;
 var trajectoryStartLineWidth = 1;
 
@@ -804,6 +805,7 @@ function convertDataToThreeJsFormat2(data) {
                     if (!trajectoryToClusterId[label.toUpperCase()]) {
                         currentHighestClusterId = currentHighestClusterId + 1;
                         currentClusterId = currentHighestClusterId;
+                        trajectoryClusterIds.push(currentClusterId+"");
                         trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
 
                         if (!geometry.hasOwnProperty(currentClusterId)) {
@@ -960,7 +962,7 @@ function convertDataToThreeJsFormat2(data) {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            if (key > highetClusterId) {
+            if (trajectoryClusterIds.indexOf(key) >= 0) {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
             } else {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
@@ -1141,6 +1143,7 @@ function convertDataToThreeJsFormat(data) {
                     if (!trajectoryToClusterId[label.toUpperCase()]) {
                         currentHighestClusterId = currentHighestClusterId + 1;
                         currentClusterId = currentHighestClusterId;
+                        trajectoryClusterIds.push(currentClusterId+"");
                         trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
 
                         if (!geometry.hasOwnProperty(currentClusterId)) {
@@ -1304,7 +1307,7 @@ function convertDataToThreeJsFormat(data) {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            if (key > highetClusterId) {
+            if (trajectoryClusterIds.indexOf(key) >= 0) {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
             } else {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
@@ -1528,7 +1531,7 @@ function updatePlot(index) {
                 }
 
                 if (recoloredclusters.hasOwnProperty(key)) {
-                    var tempcolor = recoloredclusters[key]
+                    var tempcolor = recoloredclusters[key];
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
                     var colorsd = new Float32Array(colorattri.length);
                     for (var k = 0; k < colorattri.length / 3; k++) {
@@ -1536,7 +1539,7 @@ function updatePlot(index) {
                         colorsd[k * 3 + 1] = tempcolor.g;
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
-                    var opacity = Math.precision(trueColorList[key].a/255,2)
+                    var opacity = Math.precision(trueColorList[key].a/255,2);
                     if(realpaedclusters.hasOwnProperty(key)){
                         opacity = Math.precision(realpaedclusters[key]/255,2)
                     }
@@ -1549,7 +1552,11 @@ function updatePlot(index) {
                 }
 
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                    if (trajectoryClusterIds.indexOf(key) < 0) {
+                        currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                    } else {
+                        currentParticles[key].material.map = trajSprites[changedGlyphs[key]];
+                    }
                     currentParticles[key].material.needsUpdate = true;
                 }
                 if (!(removedclusters.hasOwnProperty(key))) {
@@ -2429,7 +2436,11 @@ function renderCustomCluster() {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
+            if (trajectoryClusterIds.indexOf(key) >= 0) {
+                tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, true));
+            } else {
+                tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
+            }
 
             if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
                 if (sections[key].size == 1) {
@@ -2449,7 +2460,11 @@ function renderCustomCluster() {
 
 function changeGlyph(id, shape) {
     changedGlyphs[id] = shape;
-    currentParticles[id].material.map = sprites[shape];
+    if (trajectoryClusterIds.indexOf(id) < 0) {
+        currentParticles[id].material.map = sprites[shape];
+    } else {
+        currentParticles[id].material.map = trajSprites[shape];
+    }
     currentParticles[id].material.needsUpdate = true;
     generateClusterList(sections, colorlist);
 }
