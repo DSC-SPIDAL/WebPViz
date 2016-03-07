@@ -238,7 +238,7 @@ function setupThreeJs() {
         $('#canvas3d').height(height);
     } else {
         var height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
-        $('#canvas3d').width((window.innerWidth - 30)/2 -10);
+        $('#canvas3d').width((window.innerWidth - 30)/2 -30);
         $('#canvas3d').height(height);
     }
     var canvasWidth = $('#canvas3d').width();
@@ -509,7 +509,9 @@ function generateGraph() {
         renderCustomCluster();
         addParticlesToScence();
         var linesegs = drawEdges(data.edges, points, pointcolors);
-        scene3d.add(linesegs);
+        if (linesegs) {
+            scene3d.add(linesegs);
+        }
         generateClusterList(sections, colorlist);
         populatePlotInfo();
         var cls = $("#plot-clusters").isotope({
@@ -2510,15 +2512,15 @@ function onWindowResize() {
     var width;
     var height;
     if (!infoPage) {
-        width = window.innerWidth;
-        height = window.innerHeight - 57 - 40 - 40 - 10;
+        width = window.innerWidth - 30;
+        height = window.innerHeight - 57 - 40 - 40 - 11;
     } else {
-        width = window.innerWidth / 2 -10;
-        height = (window.innerHeight - 57 - 40 - 40 - 10)/2;
+        width = (window.innerWidth -30)/2 -30;
+        height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
     }
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(width - 45, height);
+    renderer.setSize(width, height);
     //controls.handleResize();
     render();
 }
