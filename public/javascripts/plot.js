@@ -118,7 +118,7 @@ ImageTrajEnum = {
     CYLINDER: "/assets/images/textures1/traj/cylinder.png"
 };
 
-$(function () {
+function initSlider() {
     $("#plot-slider").ionRangeSlider({
         grid: true,
         min: 0,
@@ -131,7 +131,7 @@ $(function () {
         }
     });
     plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
-});
+}
 
 var totalItemsToLoad = 1;
 var itemsLoaded = 1;
@@ -140,6 +140,7 @@ var reInitialize = false;
 
 //Plot functions - These are the methods that are first called when a plot is generated
 function visualize(resultSetUrl, artifact, fid, tid, info) {
+    initSlider();
     info = typeof info !== 'undefined' ? info : false;
     infoPage = info;
     clusterUrl = resultSetUrl;
@@ -158,6 +159,7 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
 
 
 function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
+    initSlider();
     info = typeof info !== 'undefined' ? info : false;
     infoPage = info;
     clusterUrl = resultSetUrl;
@@ -189,7 +191,6 @@ function reInitGraph() {
     // initPlotData();
     generateGraph();
     updateSingleGui();
-    reInitialize = false;
 }
 
 // we will move the time series to begining
@@ -206,12 +207,13 @@ function reInitTimeSeries() {
     initPlotData();
     updateTimeSeriesGui();
     generateTimeSeries(resultSets, true);
-    reInitialize = false;
+    //reInitialize = false;
 }
 
-function animate1() {
+function animate() {
     if (!reInitialize) {
-        requestAnimationFrame(animate1);
+        // console.log("Not re-init");
+        requestAnimationFrame(animate);
         controls.update();
         stats.update();
         var camera = scene3d.getObjectByName('camera');
@@ -523,7 +525,8 @@ function generateGraph() {
         window.addEventListener('resize', onWindowResize, true);
         changeGlyphSize();
         changePointSize();
-        animate1();
+        reInitialize = false;
+        animate();
         savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
@@ -1579,7 +1582,6 @@ function updatePlot(index) {
         sections = localSection;
         window.addEventListener('resize', onWindowResize, false);
         // render();
-        animate();
         $("#plot-title").text(fileNames[index]);
         //savePlotSettings(controlers.settings);
         return true;
@@ -1616,7 +1618,6 @@ function playLoop() {
 }
 
 function initBufferAndLoad() {
-    var currentValue = parseInt($("#plot-slider").prop("value"));
     setTimeout(function () {
         if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < MAX_PLOTS_STORED) {
             if (timeSeriesLength > MAX_PLOTS_STORED) {
@@ -1627,10 +1628,12 @@ function initBufferAndLoad() {
             initBufferAndLoad();
         } else {
             updatePlot(0);
-            animate1();
+            reInitialize = false;
+            animate();
             $("#progress").css({display: "none"});
             if (!bufferLoopStarted) {
                 bufferLoopStarted = true;
+                console.log("8");
                 bufferLoop(null);
             }
         }
@@ -1661,7 +1664,7 @@ function clearThreeJS(loadStartIndex, loadend) {
         }
         if (dataSets[i]) {
             delete dataSets[i];
-            dataSets[i] = null;
+            // dataSets[i] = null;
         }
         if (plotPointsSets[i]) {
             delete plotPointsSets[i];
@@ -1696,7 +1699,7 @@ function clearThreeJS(loadStartIndex, loadend) {
         }
         if (dataSets[i]) {
             delete dataSets[i];
-            dataSets[i] = null;
+            // dataSets[i] = null;
         }
         if (plotPointsSets[i]) {
             delete plotPointsSets[i];
@@ -1765,7 +1768,6 @@ function changePointSize() {
             currentParticles[key].material.needsUpdate = true;
         }
     }
-    render();
 }
 
 function changeGlyphSize() {
@@ -1784,7 +1786,6 @@ function changeGlyphSize() {
             currentParticles[key].material.needsUpdate = true;
         }
     }
-    render();
 }
 
 
@@ -2521,8 +2522,6 @@ function onWindowResize() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
-    //controls.handleResize();
-    render();
 }
 
 //General Util Methods
@@ -2647,29 +2646,11 @@ function rainBowColors(length, maxLength) {
 
 }
 
-//Three js Control methods
-
-/**
- * Used to animate the plot
- */
-function animate() {
-    // we don't do anythin, need to remove this function and its references
-}
-
-
-
-function render() {
-    // we don't do anythin, need to remove this function and its references
-}
-
 //Control Box Operations
 var gui;
 
 function updateSingleGui() {
     var kys = Object.keys(allSettings.settings);
-    //if (gui.__controllers[2]) {
-    //    gui.__controllers[2].remove();
-    //}
     if (settingsDat) {
         gui.remove(settingsDat);
     }
@@ -2682,9 +2663,6 @@ function updateSingleGui() {
 
 function updateTimeSeriesGui() {
     var kys = Object.keys(allSettings.settings);
-    //if (gui.__controllers[3]) {
-    //    gui.__controllers[3].remove();
-    //}
     if (settingsDat) {
         gui.remove(settingsDat);
     }
