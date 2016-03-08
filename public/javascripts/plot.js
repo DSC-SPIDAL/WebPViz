@@ -1239,7 +1239,7 @@ function convertDataToThreeJsFormat(data) {
                     var h = hsl[0];
                     var s = hsl[1];
                     var l = hsl[2];
-                    var saturationIncrement = 1.0 / trajectoryPointCount;
+                    var saturationIncrement = 1.0 / (trajectoryPointCount + 1);
                     for (var z = 0; z < trajectoryList.length; z++) {
                         if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
                             continue;
