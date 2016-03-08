@@ -77,10 +77,10 @@ var group = "";
 var scenes = {};
 
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = [];
+var trajectoryPointLabels = ['IBM','AAPL'];
 var trajectoryPoints = {};
-var trajectoryLimit = 10;
-var totalTrajectoryPoints = 5;
+var trajectoryLimit = -1;
+var totalTrajectoryPoints = 500;
 var trajectoryPointSizeRatio = 10;
 // keep track of the cluster IDs created for the trajectory
 var trajectoryToClusterId = {};
@@ -1230,10 +1230,9 @@ function convertDataToThreeJsFormat(data) {
                             trajectoryPointCount++;
                         }
                     }
-                    var positionsTrajec = new Float32Array(trajectoryPointCount * 3);
-                    var colorarrayTrajec = new Float32Array(trajectoryPointCount * 3);
-                    var ptempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
 
+                    var postitionTrajecArray = [];
+                    var colorararrayTrajectArray = [];
                     var startingColor = Color.rgb(clustercolor.r, clustercolor.g, clustercolor.b);
                     var hsl = startingColor.hslData();
                     var h = hsl[0];
@@ -1257,14 +1256,22 @@ function convertDataToThreeJsFormat(data) {
                         s = c * saturationIncrement;
                         var newColor = Color.hsl(h, s, l);
                         var newRgb = newColor.rgbData();
-
                         if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
-                            positionsTrajec[c * 3 + 0] = pp0;
-                            positionsTrajec[c * 3 + 1] = pp1;
-                            positionsTrajec[c * 3 + 2] = pp2;
-                            colorarrayTrajec[c * 3 + 0] = newRgb[0];
-                            colorarrayTrajec[c * 3 + 1] = newRgb[1];
-                            colorarrayTrajec[c * 3 + 2] = newRgb[2];
+                            postitionTrajecArray.push(pp0);
+                            postitionTrajecArray.push(pp1);
+                            postitionTrajecArray.push(pp2);
+                            colorararrayTrajectArray.push(clustercolor.r);
+                            colorararrayTrajectArray.push(clustercolor.g);
+                            colorararrayTrajectArray.push(clustercolor.b);
+                            //colorararrayTrajectArray.push(newRgb[0]);
+                            //colorararrayTrajectArray.push(newRgb[1]);
+                            //colorararrayTrajectArray.push(newRgb[2]);
+                            //positionsTrajec[c * 3 + 0] = pp0;
+                            //positionsTrajec[c * 3 + 1] = pp1;
+                            //positionsTrajec[c * 3 + 2] = pp2;
+                            //colorarrayTrajec[c * 3 + 0] = newRgb[0];
+                            //colorarrayTrajec[c * 3 + 1] = newRgb[1];
+                            //colorarrayTrajec[c * 3 + 2] = newRgb[2];
                             c++;
                         }
 
@@ -1274,6 +1281,11 @@ function convertDataToThreeJsFormat(data) {
 
                         trajectoryPointIndex++;
                     }
+                    var positionsTrajec = new Float32Array(postitionTrajecArray.length);
+                    var colorarrayTrajec = new Float32Array(colorararrayTrajectArray.length);
+                    positionsTrajec.set(postitionTrajecArray);
+                    colorarrayTrajec.set(colorararrayTrajectArray);
+
                     geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                     geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
                     points[trajectoryPointIndex] = [p0, p1, p2];
