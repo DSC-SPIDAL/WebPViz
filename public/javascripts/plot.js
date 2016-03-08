@@ -26,6 +26,7 @@ var sprites = {};
 var trajSprites = {};
 var particleSets = {};
 var lineSets = {};
+var texts = {};
 var sectionSets = {};
 var changedGlyphs = {};
 var changedSizes ={};
@@ -1333,6 +1334,7 @@ function convertDataToThreeJsFormat(data) {
     }
 
     lineSets[data.seq] = drawEdges(edges, points, pointcolors);
+    texts[data.seq] = makeSpirtes(points);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
@@ -1354,6 +1356,139 @@ function convertDataToThreeJsFormat(data) {
     sectionSets[data.seq] = localSections;
     fileNames[data.seq] = data.file;
 }
+
+function makeSpirtes(points) {
+    var sprites = [];
+    for (var key in points) {
+        if (points.hasOwnProperty(key)) {
+            var sprite = makeTextSprite(key + "");
+            var point = points[key];
+            sprite.position.set(point[0], point[1], point[2]);
+            sprites.push(sprite);
+        }
+    }
+    return sprites;
+}
+
+function makeTextSprite( message, parameters )
+{
+    if ( parameters === undefined ) parameters = {};
+
+    var fontface = parameters.hasOwnProperty("fontface") ?
+        parameters["fontface"] : "Arial";
+
+    var fontsize = parameters.hasOwnProperty("fontsize") ?
+        parameters["fontsize"] : .1;
+
+    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+        parameters["borderThickness"] : .01;
+
+    var borderColor = parameters.hasOwnProperty("borderColor") ?
+        parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+
+    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+        parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    context.font = "Bold " + fontsize + "px " + fontface;
+
+    // get size data (height depends only on font size)
+    var metrics = context.measureText( message );
+    var textWidth = metrics.width;
+
+    // background color
+    context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+        + backgroundColor.b + "," + backgroundColor.a + ")";
+    // border color
+    context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+        + borderColor.b + "," + borderColor.a + ")";
+    context.lineWidth = borderThickness;
+    roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+    // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+    // text color
+    context.fillStyle = "rgba(0, 0, 0, 1.0)";
+    context.fillText( message, borderThickness, fontsize + borderThickness);
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    var spriteMaterial = new THREE.SpriteMaterial(
+        { map: texture, useScreenCoordinates: true} );
+    var sprite = new THREE.Sprite( spriteMaterial );
+    sprite.scale.set(.1,.1,1.0);
+    return sprite;
+}
+// function for drawing rounded rectangles
+function roundRect(ctx, x, y, w, h, r)
+{
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+}
+
+var text = {
+
+    size: 2,
+    height: 4,
+    curveSegments: 2,
+    bevelThickness: 4,
+    bevelSize: 0,
+    bevelEnabled: false,
+
+    //createText: function (text) {
+    //    return new THREE.TextGeometry( text, {
+    //        size: this.size,
+    //        height: this.height,
+    //        curveSegments: this.curveSegments,
+    //        bevelThickness: this.bevelThickness,
+    //        bevelSize: this.bevelSize,
+    //        bevelEnabled: this.bevelEnabled,
+    //        material: 0,
+    //        extrudeMaterial: 1
+    //    });
+    //},
+    //
+    //createMesh: function(text, pos) {
+    //    var material = new THREE.MultiMaterial( [
+    //        new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading } ), // front
+    //        new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.SmoothShading } )]);
+    //    var textGeo = this.createText(text);
+    //    var textMesh = new THREE.Mesh(textGeo, material);
+    //
+    //    textMesh.position.x = pos[0];
+    //    textMesh.position.y = pos[1];
+    //    textMesh.position.z = pos[2];
+    //
+    //    textMesh.rotation.x = 0;
+    //    textMesh.rotation.y = Math.PI * 2;
+    //
+    //    return textMesh;
+    //},
+    //
+    //createTextPoints: function(points) {
+    //    var texts = new THREE.Object3D();
+    //    for (var k in points) {
+    //        if (points.hasOwnProperty(k)) {
+    //            var pos = points[k];
+    //            var mesh = this.createMesh(k + "", pos);
+    //            texts.add(mesh);
+    //        }
+    //    }
+    //    return texts;
+    //}
+};
 
 // get the current points and check weather the given label exists
 function checkLabelExists(labelList) {
@@ -1581,6 +1716,14 @@ function updatePlot(index) {
                 }
             }
         }
+
+        if (texts[index]) {
+            var sprites = texts[index];
+            for (var i = 0; i < sprites.length; i++) {
+                scene3d.add(sprites[i]);
+            }
+        }
+
         if (lineSets[index]) {
             scene3d.add(lineSets[index]);
         }
