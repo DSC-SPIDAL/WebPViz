@@ -88,6 +88,7 @@ var trajectoryStartLineWidth = 1;
 
 
 var scenes = {
+    scale: 1,
     sceneSequence: {},
     addScene: function (seq, scene) {
         this.sceneSequence[seq] = scene;
@@ -106,6 +107,7 @@ var trajectoryData = {
     textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
     enableTrajectoryLabels: false,
+    textLabelSize: 1,
 
     // create the trajectory labels for seq with label
     makeSprites: function (points, color, seq, label) {
@@ -135,7 +137,7 @@ var trajectoryData = {
                         g: color.g,
                         b: color.b,
                         a: 1.0
-                    }
+                    }, scale: this.textLabelSize * 0.1
                 });
                 sprites.push(sprite);
             }
@@ -353,7 +355,7 @@ function setupThreeJs() {
     cameraCenter = new THREE.Vector3(0, 0, 0);
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
-    camera.position.set(100, 100, 100);
+    camera.position.set(1, 1, 1);
     camera.lookAt(cameraCenter);
     scene3d.add(camera);
     controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -883,15 +885,15 @@ function convertDataToThreeJsFormat(data) {
                 if (!p) {
                     continue;
                 }
-                var p0 = parseFloat(p[0]) * 10;
-                var p1 = parseFloat(p[1]) * 10;
-                var p2 = parseFloat(p[2]) * 10;
+                var p0 = parseFloat(p[0]) * scenes.scale;
+                var p1 = parseFloat(p[1]) * scenes.scale;
+                var p2 = parseFloat(p[2]) * scenes.scale;
                 var label = p[3];
                 var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
 
                 // regular point
                 if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) < 0) {
-                    plotPoints[clusterdata.p[pointIndex]] = [p[0]*10, p[1]*10, p[2]*10];
+                    plotPoints[clusterdata.p[pointIndex]] = [p[0] * scenes.scale, p[1]*scenes.scale, p[2]*scenes.scale];
                     pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
                     positions[k * 3 + 0] = p0;
                     positions[k * 3 + 1] = p1;
@@ -1019,9 +1021,9 @@ function convertDataToThreeJsFormat(data) {
                         if (!tp) {
                             continue;
                         }
-                        var pp0 = parseFloat(tp.p[0] * 10);
-                        var pp1 = parseFloat(tp.p[1]* 10);
-                        var pp2 = parseFloat(tp.p[2]* 10);
+                        var pp0 = parseFloat(tp.p[0] * scenes.scale);
+                        var pp1 = parseFloat(tp.p[1]* scenes.scale);
+                        var pp2 = parseFloat(tp.p[2]* scenes.scale);
                         s = c * saturationIncrement;
                         var newColor = Color.hsl(h, s, l);
                         var newRgb = newColor.rgbData();
@@ -1106,9 +1108,9 @@ function convertDataToThreeJsFormat(data) {
         if (particles.hasOwnProperty(key)) {
             if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
                 if (sections[key].size == 1) {
-                    particles[key].material.size = (localSections[key].size / 20) * controlers.pointsize;
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
                 } else {
-                    particles[key].material.size = (localSections[key].size / 20) * controlers.glyphsize;
+                    particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
                 }
                 particles[key].material.needsUpdate = true;
             }
@@ -1138,7 +1140,7 @@ function makeTextSprite(message, x, y, z, parameters) {
         parameters["fontsize"] : 12;
 
     var borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 2;
+        parameters["borderThickness"] : 1;
 
     var borderColor = parameters.hasOwnProperty("borderColor") ?
         parameters["borderColor"] : {r: 255, g: 0, b: 0, a: 1.0};
@@ -1157,6 +1159,8 @@ function makeTextSprite(message, x, y, z, parameters) {
 
     var hAlign = parameters.hasOwnProperty("hAlign") ?
         parameters["hAlign"] : "center";
+
+    var scaleFactor = parameters.hasOwnProperty('scale') ? parameters['scale'] : 1;
 
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
@@ -1228,7 +1232,7 @@ function makeTextSprite(message, x, y, z, parameters) {
     //addSphere(x, y, z);
 
     // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas)
+    var texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
 
     var spriteMaterial = new THREE.SpriteMaterial({map: texture});
@@ -1237,7 +1241,7 @@ function makeTextSprite(message, x, y, z, parameters) {
     // we MUST set the scale to 2:1.  The canvas is already at a 2:1 scale,
     // but the sprite itself is square: 1.0 by 1.0
     // Note also that the size of the scale factors controls the actual size of the text-label
-    sprite.scale.set(4, 2, 1);
+    sprite.scale.set(2 * scaleFactor, 1 * scaleFactor, 1);
 
     // set the sprite's position.  Note that this position is in the CENTER of the sprite
     sprite.position.set(x, y, z);
@@ -1402,7 +1406,7 @@ function loadMatrial(size, shape, isglyph, alpha, traj) {
         opacity = Math.precision(alpha/255,2);
     }
     var material = new THREE.PointsMaterial({
-        size: size / 20,
+        size: size / 200,
         map: sprite,
         vertexColors: THREE.VertexColors,
         transparent: true,
@@ -1471,15 +1475,15 @@ function updatePlot(index) {
 
                 if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
                     if (sections[key].size == 1) {
-                        currentParticles[key].material.size = (sections[key].size / 20) * controlers.pointsize;
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
                     } else {
-                        currentParticles[key].material.size = (sections[key].size / 20) * controlers.glyphsize;
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
                     }
                     currentParticles[key].material.needsUpdate = true;
                 }
 
                 if(changedSizes.hasOwnProperty(key)){
-                    currentParticles[key].material.size = (changedSizes[key] / 20) * controlers.glyphsize;
+                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
                 }
 
                 if (recoloredclusters.hasOwnProperty(key)) {
@@ -1715,9 +1719,9 @@ function changePointSize() {
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             if (sections[key].size == 1) {
-                currentParticles[key].material.size = (sections[key].size / 20) * controlers.pointsize;
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
             } else {
-                currentParticles[key].material.size = (sections[key].size / 20) * controlers.glyphsize;
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
             }
             currentParticles[key].material.needsUpdate = true;
         }
@@ -1728,13 +1732,13 @@ function changeGlyphSize() {
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             if (sections[key].size == 1) {
-                currentParticles[key].material.size = (sections[key].size / 20) * controlers.pointsize;
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
             } else {
-                currentParticles[key].material.size = (sections[key].size / 20) * controlers.glyphsize;
+                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
             }
 
             if(changedSizes.hasOwnProperty(key)){
-                currentParticles[key].material.size = (changedSizes[key] / 20) * controlers.glyphsize;
+                currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
             }
 
             currentParticles[key].material.needsUpdate = true;
@@ -2402,9 +2406,9 @@ function renderCustomCluster() {
 
             if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
                 if (sections[key].size == 1) {
-                    tempparticles.material.size = (localSections[key].size / 20) * controlers.pointsize;
+                    tempparticles.material.size = (localSections[key].size / 200) * controlers.pointsize;
                 } else {
-                    tempparticles.material.size = (localSections[key].size / 20) * controlers.glyphsize;
+                    tempparticles.material.size = (localSections[key].size / 200) * controlers.glyphsize;
                 }
                 tempparticles.material.needsUpdate = true;
             }
@@ -2428,7 +2432,7 @@ function changeGlyph(id, shape) {
 }
 
 function changeSingleGlyphSize(id, size){
-    currentParticles[id].material.size = (size / 20) * controlers.glyphsize;
+    currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
     currentParticles[id].material.needsUpdate = true;
     sections[id].size = size;
     changedSizes[id] = size;

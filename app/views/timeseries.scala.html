@@ -205,6 +205,8 @@
                         <input type="text" class="form-control" id="trajectoryStartLineWidth" placeholder="1.0">
                         <label for="cluster-label">Trajectory label count</label>
                         <input type="text" class="form-control" id="trajectoryLabelCount" placeholder="0">
+                        <label for="cluster-label">Trajectory label size</label>
+                        <input type="text" class="form-control" id="trajectoryLabelSize" placeholder="0">
                         <label for="cluster-label" id="errorLabel" class="danger" style="color:red"></label>
                     </div>
                     <button id="addTrajectory" class="btn btn-default btn-success">Ok</button>
@@ -468,6 +470,7 @@
                 $("#trajectoryTotal").val(totalTrajectoryPoints);
                 $("#trajectoryStartLineWidth").val(trajectoryStartLineWidth);
                 $("#trajectoryLabelCount").val(trajectoryData.totalLabels);
+                $("#trajectoryLabelSize").val(trajectoryData.textLabelSize);
                 $('#trajectory-modal').modal('show');
             });
 
@@ -485,6 +488,7 @@
                 var tTotal = $("#trajectoryTotal").val();
                 var tStart = $("#trajectoryStartLineWidth").val();
                 var tLabelCount = $("#trajectoryLabelCount").val();
+                var tLabelSize = $("#trajectoryLabelSize").val();
                 //var tEnd = $("#trajectoryEndLineWidth").val();
                 var currentValue = parseInt($("#plot-slider").prop("value"));
 
@@ -501,6 +505,7 @@
                     //trajectoryEndLineWidth = parseFloat(tEnd);
                     trajectoryStartLineWidth = parseFloat(tStart);
                     trajectoryData.totalLabels = parseInt(tLabelCount);
+                    trajectoryData.textLabelSize = parseFloat(tLabelSize);
 
                     updatePlot(currentValue);
                     return true;
