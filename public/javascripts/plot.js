@@ -228,6 +228,12 @@ function animate() {
     }
 }
 
+function getCanvasSize() {
+    var canvasWidth = $('#canvas3d').width();
+    var canvasHeight = $('#canvas3d').height();
+    return [canvasWidth, canvasHeight];
+}
+
 //Init methods
 
 function setupThreeJs() {
@@ -787,24 +793,24 @@ function convertDataToThreeJsFormat(data) {
                 if (!p) {
                     continue;
                 }
-                var p0 = parseFloat(p[0]);
-                var p1 = parseFloat(p[1]);
-                var p2 = parseFloat(p[2]);
+                var p0 = parseFloat(p[0]) * 10;
+                var p1 = parseFloat(p[1]) * 10;
+                var p2 = parseFloat(p[2]) * 10;
                 var label = p[3];
                 var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
 
                 // regular point
                 if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) < 0) {
-                    plotPoints[clusterdata.p[pointIndex]] = [p[0], p[1], p[2]];
+                    plotPoints[clusterdata.p[pointIndex]] = [p[0]*10, p[1]*10, p[2]*10];
                     pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
-                    positions[k * 3 + 0] = p0 * 10;
-                    positions[k * 3 + 1] = p1 * 10;
-                    positions[k * 3 + 2] = p2 * 10;
+                    positions[k * 3 + 0] = p0;
+                    positions[k * 3 + 1] = p1;
+                    positions[k * 3 + 2] = p2;
 
                     if (!calculatedmeans) {
-                        xmean += p0 * 10;
-                        ymean += p1 * 10;
-                        zmean += p2 * 10;
+                        xmean += p0;
+                        ymean += p1;
+                        zmean += p2;
                     }
                     colorarray[k * 3 + 0] = tempcolor.r;
                     colorarray[k * 3 + 1] = tempcolor.g;
@@ -1023,10 +1029,12 @@ function makeSpirtes(points) {
     var sprites = [];
     for (var key in points) {
         if (points.hasOwnProperty(key)) {
-            var sprite = makeTextSprite(key + "");
             var point = points[key];
+            var sprite = makeTextSprite(key + "");
+
+            sprite.position.set(point[0]+xmeantotal, point[1]+ymeantotal, point[2]+zmeantotal);
             sprite.position.set(point[0], point[1], point[2]);
-            sprite.position.normalize();
+            //sprite.position.normalize();
             sprites.push(sprite);
         }
     }
@@ -1040,7 +1048,7 @@ function makeTextSprite( message, parameters )  {
         parameters["fontface"] : "Arial";
 
     var fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 36;
+        parameters["fontsize"] : 18;
 
     var borderThickness = parameters.hasOwnProperty("borderThickness") ?
         parameters["borderThickness"] : 1;
@@ -1076,12 +1084,136 @@ function makeTextSprite( message, parameters )  {
     // canvas contents will be used for a texture
     var texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
-    var spriteMaterial = new THREE.SpriteMaterial(
-        { map: texture} );
+    var spriteMaterial = new THREE.SpriteMaterial( { map: texture, useScreenCoordinates: false } );
     var sprite = new THREE.Sprite( spriteMaterial );
-    sprite.scale.set(1,1,1.0);
+
+    var canvasSize = getCanvasSize();
+    sprite.scale.set(1,1,2);
     return sprite;
 }
+
+function getCanvasColor ( color ) {
+    return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
+}
+
+var DESCENDER_ADJUST = 1.28;
+function makeTextSprite2(message, x, y, z, parameters) {
+    if (parameters === undefined) parameters = {};
+
+    var fontface = parameters.hasOwnProperty("fontface") ?
+        parameters["fontface"] : "Arial";
+
+    var fontsize = parameters.hasOwnProperty("fontsize") ?
+        parameters["fontsize"] : 18;
+
+    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+        parameters["borderThickness"] : 4;
+
+    var borderColor = parameters.hasOwnProperty("borderColor") ?
+        parameters["borderColor"] : {r: 0, g: 0, b: 0, a: 1.0};
+
+    var fillColor = parameters.hasOwnProperty("fillColor") ?
+        parameters["fillColor"] : undefined;
+
+    var textColor = parameters.hasOwnProperty("textColor") ?
+        parameters["textColor"] : {r: 0, g: 0, b: 255, a: 1.0};
+
+    var radius = parameters.hasOwnProperty("radius") ?
+        parameters["radius"] : 6;
+
+    var vAlign = parameters.hasOwnProperty("vAlign") ?
+        parameters["vAlign"] : "center";
+
+    var hAlign = parameters.hasOwnProperty("hAlign") ?
+        parameters["hAlign"] : "center";
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+
+    // set a large-enough fixed-size canvas
+    canvas.width = 1800;
+    canvas.height = 900;
+
+    context.font = fontsize + "px " + fontface;
+    context.textBaseline = "alphabetic";
+    context.textAlign = "left";
+
+    // get size data (height depends only on font size)
+    var metrics = context.measureText(message);
+    var textWidth = metrics.width;
+
+    /*
+     // need to ensure that our canvas is always large enough
+     // to support the borders and justification, if any
+     // Note that this will fail for vertical text (e.g. Japanese)
+     // The other problem with this approach is that the size of the canvas
+     // varies with the length of the text, so 72-point text is different
+     // sizes for different text strings.  There are ways around this
+     // by dynamically adjust the sprite scale etc. but not in this demo...
+     var larger = textWidth > fontsize ? textWidth : fontsize;
+     canvas.width = larger * 4;
+     canvas.height = larger * 2;
+     // need to re-fetch and refresh the context after resizing the canvas
+     context = canvas.getContext('2d');
+     context.font = fontsize + "px " + fontface;
+     context.textBaseline = "alphabetic";
+     context.textAlign = "left";
+     metrics = context.measureText( message );
+     textWidth = metrics.width;
+
+     console.log("canvas: " + canvas.width + ", " + canvas.height + ", texW: " + textWidth);
+     */
+
+    // find the center of the canvas and the half of the font width and height
+    // we do it this way because the sprite's position is the CENTER of the sprite
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2;
+    var tx = textWidth / 2.0;
+    var ty = fontsize / 2.0;
+
+    // then adjust for the justification
+    if (vAlign == "bottom")
+        ty = 0;
+    else if (vAlign == "top")
+        ty = fontsize;
+
+    if (hAlign == "left")
+        tx = textWidth;
+    else if (hAlign == "right")
+        tx = 0;
+
+    // the DESCENDER_ADJUST is extra height factor for text below baseline: g,j,p,q. since we don't know the true bbox
+    roundRect(context, cx - tx, cy + ty + 0.28 * fontsize,
+        textWidth, fontsize * DESCENDER_ADJUST, radius, borderThickness, borderColor, fillColor);
+
+    // text color.  Note that we have to do this AFTER the round-rect as it also uses the "fillstyle" of the canvas
+    context.fillStyle = getCanvasColor(textColor);
+
+    context.fillText(message, cx - tx, cy + ty);
+
+    // draw some visual references - debug only
+    //drawCrossHairs(context, cx, cy);
+    // outlineCanvas(context, canvas);
+    //addSphere(x, y, z);
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas)
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({map: texture});
+    var sprite = new THREE.Sprite(spriteMaterial);
+
+    // we MUST set the scale to 2:1.  The canvas is already at a 2:1 scale,
+    // but the sprite itself is square: 1.0 by 1.0
+    // Note also that the size of the scale factors controls the actual size of the text-label
+    sprite.scale.set(4, 2, 1);
+
+    // set the sprite's position.  Note that this position is in the CENTER of the sprite
+    sprite.position.set(x, y, z);
+
+    return sprite;
+}
+
 // function for drawing rounded rectangles
 function roundRect(ctx, x, y, w, h, r)
 {
