@@ -78,7 +78,7 @@ var group = "";
 var scenes = {};
 
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = ['IBM','AAPL'];
+var trajectoryPointLabels = ['IBM'];
 var trajectoryPoints = {};
 var trajectoryLimit = -1;
 var totalTrajectoryPoints = 500;
@@ -502,7 +502,7 @@ function generateGraph() {
 
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
@@ -601,7 +601,7 @@ function drawEdges2(edges, points, pointcolors) {
                     var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryStartLineWidth + i * width)});
                     geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
                     geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-                    geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                    //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
                     var linesegs = new THREE.LineSegments(geometry, material);
                     lines.add(linesegs);
 
@@ -670,7 +670,7 @@ function drawEdges(edges, points, pointcolors) {
     colorarray32.set(colorarray);
     geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
     geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-    geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+    //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
     var linesegs = line = new THREE.LineSegments(geometry, material);
     return linesegs;
     //scene3d.add(linesegs)
@@ -992,7 +992,7 @@ function convertDataToThreeJsFormat(data) {
 
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
-            geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+            //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
             if (trajectoryClusterIds.indexOf(key) >= 0) {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
             } else {
@@ -1025,15 +1025,26 @@ function convertDataToThreeJsFormat(data) {
     fileNames[data.seq] = data.file;
 }
 
+var DESCENDER_ADJUST = 1.28;
+
+function getCanvasColor ( color ) {
+    return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
+}
+
 function makeSpirtes(points) {
     var sprites = [];
     for (var key in points) {
         if (points.hasOwnProperty(key)) {
             var point = points[key];
-            var sprite = makeTextSprite(key + "");
+            var sprite = makeTextSprite(key + "", point[0], point[1], point[2]);
 
-            sprite.position.set(point[0]+xmeantotal, point[1]+ymeantotal, point[2]+zmeantotal);
-            sprite.position.set(point[0], point[1], point[2]);
+            //sprite.position.set(point[0]+xmeantotal, point[1]+ymeantotal, point[2]+zmeantotal);
+            var imageWidth = sprite.material.map.image.width / 2;
+            var imageHeight = sprite.material.map.image.height / 2;
+            //sprite.position.set(point[0], point[1], point[2]);
+            //sprite.translateX(-xmeantotal);
+            //sprite.translateY(-ymeantotal);
+            //sprite.translateZ(-zmeantotal);
             //sprite.position.normalize();
             sprites.push(sprite);
         }
@@ -1041,82 +1052,26 @@ function makeSpirtes(points) {
     return sprites;
 }
 
-function makeTextSprite( message, parameters )  {
-    if ( parameters === undefined ) parameters = {};
-
-    var fontface = parameters.hasOwnProperty("fontface") ?
-        parameters["fontface"] : "Arial";
-
-    var fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 18;
-
-    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 1;
-
-    var borderColor = parameters.hasOwnProperty("borderColor") ?
-        parameters["borderColor"] : { r:255, g:0, b:0, a:1.0 };
-
-    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-        parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
-
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    context.font = "Bold " + fontsize + "px " + fontface;
-
-    // get size data (height depends only on font size)
-    var metrics = context.measureText( message );
-    var textWidth = metrics.width;
-
-    // background color
-    context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-        + backgroundColor.b + "," + backgroundColor.a + ")";
-    // border color
-    context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-        + borderColor.b + "," + borderColor.a + ")";
-    context.lineWidth = borderThickness;
-    roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
-    // 1.4 is extra height factor for text below baseline: g,j,p,q.
-
-    // text color
-    context.fillStyle = "rgba(0, 0, 0, 1.0)";
-    context.fillText( message, borderThickness, fontsize + borderThickness);
-
-    // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    var spriteMaterial = new THREE.SpriteMaterial( { map: texture, useScreenCoordinates: false } );
-    var sprite = new THREE.Sprite( spriteMaterial );
-
-    var canvasSize = getCanvasSize();
-    sprite.scale.set(1,1,2);
-    return sprite;
-}
-
-function getCanvasColor ( color ) {
-    return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
-}
-
-var DESCENDER_ADJUST = 1.28;
-function makeTextSprite2(message, x, y, z, parameters) {
+function makeTextSprite(message, x, y, z, parameters) {
     if (parameters === undefined) parameters = {};
 
     var fontface = parameters.hasOwnProperty("fontface") ?
         parameters["fontface"] : "Arial";
 
     var fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 18;
+        parameters["fontsize"] : 12;
 
     var borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 4;
+        parameters["borderThickness"] : 2;
 
     var borderColor = parameters.hasOwnProperty("borderColor") ?
-        parameters["borderColor"] : {r: 0, g: 0, b: 0, a: 1.0};
+        parameters["borderColor"] : {r: 255, g: 0, b: 0, a: 1.0};
 
     var fillColor = parameters.hasOwnProperty("fillColor") ?
-        parameters["fillColor"] : undefined;
+        parameters["fillColor"] : {r: 255, g: 255, b: 255, a: 1.0};
 
     var textColor = parameters.hasOwnProperty("textColor") ?
-        parameters["textColor"] : {r: 0, g: 0, b: 255, a: 1.0};
+        parameters["textColor"] : {r: 0, g: 0, b: 0, a: 1.0};
 
     var radius = parameters.hasOwnProperty("radius") ?
         parameters["radius"] : 6;
@@ -1131,8 +1086,8 @@ function makeTextSprite2(message, x, y, z, parameters) {
     var context = canvas.getContext('2d');
 
     // set a large-enough fixed-size canvas
-    canvas.width = 1800;
-    canvas.height = 900;
+    canvas.width = 300;
+    canvas.height = 150;
 
     context.font = fontsize + "px " + fontface;
     context.textBaseline = "alphabetic";
@@ -1214,8 +1169,101 @@ function makeTextSprite2(message, x, y, z, parameters) {
     return sprite;
 }
 
+ /**
+   *  function for drawing rounded rectangles
+   */
+ function roundRect(ctx, x, y, w, h, r, borderThickness, borderColor, fillColor) {
+     // no point in drawing it if it isn't going to be rendered
+     if (fillColor == undefined && borderColor == undefined)
+         return;
+
+     x -= borderThickness + r;
+     y += borderThickness + r;
+     w += borderThickness * 2 + r * 2;
+     h += borderThickness * 2 + r * 2;
+
+     ctx.beginPath();
+     ctx.moveTo(x + r, y);
+     ctx.lineTo(x + w - r, y);
+     ctx.quadraticCurveTo(x + w, y, x + w, y - r);
+     ctx.lineTo(x + w, y - h + r);
+     ctx.quadraticCurveTo(x + w, y - h, x + w - r, y - h);
+     ctx.lineTo(x + r, y - h);
+     ctx.quadraticCurveTo(x, y - h, x, y - h + r);
+     ctx.lineTo(x, y - r);
+     ctx.quadraticCurveTo(x, y, x + r, y);
+     ctx.closePath();
+
+     ctx.lineWidth = borderThickness;
+
+     // background color
+     // border color
+
+     // if the fill color is defined, then fill it
+     if (fillColor != undefined) {
+         ctx.fillStyle = getCanvasColor(fillColor);
+         ctx.fill();
+     }
+
+     if (borderThickness > 0 && borderColor != undefined) {
+         ctx.strokeStyle = getCanvasColor(borderColor);
+         ctx.stroke();
+     }
+ }
+
+function makeTextSprite2( message, parameters )  {
+    if ( parameters === undefined ) parameters = {};
+
+    var fontface = parameters.hasOwnProperty("fontface") ?
+        parameters["fontface"] : "Arial";
+
+    var fontsize = parameters.hasOwnProperty("fontsize") ?
+        parameters["fontsize"] : 18;
+
+    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+        parameters["borderThickness"] : 2;
+
+    var borderColor = parameters.hasOwnProperty("borderColor") ?
+        parameters["borderColor"] : { r:255, g:0, b:0, a:1.0 };
+
+    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+        parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    context.font = "Bold " + fontsize + "px " + fontface;
+
+    // get size data (height depends only on font size)
+    var metrics = context.measureText( message );
+    var textWidth = metrics.width;
+
+    // background color
+    context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+        + backgroundColor.b + "," + backgroundColor.a + ")";
+    // border color
+    context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+        + borderColor.b + "," + borderColor.a + ")";
+    context.lineWidth = borderThickness;
+    roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+    // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+    // text color
+    context.fillStyle = "rgba(0, 0, 0, 1.0)";
+    context.fillText( message, borderThickness, fontsize + borderThickness);
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    var spriteMaterial = new THREE.SpriteMaterial( { map: texture} );
+    var sprite = new THREE.Sprite( spriteMaterial );
+
+    var canvasSize = getCanvasSize();
+    sprite.scale.set(1,1,1);
+    return sprite;
+}
+
 // function for drawing rounded rectangles
-function roundRect(ctx, x, y, w, h, r)
+function roundRect2(ctx, x, y, w, h, r)
 {
     ctx.beginPath();
     ctx.moveTo(x+r, y);
@@ -2335,7 +2383,7 @@ function renderCustomCluster() {
     var tempparticles;
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
-            geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+            //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
             if (trajectoryClusterIds.indexOf(key) >= 0) {
                 tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, true));
             } else {
