@@ -107,7 +107,7 @@ var trajectoryData = {
     textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
     enableTrajectoryLabels: false,
-    textLabelSize: 1,
+    textLabelSize:.5,
 
     // create the trajectory labels for seq with label
     makeSprites: function (points, color, seq, label) {
