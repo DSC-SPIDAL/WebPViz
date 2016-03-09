@@ -117,14 +117,18 @@ var trajectoryData = {
             this.textLabels[seq] = spritesForSeq;
         }
 
+        if (this.totalLabels < 2) {
+            return;
+        }
+
         var pointPerElements = 1;
         if (trajectoryLimit < 0) {
-            pointPerElements = Math.round(Math.ceil(points.length / (this.totalLabels * 3)));
+            pointPerElements = Math.round(Math.ceil(points.length / ((this.totalLabels -1) * 3)));
         }
 
         var count = 0;
         for (var i = 0; i < points.length; i += 3) {
-            if (count % pointPerElements == 0) {
+            if (count % pointPerElements == 0 || (i >= points.length - 3)) {
                 var sprite = makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {
                     borderColor: {
                         r: color.r,
