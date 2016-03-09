@@ -74,11 +74,8 @@ var artifactName = "";
 var desc = "";
 var group = "";
 
-// save the scenes so that we can free them
-var scenes = {};
-
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = ['IBM'];
+var trajectoryPointLabels = ['IBM', 'AAPL'];
 var trajectoryPoints = {};
 var trajectoryLimit = -1;
 var totalTrajectoryPoints = 500;
@@ -88,6 +85,81 @@ var trajectoryToClusterId = {};
 var trajectoryClusterIds = [];
 var trajectoryEndLineWidth = 5;
 var trajectoryStartLineWidth = 1;
+
+
+var scenes = {
+    sceneSequence: {},
+    addScene: function (seq, scene) {
+        this.sceneSequence[seq] = scene;
+    },
+
+    clearScenes: function(start, end) {
+        for (var i = start; i < end; i++) {
+            if (scenes.sceneSequence[i]) {
+                delete scenes[i];
+            }
+        }
+    }
+};
+
+var trajectoryData = {
+    textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
+    totalLabels: 100,
+
+    // create the trajectory labels for seq with label
+    makeSprites: function (points, color, seq, label) {
+        var sprites = [];
+        var spritesForSeq = {};
+        if (this.textLabels[seq]) {
+            spritesForSeq = this.textLabels[seq];
+        } else {
+            this.textLabels[seq] = spritesForSeq;
+        }
+
+        var count = 0;
+        for (var i = 0; i < points.length; i += 3) {
+            var sprite = makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {borderColor: {r:color.r, g:color.g, b:color.b, a:1.0}});
+            count++;
+            sprites.push(sprite);
+        }
+        spritesForSeq[label] = sprites;
+    },
+
+    renderSprites: function (scene3d, seq) {
+        if (this.textLabels[seq]) {
+            var spritesForSeq = this.textLabels[seq];
+            for (var key in spritesForSeq) {
+                if (spritesForSeq.hasOwnProperty(key)) {
+                    var sprites = spritesForSeq[key];
+                    for (var i = 0; i < sprites.length; i++) {
+                        scene3d.add(sprites[i]);
+                    }
+                }
+            }
+        }
+    },
+
+    clearSprites: function (start, end) {
+        for (var i = start; i < end; i++) {
+            var scene = scenes.sceneSequence[i];
+            if (scene) {
+                var spritesForSeq = this.textLabels[i];
+                for (var key in spritesForSeq) {
+                    if (spritesForSeq.hasOwnProperty(key)) {
+                        var sprites = spritesForSeq[key];
+                        for (var j = 0; j < sprites.length; j++) {
+                            scene3d.remove(sprites[j]);
+                        }
+                    }
+                }
+            }
+
+            if (this.textLabels[i]) {
+                delete this.textLabels[i];
+            }
+        }
+    }
+};
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -235,7 +307,6 @@ function getCanvasSize() {
 }
 
 //Init methods
-
 function setupThreeJs() {
     if (!infoPage) {
         var height = window.innerHeight - 57 - 40 - 40 - 11;
@@ -909,8 +980,8 @@ function convertDataToThreeJsFormat(data) {
                         }
                     }
 
-                    var postitionTrajecArray = [];
-                    var colorararrayTrajectArray = [];
+                    var positionTrajecArray = [];
+                    var colorTrajectArray = [];
                     var startingColor = Color.rgb(clustercolor.r, clustercolor.g, clustercolor.b);
                     var hsl = startingColor.hslData();
                     var h = hsl[0];
@@ -935,12 +1006,12 @@ function convertDataToThreeJsFormat(data) {
                         var newColor = Color.hsl(h, s, l);
                         var newRgb = newColor.rgbData();
                         if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
-                            postitionTrajecArray.push(pp0);
-                            postitionTrajecArray.push(pp1);
-                            postitionTrajecArray.push(pp2);
-                            colorararrayTrajectArray.push(clustercolor.r);
-                            colorararrayTrajectArray.push(clustercolor.g);
-                            colorararrayTrajectArray.push(clustercolor.b);
+                            positionTrajecArray.push(pp0);
+                            positionTrajecArray.push(pp1);
+                            positionTrajecArray.push(pp2);
+                            colorTrajectArray.push(clustercolor.r);
+                            colorTrajectArray.push(clustercolor.g);
+                            colorTrajectArray.push(clustercolor.b);
                             c++;
                         }
 
@@ -950,13 +1021,16 @@ function convertDataToThreeJsFormat(data) {
 
                         trajectoryPointIndex++;
                     }
-                    var positionsTrajec = new Float32Array(postitionTrajecArray.length);
-                    var colorarrayTrajec = new Float32Array(colorararrayTrajectArray.length);
-                    positionsTrajec.set(postitionTrajecArray);
-                    colorarrayTrajec.set(colorararrayTrajectArray);
+                    var positionsTrajec = new Float32Array(positionTrajecArray.length);
+                    var colorsTrajec = new Float32Array(colorTrajectArray.length);
+                    positionsTrajec.set(positionTrajecArray);
+                    colorsTrajec.set(colorTrajectArray);
 
                     geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
-                    geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorarrayTrajec, 3));
+                    geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorsTrajec, 3));
+
+                    trajectoryData.makeSprites(positionTrajecArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, label);
+
                     points[trajectoryPointIndex] = [p0, p1, p2];
                     pointcolors[trajectoryPointIndex] = tempcolor;
                     edgeVerteces.push(trajectoryPointIndex + "");
@@ -1002,7 +1076,6 @@ function convertDataToThreeJsFormat(data) {
     }
 
     lineSets[data.seq] = drawEdges(edges, points, pointcolors);
-    texts[data.seq] = makeSpirtes(points);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
@@ -1029,27 +1102,6 @@ var DESCENDER_ADJUST = 1.28;
 
 function getCanvasColor ( color ) {
     return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
-}
-
-function makeSpirtes(points) {
-    var sprites = [];
-    for (var key in points) {
-        if (points.hasOwnProperty(key)) {
-            var point = points[key];
-            var sprite = makeTextSprite(key + "", point[0], point[1], point[2]);
-
-            //sprite.position.set(point[0]+xmeantotal, point[1]+ymeantotal, point[2]+zmeantotal);
-            var imageWidth = sprite.material.map.image.width / 2;
-            var imageHeight = sprite.material.map.image.height / 2;
-            //sprite.position.set(point[0], point[1], point[2]);
-            //sprite.translateX(-xmeantotal);
-            //sprite.translateY(-ymeantotal);
-            //sprite.translateZ(-zmeantotal);
-            //sprite.position.normalize();
-            sprites.push(sprite);
-        }
-    }
-    return sprites;
 }
 
 function makeTextSprite(message, x, y, z, parameters) {
@@ -1210,75 +1262,6 @@ function makeTextSprite(message, x, y, z, parameters) {
          ctx.stroke();
      }
  }
-
-function makeTextSprite2( message, parameters )  {
-    if ( parameters === undefined ) parameters = {};
-
-    var fontface = parameters.hasOwnProperty("fontface") ?
-        parameters["fontface"] : "Arial";
-
-    var fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 18;
-
-    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 2;
-
-    var borderColor = parameters.hasOwnProperty("borderColor") ?
-        parameters["borderColor"] : { r:255, g:0, b:0, a:1.0 };
-
-    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-        parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
-
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    context.font = "Bold " + fontsize + "px " + fontface;
-
-    // get size data (height depends only on font size)
-    var metrics = context.measureText( message );
-    var textWidth = metrics.width;
-
-    // background color
-    context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-        + backgroundColor.b + "," + backgroundColor.a + ")";
-    // border color
-    context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-        + borderColor.b + "," + borderColor.a + ")";
-    context.lineWidth = borderThickness;
-    roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
-    // 1.4 is extra height factor for text below baseline: g,j,p,q.
-
-    // text color
-    context.fillStyle = "rgba(0, 0, 0, 1.0)";
-    context.fillText( message, borderThickness, fontsize + borderThickness);
-
-    // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    var spriteMaterial = new THREE.SpriteMaterial( { map: texture} );
-    var sprite = new THREE.Sprite( spriteMaterial );
-
-    var canvasSize = getCanvasSize();
-    sprite.scale.set(1,1,1);
-    return sprite;
-}
-
-// function for drawing rounded rectangles
-function roundRect2(ctx, x, y, w, h, r)
-{
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-}
 
 // get the current points and check weather the given label exists
 function checkLabelExists(labelList) {
@@ -1448,6 +1431,9 @@ function updatePlot(index) {
         }
 
         scene3d = new THREE.Scene();
+
+        scenes.addScene(index, scene3d);
+
         scene3d.add(camera);
         scenes[index] = scene3d;
         currentParticles = particleSets[index];
@@ -1507,12 +1493,7 @@ function updatePlot(index) {
             }
         }
 
-        if (texts[index]) {
-            var sprites = texts[index];
-            for (var i = 0; i < sprites.length; i++) {
-                scene3d.add(sprites[i]);
-            }
-        }
+        trajectoryData.renderSprites(scene3d, index);
 
         if (lineSets[index]) {
             scene3d.add(lineSets[index]);
@@ -1578,7 +1559,6 @@ function initBufferAndLoad() {
             $("#progress").css({display: "none"});
             if (!bufferLoopStarted) {
                 bufferLoopStarted = true;
-                console.log("8");
                 bufferLoop(null);
             }
         }
@@ -1623,7 +1603,10 @@ function clearThreeJS(loadStartIndex, loadend) {
             delete sectionSets[i];
             sectionSets[i] = null;
         }
+
     }
+    trajectoryData.clearSprites(0, loadStartIndex);
+    trajectoryData.clearSprites(loadend + 1, timeSeriesLength);
     for (var i = loadend + 1; i < timeSeriesLength; i++) {
         if (bufferRequestMade[i]) {
             delete bufferRequestMade[i];
@@ -1658,6 +1641,8 @@ function clearThreeJS(loadStartIndex, loadend) {
             pointLabelxKeySets[i] = null
         }
     }
+    scenes.clearScenes(0, loadStartIndex);
+    scenes.clearScenes(loadend + 1, timeSeriesLength);
 }
 
 function bufferLoop(indx) {
@@ -1896,6 +1881,7 @@ function generateCheckList(list, initcolors) {
     if($("#cluster_table").length && !customclusternotadded){
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
+            if (!list[key]) continue;
             if (!(removedclusters.hasOwnProperty(key))) {
                 $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
             } else {
@@ -1919,11 +1905,11 @@ function generateCheckList(list, initcolors) {
             }
         }
         found =  true;
-    }else {
-
+    } else {
         tablerows = "";
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
+            if (!list[key]) continue;
             tablerows += "<tr class='even pointer' id='" + key + "'>"
                 + "<td class='a-center'>";
             if (!(removedclusters.hasOwnProperty(key))) {
@@ -2508,6 +2494,8 @@ function getFontIconByShape(shape) {
 }
 
 function getGlyphName(key) {
+    if (!key) return;
+
     var glyph = null;
     if (key.size > 1) {
         switch (parseInt(key.shape)) {
