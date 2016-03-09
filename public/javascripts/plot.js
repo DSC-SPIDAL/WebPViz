@@ -104,7 +104,8 @@ var scenes = {
 
 var trajectoryData = {
     textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
-    totalLabels: 100,
+    totalLabels: 10,
+    enableTrajectoryLabels: false,
 
     // create the trajectory labels for seq with label
     makeSprites: function (points, color, seq, label) {
@@ -116,11 +117,25 @@ var trajectoryData = {
             this.textLabels[seq] = spritesForSeq;
         }
 
+        var pointPerElements = 1;
+        if (trajectoryLimit < 0) {
+            pointPerElements = Math.round(Math.ceil(points.length / (this.totalLabels * 3)));
+        }
+
         var count = 0;
         for (var i = 0; i < points.length; i += 3) {
-            var sprite = makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {borderColor: {r:color.r, g:color.g, b:color.b, a:1.0}});
+            if (count % pointPerElements == 0) {
+                var sprite = makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {
+                    borderColor: {
+                        r: color.r,
+                        g: color.g,
+                        b: color.b,
+                        a: 1.0
+                    }
+                });
+                sprites.push(sprite);
+            }
             count++;
-            sprites.push(sprite);
         }
         spritesForSeq[label] = sprites;
     },
@@ -982,6 +997,7 @@ function convertDataToThreeJsFormat(data) {
 
                     var positionTrajecArray = [];
                     var colorTrajectArray = [];
+                    var positionTrajecLabelArray = [];
                     var startingColor = Color.rgb(clustercolor.r, clustercolor.g, clustercolor.b);
                     var hsl = startingColor.hslData();
                     var h = hsl[0];
@@ -1015,6 +1031,10 @@ function convertDataToThreeJsFormat(data) {
                             c++;
                         }
 
+                        positionTrajecLabelArray.push(pp0);
+                        positionTrajecLabelArray.push(pp1);
+                        positionTrajecLabelArray.push(pp2);
+
                         points[trajectoryPointIndex] = [pp0, pp1, pp2];
                         pointcolors[trajectoryPointIndex] =  new THREE.Color("rgb(" + newRgb[0] + "," + newRgb[1] + "," + newRgb[2] + ")");
                         edgeVerteces.push(trajectoryPointIndex);
@@ -1029,7 +1049,7 @@ function convertDataToThreeJsFormat(data) {
                     geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                     geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorsTrajec, 3));
 
-                    trajectoryData.makeSprites(positionTrajecArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, label);
+                    trajectoryData.makeSprites(positionTrajecLabelArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, label);
 
                     points[trajectoryPointIndex] = [p0, p1, p2];
                     pointcolors[trajectoryPointIndex] = tempcolor;
