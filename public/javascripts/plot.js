@@ -75,10 +75,10 @@ var desc = "";
 var group = "";
 
 // keep track of the information needed to do trajectories
-var trajectoryPointLabels = ['IBM', 'AAPL'];
+var trajectoryPointLabels = [];
 var trajectoryPoints = {};
 var trajectoryLimit = -1;
-var totalTrajectoryPoints = 500;
+var totalTrajectoryPoints = 50;
 var trajectoryPointSizeRatio = 10;
 // keep track of the cluster IDs created for the trajectory
 var trajectoryToClusterId = {};
