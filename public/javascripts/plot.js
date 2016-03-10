@@ -74,19 +74,6 @@ var artifactName = "";
 var desc = "";
 var group = "";
 
-// keep track of the information needed to do trajectories
-var trajectoryPointLabels = [];
-var trajectoryPoints = {};
-var trajectoryLimit = -1;
-var totalTrajectoryPoints = 50;
-var trajectoryPointSizeRatio = 10;
-// keep track of the cluster IDs created for the trajectory
-var trajectoryToClusterId = {};
-var trajectoryClusterIds = [];
-var trajectoryEndLineWidth = 5;
-var trajectoryStartLineWidth = 1;
-
-
 var scenes = {
     scale: 1,
     sceneSequence: {},
@@ -106,8 +93,18 @@ var scenes = {
 var trajectoryData = {
     textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
-    enableTrajectoryLabels: false,
     textLabelSize:.5,
+    trajectoryPointLabels: [],
+    trajectoryPoints: {},
+    trajectoryLimit: -1,
+    totalTrajectoryPoints: 50,
+    trajectoryPointSizeRatio: 10,
+    // keep track of the cluster IDs created for the trajectory
+    trajectoryToClusterId: {},
+    trajectoryClusterIds: [],
+    trajectoryEndLineWidth: 5,
+    trajectoryStartLineWidth: 1,
+    config: {},
 
     // create the trajectory labels for seq with label
     makeSprites: function (points, color, seq, label) {
@@ -124,7 +121,7 @@ var trajectoryData = {
         }
 
         var pointPerElements = 1;
-        if (trajectoryLimit < 0) {
+        if (trajectoryData.trajectoryLimit < 0) {
             pointPerElements = Math.round(Math.ceil(points.length / ((this.totalLabels -1) * 3)));
         }
 
@@ -179,6 +176,30 @@ var trajectoryData = {
                 delete this.textLabels[i];
             }
         }
+    },
+
+    load: function(save) {
+        this.textLabelSize = save['textLabelSize'];
+        this.totalLabels = save['totalLabels'];
+        this.trajectoryPointLabels = save['trajectoryPointLabels'];
+        this.trajectoryLimit = save['trajectoryLimit'];
+        this.totalTrajectoryPoints = save['totalTrajectoryPoints'];
+        this.trajectoryPointSizeRatio = save['trajectoryPointSizeRatio'];
+        // keep track of the cluster IDs created for the trajector
+        this.trajectoryStartLineWidth = save['trajectoryStartLineWidth'];
+    },
+
+    createSave: function() {
+        save = {};
+        save['textLabelSize'] = this.textLabelSize;
+        save['totalLabels'] = this.totalLabels;
+        save['trajectoryPointLabels'] = this.trajectoryPointLabels;
+        save['trajectoryLimit'] = this.trajectoryLimit;
+        save['totalTrajectoryPoints'] = this.totalTrajectoryPoints;
+        save['trajectoryPointSizeRatio'] = this.trajectoryPointSizeRatio;
+            // keep track of the cluster IDs created for the trajector
+        save['trajectoryStartLineWidth'] = this.trajectoryStartLineWidth;
+        return save;
     }
 };
 
@@ -435,6 +456,9 @@ function intialSetup(settings, reinit) {
             camera.matrix.fromArray(JSON.parse(cameraState));
             camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
         }
+        if (sett.trajectoryData) {
+            trajectoryData.load(sett.trajectoryData);
+        }
         camera.updateProjectionMatrix();
         var colors = sett.clusterColors;
         if (colors) {
@@ -660,7 +684,7 @@ function drawEdges2(edges, points, pointcolors) {
                 return;
             }
 
-            var width = (trajectoryEndLineWidth - trajectoryStartLineWidth) / vertices.length;
+            var width = (trajectoryData.trajectoryEndLineWidth - trajectoryData.trajectoryStartLineWidth) / vertices.length;
             for (var i = 0; i < vertices.length; i++) {
                 var pointkey = vertices[i];
                 var point = points[parseInt(pointkey)];
@@ -690,7 +714,7 @@ function drawEdges2(edges, points, pointcolors) {
                     colorarray32.set(colorarray);
 
                     var geometry = new THREE.BufferGeometry();
-                    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryStartLineWidth + i * width)});
+                    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryData.trajectoryStartLineWidth + i * width)});
                     geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
                     geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
                     //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
@@ -713,7 +737,7 @@ function drawEdges(edges, points, pointcolors) {
         return;
 
     var geometry = new THREE.BufferGeometry();
-    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryStartLineWidth});
+    var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryData.trajectoryStartLineWidth});
     var positions = [];
     var colorarray = [];
     for (var key in edges) {
@@ -796,17 +820,17 @@ function convertDataToThreeJsFormat(data) {
             }
         }
     }
-    var upperCaseTrajectoryPointLabels = trajectoryPointLabels.map(function(value) {
+    var upperCaseTrajectoryPointLabels = trajectoryData.trajectoryPointLabels.map(function(value) {
         return value.toUpperCase();
     });
 
     var pointPerElements = 1;
-    if (trajectoryLimit < 0) {
-        pointPerElements = Math.round(Math.ceil(timeSeriesLength / totalTrajectoryPoints));
-    } else if (totalTrajectoryPoints > trajectoryLimit) {
+    if (trajectoryData.trajectoryLimit < 0) {
+        pointPerElements = Math.round(Math.ceil(timeSeriesLength / trajectoryData.totalTrajectoryPoints));
+    } else if (trajectoryData.totalTrajectoryPoints > trajectoryData.trajectoryLimit) {
         pointPerElements = 1;
-    } else if (totalTrajectoryPoints < trajectoryLimit) {
-        pointPerElements = Math.round(Math.ceil(trajectoryLimit / totalTrajectoryPoints));
+    } else if (trajectoryData.totalTrajectoryPoints < trajectoryData.trajectoryLimit) {
+        pointPerElements = Math.round(Math.ceil(trajectoryData.trajectoryLimit / trajectoryData.totalTrajectoryPoints));
     }
 
     var highetClusterId = currentHighestClusterId;
@@ -861,8 +885,8 @@ function convertDataToThreeJsFormat(data) {
             zmean = 0;
             var k = 0;
             var trajectoryNumber = 0;
-            if (trajectoryLimit >= 0) {
-                trajectoryNumber = trajectoryLimit;
+            if (trajectoryData.trajectoryLimit >= 0) {
+                trajectoryNumber = trajectoryData.trajectoryLimit;
             } else {
                 trajectoryNumber = -1;
             }
@@ -910,16 +934,16 @@ function convertDataToThreeJsFormat(data) {
                     k++;
                 } else {
                     // trajectory point
-                    var trajectoryList = trajectoryPoints[label];
+                    var trajectoryList = trajectoryData.trajectoryPoints[label];
                     var edge = {};
                     var edgeVerteces = [];
                     var currentClusterId = 0;
                     // check weather there is a cluster id for this trajectory
-                    if (!trajectoryToClusterId[label.toUpperCase()]) {
+                    if (!trajectoryData.trajectoryToClusterId[label.toUpperCase()]) {
                         currentHighestClusterId = currentHighestClusterId + 1;
                         currentClusterId = currentHighestClusterId;
-                        trajectoryClusterIds.push(currentClusterId+"");
-                        trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
+                        trajectoryData.trajectoryClusterIds.push(currentClusterId+"");
+                        trajectoryData.trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
 
                         if (!geometry.hasOwnProperty(currentClusterId)) {
                             geometry[currentClusterId] = new THREE.BufferGeometry();
@@ -928,7 +952,7 @@ function convertDataToThreeJsFormat(data) {
                         // we will add some extra points to cluster
                         localSection = {
                             "length": clusterdata.p.length,
-                            "size": trajectoryPointSizeRatio,
+                            "size": trajectoryData.trajectoryPointSizeRatio,
                             "shape": clusterdata.f,
                             "visible": clusterdata.v,
                             "color": clustercolor,
@@ -944,13 +968,13 @@ function convertDataToThreeJsFormat(data) {
                         }
                         localSections[currentClusterId] = localSection;
                     } else {
-                        currentClusterId = trajectoryToClusterId[label.toUpperCase()];
+                        currentClusterId = trajectoryData.trajectoryToClusterId[label.toUpperCase()];
                         clustercolor = trueColorList[currentClusterId];
                     }
 
                     if (!trajectoryList) {
                         trajectoryList = [];
-                        trajectoryPoints[label] = trajectoryList;
+                        trajectoryData.trajectoryPoints[label] = trajectoryList;
                     }
 
                     var trajectory = {};
@@ -965,7 +989,7 @@ function convertDataToThreeJsFormat(data) {
                     // we will add some extra points to cluster
                     localSection = {
                         "length": clusterdata.p.length,
-                        "size": trajectoryPointSizeRatio,
+                        "size": trajectoryData.trajectoryPointSizeRatio,
                         "shape": clusterdata.f,
                         "visible": clusterdata.v,
                         "color": clustercolor,
@@ -1093,7 +1117,7 @@ function convertDataToThreeJsFormat(data) {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            if (trajectoryClusterIds.indexOf(key) >= 0) {
+            if (trajectoryData.trajectoryClusterIds.indexOf(key) >= 0) {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
             } else {
                 particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
@@ -1508,7 +1532,7 @@ function updatePlot(index) {
                 }
 
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    if (trajectoryClusterIds.indexOf(key) < 0) {
+                    if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
                         currentParticles[key].material.map = sprites[changedGlyphs[key]];
                     } else {
                         currentParticles[key].material.map = trajSprites[changedGlyphs[key]];
@@ -1829,6 +1853,7 @@ function savePlotSettings(result) {
         obj['zoom'] = camera.zoom;
         obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
         obj['controltarget'] = controls.target;
+        obj['trajectoryData'] = trajectoryData.createSave();
         sett[res] = obj;
     }
 }
@@ -2032,7 +2057,7 @@ function generateClusterList(list, initcolors) {
                     }
                 }
                 // try to find the element first
-                if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryPointLabels.length == 0) {
+                if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryData.trajectoryPointLabels.length == 0) {
                     if ($("#plot-clusters > #" + key + " span").length) {
                         if (sprite != null) {
                             $("#pc" + key).css("background-color", "#ffffff");
@@ -2398,7 +2423,7 @@ function renderCustomCluster() {
     for (var key in geometry) {
         if (geometry.hasOwnProperty(key)) {
             //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-            if (trajectoryClusterIds.indexOf(key) >= 0) {
+            if (trajectoryData.trajectoryClusterIds.indexOf(key) >= 0) {
                 tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, true));
             } else {
                 tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
@@ -2422,7 +2447,7 @@ function renderCustomCluster() {
 
 function changeGlyph(id, shape) {
     changedGlyphs[id] = shape;
-    if (trajectoryClusterIds.indexOf(id) < 0) {
+    if (trajectoryData.trajectoryClusterIds.indexOf(id) < 0) {
         currentParticles[id].material.map = sprites[shape];
     } else {
         currentParticles[id].material.map = trajSprites[shape];

@@ -464,11 +464,11 @@
     </script>
     <script>
             $("#trajectory-show").click(function() {
-                $("#trajectoryInput").val(trajectoryPointLabels.toString());
-                $("#trajectoryNumber").val(trajectoryLimit);
-                $("#trajectoryRatio").val(trajectoryPointSizeRatio);
-                $("#trajectoryTotal").val(totalTrajectoryPoints);
-                $("#trajectoryStartLineWidth").val(trajectoryStartLineWidth);
+                $("#trajectoryInput").val(trajectoryData.trajectoryPointLabels.toString());
+                $("#trajectoryNumber").val(trajectoryData.trajectoryLimit);
+                $("#trajectoryRatio").val(trajectoryData.trajectoryPointSizeRatio);
+                $("#trajectoryTotal").val(trajectoryData.totalTrajectoryPoints);
+                $("#trajectoryStartLineWidth").val(trajectoryData.trajectoryStartLineWidth);
                 $("#trajectoryLabelCount").val(trajectoryData.totalLabels);
                 $("#trajectoryLabelSize").val(trajectoryData.textLabelSize);
                 $('#trajectory-modal').modal('show');
@@ -495,15 +495,15 @@
                 var trajectoryPointLabels2 = tList.split(",");
                 var labelExists = checkLabelExists(trajectoryPointLabels2);
                 if (labelExists.length == 0) {
-                    trajectoryPointLabels = [];
+                    trajectoryData.trajectoryPointLabels = [];
                     for (var i = 0; i < trajectoryPointLabels2.length; i++) {
-                        trajectoryPointLabels.push(trajectoryPointLabels2[i]);
+                        trajectoryData.trajectoryPointLabels.push(trajectoryPointLabels2[i]);
                     }
-                    trajectoryLimit = parseInt(tNo);
-                    trajectoryPointSizeRatio = parseFloat(tRatio);
-                    totalTrajectoryPoints = parseFloat(tTotal);
+                    trajectoryData.trajectoryLimit = parseInt(tNo);
+                    trajectoryData.trajectoryPointSizeRatio = parseFloat(tRatio);
+                    trajectoryData.totalTrajectoryPoints = parseFloat(tTotal);
                     //trajectoryEndLineWidth = parseFloat(tEnd);
-                    trajectoryStartLineWidth = parseFloat(tStart);
+                    trajectoryData.trajectoryStartLineWidth = parseFloat(tStart);
                     trajectoryData.totalLabels = parseInt(tLabelCount);
                     trajectoryData.textLabelSize = parseFloat(tLabelSize);
 
