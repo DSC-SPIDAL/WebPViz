@@ -493,11 +493,18 @@
                 var currentValue = parseInt($("#plot-slider").prop("value"));
 
                 var trajectoryPointLabels2 = tList.split(",");
-                var labelExists = checkLabelExists(trajectoryPointLabels2);
+                var cleanedLabelList = [];
+                // remove any empty values
+                for (var i = 0; i < trajectoryPointLabels2.length; i++) {
+                    if (!(trajectoryPointLabels2[i] === "")) {
+                        cleanedLabelList.push(trajectoryPointLabels2[i]);
+                    }
+                }
+                var labelExists = checkLabelExists(cleanedLabelList);
                 if (labelExists.length == 0) {
                     trajectoryData.trajectoryPointLabels = [];
-                    for (var i = 0; i < trajectoryPointLabels2.length; i++) {
-                        trajectoryData.trajectoryPointLabels.push(trajectoryPointLabels2[i]);
+                    for (var i = 0; i < cleanedLabelList.length; i++) {
+                        trajectoryData.trajectoryPointLabels.push(cleanedLabelList[i]);
                     }
                     trajectoryData.trajectoryLimit = parseInt(tNo);
                     trajectoryData.trajectoryPointSizeRatio = parseFloat(tRatio);

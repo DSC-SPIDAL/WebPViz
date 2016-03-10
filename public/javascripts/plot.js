@@ -40,7 +40,6 @@ var xmean = 0, ymean = 0, zmean = 0, cameraCenter, calculatedmeans = false;
 
 //Single Plot Varibles
 var clusterUrl;
-var clusters;
 var resultSetId;
 var timeseriesId;
 var fileName;
@@ -63,6 +62,7 @@ var pointSize = 1.0;
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
+// static information about the plot
 var plotInfo = {
     infoPage: false,
     artifactName: "",
@@ -304,6 +304,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     clusterUrl = resultSetUrl;
     publicUrl = pub;
     timeseriesId = id;
+
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
 
@@ -543,7 +544,7 @@ function generateGraph() {
         var points = {};
         var pointcolors = {};
         $("#plot-title").text(data.file);
-        clusters = data.clusters;
+        var clusters = data.clusters;
         var clusterCount = 0;
         for (var cid in clusters) {
             if (data.clusters.hasOwnProperty(cid)) {
@@ -817,7 +818,7 @@ function convertDataToThreeJsFormat(data) {
     var plotPoints = {};
     pointLabelxKey = {};
     var geometry = {};
-    clusters = data.clusters;
+    var clusters = data.clusters;
     fileName = data.file;
     plotDesc = data.desc;
     uploader = data.uploader;
@@ -1284,7 +1285,7 @@ function makeTextSprite(message, x, y, z, parameters) {
     // we MUST set the scale to 2:1.  The canvas is already at a 2:1 scale,
     // but the sprite itself is square: 1.0 by 1.0
     // Note also that the size of the scale factors controls the actual size of the text-label
-    sprite.scale.set(2 * scaleFactor, 1 * scaleFactor, 1);
+    sprite.scale.set(1 * scaleFactor,.5 * scaleFactor, 1);
 
     // set the sprite's position.  Note that this position is in the CENTER of the sprite
     sprite.position.set(x, y, z);
