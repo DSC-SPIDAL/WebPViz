@@ -12,7 +12,6 @@ var allSettings = {};
 var settingOn = false;
 
 // Color controls
-var colors = [];
 var colorlist = {};
 var trueColorList = {};
 var colorsLoaded = false;
@@ -28,7 +27,6 @@ var particleSets = {};
 var sectionSets = {};
 var changedGlyphs = {};
 var changedSizes ={};
-var customclusters = {};
 var customclusternotadded = false;
 var customclusternotaddedtolist = false;
 var pointLabelxKey = {};
@@ -51,9 +49,7 @@ var uploader;
 //Time Series Vars
 var fileNames = {};
 var resultSets;
-var removedclusters = [];
-var recoloredclusters = [];
-var realpaedclusters = [];
+
 var timeSeriesLength;
 var plotDesc;
 
@@ -67,10 +63,28 @@ var pointSize = 1.0;
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
-var infoPage = false;
-var artifactName = "";
-var desc = "";
-var group = "";
+var plotInfo = {
+    infoPage: false,
+    artifactName: "",
+    desc: "",
+    group: "",
+    isTimeSeries: false,
+
+    updateInfo: function(info, name, desc, group, isTimeSeries) {
+        this.infoPage = info;
+        this.artifactName = name;
+        this.desc = desc;
+        this.group = group;
+        this.isTimeSeries = isTimeSeries;
+    }
+};
+
+var clusterData = {
+    customclusters: {},
+    removedclusters: [],
+    recoloredclusters: [],
+    realpaedclusters: []
+};
 
 // keeps track of the obects to render
 var renderObjects = {
@@ -107,7 +121,7 @@ var scenes = {
 };
 
 var trajectoryData = {
-    textLabels: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
+    labelSets: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
     textLabelSize:.5,
     trajectoryPointLabels: [],
@@ -120,16 +134,15 @@ var trajectoryData = {
     trajectoryClusterIds: [],
     trajectoryEndLineWidth: 5,
     trajectoryStartLineWidth: 1,
-    config: {},
 
     // create the trajectory labels for seq with label
     makeSprites: function (points, color, seq, label) {
         var sprites = [];
         var spritesForSeq = {};
-        if (this.textLabels[seq]) {
-            spritesForSeq = this.textLabels[seq];
+        if (this.labelSets[seq]) {
+            spritesForSeq = this.labelSets[seq];
         } else {
-            this.textLabels[seq] = spritesForSeq;
+            this.labelSets[seq] = spritesForSeq;
         }
 
         if (this.totalLabels < 2) {
@@ -160,8 +173,8 @@ var trajectoryData = {
     },
 
     renderSprites: function (scene3d, seq) {
-        if (this.textLabels[seq]) {
-            var spritesForSeq = this.textLabels[seq];
+        if (this.labelSets[seq]) {
+            var spritesForSeq = this.labelSets[seq];
             for (var key in spritesForSeq) {
                 if (spritesForSeq.hasOwnProperty(key)) {
                     var sprites = spritesForSeq[key];
@@ -177,7 +190,7 @@ var trajectoryData = {
         for (var i = start; i < end; i++) {
             var scene = scenes.sceneSequence[i];
             if (scene) {
-                var spritesForSeq = this.textLabels[i];
+                var spritesForSeq = this.labelSets[i];
                 for (var key in spritesForSeq) {
                     if (spritesForSeq.hasOwnProperty(key)) {
                         var sprites = spritesForSeq[key];
@@ -188,8 +201,8 @@ var trajectoryData = {
                 }
             }
 
-            if (this.textLabels[i]) {
-                delete this.textLabels[i];
+            if (this.labelSets[i]) {
+                delete this.labelSets[i];
             }
         }
     },
@@ -266,21 +279,16 @@ function initSlider() {
 
 var totalItemsToLoad = 1;
 var itemsLoaded = 1;
-var isTimeSeries = false;
 var reInitialize = false;
 
 //Plot functions - These are the methods that are first called when a plot is generated
 function visualize(resultSetUrl, artifact, fid, tid, info) {
     initSlider();
     info = typeof info !== 'undefined' ? info : false;
-    infoPage = info;
+    plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, false);
     clusterUrl = resultSetUrl;
     resultSetId = fid;
     timeseriesId = tid;
-    artifactName = artifact.name;
-    desc = artifact.desc;
-    group = artifact.group;
-    isTimeSeries = false;
     setupThreeJs();
     $("#progress").css({display: "block"});
     intialSetup(artifact.settings, false);
@@ -292,16 +300,12 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
 function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     initSlider();
     info = typeof info !== 'undefined' ? info : false;
-    infoPage = info;
+    plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, true);
     clusterUrl = resultSetUrl;
     publicUrl = pub;
     timeseriesId = id;
     resultSets = artifact.files;
     timeSeriesLength = resultSets.length;
-    artifactName = artifact.name;
-    desc = artifact.desc;
-    group = artifact.group;
-    isTimeSeries = true;
 
     setupThreeJs();
     $("#progress").css({display: "block"});
@@ -350,7 +354,7 @@ function animate() {
         var camera = scene3d.getObjectByName('camera');
         renderer.render(scene3d, camera);
     } else {
-        if (isTimeSeries) {
+        if (plotInfo.isTimeSeries) {
             reInitTimeSeries();
         } else {
             reInitGraph();
@@ -366,7 +370,7 @@ function getCanvasSize() {
 
 //Init methods
 function setupThreeJs() {
-    if (!infoPage) {
+    if (!plotInfo.infoPage) {
         var height = window.innerHeight - 57 - 40 - 40 - 11;
         $('#canvas3d').width(window.innerWidth - 30);
         $('#canvas3d').height(height);
@@ -465,7 +469,7 @@ function intialSetup(settings, reinit) {
             changedSizes = sett.changedSizes;
         }
         if (sett.customclusters) {
-            customclusters = sett.customclusters;
+            clusterData.customclusters = sett.customclusters;
         }
         if (sett.camerastate) {
             var cameraState = sett.camerastate;
@@ -634,7 +638,7 @@ function generateGraph() {
 
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
@@ -810,7 +814,6 @@ function drawEdges(edges, points, pointcolors) {
 
 function convertDataToThreeJsFormat(data) {
     particles = {};
-    colors = {};
     var plotPoints = {};
     pointLabelxKey = {};
     var geometry = {};
@@ -1526,8 +1529,8 @@ function updatePlot(index) {
                     currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
                 }
 
-                if (recoloredclusters.hasOwnProperty(key)) {
-                    var tempcolor = recoloredclusters[key];
+                if (clusterData.recoloredclusters.hasOwnProperty(key)) {
+                    var tempcolor = clusterData.recoloredclusters[key];
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
                     var colorsd = new Float32Array(colorattri.length);
                     for (var k = 0; k < colorattri.length / 3; k++) {
@@ -1536,8 +1539,8 @@ function updatePlot(index) {
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
                     var opacity = Math.precision(trueColorList[key].a/255,2);
-                    if(realpaedclusters.hasOwnProperty(key)){
-                        opacity = Math.precision(realpaedclusters[key]/255,2)
+                    if(clusterData.realpaedclusters.hasOwnProperty(key)){
+                        opacity = Math.precision(clusterData.realpaedclusters[key]/255,2)
                     }
                     currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                     currentParticles[key].geometry.colorsNeedUpdate = true;
@@ -1555,7 +1558,7 @@ function updatePlot(index) {
                     }
                     currentParticles[key].material.needsUpdate = true;
                 }
-                if (!(removedclusters.hasOwnProperty(key))) {
+                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
                     scene3d.add(currentParticles[key]);
                 }
             }
@@ -1856,7 +1859,7 @@ function savePlotSettings(result) {
         obj['changedSizes'] = changedSizes;
         obj['speed'] = controlers.delay;
         obj['glyphs'] = changedGlyphs;
-        obj['customclusters'] = customclusters;
+        obj['customclusters'] = clusterData.customclusters;
         var lookAtVector = new THREE.Vector3(0, 0, 0);
         lookAtVector.applyQuaternion(camera.quaternion);
         var lookAtJson = {};
@@ -1883,10 +1886,10 @@ function savePlotSettings(result) {
  * Generates the Information box content
  */
 function populatePlotInfo() {
-    if (!infoPage) {
-        document.getElementById('plot-info-description').innerHTML = "<b>Name: " + artifactName + "</br>" + "<b>Frame: </b>" + fileName + "</br>" +
-            "<b>Desc: </b>" + desc + "</br>" +
-            "<b>Group: </b>" + group;
+    if (!plotInfo.infoPage) {
+        document.getElementById('plot-info-description').innerHTML = "<b>Name: " + plotInfo.artifactName + "</br>" + "<b>Frame: </b>" + fileName + "</br>" +
+            "<b>Desc: </b>" + plotInfo.desc + "</br>" +
+            "<b>Group: </b>" + plotInfo.group;
     } else {
         $("#np").text(Object.keys(plotPoints).length);
         $("#nc").text(sections.length);
@@ -1903,7 +1906,7 @@ function populatePlotInfo() {
  * @returns {string} generated check list in HTML
  */
 function generateCheckList(list, initcolors) {
-    if (infoPage) return;
+    if (plotInfo.infoPage) return;
 
     var keys = [];
     for (var k in trueColorList) {
@@ -1953,7 +1956,7 @@ function generateCheckList(list, initcolors) {
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             if (!list[key]) continue;
-            if (!(removedclusters.hasOwnProperty(key))) {
+            if (!(clusterData.removedclusters.hasOwnProperty(key))) {
                 $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
             } else {
                 $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
@@ -1983,7 +1986,7 @@ function generateCheckList(list, initcolors) {
             if (!list[key]) continue;
             tablerows += "<tr class='even pointer' id='" + key + "'>"
                 + "<td class='a-center'>";
-            if (!(removedclusters.hasOwnProperty(key))) {
+            if (!(clusterData.removedclusters.hasOwnProperty(key))) {
                 tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
             } else {
                 tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
@@ -2039,7 +2042,7 @@ function generateCheckList(list, initcolors) {
  * @returns {string} generated list in HTML
  */
 function generateClusterList(list, initcolors) {
-    if (infoPage) return;
+    if (plotInfo.infoPage) return;
 
     var keys = [];
     for (var k in trueColorList) {
@@ -2182,8 +2185,8 @@ function recolorSection(id, color, alpha) {
     sections[id].color.a = alpha;
     generateClusterList(sections, colorlist);
 
-    recoloredclusters[id] = new THREE.Color(color);
-    realpaedclusters[id] = alpha;
+    clusterData.recoloredclusters[id] = new THREE.Color(color);
+    clusterData.realpaedclusters[id] = alpha;
     currentParticles[id].material.opacity = opacity;
     currentParticles[id].material.transparent = true;
     currentParticles[id].geometry.colorsNeedUpdate = true;
@@ -2231,7 +2234,7 @@ function changeColorScheme(scheme) {
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                recoloredclusters[key] = tempcolor
+                clusterData.recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
             }
         }
@@ -2261,7 +2264,7 @@ function changeColorScheme(scheme) {
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                recoloredclusters[key] = tempcolor
+                clusterData.recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
                 if (scheme == 'rainbow') {
                     count += 1;
@@ -2294,7 +2297,7 @@ function changeColorScheme(scheme) {
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                recoloredclusters[key] = tempcolor
+                clusterData.recoloredclusters[key] = tempcolor
                 currentParticles[key].geometry.colorsNeedUpdate = true;
                 count += 1;
             }
@@ -2307,30 +2310,30 @@ function changeColorScheme(scheme) {
 
 function removeSection(id) {
     scene3d.remove(currentParticles[id]);
-    removedclusters[id] = id;
+    clusterData.removedclusters[id] = id;
 }
 
 function removeAllSection() {
-    removedclusters = [];
+    clusterData.removedclusters = [];
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.remove(currentParticles[key]);
-            removedclusters[key] = key;
+            clusterData.removedclusters[key] = key;
         }
     }
 }
 function addAllSections() {
-    for (var key in removedclusters) {
-        if (removedclusters.hasOwnProperty(key)) {
+    for (var key in clusterData.removedclusters) {
+        if (clusterData.removedclusters.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
         }
     }
-    removedclusters = [];
+    clusterData.removedclusters = [];
 }
 
 function addSection(id) {
     scene3d.add(currentParticles[id]);
-    delete removedclusters[id];
+    delete clusterData.removedclusters[id];
 }
 
 function addCustomCluster(isSingle) {
@@ -2350,7 +2353,7 @@ function addCustomCluster(isSingle) {
         c: color,
         p: p
     };
-    customclusters[clusterkey.toString()] = cluster;
+    clusterData.customclusters[clusterkey.toString()] = cluster;
     customclusternotadded = true;
     customclusternotaddedtolist = true;
     if (!isSingle) {
@@ -2370,9 +2373,9 @@ function addCustomCluster(isSingle) {
 function renderCustomCluster() {
     var geometry = {};
     var localSections = [];
-    for (var cid in customclusters) {
-        if (customclusters.hasOwnProperty(cid)) {
-            var clusterdata = customclusters[cid];
+    for (var cid in clusterData.customclusters) {
+        if (clusterData.customclusters.hasOwnProperty(cid)) {
+            var clusterdata = clusterData.customclusters[cid];
             var clusterid = parseInt(cid)
             setMaxClusterId(clusterid);
             var clustercolor;
@@ -2456,10 +2459,8 @@ function renderCustomCluster() {
                 tempparticles.material.needsUpdate = true;
             }
             currentParticles[key] = tempparticles;
-
         }
     }
-
 }
 
 
@@ -2514,7 +2515,7 @@ function addParticlesToScence() {
 function onWindowResize() {
     var width;
     var height;
-    if (!infoPage) {
+    if (!plotInfo.infoPage) {
         width = window.innerWidth - 30;
         height = window.innerHeight - 57 - 40 - 40 - 11;
     } else {
@@ -2680,7 +2681,7 @@ function updateTimeSeriesGui() {
 var settingsDat;
 
 function setupGuiSingle() {
-    if (infoPage) return;
+    if (plotInfo.infoPage) return;
 
     var kys = Object.keys(allSettings.settings);
     gui = new dat.GUI({autoPlace: false});
@@ -2692,7 +2693,7 @@ function setupGuiSingle() {
 }
 
 function setupGuiTimeSeries() {
-    if (infoPage) return;
+    if (plotInfo.infoPage) return;
 
     var kys = Object.keys(allSettings.settings);
     gui = new dat.GUI({autoPlace: false});
