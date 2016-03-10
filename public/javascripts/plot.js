@@ -25,8 +25,6 @@ var sections = [], particles = [], currentParticles = [];
 var sprites = {};
 var trajSprites = {};
 var particleSets = {};
-var lineSets = {};
-var texts = {};
 var sectionSets = {};
 var changedGlyphs = {};
 var changedSizes ={};
@@ -73,6 +71,24 @@ var infoPage = false;
 var artifactName = "";
 var desc = "";
 var group = "";
+
+// keeps track of the obects to render
+var renderObjects = {
+    lineSets: {},
+
+    clearLines: function (start, end) {
+        for (var i = start; i < end; i++) {
+            var scene = scenes.sceneSequence[i];
+            if (scene) {
+                var line = this.lineSets[i];
+                scene3d.remove(line);
+            }
+            if (this.lineSets[i]) {
+                delete this.lineSets[i];
+            }
+        }
+    }
+};
 
 var scenes = {
     scale: 1,
@@ -1125,7 +1141,7 @@ function convertDataToThreeJsFormat(data) {
         }
     }
 
-    lineSets[data.seq] = drawEdges(edges, points, pointcolors);
+    renderObjects.lineSets[data.seq] = drawEdges(edges, points, pointcolors);
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
@@ -1190,8 +1206,8 @@ function makeTextSprite(message, x, y, z, parameters) {
     var context = canvas.getContext('2d');
 
     // set a large-enough fixed-size canvas
-    canvas.width = 300;
-    canvas.height = 150;
+    canvas.width = 128;
+    canvas.height = 64;
 
     context.font = fontsize + "px " + fontface;
     context.textBaseline = "alphabetic";
@@ -1547,8 +1563,8 @@ function updatePlot(index) {
 
         trajectoryData.renderSprites(scene3d, index);
 
-        if (lineSets[index]) {
-            scene3d.add(lineSets[index]);
+        if (renderObjects.lineSets[index]) {
+            scene3d.add(renderObjects.lineSets[index]);
         }
         // change only when the setting dispaly is on
         if (settingOn) {
@@ -1659,6 +1675,8 @@ function clearThreeJS(loadStartIndex, loadend) {
     }
     trajectoryData.clearSprites(0, loadStartIndex);
     trajectoryData.clearSprites(loadend + 1, timeSeriesLength);
+    renderObjects.clearLines(0, loadStartIndex);
+    renderObjects.clearLines(loadend + 1, timeSeriesLength);
     for (var i = loadend + 1; i < timeSeriesLength; i++) {
         if (bufferRequestMade[i]) {
             delete bufferRequestMade[i];
