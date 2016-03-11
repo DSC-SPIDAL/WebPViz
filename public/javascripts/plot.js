@@ -214,8 +214,14 @@ var trajectoryData = {
         this.trajectoryLimit = save['trajectoryLimit'];
         this.totalTrajectoryPoints = save['totalTrajectoryPoints'];
         this.trajectoryPointSizeRatio = save['trajectoryPointSizeRatio'];
+        if (save['trajectoryToClusterId']) {
+            this.trajectoryToClusterId = save['trajectoryToClusterId'];
+        }
         // keep track of the cluster IDs created for the trajector
         this.trajectoryStartLineWidth = save['trajectoryStartLineWidth'];
+        if (save['trajectoryClusterIds']) {
+            this.trajectoryClusterIds = save['trajectoryClusterIds'];
+        }
     },
 
     createSave: function() {
@@ -227,7 +233,9 @@ var trajectoryData = {
         save['totalTrajectoryPoints'] = this.totalTrajectoryPoints;
         save['trajectoryPointSizeRatio'] = this.trajectoryPointSizeRatio;
             // keep track of the cluster IDs created for the trajector
+        save['trajectoryToClusterId'] = this.trajectoryToClusterId;
         save['trajectoryStartLineWidth'] = this.trajectoryStartLineWidth;
+        save['trajectoryClusterIds'] = this.trajectoryClusterIds;
         return save;
     },
 
@@ -949,6 +957,7 @@ function convertDataToThreeJsFormat(data) {
                     var edge = {};
                     var edgeVerteces = [];
                     var currentClusterId = 0;
+                    var shape = clusterdata.f;
                     // check weather there is a cluster id for this trajectory
                     if (!trajectoryData.trajectoryToClusterId[label.toUpperCase()]) {
                         currentHighestClusterId = currentHighestClusterId + 1;
@@ -959,6 +968,12 @@ function convertDataToThreeJsFormat(data) {
                         currentClusterId = trajectoryData.trajectoryToClusterId[label.toUpperCase()];
                         if (trueColorList[currentClusterId]) {
                             clustercolor = trueColorList[currentClusterId];
+                        }
+                        if (changedGlyphs[currentClusterId]) {
+                            shape = changedGlyphs[currentClusterId];
+                        }
+                        if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
+                            trajectoryData.trajectoryClusterIds.push(currentClusterId+"");
                         }
                     }
 
@@ -975,7 +990,7 @@ function convertDataToThreeJsFormat(data) {
                     localSection = {
                         "length": clusterdata.p.length,
                         "size": trajectoryData.trajectoryPointSizeRatio,
-                        "shape": clusterdata.f,
+                        "shape": shape,
                         "visible": clusterdata.v,
                         "color": clustercolor,
                         "label": label,
@@ -2101,17 +2116,17 @@ function resetView() {
 function recolorSection(id, color, alpha) {
     if (id == "cccolor") return;
     if (id == "multi") {
-        recolorMultipleSections(color,alpha)
+        recolorMultipleSections(color,alpha);
         return;
     }
 
     colorlist[id] = color;
-    var opacity = Math.precision(alpha/255,3)
+    var opacity = Math.precision(alpha/255,3);
 
     //remove the color jpicker binding
     $("#cluster_table tbody > #" + id +" span.jPicker").remove();
-    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color)
-    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('alpha', alpha)
+    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color);
+    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('alpha', alpha);
     $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
 
     //change to custom color scheme since a color change has been made
@@ -2120,7 +2135,7 @@ function recolorSection(id, color, alpha) {
         $("#color-scheme").val('custom');
     }
 
-    color = "#" + color
+    color = "#" + color;
     var tempcolor = new THREE.Color(color);
     trueColorList[id] = {
         "r": tempcolor.toArray()[0] * 255,
