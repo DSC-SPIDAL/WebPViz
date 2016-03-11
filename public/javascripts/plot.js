@@ -263,6 +263,12 @@ var trajectoryData = {
                 }
             }
         }
+        for (var i = 0; i < this.trajectoryClusterIds.length; i++) {
+            var tempCid = parseInt(this.trajectoryClusterIds[i]);
+            if (tempCid > currentHighestClusterId) {
+                currentHighestClusterId = tempCid;
+            }
+        }
         return currentHighestClusterId;
     }
 };
