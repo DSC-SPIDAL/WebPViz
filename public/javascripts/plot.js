@@ -229,6 +229,48 @@ var trajectoryData = {
             // keep track of the cluster IDs created for the trajector
         save['trajectoryStartLineWidth'] = this.trajectoryStartLineWidth;
         return save;
+    },
+
+    generateTrajectory: function() {
+        // trajectory point
+        var trajectoryList = trajectoryData.trajectoryPoints[label];
+        var edge = {};
+        var edgeVerteces = [];
+        var currentClusterId = 0;
+
+        // check weather there is a cluster id for this trajectory
+        if (!trajectoryData.trajectoryToClusterId[label.toUpperCase()]) {
+            currentHighestClusterId = currentHighestClusterId + 1;
+            currentClusterId = currentHighestClusterId;
+            trajectoryData.trajectoryClusterIds.push(currentClusterId+"");
+            trajectoryData.trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
+
+            if (!geometry.hasOwnProperty(currentClusterId)) {
+                geometry[currentClusterId] = new THREE.BufferGeometry();
+                particles[currentClusterId] = [];
+            }
+            // we will add some extra points to cluster
+            localSection = {
+                "length": clusterdata.p.length,
+                "size": trajectoryData.trajectoryPointSizeRatio,
+                "shape": clusterdata.f,
+                "visible": clusterdata.v,
+                "color": clustercolor,
+                "label": label,
+                'traj': true
+            };
+            if (!sections.hasOwnProperty(currentClusterId)) {
+                sections[currentClusterId] = localSection;
+            }
+            trueColorList[currentClusterId] = clustercolor;
+            if (!colorlist.hasOwnProperty(currentClusterId)) {
+                colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+            }
+            localSections[currentClusterId] = localSection;
+        } else {
+            currentClusterId = trajectoryData.trajectoryToClusterId[label.toUpperCase()];
+            clustercolor = trueColorList[currentClusterId];
+        }
     }
 };
 
@@ -1166,6 +1208,11 @@ function convertDataToThreeJsFormat(data) {
     pointLabelxKeySets[data.seq] = pointLabelxKey;
     sectionSets[data.seq] = localSections;
     fileNames[data.seq] = data.file;
+}
+
+// a trajectory has edges, text labels and glyphs
+function createTrajectory() {
+
 }
 
 var DESCENDER_ADJUST = 1.28;
