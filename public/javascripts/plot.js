@@ -852,11 +852,11 @@ function convertDataToThreeJsFormat(data) {
 
     var pointPerElements = 1;
     if (trajectoryData.trajectoryLimit < 0) {
-        pointPerElements = Math.round(Math.ceil(timeSeriesLength / trajectoryData.totalTrajectoryPoints));
+        pointPerElements = Math.round(Math.ceil(timeSeriesLength / (trajectoryData.totalTrajectoryPoints+1)));
     } else if (trajectoryData.totalTrajectoryPoints > trajectoryData.trajectoryLimit) {
         pointPerElements = 1;
     } else if (trajectoryData.totalTrajectoryPoints < trajectoryData.trajectoryLimit) {
-        pointPerElements = Math.round(Math.ceil(trajectoryData.trajectoryLimit / trajectoryData.totalTrajectoryPoints));
+        pointPerElements = Math.round(Math.ceil(trajectoryData.trajectoryLimit / (trajectoryData.totalTrajectoryPoints+1)));
     }
 
     for (var cid in clusters) {
@@ -907,11 +907,11 @@ function convertDataToThreeJsFormat(data) {
 
             xmean = 0; ymean = 0; zmean = 0;
             var k = 0;
-            var trajectoryNumber = 0;
+            var trajectorLength = 0;
             if (trajectoryData.trajectoryLimit >= 0) {
-                trajectoryNumber = trajectoryData.trajectoryLimit;
+                trajectorLength = trajectoryData.trajectoryLimit;
             } else {
-                trajectoryNumber = -1;
+                trajectorLength = -1;
             }
 
             var positionsArray = [];
@@ -934,10 +934,6 @@ function convertDataToThreeJsFormat(data) {
                     positionsArray.push(p0);
                     positionsArray.push(p1);
                     positionsArray.push(p2);
-                    //positions[k * 3 + 0] = p0;
-                    //positions[k * 3 + 1] = p1;
-                    //positions[k * 3 + 2] = p2;
-
                     if (!calculatedmeans) {
                         xmean += p0;
                         ymean += p1;
@@ -946,9 +942,6 @@ function convertDataToThreeJsFormat(data) {
                     colorArray.push(tempcolor.r);
                     colorArray.push(tempcolor.g);
                     colorArray.push(tempcolor.b);
-                    //colors[k * 3 + 0] = tempcolor.r;
-                    //colors[k * 3 + 1] = tempcolor.g;
-                    //colors[k * 3 + 2] = tempcolor.b;
                     k++;
                 } else {
                     // trajectory point
@@ -973,12 +966,7 @@ function convertDataToThreeJsFormat(data) {
                         trajectoryList = [];
                         trajectoryData.trajectoryPoints[label] = trajectoryList;
                     }
-
-                    var trajectory = {};
-                    trajectory['p'] = p;
-                    trajectory['c'] = clustercolor;
-                    trajectoryList[data.seq] = trajectory;
-
+                    trajectoryList.push({p:p, c:clustercolor});
                     if (!geometry.hasOwnProperty(currentClusterId)) {
                         geometry[currentClusterId] = new THREE.BufferGeometry();
                         particles[currentClusterId] = [];
@@ -1007,17 +995,14 @@ function convertDataToThreeJsFormat(data) {
                     var startingIndex = 0;
                     var trajectoryPointCount = 0;
                     for (var z = 0; z < trajectoryList.length; z++) {
-                        if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
+                        if (trajectorLength >= 0 && z < trajectoryList.length - trajectorLength) {
                             continue;
-                        } else if (!indexStarted) {
-                            indexStarted = true;
-                            startingIndex = z;
                         }
                         var tp = trajectoryList[z];
                         if (!tp) {
                             continue;
                         }
-                        if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                        if (((z - startingIndex) - 0) % pointPerElements == 0) {
                             trajectoryPointCount++;
                         }
                     }
@@ -1032,7 +1017,7 @@ function convertDataToThreeJsFormat(data) {
                     var l = hsl[2];
                     var saturationIncrement = 1.0 / (trajectoryPointCount + 1);
                     for (var z = 0; z < trajectoryList.length; z++) {
-                        if (trajectoryNumber >= 0 && z < trajectoryList.length - trajectoryNumber) {
+                        if (trajectorLength >= 0 && z < trajectoryList.length - trajectorLength) {
                             continue;
                         } else if (!indexStarted) {
                             indexStarted = true;
@@ -1048,7 +1033,7 @@ function convertDataToThreeJsFormat(data) {
                         s = c * saturationIncrement;
                         var newColor = Color.hsl(h, s, l);
                         var newRgb = newColor.rgbData();
-                        if (((z - startingIndex) - pointPlaceStartingIndex) % pointPerElements == 0) {
+                        if (((z - startingIndex) - 0) % pointPerElements == 0 || z == trajectoryList.length - 1) {
                             positionTrajecArray.push(pp0);
                             positionTrajecArray.push(pp1);
                             positionTrajecArray.push(pp2);
