@@ -514,6 +514,8 @@
                     trajectoryData.totalLabels = parseInt(tLabelCount);
                     trajectoryData.textLabelSize = parseFloat(tLabelSize);
 
+                    // notify that the settings has updated
+                    trajectoryData.settingUpdated();
                     updatePlot(currentValue);
                     return true;
                 } else {

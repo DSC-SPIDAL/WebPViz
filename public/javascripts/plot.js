@@ -207,6 +207,20 @@ var trajectoryData = {
         }
     },
 
+    settingUpdated: function() {
+        for (var seq in this.labelSets) {
+            if (this.labelSets.hasOwnProperty(seq)) {
+                // check weather the new label exists
+                var labels = this.labelSets[seq];
+                for (var l in labels) {
+                    if (labels.hasOwnProperty(l) && this.trajectoryPointLabels.indexOf(l) < 0) {
+                        delete labels[l];
+                    }
+                }
+            }
+        }
+    },
+
     load: function(save) {
         this.textLabelSize = save['textLabelSize'];
         this.totalLabels = save['totalLabels'];
