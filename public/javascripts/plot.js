@@ -990,23 +990,8 @@ function convertDataToThreeJsFormat(data) {
                     }
                     localSections[currentClusterId] = localSection;
                     var c = 0;
-                    var pointPlaceStartingIndex = Math.round(Math.ceil(pointPerElements / 2));
                     var indexStarted = false;
                     var startingIndex = 0;
-                    var trajectoryPointCount = 0;
-                    for (var z = 0; z < trajectoryList.length; z++) {
-                        if (trajectorLength >= 0 && z < trajectoryList.length - trajectorLength) {
-                            continue;
-                        }
-                        var tp = trajectoryList[z];
-                        if (!tp) {
-                            continue;
-                        }
-                        if (((z - startingIndex) - 0) % pointPerElements == 0) {
-                            trajectoryPointCount++;
-                        }
-                    }
-
                     var positionTrajecArray = [];
                     var colorTrajectArray = [];
                     var positionTrajecLabelArray = [];
@@ -1015,7 +1000,7 @@ function convertDataToThreeJsFormat(data) {
                     var h = hsl[0];
                     var s = hsl[1];
                     var l = hsl[2];
-                    var saturationIncrement = 1.0 / (trajectoryPointCount + 1);
+                    var saturationIncrement = 1.0 / (trajectoryList.length);
                     for (var z = 0; z < trajectoryList.length; z++) {
                         if (trajectorLength >= 0 && z < trajectoryList.length - trajectorLength) {
                             continue;
@@ -1030,7 +1015,7 @@ function convertDataToThreeJsFormat(data) {
                         var pp0 = parseFloat(tp.p[0] * scenes.scale);
                         var pp1 = parseFloat(tp.p[1]* scenes.scale);
                         var pp2 = parseFloat(tp.p[2]* scenes.scale);
-                        s = c * saturationIncrement;
+                        s = z * saturationIncrement;
                         var newColor = Color.hsl(h, s, l);
                         var newRgb = newColor.rgbData();
                         if (((z - startingIndex) - 0) % pointPerElements == 0 || z == trajectoryList.length - 1) {
