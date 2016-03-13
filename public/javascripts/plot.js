@@ -120,24 +120,17 @@ var scenes = {
         }
     }
 };
-var count = 0;
 var events = {
     onDocumentMouseMove: function(event){
 
-        if(toolTipLabels.context == null) return;
+        if(!toolTipLabels.initialized) return;
 
-        toolTipLabels.context.clearRect(0,0,640,480);
-        toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
-        toolTipLabels.context.fillRect( 0,0, 20+8,20+8);
-        toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
-        toolTipLabels.context.fillRect( 2,2, 20+4,20+4 );
-        toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
-        toolTipLabels.context.fillText( count, 4,20 );
-        toolTipLabels.texture.needsUpdate = true;
-        count = count + 1;
+       // toolTipLabels.sprite.position.set((event.clientX/window.innerWidth)*2-1,-(event.clientY/window.innerHeight)*2+1,1);
+        toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
+
         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
+        toolTipLabels.update();
     }
 }
 
@@ -149,6 +142,7 @@ var toolTipLabels = {
     sprite: null,
     raycaster: null,
     intersected: null,
+    initialized: false,
 
     initialize: function(){
         toolTipLabels.canvas = document.createElement('canvas');
@@ -163,16 +157,38 @@ var toolTipLabels = {
 
         scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
+        toolTipLabels.initialized = true;
     },
     update: function(){
+        if(!toolTipLabels.initialized) return;
+
         toolTipLabels.raycaster.setFromCamera(mouse,camera);
-        var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
+        var intersects = toolTipLabels.raycaster.intersectObjects(currentParticles);
 
         if(intersects.length > 0){
             if(toolTipLabels.intersected != intersects[0].object){
-                toolTipLabels.intersected = intersects[0].object();
-                
+                toolTipLabels.intersected = intersects[0].object;
+                if (toolTipLabels.intersected.geometry.name){
+                    toolTipLabels.context.clearRect(0,0,640,480);
+                    var message = toolTipLabels.intersected.geometry.name;
+                    var metrics = toolTipLabels.context.measureText(message);
+                    var width = metrics.width;
+                    toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
+                    toolTipLabels.context.fillRect( 0,0, width+8,20+8);
+                    toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
+                    toolTipLabels.context.fillRect( 2,2, width+4,20+4 );
+                    toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
+                    toolTipLabels.context.fillText( message, 4,20 );
+                    toolTipLabels.texture.needsUpdate = true;
+                }else{
+                   // toolTipLabels.context.clearRect(0,0,300,300);
+                    toolTipLabels.texture.needsUpdate = true;
+                }
             }
+        }else{
+            toolTipLabels.intersected = null;
+            toolTipLabels.context.clearRect(0,0,300,300);
+            toolTipLabels.texture.needsUpdate = true;
         }
 
     }
@@ -756,7 +772,7 @@ function generateGraph() {
                 zmean = zmean / clusterdata.p.length;
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
-
+                geometry[clusterid].name = clusterid;
                 xmeantotal += xmean;
                 ymeantotal += ymean;
                 zmeantotal += zmean;
