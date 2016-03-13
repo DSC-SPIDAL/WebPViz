@@ -37,6 +37,7 @@ var plotPoints = {};
 
 var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
 var xmean = 0, ymean = 0, zmean = 0, cameraCenter, calculatedmeans = false;
+var mouse
 
 //Single Plot Varibles
 var clusterUrl;
@@ -119,7 +120,66 @@ var scenes = {
         }
     }
 };
+var count = 0;
+var events = {
+    onDocumentMouseMove: function(event){
 
+        if(toolTipLabels.context == null) return;
+
+        toolTipLabels.context.clearRect(0,0,640,480);
+        toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
+        toolTipLabels.context.fillRect( 0,0, 20+8,20+8);
+        toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
+        toolTipLabels.context.fillRect( 2,2, 20+4,20+4 );
+        toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
+        toolTipLabels.context.fillText( count, 4,20 );
+        toolTipLabels.texture.needsUpdate = true;
+        count = count + 1;
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    }
+}
+
+var toolTipLabels = {
+    canvas: null,
+    context: null,
+    texture: null,
+    spriteMaterial: null,
+    sprite: null,
+    raycaster: null,
+    intersected: null,
+
+    initialize: function(){
+        toolTipLabels.canvas = document.createElement('canvas');
+        toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
+        toolTipLabels.texture = new THREE.Texture(toolTipLabels.canvas);
+        toolTipLabels.texture.needsUpdate = true;
+        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
+        toolTipLabels.sprite = new THREE.Sprite( toolTipLabels.spriteMaterial );
+        toolTipLabels.sprite.scale.set(1,1,1);
+        toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
+
+
+        scene3d.add(toolTipLabels.sprite);
+        toolTipLabels.raycaster = new THREE.Raycaster();
+    },
+    update: function(){
+        toolTipLabels.raycaster.setFromCamera(mouse,camera);
+        var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
+
+        if(intersects.length > 0){
+            if(toolTipLabels.intersected != intersects[0].object){
+                toolTipLabels.intersected = intersects[0].object();
+                
+            }
+        }
+
+    }
+
+
+
+}
 var trajectoryData = {
     labelSets: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
@@ -475,6 +535,7 @@ function setupThreeJs() {
     controls.staticMoving = true;
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
+    mouse = new THREE.Vector2();
     initColorSchemes();
     sprites["0"] = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
     sprites["1"] = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
@@ -492,7 +553,7 @@ function setupThreeJs() {
     trajSprites["5"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CONE);
     trajSprites["6"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
-}
+    window.addEventListener( 'mousemove', events.onDocumentMouseMove, false );}
 
 function intialSetup(settings, reinit) {
     colorsLoaded = false;
@@ -738,6 +799,7 @@ function generateGraph() {
         changePointSize();
         reInitialize = false;
         animate();
+        toolTipLabels.initialize();
         savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
