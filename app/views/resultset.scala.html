@@ -368,5 +368,10 @@
                 callSave();
                 updateSingleGui();
             });
+
+            window.addEventListener("keyup", function(e){
+                if(e.which !== 80) return;
+                imageSaver.saveAsImage();
+            });
     </script>
 }

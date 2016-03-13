@@ -273,6 +273,36 @@ var trajectoryData = {
     }
 };
 
+var imageSaver = {
+    saveAsImage: function () {
+        var imgData, imgNode;
+        try {
+            var strMime = "image/png";
+            imgData = renderer.domElement.toDataURL(strMime);
+            var strDownloadMime = "image/octet-stream";
+            //window.open( renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
+            this.saveFile(imgData.replace(strMime, strDownloadMime), fileName + "_" + new Date().format('isoDateTime') + ".png");
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+    },
+
+    saveFile: function (strData, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            document.body.appendChild(link); //Firefox requires the link to be in the body
+            link.download = filename;
+            link.href = strData;
+            link.click();
+            document.body.removeChild(link); //remove the link when done
+        } else {
+            location.replace(uri);
+        }
+    }
+};
+
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
 
@@ -430,7 +460,7 @@ function setupThreeJs() {
     //set the scene
     var canvas3d = $('#canvas3d');
     //new THREE.WebGLRenderer
-    renderer = new THREE.WebGLRenderer({canvas: canvas3d.get(0), antialias: true});
+    renderer = new THREE.WebGLRenderer({canvas: canvas3d.get(0), antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(canvasWidth, canvasHeight);
     renderer.setClearColor(0x121224, 1);
 

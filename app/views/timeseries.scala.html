@@ -481,6 +481,11 @@
                 }
             });
 
+            window.addEventListener("keyup", function(e){
+                if(e.which !== 80) return;
+                imageSaver.saveAsImage();
+            });
+
             function addTrajectory() {
                 var tList = $("#trajectoryInput").val().replace(/\s+/g, '');
                 var tNo = $("#trajectoryNumber").val();
