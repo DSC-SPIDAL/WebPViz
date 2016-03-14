@@ -125,9 +125,18 @@ var events = {
 
         if(!toolTipLabels.initialized) return;
 
-       // toolTipLabels.sprite.position.set((event.clientX/window.innerWidth)*2-1,-(event.clientY/window.innerHeight)*2+1,1);
-        toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
-
+        var vector = new THREE.Vector3();
+        vector.set(
+            ( event.clientX / window.innerWidth ) * 2 - 1,
+            - ( event.clientY / window.innerHeight ) * 2 + 1,
+            camera.position.z );
+        vector.unproject( camera );
+        console.log(vector)
+        var dir = vector.normalize();
+        //var distance = - camera.position.z / dir.z;
+        //var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+        //toolTipLabels.sprite.position.set((event.clientX/window.innerWidth)*2-1,-(event.clientY/window.innerHeight)*2+1,1);
+        toolTipLabels.sprite.position.set( vector.x, vector.y ,  vector.z );
         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
         toolTipLabels.update();
@@ -149,7 +158,7 @@ var toolTipLabels = {
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = new THREE.Texture(toolTipLabels.canvas);
         toolTipLabels.texture.needsUpdate = true;
-        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
+        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture, useScreenCoordinates: true} );
         toolTipLabels.sprite = new THREE.Sprite( toolTipLabels.spriteMaterial );
         toolTipLabels.sprite.scale.set(1,1,1);
         toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
@@ -179,9 +188,6 @@ var toolTipLabels = {
                     toolTipLabels.context.fillRect( 2,2, width+4,20+4 );
                     toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
                     toolTipLabels.context.fillText( message, 4,20 );
-                    toolTipLabels.texture.needsUpdate = true;
-                }else{
-                   // toolTipLabels.context.clearRect(0,0,300,300);
                     toolTipLabels.texture.needsUpdate = true;
                 }
             }
