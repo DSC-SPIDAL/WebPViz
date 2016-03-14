@@ -187,7 +187,7 @@ var toolTipLabels = {
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
                 var currentpoint = intersects[0];
-                if (toolTipLabels.intersected.geometry.name){
+                if (toolTipLabels.intersected.geometry.name != null){
                     toolTipLabels.context.clearRect(0,0,640,480);
                     var message = toolTipLabels.intersected.geometry.name;
                     var metrics = toolTipLabels.context.measureText(message);
@@ -199,6 +199,7 @@ var toolTipLabels = {
                     toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
                     toolTipLabels.context.fillText( message, 4,20 );
                     toolTipLabels.texture.needsUpdate = true;
+                    toolTipLabels.sprite.position.set( currentpoint.point.x, currentpoint.point.y, currentpoint.point.z);
                 }
             }
         }else{
