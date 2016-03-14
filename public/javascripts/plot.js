@@ -122,23 +122,32 @@ var scenes = {
 };
 var events = {
     onDocumentMouseMove: function(event){
-
+        event.preventDefault();
         if(!toolTipLabels.initialized) return;
 
-        var vector = new THREE.Vector3();
-        vector.set(
-            ( event.clientX / window.innerWidth ) * 2 - 1,
-            - ( event.clientY / window.innerHeight ) * 2 + 1,
-            camera.position.z );
-        vector.unproject( camera );
-        console.log(vector)
-        var dir = vector.normalize();
+        var canvas = document.getElementById("canvas3d").getBoundingClientRect();
+        var width =  canvas.width;
+        var height =  canvas.height;
+
+       // var vector = new THREE.Vector3();
+        //vector.set(
+        //    ( event.clientX / width ) * 2 - 1,
+        //    - ( event.clientY /height ) * 2 + 1,
+        //    0.5 );
+        //vector.unproject( camera );
+        //
+        //var dir = vector;
         //var distance = - camera.position.z / dir.z;
         //var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+        //currentParticles
+        //console.log(pos)
+        //console.log("++++++++")
+        //console.log(xmeantotal)
+
         //toolTipLabels.sprite.position.set((event.clientX/window.innerWidth)*2-1,-(event.clientY/window.innerHeight)*2+1,1);
-        toolTipLabels.sprite.position.set( vector.x, vector.y ,  vector.z );
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+     //   toolTipLabels.sprite.position.set( vector.x, vector.y ,  vector.z );
+        mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
+        mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
         toolTipLabels.update();
     }
 }
@@ -177,6 +186,7 @@ var toolTipLabels = {
         if(intersects.length > 0){
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
+                var currentpoint = intersects[0];
                 if (toolTipLabels.intersected.geometry.name){
                     toolTipLabels.context.clearRect(0,0,640,480);
                     var message = toolTipLabels.intersected.geometry.name;
@@ -547,11 +557,11 @@ function setupThreeJs() {
     renderer.setClearColor(0x121224, 1);
 
     //new THREE.PerspectiveCamera
-    cameraCenter = new THREE.Vector3(0, 0, 0);
+   // cameraCenter = new THREE.Vector3(0, 0, 0);
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
-    camera.position.set(1, 1, 1);
-    camera.lookAt(cameraCenter);
+    camera.position.set(1, 1, 0);
+  //  camera.lookAt(cameraCenter);
     scene3d.add(camera);
     controls = new THREE.TrackballControls(camera, renderer.domElement);
     controls.staticMoving = true;
@@ -778,6 +788,7 @@ function generateGraph() {
                 zmean = zmean / clusterdata.p.length;
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+                geometry[clusterid].computeBoundingBox();
                 geometry[clusterid].name = clusterid;
                 xmeantotal += xmean;
                 ymeantotal += ymean;
@@ -793,7 +804,7 @@ function generateGraph() {
 
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-                geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+            //    geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
