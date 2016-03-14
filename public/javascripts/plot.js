@@ -130,10 +130,7 @@ var events = {
         var height =  canvas.height;
 
        // var vector = new THREE.Vector3();
-        //vector.set(
-        //    ( event.clientX / width ) * 2 - 1,
-        //    - ( event.clientY /height ) * 2 + 1,
-        //    0.5 );
+
         //vector.unproject( camera );
         //
         //var dir = vector;
@@ -148,6 +145,10 @@ var events = {
      //   toolTipLabels.sprite.position.set( vector.x, vector.y ,  vector.z );
         mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
         mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
+
+        var vector = new THREE.Vector3();
+        vector.set( mouse.x, mouse.y, 0.5);
+        vector.unproject(camera);
         toolTipLabels.update();
     }
 }
@@ -167,7 +168,7 @@ var toolTipLabels = {
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = new THREE.Texture(toolTipLabels.canvas);
         toolTipLabels.texture.needsUpdate = true;
-        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture, useScreenCoordinates: true} );
+        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
         toolTipLabels.sprite = new THREE.Sprite( toolTipLabels.spriteMaterial );
         toolTipLabels.sprite.scale.set(1,1,1);
         toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
@@ -186,7 +187,7 @@ var toolTipLabels = {
         if(intersects.length > 0){
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
-                var currentpoint = intersects[0];
+                var currentpoint = intersects[0].point;
                 if (toolTipLabels.intersected.geometry.name != null){
                     toolTipLabels.context.clearRect(0,0,640,480);
                     var message = toolTipLabels.intersected.geometry.name;
@@ -199,7 +200,8 @@ var toolTipLabels = {
                     toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
                     toolTipLabels.context.fillText( message, 4,20 );
                     toolTipLabels.texture.needsUpdate = true;
-                    toolTipLabels.sprite.position.set( currentpoint.point.x, currentpoint.point.y, currentpoint.point.z);
+                    toolTipLabels.sprite.position.copy( currentpoint )
+
                 }
             }
         }else{
@@ -805,7 +807,7 @@ function generateGraph() {
 
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
-            //    geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
