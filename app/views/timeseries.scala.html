@@ -482,8 +482,10 @@
             });
 
             window.addEventListener("keyup", function(e){
-                if(e.which !== 80) return;
-                imageSaver.saveAsImage();
+                if (e.altKey) {
+                    if(e.which !== 80) return;
+                    imageSaver.saveAsImage();
+                }
             });
 
             function addTrajectory() {
