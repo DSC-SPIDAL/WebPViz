@@ -121,6 +121,16 @@ var scenes = {
     }
 };
 var events = {
+    onKeyPress: function(event){
+        if(event.ctrlKey){
+            if(!toolTipLabels.initialized) toolTipLabels.initialize();
+            window.addEventListener('mousemove', events.onDocumentMouseMove, false)
+        }
+    },
+    onKeyUp: function(event){
+            window.removeEventListener('mousemove', events.onDocumentMouseMove)
+            toolTipLabels.clear();
+    },
     onDocumentMouseMove: function(event){
         event.preventDefault();
         if(!toolTipLabels.initialized) return;
@@ -210,6 +220,13 @@ var toolTipLabels = {
             toolTipLabels.texture.needsUpdate = true;
         }
 
+    },
+    clear: function(){
+        if(!toolTipLabels.initialized) return;
+
+        toolTipLabels.intersected = null;
+        toolTipLabels.context.clearRect(0,0,300,300);
+        toolTipLabels.texture.needsUpdate = true;
     }
 
 
@@ -588,7 +605,9 @@ function setupThreeJs() {
     trajSprites["5"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CONE);
     trajSprites["6"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener( 'mousemove', events.onDocumentMouseMove, false );}
+    window.addEventListener( 'keydown', events.onKeyPress, false );
+    window.addEventListener( 'keyup', events.onKeyUp, false );
+}
 
 function intialSetup(settings, reinit) {
     colorsLoaded = false;
@@ -835,7 +854,6 @@ function generateGraph() {
         changePointSize();
         reInitialize = false;
         animate();
-        toolTipLabels.initialize();
         savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
