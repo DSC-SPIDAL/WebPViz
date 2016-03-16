@@ -2399,6 +2399,8 @@ function removeAllSection() {
         if (renderObjects.lineSets[seqId][key]) {
             scene3d.remove(renderObjects.lineSets[seqId][key]);
         }
+
+        trajectoryData.removeSprites(scene3d, seqId, key);
     }
 }
 function addAllSections() {
@@ -2410,6 +2412,8 @@ function addAllSections() {
             if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
                 scene3d.add(renderObjects.lineSets[seqId][key]);
             }
+
+            trajectoryData.addSprites(scene3d, seqId, key);
         }
     }
     clusterData.removedclusters = [];
