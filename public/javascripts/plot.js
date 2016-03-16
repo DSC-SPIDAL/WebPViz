@@ -94,8 +94,12 @@ var renderObjects = {
         for (var i = start; i < end; i++) {
             var scene = scenes.sceneSequence[i];
             if (scene) {
-                var line = this.lineSets[i];
-                scene3d.remove(line);
+                for (var key in this.lineSets[i]){
+                    if (this.lineSets[i].hasOwnProperty(key)) {
+                        var line = this.lineSets[i][key];
+                        scene3d.remove(line);
+                    }
+                }
             }
             if (this.lineSets[i]) {
                 delete this.lineSets[i];
@@ -117,6 +121,11 @@ var scenes = {
                 delete scenes[i];
             }
         }
+    },
+
+    currentSceneId: function() {
+        var currentValue = parseInt($("#plot-slider").prop("value"));
+        return currentValue ? currentValue : 0;
     }
 };
 
@@ -181,6 +190,30 @@ var trajectoryData = {
                     for (var i = 0; i < sprites.length; i++) {
                         scene3d.add(sprites[i]);
                     }
+                }
+            }
+        }
+    },
+
+    removeSprites: function (scene3d, seq, clusterId) {
+        if (this.labelSets[seq]) {
+            var spritesForSeq = this.labelSets[seq];
+            if (spritesForSeq.hasOwnProperty(clusterId)) {
+                var sprites = spritesForSeq[clusterId];
+                for (var i = 0; i < sprites.length; i++) {
+                    scene3d.remove(sprites[i]);
+                }
+            }
+        }
+    },
+
+    addSprites: function (scene3d, seq, clusterId) {
+        if (this.labelSets[seq]) {
+            var spritesForSeq = this.labelSets[seq];
+            if (spritesForSeq.hasOwnProperty(clusterId)) {
+                var sprites = spritesForSeq[clusterId];
+                for (var i = 0; i < sprites.length; i++) {
+                    scene3d.add(sprites[i]);
                 }
             }
         }
@@ -893,12 +926,9 @@ function convertDataToThreeJsFormat(data) {
     fileName = data.file;
     plotDesc = data.desc;
     uploader = data.uploader;
-    var trajectoryEdgePoints = {};
-    var trajectoryEdgePointcolors = {};
-    var trajectoryEdgeIndex = 0;
-    var trajectoryEdges = {};
-    // we will create a separate point list for trajectories
-    var trajectoryPointIndex = 0;
+
+    // for each trajectory this holds the edges
+    var trajectoryEdgesForSeq = {};
 
     var localSections = [];
     var clusterCount = 0;
@@ -1002,6 +1032,13 @@ function convertDataToThreeJsFormat(data) {
                     colorArray.push(tempcolor.b);
                     k++;
                 } else {
+                    var trajectoryEdgePoints = {};
+                    var trajectoryEdgePointcolors = {};
+                    var trajectoryEdgeIndex = 0;
+                    var trajectoryEdges = {};
+                    // we will create a separate point list for trajectories of each cluster id
+                    var trajectoryPointIndex = 0;
+
                     // trajectory point
                     var trajectoryList = trajectoryData.trajectoryPoints[label];
                     var edge = {};
@@ -1111,7 +1148,7 @@ function convertDataToThreeJsFormat(data) {
                     geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                     geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorsTrajec, 3));
 
-                    trajectoryData.makeSprites(positionTrajecLabelArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, label);
+                    trajectoryData.makeSprites(positionTrajecLabelArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, currentClusterId);
 
                     trajectoryEdgePoints[trajectoryPointIndex] = [p0, p1, p2];
                     trajectoryEdgePointcolors[trajectoryPointIndex] = tempcolor;
@@ -1120,6 +1157,9 @@ function convertDataToThreeJsFormat(data) {
                     edge['v'] = edgeVerteces;
                     trajectoryEdges[trajectoryEdgeIndex] = edge;
                     trajectoryEdgeIndex++;
+
+                    var traj = drawEdges(trajectoryEdges, trajectoryEdgePoints, trajectoryEdgePointcolors);
+                    trajectoryEdgesForSeq[currentClusterId] = traj;
                 }
             }
 
@@ -1160,7 +1200,7 @@ function convertDataToThreeJsFormat(data) {
         }
     }
 
-    renderObjects.lineSets[data.seq] = drawEdges(trajectoryEdges, trajectoryEdgePoints, trajectoryEdgePointcolors);
+    renderObjects.lineSets[data.seq] = trajectoryEdgesForSeq;
 
     particleSets[data.seq] = particles;
     for (var key in particles) {
@@ -1400,7 +1440,7 @@ function arrDiff(a1, a2) {
         diff.push(k);
     }
     return diff;
-};
+}
 
 function loadPlotData(start, end) {
     for (var i = start; i < end; i++) {
@@ -1588,7 +1628,13 @@ function updatePlot(index) {
         trajectoryData.renderSprites(scene3d, index);
 
         if (renderObjects.lineSets[index]) {
-            scene3d.add(renderObjects.lineSets[index]);
+            for (var cid in renderObjects.lineSets[index]) {
+                if (renderObjects.lineSets[index].hasOwnProperty(cid)) {
+                    if (!clusterData.removedclusters.hasOwnProperty(cid)) {
+                        scene3d.add(renderObjects.lineSets[index][cid]);
+                    }
+                }
+            }
         }
         // change only when the setting dispaly is on
         if (settingOn) {
@@ -2330,30 +2376,54 @@ function changeColorScheme(scheme) {
 }
 
 function removeSection(id) {
+    var seqId = scenes.currentSceneId();
     scene3d.remove(currentParticles[id]);
+    if (renderObjects.lineSets[seqId]) {
+        if (renderObjects.lineSets[seqId][id]) {
+            scene3d.remove(renderObjects.lineSets[seqId][id]);
+        }
+    }
+    trajectoryData.removeSprites(scene3d, seqId, id);
     clusterData.removedclusters[id] = id;
 }
 
 function removeAllSection() {
+    var seqId = scenes.currentSceneId();
     clusterData.removedclusters = [];
     for (var key in currentParticles) {
         if (currentParticles.hasOwnProperty(key)) {
             scene3d.remove(currentParticles[key]);
             clusterData.removedclusters[key] = key;
         }
+
+        if (renderObjects.lineSets[seqId][key]) {
+            scene3d.remove(renderObjects.lineSets[seqId][key]);
+        }
     }
 }
 function addAllSections() {
+    var seqId = scenes.currentSceneId();
     for (var key in clusterData.removedclusters) {
         if (clusterData.removedclusters.hasOwnProperty(key)) {
             scene3d.add(currentParticles[key]);
+
+            if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
+                scene3d.add(renderObjects.lineSets[seqId][key]);
+            }
         }
     }
     clusterData.removedclusters = [];
 }
 
 function addSection(id) {
+    var seqId = scenes.currentSceneId();
     scene3d.add(currentParticles[id]);
+    if (trajectoryData.labelSets[seqId]) {
+        if (renderObjects.lineSets[seqId][id]) {
+            scene3d.add(renderObjects.lineSets[seqId][id]);
+        }
+    }
+    trajectoryData.addSprites(scene3d, seqId, id);
     delete clusterData.removedclusters[id];
 }
 
@@ -2448,7 +2518,7 @@ function renderCustomCluster() {
                 positions[k * 3 + 1] = p1;
                 positions[k * 3 + 2] = p2;
 
-                var tempc = trueColorList[clusterid]
+                var tempc = trueColorList[clusterid];
                 tempcolor = new THREE.Color("rgb(" + tempc.r + "," + tempc.g + "," + tempc.b + ")");
 
                 colorarray[k * 3 + 0] = tempcolor.r;
@@ -2497,6 +2567,8 @@ function changeGlyph(id, shape) {
 }
 
 function changeSingleGlyphSize(id, size){
+    if (!currentParticles[id]) return;
+
     currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
     currentParticles[id].material.needsUpdate = true;
     sections[id].size = size;
@@ -2507,7 +2579,7 @@ function changeMultipleGlyphSizes(size){
     var rows = $('#cluster_table tr.selected');
     for (var key in rows) {
         if (rows.hasOwnProperty(key)) {
-            var rowdata = rows[key]
+            var rowdata = rows[key];
             var id = rowdata.id;
             if (id != undefined || id != null) changeSingleGlyphSize(id, size);
         }

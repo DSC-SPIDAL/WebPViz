@@ -100,26 +100,26 @@ $(function () {
         if(e.which == 13){
             var id = $(this).attr('id');
             var key = $(this).attr('key');
-            var value = $(this).val()
-            changeSingleGlyphSize(key,value)
+            var value = $(this).val();
+            changeSingleGlyphSize(key,value);
         }
     });
 
     $('#cluster_table_div').on('focusout','input',function() {
             var id = $(this).attr('id');
             var key = $(this).attr('key');
-            var value = $(this).val()
+            var value = $(this).val();
             changeSingleGlyphSize(key,value)
     });
 
     $('#multirowsize').on('focusout',function() {
-            var value = $(this).val()
+            var value = $(this).val();
             changeMultipleGlyphSizes(value)
     });
 
     $('#multirowsize').on('keypress', function(e) {
         if(e.which == 13){
-            var value = $(this).val()
+            var value = $(this).val();
             changeMultipleGlyphSizes(value)
         }
     });
