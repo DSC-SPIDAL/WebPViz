@@ -174,6 +174,7 @@ var toolTipLabels = {
         //toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
         scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
+        toolTipLabels.raycaster.params.Points.threshold = toolTipLabels.calculateThreshhold();
         toolTipLabels.initialized = true;
     },
     update: function(){
@@ -211,6 +212,19 @@ var toolTipLabels = {
             toolTipLabels.texture.needsUpdate = true;
         }
 
+    },
+    calculateThreshhold: function(){
+        var count = 0;
+        var sum  = 0;
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                var current = currentParticles[key];
+                count = count + 1;
+                if ( current.geometry.boundingSphere === null ) current.geometry.computeBoundingSphere();
+                sum = sum + current.geometry.boundingSphere.radius;
+            }
+        }
+        return (sum/count)/10;
     },
     clear: function(){
         if(!toolTipLabels.initialized) return;

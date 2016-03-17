@@ -56,10 +56,10 @@ THREE.Points.prototype.raycast = ( function () {
 				var intersectPoint = ray.closestPointToPoint( point );
 				intersectPoint.applyMatrix4( matrixWorld );
 
-				var distance = raycaster.ray.origin.distanceTo( intersectPoint );
+				//var distance = raycaster.ray.origin.distanceTo( intersectPoint );
 
-				if ( distance < raycaster.near || distance > raycaster.far ) return;
-
+				//if ( distance < raycaster.near || distance > raycaster.far ) return;
+				// IMPORTANT: The original code was edited to use distanceToRay Instead of distance to calculate intersections
 				intersects.push( {
 
 					distance: Math.sqrt( rayPointDistanceSq ),
