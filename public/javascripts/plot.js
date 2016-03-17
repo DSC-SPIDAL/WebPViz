@@ -217,10 +217,8 @@ var toolTipLabels = {
         toolTipLabels.intersected = null;
         toolTipLabels.context.clearRect(0,0,300,300);
         toolTipLabels.texture.needsUpdate = true;
+        document.getElementById("canvas3d").style.cursor = "default";
     }
-
-
-
 }
 var trajectoryData = {
     labelSets: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
@@ -1310,7 +1308,7 @@ function updateTextSprite(message,x, y, z, sprite){
     var cy = canvas.height / 2;
     var tx = textWidth / 2.0;
     var ty = 16 / 2.0;
-    var fillColor = {r: 255, g: 255, b: 255, a: .5};
+    var fillColor = {r: 255, g: 255, b: 255, a: .7};
     var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
     var textColor = {r: 0, g: 0, b: 0, a: 1.0};
     context.clearRect(0,0,256,128);
