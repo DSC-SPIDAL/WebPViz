@@ -160,7 +160,7 @@ var toolTipLabels = {
     initialized: false,
 
     initialize: function(){
-        var parameters = {'scale':0.25,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
+        var parameters = {'scale':0.15,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
         toolTipLabels.sprite =  makeTextSprite("",0.05, 0.03, -.121,parameters);
         toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
@@ -178,7 +178,7 @@ var toolTipLabels = {
         var intersects = toolTipLabels.raycaster.intersectObjects(currentParticles);
 
         if(intersects.length > 0){
-            var currentpoint = intersects[0].point;
+            var currentpoint = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
             toolTipLabels.sprite.position.set(currentpoint.x,currentpoint.y,currentpoint.z);
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
