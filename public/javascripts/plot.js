@@ -139,20 +139,6 @@ var events = {
         var width =  canvas.width;
         var height =  canvas.height;
 
-       // var vector = new THREE.Vector3();
-
-        //vector.unproject( camera );
-        //
-        //var dir = vector;
-        //var distance = - camera.position.z / dir.z;
-        //var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-        //currentParticles
-        //console.log(pos)
-        //console.log("++++++++")
-        //console.log(xmeantotal)
-
-        //toolTipLabels.sprite.position.set((event.clientX/window.innerWidth)*2-1,-(event.clientY/window.innerHeight)*2+1,1);
-     //   toolTipLabels.sprite.position.set( vector.x, vector.y ,  vector.z );
         mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
         mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
 
@@ -174,16 +160,18 @@ var toolTipLabels = {
     initialized: false,
 
     initialize: function(){
-        toolTipLabels.canvas = document.createElement('canvas');
+        var parameters = {'scale':0.25,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
+        toolTipLabels.sprite =  makeTextSprite("",0.05, 0.03, -.121,parameters);
+        toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
-        toolTipLabels.texture = new THREE.Texture(toolTipLabels.canvas);
-        toolTipLabels.texture.needsUpdate = true;
-        toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
-        toolTipLabels.sprite = new THREE.Sprite( toolTipLabels.spriteMaterial );
-        toolTipLabels.sprite.scale.set(1,1,1);
-        toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
+        toolTipLabels.texture = toolTipLabels.sprite.material.map;
+        toolTipLabels.context.clearRect(0,0,256,128);
 
+        //toolTipLabels.texture.needsUpdate = true;
+        //toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
 
+        //toolTipLabels.sprite.scale.set(1,1,1);
+        //toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
         scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
         toolTipLabels.initialized = true;
@@ -195,35 +183,37 @@ var toolTipLabels = {
         var intersects = toolTipLabels.raycaster.intersectObjects(currentParticles);
 
         if(intersects.length > 0){
+            var currentpoint = intersects[0].point;
+            toolTipLabels.sprite.position.set(currentpoint.x,currentpoint.y,currentpoint.z);
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
-                var currentpoint = intersects[0].point;
                 if (toolTipLabels.intersected.geometry.name != null){
-                    toolTipLabels.context.clearRect(0,0,640,480);
-                    var message = toolTipLabels.intersected.geometry.name;
-                    var metrics = toolTipLabels.context.measureText(message);
-                    var width = metrics.width;
-                    toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
-                    toolTipLabels.context.fillRect( 0,0, width+8,20+8);
-                    toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
-                    toolTipLabels.context.fillRect( 2,2, width+4,20+4 );
-                    toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
-                    toolTipLabels.context.fillText( message, 4,20 );
-                    toolTipLabels.texture.needsUpdate = true;
-                    toolTipLabels.sprite.position.copy( currentpoint )
+                    updateTextSprite(toolTipLabels.intersected.geometry.name, currentpoint.x,currentpoint.y,currentpoint.z, toolTipLabels.sprite)
+                    //toolTipLabels.sprite =  makeTextSprite(toolTipLabels.intersected.geometry.name, currentpoint.x,currentpoint.y,currentpoint.z)
+                    //toolTipLabels.context.clearRect(0,0,256,128);
+                    //var message = toolTipLabels.intersected.geometry.name;
+                    //var metrics = toolTipLabels.context.measureText(message);
+                    //var width = metrics.width;
+                    //toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
+                    //toolTipLabels.context.fillRect( 0,0, width+8,20+8);
+                    //toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
+                    //toolTipLabels.context.fillRect( 2,2, width+4,20+4 );
+                    //toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
+                    //toolTipLabels.context.fillText( message, 4,20 );
+                    //toolTipLabels.texture.needsUpdate = true;
+                    //toolTipLabels.sprite.position.copy( currentpoint )
 
                 }
             }
         }else{
             toolTipLabels.intersected = null;
-            toolTipLabels.context.clearRect(0,0,300,300);
+            toolTipLabels.context.clearRect(0,0,256,128);
             toolTipLabels.texture.needsUpdate = true;
         }
 
     },
     clear: function(){
         if(!toolTipLabels.initialized) return;
-
         toolTipLabels.intersected = null;
         toolTipLabels.context.clearRect(0,0,300,300);
         toolTipLabels.texture.needsUpdate = true;
@@ -580,7 +570,7 @@ function setupThreeJs() {
    // cameraCenter = new THREE.Vector3(0, 0, 0);
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
-    camera.position.set(1, 1, 0);
+    camera.position.set(1, 1, 1);
   //  camera.lookAt(cameraCenter);
     scene3d.add(camera);
     controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -1309,6 +1299,29 @@ var DESCENDER_ADJUST = 1.28;
 function getCanvasColor ( color ) {
     return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
 }
+function updateTextSprite(message,x, y, z, sprite){
+    var canvas = sprite.material.map.image;
+    var context = canvas.getContext('2d');
+
+    var metrics = context.measureText(message);
+    var textWidth = metrics.width + 10;
+
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2;
+    var tx = textWidth / 2.0;
+    var ty = 16 / 2.0;
+    var fillColor = {r: 255, g: 255, b: 255, a: .5};
+    var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
+    var textColor = {r: 0, g: 0, b: 0, a: 1.0};
+    context.clearRect(0,0,256,128);
+    roundRect(context, cx - tx, cy + ty + 0.28 * 16,
+        textWidth, 16 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
+
+    context.fillStyle = getCanvasColor(textColor);
+    context.fillText(message, cx - tx, cy + ty);
+    sprite.material.map.needsUpdate = true;
+    sprite.position.set(x, y, z);
+}
 
 function makeTextSprite(message, x, y, z, parameters) {
     if (parameters === undefined) parameters = {};
@@ -1335,10 +1348,10 @@ function makeTextSprite(message, x, y, z, parameters) {
         parameters["radius"] : 6;
 
     var vAlign = parameters.hasOwnProperty("vAlign") ?
-        parameters["vAlign"] : "center";
+        parameters["vAlign"] : "top";
 
     var hAlign = parameters.hasOwnProperty("hAlign") ?
-        parameters["hAlign"] : "center";
+        parameters["hAlign"] : "right";
 
     var scaleFactor = parameters.hasOwnProperty('scale') ? parameters['scale'] : 1;
 
