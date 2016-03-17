@@ -166,12 +166,6 @@ var toolTipLabels = {
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = toolTipLabels.sprite.material.map;
         toolTipLabels.context.clearRect(0,0,256,128);
-
-        //toolTipLabels.texture.needsUpdate = true;
-        //toolTipLabels.spriteMaterial = new THREE.SpriteMaterial( { map: toolTipLabels.texture} );
-
-        //toolTipLabels.sprite.scale.set(1,1,1);
-        //toolTipLabels.sprite.position.set( 0.05, 0.03, -.121 );
         scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
         toolTipLabels.raycaster.params.Points.threshold = toolTipLabels.calculateThreshhold();
@@ -190,20 +184,6 @@ var toolTipLabels = {
                 toolTipLabels.intersected = intersects[0].object;
                 if (toolTipLabels.intersected.geometry.name != null){
                     updateTextSprite(toolTipLabels.intersected.geometry.name, currentpoint.x,currentpoint.y,currentpoint.z, toolTipLabels.sprite)
-                    //toolTipLabels.sprite =  makeTextSprite(toolTipLabels.intersected.geometry.name, currentpoint.x,currentpoint.y,currentpoint.z)
-                    //toolTipLabels.context.clearRect(0,0,256,128);
-                    //var message = toolTipLabels.intersected.geometry.name;
-                    //var metrics = toolTipLabels.context.measureText(message);
-                    //var width = metrics.width;
-                    //toolTipLabels.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
-                    //toolTipLabels.context.fillRect( 0,0, width+8,20+8);
-                    //toolTipLabels.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
-                    //toolTipLabels.context.fillRect( 2,2, width+4,20+4 );
-                    //toolTipLabels.context.fillStyle = "rgba(0,0,0,1)"; // text color
-                    //toolTipLabels.context.fillText( message, 4,20 );
-                    //toolTipLabels.texture.needsUpdate = true;
-                    //toolTipLabels.sprite.position.copy( currentpoint )
-
                 }
             }
         }else{
@@ -813,7 +793,7 @@ function generateGraph() {
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
                 geometry[clusterid].computeBoundingBox();
-                geometry[clusterid].name = clusterid;
+                geometry[clusterid].name = clusterdata.l;
                 xmeantotal += xmean;
                 ymeantotal += ymean;
                 zmeantotal += zmean;
