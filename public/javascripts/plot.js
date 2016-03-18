@@ -1235,6 +1235,8 @@ function convertDataToThreeJsFormat(data) {
             colors32.set(colorArray);
             geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions32, 3));
             geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colors32, 3));
+            geometry[clusterid].name = clusterdata.l;
+
         }
     }
 
@@ -1643,7 +1645,7 @@ function updatePlot(index) {
         }
 
         scene3d = new THREE.Scene();
-
+        toolTipLabels.initialized = false;
         scenes.addScene(index, scene3d);
 
         scene3d.add(camera);
