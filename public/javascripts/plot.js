@@ -160,7 +160,7 @@ var toolTipLabels = {
     initialized: false,
 
     initialize: function(){
-        var parameters = {'scale':0.15,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
+        var parameters = {'scale':0.05,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
         toolTipLabels.sprite =  makeTextSprite("",0.05, 0.03, -.121,parameters);
         toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
@@ -175,15 +175,15 @@ var toolTipLabels = {
         if(!toolTipLabels.initialized) return;
 
         toolTipLabels.raycaster.setFromCamera(mouse,camera);
-        var intersects = toolTipLabels.raycaster.intersectObjects(currentParticles);
+        var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
 
         if(intersects.length > 0){
-            var currentpoint = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
-            toolTipLabels.sprite.position.set(currentpoint.x,currentpoint.y,currentpoint.z);
+            var labelposition = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
+            toolTipLabels.sprite.position.set(labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z);
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
                 if (toolTipLabels.intersected.geometry.name != null){
-                    updateTextSprite(toolTipLabels.intersected.geometry.name, currentpoint.x,currentpoint.y,currentpoint.z, toolTipLabels.sprite)
+                    updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
                 }
             }
         }else{
@@ -1296,18 +1296,18 @@ function updateTextSprite(message,x, y, z, sprite){
     var context = canvas.getContext('2d');
 
     var metrics = context.measureText(message);
-    var textWidth = metrics.width + 10;
+    var textWidth = metrics.width;
 
     var cx = canvas.width / 2;
     var cy = canvas.height / 2;
     var tx = textWidth / 2.0;
-    var ty = 16 / 2.0;
+    var ty = 12 / 2.0;
     var fillColor = {r: 255, g: 255, b: 255, a: .7};
     var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
     var textColor = {r: 0, g: 0, b: 0, a: 1.0};
     context.clearRect(0,0,256,128);
-    roundRect(context, cx - tx, cy + ty + 0.28 * 16,
-        textWidth, 16 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
+    roundRect(context, cx - tx, cy + ty + 0.28 * 12,
+        textWidth, 12 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
 
     context.fillStyle = getCanvasColor(textColor);
     context.fillText(message, cx - tx, cy + ty);
