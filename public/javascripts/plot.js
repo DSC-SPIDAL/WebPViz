@@ -186,9 +186,11 @@ var trajectoryData = {
             var spritesForSeq = this.labelSets[seq];
             for (var key in spritesForSeq) {
                 if (spritesForSeq.hasOwnProperty(key)) {
-                    var sprites = spritesForSeq[key];
-                    for (var i = 0; i < sprites.length; i++) {
-                        scene3d.add(sprites[i]);
+                    if (!clusterData.removedclusters.hasOwnProperty(key)) {
+                        var sprites = spritesForSeq[key];
+                        for (var i = 0; i < sprites.length; i++) {
+                            scene3d.add(sprites[i]);
+                        }
                     }
                 }
             }
