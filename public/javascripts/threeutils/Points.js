@@ -33,6 +33,8 @@ THREE.Points.prototype.raycast = ( function () {
 
 		if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
 
+		if(geometry.boundingSphere.radius == 0) geometry.boundingSphere.radius = 0.5;
+
 		sphere.copy( geometry.boundingSphere );
 		sphere.applyMatrix4( matrixWorld );
 

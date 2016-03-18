@@ -182,8 +182,12 @@ var toolTipLabels = {
             toolTipLabels.sprite.position.set(labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z);
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
-                if (toolTipLabels.intersected.geometry.name != null){
+                if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
                     updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                }else if(toolTipLabels.intersected.geometry.name == ""){
+                    toolTipLabels.intersected = null;
+                    toolTipLabels.context.clearRect(0,0,256,128);
+                    toolTipLabels.texture.needsUpdate = true;
                 }
             }
         }else{
@@ -792,11 +796,11 @@ function generateGraph() {
                 zmean = zmean / clusterdata.p.length;
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
-                geometry[clusterid].computeBoundingBox();
                 geometry[clusterid].name = clusterdata.l;
                 xmeantotal += xmean;
                 ymeantotal += ymean;
                 zmeantotal += zmean;
+
             }
         }
 
