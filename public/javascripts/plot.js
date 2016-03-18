@@ -141,10 +141,6 @@ var events = {
 
         mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
         mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
-
-        var vector = new THREE.Vector3();
-        vector.set( mouse.x, mouse.y, 0.5);
-        vector.unproject(camera);
         toolTipLabels.update();
     }
 }
@@ -215,7 +211,6 @@ var toolTipLabels = {
         toolTipLabels.intersected = null;
         toolTipLabels.context.clearRect(0,0,300,300);
         toolTipLabels.texture.needsUpdate = true;
-        document.getElementById("canvas3d").style.cursor = "default";
     }
 }
 var trajectoryData = {
