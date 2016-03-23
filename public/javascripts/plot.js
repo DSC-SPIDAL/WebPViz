@@ -881,7 +881,7 @@ function generateGraph() {
         });
 
         window.addEventListener('resize', events.onWindowResize, true);
-        changeGlyphSize();
+        glyphsControls.changeGlyphSize();
         changePointSize();
         reInitialize = false;
         animate();
@@ -1979,26 +1979,6 @@ function changePointSize() {
     }
 }
 
-function changeGlyphSize() {
-    for (var key in currentParticles) {
-        if (currentParticles.hasOwnProperty(key)) {
-            if (sections[key].size == 1) {
-                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
-            } else {
-                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
-            }
-
-            if(changedSizes.hasOwnProperty(key)){
-                currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
-            }
-
-            currentParticles[key].material.needsUpdate = true;
-        }
-    }
-}
-
-
-
 function savePlot() {
     var res = false;
     $('#setting-exist')
@@ -2126,7 +2106,7 @@ function generateCheckList(list, initcolors) {
     var glyphList = [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var sprite = getGlyphName(list[key]);
+        var sprite = glyphsControls.getGlyphName(list[key]);
         if (sprite != null) {
             glyphList.push(key);
         } else {
@@ -2167,7 +2147,7 @@ function generateCheckList(list, initcolors) {
             } else {
                 $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
             }
-            var sprite = getGlyphName(list[key]);
+            var sprite = glyphsControls.getGlyphName(list[key]);
             var currentshape;
             if (changedGlyphs.hasOwnProperty(key)) {
                 currentshape = changedGlyphs[key];
@@ -2197,7 +2177,7 @@ function generateCheckList(list, initcolors) {
             } else {
                 tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
             }
-            var sprite = getGlyphName(list[key]);
+            var sprite = glyphsControls.getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                 + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
@@ -2277,10 +2257,10 @@ function generateClusterList(list, initcolors) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
                 var sprite = null;
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    sprite = getFontIconByShape(changedGlyphs[key]);
+                    sprite = glyphsControls.getFontIconByShape(changedGlyphs[key]);
                 } else{
                     if (list[key].size > 1) {
-                        sprite = getFontIconByShape(list[key].shape);
+                        sprite = glyphsControls.getFontIconByShape(list[key].shape);
                     }
                 }
                 // try to find the element first
@@ -2696,38 +2676,115 @@ function renderCustomCluster() {
         }
     }
 }
-
-
-function changeGlyph(id, shape) {
-    changedGlyphs[id] = shape;
-    if (trajectoryData.trajectoryClusterIds.indexOf(id) < 0) {
-        currentParticles[id].material.map = sprites[shape];
-    } else {
-        currentParticles[id].material.map = trajSprites[shape];
-    }
-    currentParticles[id].material.needsUpdate = true;
-    generateClusterList(sections, colorlist);
-}
-
-function changeSingleGlyphSize(id, size){
-    if (!currentParticles[id]) return;
-
-    currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
-    currentParticles[id].material.needsUpdate = true;
-    sections[id].size = size;
-    changedSizes[id] = size;
-}
-
-function changeMultipleGlyphSizes(size){
-    var rows = $('#cluster_table tr.selected');
-    for (var key in rows) {
-        if (rows.hasOwnProperty(key)) {
-            var rowdata = rows[key];
-            var id = rowdata.id;
-            if (id != undefined || id != null) changeSingleGlyphSize(id, size);
+var glyphsControls = {
+    changeGlyph: function(id, shape){
+        changedGlyphs[id] = shape;
+        if (trajectoryData.trajectoryClusterIds.indexOf(id) < 0) {
+            currentParticles[id].material.map = sprites[shape];
+        } else {
+            currentParticles[id].material.map = trajSprites[shape];
         }
+        currentParticles[id].material.needsUpdate = true;
+        generateClusterList(sections, colorlist);
+    },
+    changeSingleGlyphSize: function(id, size){
+        if (!currentParticles[id]) return;
+
+        currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
+        currentParticles[id].material.needsUpdate = true;
+        sections[id].size = size;
+        changedSizes[id] = size;
+    },
+    changeMultipleGlyphSizes: function(size){
+        var rows = $('#cluster_table tr.selected');
+        for (var key in rows) {
+            if (rows.hasOwnProperty(key)) {
+                var rowdata = rows[key];
+                var id = rowdata.id;
+                if (id != undefined || id != null) glyphsControls.changeSingleGlyphSize(id, size);
+            }
+        }
+        generateCheckList(sections, colorlist);
+    },
+    changeGlyphSize: function(){
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                if (sections[key].size == 1) {
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                } else {
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                }
+
+                if(changedSizes.hasOwnProperty(key)){
+                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
+                }
+
+                currentParticles[key].material.needsUpdate = true;
+            }
+        }
+    },
+    getFontIconByShape: function(shape){
+        var glyph = null;
+        switch (parseInt(shape)) {
+            case 0:
+                glyph = 'icon-disc';
+                break;
+            case 1:
+                glyph = 'icon-circle';
+                break;
+            case 2:
+                glyph = 'icon-star-1';
+                break;
+            case 3:
+                glyph = 'icon-cube';
+                break;
+            case 4:
+                glyph = 'icon-pyramid';
+                break;
+            case 5:
+                glyph = 'icon-cone';
+                break;
+            case 6:
+                glyph = 'icon-cylinder';
+                break;
+            default :
+                glyph = 'icon-cylinder';
+        }
+        return glyph;
+    },
+    getGlyphName: function(key){
+        if (!key) return;
+
+        var glyph = null;
+        if (key.size > 1) {
+            switch (parseInt(key.shape)) {
+                case 0:
+                    glyph = "Disc";
+                    break;
+                case 1:
+                    glyph = "Ball";
+                    break;
+                case 2:
+                    glyph = "Star";
+                    break;
+                case 3:
+                    glyph = "Cube";
+                    break;
+                case 4:
+                    glyph = "Pyramid";
+                    break;
+                case 5:
+                    glyph = "Cone";
+                    break;
+                case 6:
+                    glyph = "Cylinder";
+                    break;
+                default :
+                    glyph = "Cube";
+            }
+        }
+        return glyph;
     }
-    generateCheckList(sections, colorlist);
 }
 
 function showSettings() {
@@ -2753,70 +2810,6 @@ function progress() {
     var bar = 250;
     bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
     $("#bar").css({width: bar + "px"});
-}
-
-function getFontIconByShape(shape) {
-    var glyph = null;
-    switch (parseInt(shape)) {
-        case 0:
-            glyph = 'icon-disc';
-            break;
-        case 1:
-            glyph = 'icon-circle';
-            break;
-        case 2:
-            glyph = 'icon-star-1';
-            break;
-        case 3:
-            glyph = 'icon-cube';
-            break;
-        case 4:
-            glyph = 'icon-pyramid';
-            break;
-        case 5:
-            glyph = 'icon-cone';
-            break;
-        case 6:
-            glyph = 'icon-cylinder';
-            break;
-        default :
-            glyph = 'icon-cylinder';
-    }
-    return glyph;
-}
-
-function getGlyphName(key) {
-    if (!key) return;
-
-    var glyph = null;
-    if (key.size > 1) {
-        switch (parseInt(key.shape)) {
-            case 0:
-                glyph = "Disc";
-                break;
-            case 1:
-                glyph = "Ball";
-                break;
-            case 2:
-                glyph = "Star";
-                break;
-            case 3:
-                glyph = "Cube";
-                break;
-            case 4:
-                glyph = "Pyramid";
-                break;
-            case 5:
-                glyph = "Cone";
-                break;
-            case 6:
-                glyph = "Cylinder";
-                break;
-            default :
-                glyph = "Cube";
-        }
-    }
-    return glyph;
 }
 
 function checkIfSelected(key, shape, clusterkey) {
@@ -2880,7 +2873,7 @@ var controlBox = {
         if (settingsDat) {
             gui.remove(settingsDat);
         }
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
 
         for (var i in gui.__controllers) {
             gui.__controllers[i].updateDisplay();
@@ -2891,7 +2884,7 @@ var controlBox = {
         if (settingsDat) {
             gui.remove(settingsDat);
         }
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
 
         for (var i in gui.__controllers) {
             gui.__controllers[i].updateDisplay();
@@ -2905,8 +2898,8 @@ var controlBox = {
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
         gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphsControls.changeGlyphSize);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     setupGuiTimeSeries: function(){
         if (plotInfo.infoPage) return;
@@ -2917,8 +2910,8 @@ var controlBox = {
         customContainer.appendChild(gui.domElement);
         gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
         gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphsControls.changeGlyphSize);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){
         allSettings.selected = controlers.settings;
