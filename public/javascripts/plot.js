@@ -492,7 +492,7 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
     $("#progress").css({display: "block"});
     intialSetup(artifact.settings, false);
     generateGraph();
-    setupGuiSingle();
+    controlBox.setupGuiSingle();
 }
 
 
@@ -512,7 +512,7 @@ function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
     intialSetup(artifact.settings, false);
     initPlotData();
     generateTimeSeries(resultSets);
-    setupGuiTimeSeries();
+    controlBox.setupGuiTimeSeries();
 }
 
 // we will move the time series to begining
@@ -525,7 +525,7 @@ function reInitGraph() {
     intialSetup(allSettings, true);
     // initPlotData();
     generateGraph();
-    updateSingleGui();
+    controlBox.updateSingleGui();
 }
 
 // we will move the time series to begining
@@ -540,7 +540,7 @@ function reInitTimeSeries() {
     setupThreeJs();
     intialSetup(allSettings, true);
     initPlotData();
-    updateTimeSeriesGui();
+    controlBox.updateTimeSeriesGui();
     generateTimeSeries(resultSets, true);
     //reInitialize = false;
 }
@@ -2873,57 +2873,55 @@ function rainBowColors(length, maxLength) {
 }
 
 //Control Box Operations
-var gui;
+var controlBox = {
+    gui: null,
+    settingsDat: null,
+    updateSingleGui: function(){
+        var kys = Object.keys(allSettings.settings);
+        if (settingsDat) {
+            gui.remove(settingsDat);
+        }
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 
-function updateSingleGui() {
-    var kys = Object.keys(allSettings.settings);
-    if (settingsDat) {
-        gui.remove(settingsDat);
+        for (var i in gui.__controllers) {
+            gui.__controllers[i].updateDisplay();
+        }
+    },
+    updateTimeSeriesGui: function(){
+        var kys = Object.keys(allSettings.settings);
+        if (settingsDat) {
+            gui.remove(settingsDat);
+        }
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+
+        for (var i in gui.__controllers) {
+            gui.__controllers[i].updateDisplay();
+        }
+    },
+    setupGuiSingle: function() {
+        if (plotInfo.infoPage) return;
+
+        var kys = Object.keys(allSettings.settings);
+        gui = new dat.GUI({autoPlace: false});
+        var customContainer = document.getElementById('plot-controls');
+        customContainer.appendChild(gui.domElement);
+        gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    },
+    setupGuiTimeSeries: function(){
+        if (plotInfo.infoPage) return;
+
+        var kys = Object.keys(allSettings.settings);
+        gui = new dat.GUI({autoPlace: false});
+        var customContainer = document.getElementById('plot-controls');
+        customContainer.appendChild(gui.domElement);
+        gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
+        gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
+        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
     }
-    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 
-    for (var i in gui.__controllers) {
-        gui.__controllers[i].updateDisplay();
-    }
-}
-
-function updateTimeSeriesGui() {
-    var kys = Object.keys(allSettings.settings);
-    if (settingsDat) {
-        gui.remove(settingsDat);
-    }
-    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
-
-    for (var i in gui.__controllers) {
-        gui.__controllers[i].updateDisplay();
-    }
-}
-
-var settingsDat;
-
-function setupGuiSingle() {
-    if (plotInfo.infoPage) return;
-
-    var kys = Object.keys(allSettings.settings);
-    gui = new dat.GUI({autoPlace: false});
-    var customContainer = document.getElementById('plot-controls');
-    customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(changeGlyphSize);
-    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
-}
-
-function setupGuiTimeSeries() {
-    if (plotInfo.infoPage) return;
-
-    var kys = Object.keys(allSettings.settings);
-    gui = new dat.GUI({autoPlace: false});
-    var customContainer = document.getElementById('plot-controls');
-    customContainer.appendChild(gui.domElement);
-    gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-    gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
-    gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
-    settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
 }
 
 function settingChange() {
