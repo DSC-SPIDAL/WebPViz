@@ -37,6 +37,7 @@ var plotPoints = {};
 
 var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
 var xmean = 0, ymean = 0, zmean = 0, cameraCenter, calculatedmeans = false;
+var mouse
 
 //Single Plot Varibles
 var clusterUrl;
@@ -128,7 +129,99 @@ var scenes = {
         return currentValue ? currentValue : 0;
     }
 };
+var events = {
+    onKeyPress: function(event){
+        if(event.ctrlKey){
+            if(!toolTipLabels.initialized) toolTipLabels.initialize();
+            window.addEventListener('mousemove', events.onDocumentMouseMove, false)
+        }
+    },
+    onKeyUp: function(event){
+            window.removeEventListener('mousemove', events.onDocumentMouseMove)
+            toolTipLabels.clear();
+    },
+    onDocumentMouseMove: function(event){
+        event.preventDefault();
+        if(!toolTipLabels.initialized) return;
 
+        var canvas = document.getElementById("canvas3d").getBoundingClientRect();
+        var width =  canvas.width;
+        var height =  canvas.height;
+
+        mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
+        mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
+        toolTipLabels.update();
+    }
+}
+
+var toolTipLabels = {
+    canvas: null,
+    context: null,
+    texture: null,
+    spriteMaterial: null,
+    sprite: null,
+    raycaster: null,
+    intersected: null,
+    initialized: false,
+
+    initialize: function(){
+        var parameters = {'scale':0.05,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
+        toolTipLabels.sprite =  makeTextSprite("",0.05, 0.03, -.121,parameters);
+        toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
+        toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
+        toolTipLabels.texture = toolTipLabels.sprite.material.map;
+        toolTipLabels.context.clearRect(0,0,256,128);
+        scene3d.add(toolTipLabels.sprite);
+        toolTipLabels.raycaster = new THREE.Raycaster();
+        toolTipLabels.raycaster.params.Points.threshold = toolTipLabels.calculateThreshhold();
+        toolTipLabels.initialized = true;
+    },
+    update: function(){
+        if(!toolTipLabels.initialized) return;
+
+        toolTipLabels.raycaster.setFromCamera(mouse,camera);
+        var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
+
+        if(intersects.length > 0){
+            var labelposition = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
+            toolTipLabels.sprite.position.set(labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z);
+            if(toolTipLabels.intersected != intersects[0].object){
+                toolTipLabels.intersected = intersects[0].object;
+                if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
+                    updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                }else if(toolTipLabels.intersected.geometry.name == ""){
+                    toolTipLabels.intersected = null;
+                    toolTipLabels.context.clearRect(0,0,256,128);
+                    toolTipLabels.texture.needsUpdate = true;
+                }
+            }
+        }else{
+            toolTipLabels.intersected = null;
+            toolTipLabels.context.clearRect(0,0,256,128);
+            toolTipLabels.texture.needsUpdate = true;
+        }
+
+    },
+    calculateThreshhold: function(){
+        var count = 0;
+        var sum  = 0;
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                var current = currentParticles[key];
+                count = count + 1;
+                if ( current.geometry.boundingSphere === null ) current.geometry.computeBoundingSphere();
+                sum = sum + current.geometry.boundingSphere.radius;
+            }
+        }
+        return (sum/count)/10;
+    },
+    clear: function(){
+        if(!toolTipLabels.initialized) return;
+        toolTipLabels.intersected = null;
+        toolTipLabels.context.clearRect(0,0,300,300);
+        toolTipLabels.texture.needsUpdate = true;
+    }
+}
 var trajectoryData = {
     labelSets: {}, // a map that holts trajectory for each frame, for each frame it will hold a map with trajectory for each label
     totalLabels: 10,
@@ -500,16 +593,17 @@ function setupThreeJs() {
     renderer.setClearColor(0x121224, 1);
 
     //new THREE.PerspectiveCamera
-    cameraCenter = new THREE.Vector3(0, 0, 0);
+   // cameraCenter = new THREE.Vector3(0, 0, 0);
     camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
     camera.name = 'camera';
     camera.position.set(1, 1, 1);
-    camera.lookAt(cameraCenter);
+  //  camera.lookAt(cameraCenter);
     scene3d.add(camera);
     controls = new THREE.TrackballControls(camera, renderer.domElement);
     controls.staticMoving = true;
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
+    mouse = new THREE.Vector2();
     initColorSchemes();
     sprites["0"] = THREE.ImageUtils.loadTexture(ImageEnum.DISC);
     sprites["1"] = THREE.ImageUtils.loadTexture(ImageEnum.BALL);
@@ -527,6 +621,8 @@ function setupThreeJs() {
     trajSprites["5"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CONE);
     trajSprites["6"] = THREE.ImageUtils.loadTexture(ImageTrajEnum.CYLINDER);
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener( 'keydown', events.onKeyPress, false );
+    window.addEventListener( 'keyup', events.onKeyUp, false );
 }
 
 function intialSetup(settings, reinit) {
@@ -730,10 +826,11 @@ function generateGraph() {
                 zmean = zmean / clusterdata.p.length;
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
-
+                geometry[clusterid].name = clusterdata.l;
                 xmeantotal += xmean;
                 ymeantotal += ymean;
                 zmeantotal += zmean;
+
             }
         }
 
@@ -1180,6 +1277,8 @@ function convertDataToThreeJsFormat(data) {
             colors32.set(colorArray);
             geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions32, 3));
             geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colors32, 3));
+            geometry[clusterid].name = clusterdata.l;
+
         }
     }
 
@@ -1235,6 +1334,29 @@ var DESCENDER_ADJUST = 1.28;
 function getCanvasColor ( color ) {
     return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
 }
+function updateTextSprite(message,x, y, z, sprite){
+    var canvas = sprite.material.map.image;
+    var context = canvas.getContext('2d');
+
+    var metrics = context.measureText(message);
+    var textWidth = metrics.width;
+
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2;
+    var tx = textWidth / 2.0;
+    var ty = 12 / 2.0;
+    var fillColor = {r: 255, g: 255, b: 255, a: .7};
+    var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
+    var textColor = {r: 0, g: 0, b: 0, a: 1.0};
+    context.clearRect(0,0,256,128);
+    roundRect(context, cx - tx, cy + ty + 0.28 * 12,
+        textWidth, 12 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
+
+    context.fillStyle = getCanvasColor(textColor);
+    context.fillText(message, cx - tx, cy + ty);
+    sprite.material.map.needsUpdate = true;
+    sprite.position.set(x, y, z);
+}
 
 function makeTextSprite(message, x, y, z, parameters) {
     if (parameters === undefined) parameters = {};
@@ -1261,10 +1383,10 @@ function makeTextSprite(message, x, y, z, parameters) {
         parameters["radius"] : 6;
 
     var vAlign = parameters.hasOwnProperty("vAlign") ?
-        parameters["vAlign"] : "center";
+        parameters["vAlign"] : "top";
 
     var hAlign = parameters.hasOwnProperty("hAlign") ?
-        parameters["hAlign"] : "center";
+        parameters["hAlign"] : "right";
 
     var scaleFactor = parameters.hasOwnProperty('scale') ? parameters['scale'] : 1;
 
@@ -1565,7 +1687,7 @@ function updatePlot(index) {
         }
 
         scene3d = new THREE.Scene();
-
+        toolTipLabels.initialized = false;
         scenes.addScene(index, scene3d);
 
         scene3d.add(camera);
