@@ -2920,11 +2920,9 @@ var controlBox = {
         gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
         gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(changeGlyphSize);
         settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(settingChange);
+    },
+    settingChange: function(){
+        allSettings.selected = controlers.settings;
+        reInitialize = true;
     }
-
-}
-
-function settingChange() {
-    allSettings.selected = controlers.settings;
-    reInitialize = true;
 }
