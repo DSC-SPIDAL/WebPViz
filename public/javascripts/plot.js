@@ -129,6 +129,7 @@ var scenes = {
         return currentValue ? currentValue : 0;
     }
 };
+
 var events = {
     onKeyPress: function(event){
         if(event.ctrlKey){
@@ -151,6 +152,20 @@ var events = {
         mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
         mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
         toolTipLabels.update();
+    },
+    onWindowResize: function(){
+        var width;
+        var height;
+        if (!plotInfo.infoPage) {
+            width = window.innerWidth - 30;
+            height = window.innerHeight - 57 - 40 - 40 - 11;
+        } else {
+            width = (window.innerWidth -30)/2 -30;
+            height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
+        }
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
     }
 }
 
@@ -620,7 +635,7 @@ function setupThreeJs() {
     trajSprites["4"] = new THREE.TextureLoader().load(ImageTrajEnum.PYRAMID);
     trajSprites["5"] = new THREE.TextureLoader().load(ImageTrajEnum.CONE);
     trajSprites["6"] = new THREE.TextureLoader().load(ImageTrajEnum.CYLINDER);
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', events.onWindowResize, false);
     window.addEventListener( 'keydown', events.onKeyPress, false );
     window.addEventListener( 'keyup', events.onKeyUp, false );
 }
@@ -865,7 +880,7 @@ function generateGraph() {
             containerStyle: null
         });
 
-        window.addEventListener('resize', onWindowResize, true);
+        window.addEventListener('resize', events.onWindowResize, true);
         changeGlyphSize();
         changePointSize();
         reInitialize = false;
@@ -1768,7 +1783,7 @@ function updatePlot(index) {
         fileName = fileNames[index];
         populatePlotInfo();
         sections = localSection;
-        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('resize', events.onWindowResize, false);
         // render();
         $("#plot-title").text(fileNames[index]);
         //savePlotSettings(controlers.settings);
@@ -2732,22 +2747,6 @@ function addParticlesToScence() {
         }
     }
 }
-
-function onWindowResize() {
-    var width;
-    var height;
-    if (!plotInfo.infoPage) {
-        width = window.innerWidth - 30;
-        height = window.innerHeight - 57 - 40 - 40 - 11;
-    } else {
-        width = (window.innerWidth -30)/2 -30;
-        height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
-    }
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-}
-
 //General Util Methods
 
 function progress() {
