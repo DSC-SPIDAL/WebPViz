@@ -476,20 +476,7 @@ ImageTrajEnum = {
     CYLINDER: "/assets/images/textures1/traj/cylinder.png"
 };
 
-function initSlider() {
-    $("#plot-slider").ionRangeSlider({
-        grid: true,
-        min: 0,
-        max: 100,
-        from: 0,
-        hide_min_max: true,
-        hide_from_to: true,
-        onChange: function (data) {
-            timeSeriesControls.updatePlot(data.from);
-        }
-    });
-    plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
-}
+
 
 var totalItemsToLoad = 1;
 var itemsLoaded = 1;
@@ -497,7 +484,7 @@ var reInitialize = false;
 
 //Plot functions - These are the methods that are first called when a plot is generated
 function visualize(resultSetUrl, artifact, fid, tid, info) {
-    initSlider();
+    timeSeriesControls.initSlider();
     info = typeof info !== 'undefined' ? info : false;
     plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, false);
     clusterUrl = resultSetUrl;
@@ -512,7 +499,7 @@ function visualize(resultSetUrl, artifact, fid, tid, info) {
 
 
 function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
-    initSlider();
+    timeSeriesControls.initSlider();
     info = typeof info !== 'undefined' ? info : false;
     plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, true);
     clusterUrl = resultSetUrl;
@@ -1698,8 +1685,24 @@ function clearThreeJS(loadStartIndex, loadend) {
     scenes.clearScenes(0, loadStartIndex);
     scenes.clearScenes(loadend + 1, timeSeriesLength);
 }
-
+var threejsUtils = {
+    
+}
 var timeSeriesControls = {
+    initSlider: function(){
+        $("#plot-slider").ionRangeSlider({
+            grid: true,
+            min: 0,
+            max: 100,
+            from: 0,
+            hide_min_max: true,
+            hide_from_to: true,
+            onChange: function (data) {
+                timeSeriesControls.updatePlot(data.from);
+            }
+        });
+        plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
+    },
     resetSlider: function(){
         playStatus = playEnum.PAUSE;
         plotRangeSlider.update({from: 0});
