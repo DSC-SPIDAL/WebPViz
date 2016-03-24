@@ -181,7 +181,7 @@ var toolTipLabels = {
 
     initialize: function(){
         var parameters = {'scale':0.05,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
-        toolTipLabels.sprite =  makeTextSprite("",0.05, 0.03, -.121,parameters);
+        toolTipLabels.sprite =  labelControls.makeTextSprite("",0.05, 0.03, -.121,parameters);
         toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = toolTipLabels.sprite.material.map;
@@ -203,7 +203,7 @@ var toolTipLabels = {
             if(toolTipLabels.intersected != intersects[0].object){
                 toolTipLabels.intersected = intersects[0].object;
                 if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
-                    updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                    labelControls.updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
                 }else if(toolTipLabels.intersected.geometry.name == ""){
                     toolTipLabels.intersected = null;
                     toolTipLabels.context.clearRect(0,0,256,128);
@@ -274,7 +274,7 @@ var trajectoryData = {
         var count = 0;
         for (var i = 0; i < points.length; i += 3) {
             if (count % pointPerElements == 0 || (i >= points.length - 3)) {
-                var sprite = makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {
+                var sprite = labelControls.makeTextSprite(count + "", points[i], points[i + 1], points[i + 2], {
                     borderColor: {
                         r: color.r,
                         g: color.g,
@@ -829,7 +829,7 @@ function generateGraph() {
         for (var key in geometry) {
             if (geometry.hasOwnProperty(key)) {
                 geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                currentParticles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
+                currentParticles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                 if (changedGlyphs.hasOwnProperty(key)) {
                     currentParticles[key].material.map = sprites[changedGlyphs[key]];
                     currentParticles[key].material.needsUpdate = true;
@@ -866,7 +866,7 @@ function generateGraph() {
 function generateTimeSeries(resultSets, reInit) {
     playStatus = playEnum.PAUSE;
     if (reInit) {
-        clearThreeJS(timeSeriesLength, timeSeriesLength);
+        threejsUtils.clearThreeJS(timeSeriesLength, timeSeriesLength);
     }
     timeSeriesControls.initBufferAndLoad();
     if (!reInit) {
@@ -1280,9 +1280,9 @@ function convertDataToThreeJsFormat(data) {
         if (geometry.hasOwnProperty(key)) {
             //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
             if (trajectoryData.trajectoryClusterIds.indexOf(key) >= 0) {
-                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
+                particles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, true));
             } else {
-                particles[key] = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
+                particles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false, sections[key].color.a, false));
             }
         }
     }
@@ -1310,383 +1310,372 @@ function convertDataToThreeJsFormat(data) {
     fileNames[data.seq] = data.file;
 }
 
-// a trajectory has edges, text labels and glyphs
-function createTrajectory() {
+var labelControls = {
+    DESCENDER_ADJUST: 1.28,
+    makeTextSprite: function(message, x, y, z, parameters){
+        if (parameters === undefined) parameters = {};
 
-}
+        var fontface = parameters.hasOwnProperty("fontface") ?
+            parameters["fontface"] : "Arial";
 
-var DESCENDER_ADJUST = 1.28;
+        var fontsize = parameters.hasOwnProperty("fontsize") ?
+            parameters["fontsize"] : 12;
 
+        var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+            parameters["borderThickness"] : 1;
 
-function updateTextSprite(message,x, y, z, sprite){
-    var canvas = sprite.material.map.image;
-    var context = canvas.getContext('2d');
+        var borderColor = parameters.hasOwnProperty("borderColor") ?
+            parameters["borderColor"] : {r: 255, g: 0, b: 0, a: 1.0};
 
-    var metrics = context.measureText(message);
-    var textWidth = metrics.width;
+        var fillColor = parameters.hasOwnProperty("fillColor") ?
+            parameters["fillColor"] : {r: 255, g: 255, b: 255, a: 1.0};
 
-    var cx = canvas.width / 2;
-    var cy = canvas.height / 2;
-    var tx = textWidth / 2.0;
-    var ty = 12 / 2.0;
-    var fillColor = {r: 255, g: 255, b: 255, a: .7};
-    var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
-    var textColor = {r: 0, g: 0, b: 0, a: 1.0};
-    context.clearRect(0,0,256,128);
-    roundRect(context, cx - tx, cy + ty + 0.28 * 12,
-        textWidth, 12 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
+        var textColor = parameters.hasOwnProperty("textColor") ?
+            parameters["textColor"] : {r: 0, g: 0, b: 0, a: 1.0};
 
-    context.fillStyle = colorControls.getCanvasColor(textColor);
-    context.fillText(message, cx - tx, cy + ty);
-    sprite.material.map.needsUpdate = true;
-    sprite.position.set(x, y, z);
-}
+        var radius = parameters.hasOwnProperty("radius") ?
+            parameters["radius"] : 6;
 
-function makeTextSprite(message, x, y, z, parameters) {
-    if (parameters === undefined) parameters = {};
+        var vAlign = parameters.hasOwnProperty("vAlign") ?
+            parameters["vAlign"] : "top";
 
-    var fontface = parameters.hasOwnProperty("fontface") ?
-        parameters["fontface"] : "Arial";
+        var hAlign = parameters.hasOwnProperty("hAlign") ?
+            parameters["hAlign"] : "right";
 
-    var fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 12;
+        var scaleFactor = parameters.hasOwnProperty('scale') ? parameters['scale'] : 1;
 
-    var borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 1;
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
 
-    var borderColor = parameters.hasOwnProperty("borderColor") ?
-        parameters["borderColor"] : {r: 255, g: 0, b: 0, a: 1.0};
+        // set a large-enough fixed-size canvas
+        canvas.width = 128;
+        canvas.height = 64;
 
-    var fillColor = parameters.hasOwnProperty("fillColor") ?
-        parameters["fillColor"] : {r: 255, g: 255, b: 255, a: 1.0};
+        context.font = fontsize + "px " + fontface;
+        context.textBaseline = "alphabetic";
+        context.textAlign = "left";
 
-    var textColor = parameters.hasOwnProperty("textColor") ?
-        parameters["textColor"] : {r: 0, g: 0, b: 0, a: 1.0};
+        // get size data (height depends only on font size)
+        var metrics = context.measureText(message);
+        var textWidth = metrics.width;
 
-    var radius = parameters.hasOwnProperty("radius") ?
-        parameters["radius"] : 6;
+        /*
+         // need to ensure that our canvas is always large enough
+         // to support the borders and justification, if any
+         // Note that this will fail for vertical text (e.g. Japanese)
+         // The other problem with this approach is that the size of the canvas
+         // varies with the length of the text, so 72-point text is different
+         // sizes for different text strings.  There are ways around this
+         // by dynamically adjust the sprite scale etc. but not in this demo...
+         var larger = textWidth > fontsize ? textWidth : fontsize;
+         canvas.width = larger * 4;
+         canvas.height = larger * 2;
+         // need to re-fetch and refresh the context after resizing the canvas
+         context = canvas.getContext('2d');
+         context.font = fontsize + "px " + fontface;
+         context.textBaseline = "alphabetic";
+         context.textAlign = "left";
+         metrics = context.measureText( message );
+         textWidth = metrics.width;
 
-    var vAlign = parameters.hasOwnProperty("vAlign") ?
-        parameters["vAlign"] : "top";
+         console.log("canvas: " + canvas.width + ", " + canvas.height + ", texW: " + textWidth);
+         */
 
-    var hAlign = parameters.hasOwnProperty("hAlign") ?
-        parameters["hAlign"] : "right";
+        // find the center of the canvas and the half of the font width and height
+        // we do it this way because the sprite's position is the CENTER of the sprite
+        var cx = canvas.width / 2;
+        var cy = canvas.height / 2;
+        var tx = textWidth / 2.0;
+        var ty = fontsize / 2.0;
 
-    var scaleFactor = parameters.hasOwnProperty('scale') ? parameters['scale'] : 1;
+        // then adjust for the justification
+        if (vAlign == "bottom")
+            ty = 0;
+        else if (vAlign == "top")
+            ty = fontsize;
 
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
+        if (hAlign == "left")
+            tx = textWidth;
+        else if (hAlign == "right")
+            tx = 0;
 
-    // set a large-enough fixed-size canvas
-    canvas.width = 128;
-    canvas.height = 64;
+        // the DESCENDER_ADJUST is extra height factor for text below baseline: g,j,p,q. since we don't know the true bbox
+        labelControls.roundRect(context, cx - tx, cy + ty + 0.28 * fontsize,
+            textWidth, fontsize * labelControls.DESCENDER_ADJUST, radius, borderThickness, borderColor, fillColor);
 
-    context.font = fontsize + "px " + fontface;
-    context.textBaseline = "alphabetic";
-    context.textAlign = "left";
+        // text color.  Note that we have to do this AFTER the round-rect as it also uses the "fillstyle" of the canvas
+        context.fillStyle = colorControls.getCanvasColor(textColor);
 
-    // get size data (height depends only on font size)
-    var metrics = context.measureText(message);
-    var textWidth = metrics.width;
+        context.fillText(message, cx - tx, cy + ty);
 
-    /*
-     // need to ensure that our canvas is always large enough
-     // to support the borders and justification, if any
-     // Note that this will fail for vertical text (e.g. Japanese)
-     // The other problem with this approach is that the size of the canvas
-     // varies with the length of the text, so 72-point text is different
-     // sizes for different text strings.  There are ways around this
-     // by dynamically adjust the sprite scale etc. but not in this demo...
-     var larger = textWidth > fontsize ? textWidth : fontsize;
-     canvas.width = larger * 4;
-     canvas.height = larger * 2;
-     // need to re-fetch and refresh the context after resizing the canvas
-     context = canvas.getContext('2d');
-     context.font = fontsize + "px " + fontface;
-     context.textBaseline = "alphabetic";
-     context.textAlign = "left";
-     metrics = context.measureText( message );
-     textWidth = metrics.width;
+        // draw some visual references - debug only
+        //drawCrossHairs(context, cx, cy);
+        // outlineCanvas(context, canvas);
+        //addSphere(x, y, z);
 
-     console.log("canvas: " + canvas.width + ", " + canvas.height + ", texW: " + textWidth);
+        // canvas contents will be used for a texture
+        var texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        var spriteMaterial = new THREE.SpriteMaterial({map: texture});
+        var sprite = new THREE.Sprite(spriteMaterial);
+
+        // we MUST set the scale to 2:1.  The canvas is already at a 2:1 scale,
+        // but the sprite itself is square: 1.0 by 1.0
+        // Note also that the size of the scale factors controls the actual size of the text-label
+        sprite.scale.set(1 * scaleFactor,.5 * scaleFactor, 1);
+
+        // set the sprite's position.  Note that this position is in the CENTER of the sprite
+        sprite.position.set(x, y, z);
+
+        return sprite;
+    },
+    updateTextSprite: function(message,x, y, z, sprite){
+        var canvas = sprite.material.map.image;
+        var context = canvas.getContext('2d');
+
+        var metrics = context.measureText(message);
+        var textWidth = metrics.width;
+
+        var cx = canvas.width / 2;
+        var cy = canvas.height / 2;
+        var tx = textWidth / 2.0;
+        var ty = 12 / 2.0;
+        var fillColor = {r: 255, g: 255, b: 255, a: .7};
+        var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
+        var textColor = {r: 0, g: 0, b: 0, a: 1.0};
+        context.clearRect(0,0,256,128);
+        labelControls.roundRect(context, cx - tx, cy + ty + 0.28 * 12,
+            textWidth, 12 * labelControls.DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
+
+        context.fillStyle = colorControls.getCanvasColor(textColor);
+        context.fillText(message, cx - tx, cy + ty);
+        sprite.material.map.needsUpdate = true;
+        sprite.position.set(x, y, z);
+    },
+    /**
+     *  function for drawing rounded rectangles
      */
+    roundRect: function(ctx, x, y, w, h, r, borderThickness, borderColor, fillColor){
+        // no point in drawing it if it isn't going to be rendered
+        if (fillColor == undefined && borderColor == undefined)
+            return;
 
-    // find the center of the canvas and the half of the font width and height
-    // we do it this way because the sprite's position is the CENTER of the sprite
-    var cx = canvas.width / 2;
-    var cy = canvas.height / 2;
-    var tx = textWidth / 2.0;
-    var ty = fontsize / 2.0;
+        x -= borderThickness + r;
+        y += borderThickness + r;
+        w += borderThickness * 2 + r * 2;
+        h += borderThickness * 2 + r * 2;
 
-    // then adjust for the justification
-    if (vAlign == "bottom")
-        ty = 0;
-    else if (vAlign == "top")
-        ty = fontsize;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y - r);
+        ctx.lineTo(x + w, y - h + r);
+        ctx.quadraticCurveTo(x + w, y - h, x + w - r, y - h);
+        ctx.lineTo(x + r, y - h);
+        ctx.quadraticCurveTo(x, y - h, x, y - h + r);
+        ctx.lineTo(x, y - r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
 
-    if (hAlign == "left")
-        tx = textWidth;
-    else if (hAlign == "right")
-        tx = 0;
+        ctx.lineWidth = borderThickness;
 
-    // the DESCENDER_ADJUST is extra height factor for text below baseline: g,j,p,q. since we don't know the true bbox
-    roundRect(context, cx - tx, cy + ty + 0.28 * fontsize,
-        textWidth, fontsize * DESCENDER_ADJUST, radius, borderThickness, borderColor, fillColor);
+        // background color
+        // border color
 
-    // text color.  Note that we have to do this AFTER the round-rect as it also uses the "fillstyle" of the canvas
-    context.fillStyle = colorControls.getCanvasColor(textColor);
+        // if the fill color is defined, then fill it
+        if (fillColor != undefined) {
+            ctx.fillStyle = colorControls.getCanvasColor(fillColor);
+            ctx.fill();
+        }
 
-    context.fillText(message, cx - tx, cy + ty);
-
-    // draw some visual references - debug only
-    //drawCrossHairs(context, cx, cy);
-    // outlineCanvas(context, canvas);
-    //addSphere(x, y, z);
-
-    // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-
-    var spriteMaterial = new THREE.SpriteMaterial({map: texture});
-    var sprite = new THREE.Sprite(spriteMaterial);
-
-    // we MUST set the scale to 2:1.  The canvas is already at a 2:1 scale,
-    // but the sprite itself is square: 1.0 by 1.0
-    // Note also that the size of the scale factors controls the actual size of the text-label
-    sprite.scale.set(1 * scaleFactor,.5 * scaleFactor, 1);
-
-    // set the sprite's position.  Note that this position is in the CENTER of the sprite
-    sprite.position.set(x, y, z);
-
-    return sprite;
-}
-
- /**
-   *  function for drawing rounded rectangles
-   */
- function roundRect(ctx, x, y, w, h, r, borderThickness, borderColor, fillColor) {
-     // no point in drawing it if it isn't going to be rendered
-     if (fillColor == undefined && borderColor == undefined)
-         return;
-
-     x -= borderThickness + r;
-     y += borderThickness + r;
-     w += borderThickness * 2 + r * 2;
-     h += borderThickness * 2 + r * 2;
-
-     ctx.beginPath();
-     ctx.moveTo(x + r, y);
-     ctx.lineTo(x + w - r, y);
-     ctx.quadraticCurveTo(x + w, y, x + w, y - r);
-     ctx.lineTo(x + w, y - h + r);
-     ctx.quadraticCurveTo(x + w, y - h, x + w - r, y - h);
-     ctx.lineTo(x + r, y - h);
-     ctx.quadraticCurveTo(x, y - h, x, y - h + r);
-     ctx.lineTo(x, y - r);
-     ctx.quadraticCurveTo(x, y, x + r, y);
-     ctx.closePath();
-
-     ctx.lineWidth = borderThickness;
-
-     // background color
-     // border color
-
-     // if the fill color is defined, then fill it
-     if (fillColor != undefined) {
-         ctx.fillStyle = colorControls.getCanvasColor(fillColor);
-         ctx.fill();
-     }
-
-     if (borderThickness > 0 && borderColor != undefined) {
-         ctx.strokeStyle = colorControls.getCanvasColor(borderColor);
-         ctx.stroke();
-     }
- }
-
-// get the current points and check weather the given label exists
-function checkLabelExists(labelList) {
-    var currentValue = parseInt($("#plot-slider").prop("value"));
-    if (currentValue in dataSets && dataSets[currentValue]) {
-        var data = dataSets[currentValue];
-        var clusters = data.clusters;
-        var upperCaseTrajectoryPointLabels = labelList.map(function(value) {
-            return value.toUpperCase();
-        });
-        var foundLabels = [];
-        for (var cid in clusters) {
-            if (data.clusters.hasOwnProperty(cid)) {
-                var clusterdata = data.clusters[cid];
-                for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
-                    var p = pointControls.findPoint(data, clusterdata.p[pointIndex]);
-                    if (!p) {
-                        continue;
-                    }
-                    var label = p[3];
-                    if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) >= 0 && foundLabels.indexOf(label) < 0) {
-                        foundLabels.push(label.toUpperCase());
+        if (borderThickness > 0 && borderColor != undefined) {
+            ctx.strokeStyle = colorControls.getCanvasColor(borderColor);
+            ctx.stroke();
+        }
+    },
+    // get the current points and check weather the given label exists
+    checkLabelExists: function(labelList){
+        var currentValue = parseInt($("#plot-slider").prop("value"));
+        if (currentValue in dataSets && dataSets[currentValue]) {
+            var data = dataSets[currentValue];
+            var clusters = data.clusters;
+            var upperCaseTrajectoryPointLabels = labelList.map(function(value) {
+                return value.toUpperCase();
+            });
+            var foundLabels = [];
+            for (var cid in clusters) {
+                if (data.clusters.hasOwnProperty(cid)) {
+                    var clusterdata = data.clusters[cid];
+                    for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
+                        var p = pointControls.findPoint(data, clusterdata.p[pointIndex]);
+                        if (!p) {
+                            continue;
+                        }
+                        var label = p[3];
+                        if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) >= 0 && foundLabels.indexOf(label) < 0) {
+                            foundLabels.push(label.toUpperCase());
+                        }
                     }
                 }
             }
+            return labelControls.arrDiff(upperCaseTrajectoryPointLabels, foundLabels);
         }
-        return arrDiff(upperCaseTrajectoryPointLabels, foundLabels);
-    }
-}
-
-function arrDiff(a1, a2) {
-    var a = [], diff = [];
-    for (var i = 0; i < a1.length; i++) {
-        a[a1[i]] = true;
-    }
-    for (var i = 0; i < a2.length; i++) {
-        if (a[a2[i]]) {
-            delete a[a2[i]];
-        } else {
-            a[a2[i]] = true;
+    },
+    arrDiff: function(a1, a2){
+        var a = [], diff = [];
+        for (var i = 0; i < a1.length; i++) {
+            a[a1[i]] = true;
         }
-    }
-    for (var k in a) {
-        diff.push(k);
-    }
-    return diff;
-}
-
-function loadMatrial(size, shape, isglyph, alpha, traj) {
-    var sprite;
-    if (!isglyph) {
-        sprite = null;
-    }
-
-    var spr = {};
-    if (traj) {
-        spr = trajSprites;
-    } else {
-        spr = sprites;
-    }
-
-    if (size > 1) {
-        switch (parseInt(shape)) {
-            case 0:
-                sprite = spr["0"];
-                break;
-            case 1:
-                sprite = spr["1"];
-                break;
-            case 2:
-                sprite = spr["2"];
-                break;
-            case 3:
-                sprite = spr["3"];
-                break;
-            case 4:
-                sprite = spr["4"];
-                break;
-            case 5:
-                sprite = spr["5"];
-                break;
-            case 6:
-                sprite = spr["6"];
-                break;
-            default :
-                sprite = spr["3"];
-        }
-    }
-    var opacity = 1.0;
-    if(alpha != null){
-        opacity = Math.precision(alpha/255,2);
-    }
-    var material = new THREE.PointsMaterial({
-        size: size / 200,
-        map: sprite,
-        vertexColors: THREE.VertexColors,
-        transparent: true,
-        opacity: opacity
-    });
-    return material;
-}
-
-function clearThreeJS(loadStartIndex, loadend) {
-    for (var i = 0; i < loadStartIndex; i++) {
-        if (bufferRequestMade[i]) {
-            delete bufferRequestMade[i];
-        }
-        if (particleSets[i]) {
-            var cp = particleSets[i];
-            for (var key in cp) {
-                if (cp.hasOwnProperty(key)) {
-                    if (cp[key].material) {
-                        cp[key].material.dispose();
-                        cp[key].material = null;
-                    }
-                    if (cp[key].geometry) {
-                        cp[key].geometry.dispose();
-                        cp[key].geometry = null;
-                    }
-                }
+        for (var i = 0; i < a2.length; i++) {
+            if (a[a2[i]]) {
+                delete a[a2[i]];
+            } else {
+                a[a2[i]] = true;
             }
-            delete particleSets[i];
-            particleSets[i] = null;
         }
-        if (dataSets[i]) {
-            delete dataSets[i];
-            // dataSets[i] = null;
+        for (var k in a) {
+            diff.push(k);
         }
-        if (plotPointsSets[i]) {
-            delete plotPointsSets[i];
-            plotPointsSets[i] = null
-        }
-        if (pointLabelxKeySets[i]) {
-            delete pointLabelxKeySets[i];
-            pointLabelxKeySets[i] = null
-        }
-        if (sectionSets[i]) {
-            delete sectionSets[i];
-            sectionSets[i] = null;
-        }
-
+        return diff;
     }
-    trajectoryData.clearSprites(0, loadStartIndex);
-    trajectoryData.clearSprites(loadend + 1, timeSeriesLength);
-    renderObjects.clearLines(0, loadStartIndex);
-    renderObjects.clearLines(loadend + 1, timeSeriesLength);
-    for (var i = loadend + 1; i < timeSeriesLength; i++) {
-        if (bufferRequestMade[i]) {
-            delete bufferRequestMade[i];
-        }
-        if (particleSets[i]) {
-            var cp = particleSets[i];
-            for (var key in cp) {
-                if (cp.hasOwnProperty(key)) {
-                    if (cp[key].material) {
-                        cp[key].material.dispose();
-                    }
-                    if (cp[key].geometry) {
-                        cp[key].geometry.dispose();
-                    }
-                }
-            }
-            delete particleSets[i];
-        }
-        if (dataSets[i]) {
-            delete dataSets[i];
-            // dataSets[i] = null;
-        }
-        if (plotPointsSets[i]) {
-            delete plotPointsSets[i];
-            plotPointsSets[i] = null
-        }
-        if (sectionSets[i]) {
-            delete sectionSets[i];
-        }
-        if (pointLabelxKeySets[i]) {
-            delete pointLabelxKeySets[i];
-            pointLabelxKeySets[i] = null
-        }
-    }
-    scenes.clearScenes(0, loadStartIndex);
-    scenes.clearScenes(loadend + 1, timeSeriesLength);
 }
 var threejsUtils = {
-    
+    loadMatrial: function(size, shape, isglyph, alpha, traj){
+        var sprite;
+        if (!isglyph) {
+            sprite = null;
+        }
+
+        var spr = {};
+        if (traj) {
+            spr = trajSprites;
+        } else {
+            spr = sprites;
+        }
+
+        if (size > 1) {
+            switch (parseInt(shape)) {
+                case 0:
+                    sprite = spr["0"];
+                    break;
+                case 1:
+                    sprite = spr["1"];
+                    break;
+                case 2:
+                    sprite = spr["2"];
+                    break;
+                case 3:
+                    sprite = spr["3"];
+                    break;
+                case 4:
+                    sprite = spr["4"];
+                    break;
+                case 5:
+                    sprite = spr["5"];
+                    break;
+                case 6:
+                    sprite = spr["6"];
+                    break;
+                default :
+                    sprite = spr["3"];
+            }
+        }
+        var opacity = 1.0;
+        if(alpha != null){
+            opacity = Math.precision(alpha/255,2);
+        }
+        var material = new THREE.PointsMaterial({
+            size: size / 200,
+            map: sprite,
+            vertexColors: THREE.VertexColors,
+            transparent: true,
+            opacity: opacity
+        });
+        return material;
+    },
+    clearThreeJS: function(loadStartIndex, loadend){
+        for (var i = 0; i < loadStartIndex; i++) {
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
+            if (particleSets[i]) {
+                var cp = particleSets[i];
+                for (var key in cp) {
+                    if (cp.hasOwnProperty(key)) {
+                        if (cp[key].material) {
+                            cp[key].material.dispose();
+                            cp[key].material = null;
+                        }
+                        if (cp[key].geometry) {
+                            cp[key].geometry.dispose();
+                            cp[key].geometry = null;
+                        }
+                    }
+                }
+                delete particleSets[i];
+                particleSets[i] = null;
+            }
+            if (dataSets[i]) {
+                delete dataSets[i];
+                // dataSets[i] = null;
+            }
+            if (plotPointsSets[i]) {
+                delete plotPointsSets[i];
+                plotPointsSets[i] = null
+            }
+            if (pointLabelxKeySets[i]) {
+                delete pointLabelxKeySets[i];
+                pointLabelxKeySets[i] = null
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+                sectionSets[i] = null;
+            }
+
+        }
+        trajectoryData.clearSprites(0, loadStartIndex);
+        trajectoryData.clearSprites(loadend + 1, timeSeriesLength);
+        renderObjects.clearLines(0, loadStartIndex);
+        renderObjects.clearLines(loadend + 1, timeSeriesLength);
+        for (var i = loadend + 1; i < timeSeriesLength; i++) {
+            if (bufferRequestMade[i]) {
+                delete bufferRequestMade[i];
+            }
+            if (particleSets[i]) {
+                var cp = particleSets[i];
+                for (var key in cp) {
+                    if (cp.hasOwnProperty(key)) {
+                        if (cp[key].material) {
+                            cp[key].material.dispose();
+                        }
+                        if (cp[key].geometry) {
+                            cp[key].geometry.dispose();
+                        }
+                    }
+                }
+                delete particleSets[i];
+            }
+            if (dataSets[i]) {
+                delete dataSets[i];
+                // dataSets[i] = null;
+            }
+            if (plotPointsSets[i]) {
+                delete plotPointsSets[i];
+                plotPointsSets[i] = null
+            }
+            if (sectionSets[i]) {
+                delete sectionSets[i];
+            }
+            if (pointLabelxKeySets[i]) {
+                delete pointLabelxKeySets[i];
+                pointLabelxKeySets[i] = null
+            }
+        }
+        scenes.clearScenes(0, loadStartIndex);
+        scenes.clearScenes(loadend + 1, timeSeriesLength);
+    }
+
 }
 var timeSeriesControls = {
     initSlider: function(){
@@ -1765,7 +1754,7 @@ var timeSeriesControls = {
             if (currentIndex - controlBox.loadSize > 0) {
                 loadStartIndex = currentIndex - controlBox.loadSize;
             }
-            clearThreeJS(loadStartIndex, loadend);
+            threejsUtils.clearThreeJS(loadStartIndex, loadend);
             timeSeriesControls.loadPlotData(loadStartIndex, loadend);
             if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
                 if (indx && indx != currentIndex) {
@@ -2441,9 +2430,9 @@ var clusterControls = {
             if (geometry.hasOwnProperty(key)) {
                 //geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                 if (trajectoryData.trajectoryClusterIds.indexOf(key) >= 0) {
-                    tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, true));
+                    tempparticles = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false, 1, true));
                 } else {
-                    tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
+                    tempparticles = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
                 }
 
                 if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {

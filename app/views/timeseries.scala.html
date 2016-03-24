@@ -508,7 +508,7 @@
                         cleanedLabelList.push(trajectoryPointLabels2[i]);
                     }
                 }
-                var labelExists = checkLabelExists(cleanedLabelList);
+                var labelExists = labelControls.checkLabelExists(cleanedLabelList);
                 if (labelExists.length == 0) {
                     trajectoryData.trajectoryPointLabels = [];
                     for (var i = 0; i < cleanedLabelList.length; i++) {
