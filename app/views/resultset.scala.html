@@ -251,7 +251,7 @@
                     }
                 });
                 $('.plot-save').click(function() {
-                    savePlot();
+                    saveAndVersionControls.savePlot();
                 });
                 $('#plot-reset').click(function () {
                     viewControls.resetView()
@@ -354,7 +354,7 @@
             });
 
             $( "#setting-exist" ).change(function() {
-                saveSettingSelectChange();
+                saveAndVersionControls.saveSettingSelectChange();
             });
 
             $("#saveSettings").click(function() {
@@ -365,9 +365,9 @@
                 } else {
                     setting = sel;
                 }
-                savePlotSettings(setting);
-                callSave();
-                updateSingleGui();
+                saveAndVersionControls.savePlotSettings(setting);
+                saveAndVersionControls.callSave();
+                controlBox.updateSingleGui();
             });
 
             window.addEventListener("keyup", function(e){

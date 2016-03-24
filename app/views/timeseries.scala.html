@@ -271,7 +271,7 @@
                     }
                 });
                 $('.plot-save').click(function() {
-                    savePlot();
+                    saveAndVersionControls.savePlot();
                 });
                 $('#slider-play').click(function () {
                     var span = $("#play-span");
@@ -447,7 +447,7 @@
             });
 
             $( "#setting-exist" ).change(function() {
-                saveSettingSelectChange();
+                saveAndVersionControls.saveSettingSelectChange();
             });
 
             $("#saveSettings").click(function() {
@@ -458,9 +458,9 @@
                 } else {
                     setting = sel;
                 }
-                savePlotSettings(setting);
-                callSave();
-                updateTimeSeriesGui();
+                saveAndVersionControls.savePlotSettings(setting);
+                saveAndVersionControls.callSave();
+                controlBox.updateTimeSeriesGui();
             });
     </script>
     <script>

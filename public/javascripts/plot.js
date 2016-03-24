@@ -885,7 +885,7 @@ function generateGraph() {
         pointControls.changePointSize();
         reInitialize = false;
         animate();
-        savePlotSettings(controlers.settings);
+        saveAndVersionControls.savePlotSettings(controlers.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
     });
@@ -1965,95 +1965,91 @@ var controlers = {
 };
 
 var saveAndVersionControls = {
-
-}
-function savePlot() {
-    var res = false;
-    $('#setting-exist')
-        .find('option')
-        .remove()
-        .end();
-    var kys = Object.keys(allSettings.settings);
-    var selectKey = allSettings.selected;
-    $.each(kys, function (i, item) {
+    savePlot: function(){
+        var res = false;
+        $('#setting-exist')
+            .find('option')
+            .remove()
+            .end();
+        var kys = Object.keys(allSettings.settings);
+        var selectKey = allSettings.selected;
+        $.each(kys, function (i, item) {
+            $('#setting-exist').append($('<option>', {
+                value: item,
+                text: item
+            }));
+        });
         $('#setting-exist').append($('<option>', {
-            value: item,
-            text: item
+            value: 'new',
+            text: 'New Settings'
         }));
-    });
-    $('#setting-exist').append($('<option>', {
-        value: 'new',
-        text: 'New Settings'
-    }));
-    $('#setting-new').prop("disabled", true);
-    $('#setting-exist').val(selectKey);
-    $('#saveModal').modal('show');
-}
-
-function saveSettingSelectChange() {
-    if ($('#setting-exist').val() === "new") {
-        $('#setting-new').prop("disabled", false);
-    } else {
         $('#setting-new').prop("disabled", true);
-    }
-}
-
-function callSave() {
-    var url = '/timeseries/save ';
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(allSettings),
-        url: url,
-        success: function (data) {
-            $('#saveModal').modal('hide');
-        },
-        error: function (data) {
-            $('#saveModal').modal('hide');
+        $('#setting-exist').val(selectKey);
+        $('#saveModal').modal('show');
+    },
+    saveSettingSelectChange: function(){
+        if ($('#setting-exist').val() === "new") {
+            $('#setting-new').prop("disabled", false);
+        } else {
+            $('#setting-new').prop("disabled", true);
         }
-    });
-}
-
-function savePlotSettings(result) {
-    res = result;
-    if (res) {
-        controlers.settings = result;
-        allSettings['tid'] = timeseriesId;
-        allSettings['fid'] = resultSetId;
-        var sett = allSettings.settings;
-        allSettings['selected'] = res;
-        var c = camera.toJSON();
-        var obj = {};
-        obj['camera'] = camera.toJSON();
-        obj['tid'] = timeseriesId;
-        obj['fid'] = resultSetId;
-        obj['pointSize'] = controlers.pointsize;
-        obj['glyphSize'] = controlers.glyphsize;
-        obj['changedSizes'] = changedSizes;
-        obj['speed'] = controlers.delay;
-        obj['glyphs'] = changedGlyphs;
-        obj['customclusters'] = clusterData.customclusters;
-        var lookAtVector = new THREE.Vector3(0, 0, 0);
-        lookAtVector.applyQuaternion(camera.quaternion);
-        var lookAtJson = {};
-        lookAtJson.x = lookAtVector.x;
-        lookAtJson.y = lookAtVector.y;
-        lookAtJson.z = lookAtVector.z;
-        obj['clusterColors'] = trueColorList;
-        obj['lookVector'] = lookAtJson;
-        obj['cameraPosition'] = camera.position;
-        obj['cameraup'] = camera.up;
-        obj['rotation'] = camera.rotation;
-        obj['zoom'] = camera.zoom;
-        obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
-        obj['controltarget'] = controls.target;
-        obj['trajectoryData'] = trajectoryData.createSave();
-        sett[res] = obj;
+    },
+    callSave: function(){
+        var url = '/timeseries/save ';
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(allSettings),
+            url: url,
+            success: function (data) {
+                $('#saveModal').modal('hide');
+            },
+            error: function (data) {
+                $('#saveModal').modal('hide');
+            }
+        });
+    },
+    savePlotSettings: function(result){
+        res = result;
+        if (res) {
+            controlers.settings = result;
+            allSettings['tid'] = timeseriesId;
+            allSettings['fid'] = resultSetId;
+            var sett = allSettings.settings;
+            allSettings['selected'] = res;
+            var c = camera.toJSON();
+            var obj = {};
+            obj['camera'] = camera.toJSON();
+            obj['tid'] = timeseriesId;
+            obj['fid'] = resultSetId;
+            obj['pointSize'] = controlers.pointsize;
+            obj['glyphSize'] = controlers.glyphsize;
+            obj['changedSizes'] = changedSizes;
+            obj['speed'] = controlers.delay;
+            obj['glyphs'] = changedGlyphs;
+            obj['customclusters'] = clusterData.customclusters;
+            var lookAtVector = new THREE.Vector3(0, 0, 0);
+            lookAtVector.applyQuaternion(camera.quaternion);
+            var lookAtJson = {};
+            lookAtJson.x = lookAtVector.x;
+            lookAtJson.y = lookAtVector.y;
+            lookAtJson.z = lookAtVector.z;
+            obj['clusterColors'] = trueColorList;
+            obj['lookVector'] = lookAtJson;
+            obj['cameraPosition'] = camera.position;
+            obj['cameraup'] = camera.up;
+            obj['rotation'] = camera.rotation;
+            obj['zoom'] = camera.zoom;
+            obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
+            obj['controltarget'] = controls.target;
+            obj['trajectoryData'] = trajectoryData.createSave();
+            sett[res] = obj;
+        }
     }
+
+
 }
-
-
 //Html Content Generators
 
 /**
