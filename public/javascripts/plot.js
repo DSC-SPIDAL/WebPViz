@@ -811,7 +811,7 @@ function generateGraph() {
                 ymean = 0;
                 zmean = 0;
                 for (var k = 0; k < clusterdata.p.length; k++) {
-                    var p = findPoint(data, clusterdata.p[k]);
+                    var p = pointControls.findPoint(data, clusterdata.p[k]);
                     if (!p) {
                         continue;
                     }
@@ -881,7 +881,7 @@ function generateGraph() {
         });
 
         window.addEventListener('resize', events.onWindowResize, true);
-        glyphsControls.changeGlyphSize();
+        glyphControls.changeGlyphSize();
         changePointSize();
         reInitialize = false;
         animate();
@@ -1119,7 +1119,7 @@ function convertDataToThreeJsFormat(data) {
             var positionsArray = [];
             var colorArray = [];
             for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
-                var p = findPoint(data, clusterdata.p[pointIndex]);
+                var p = pointControls.findPoint(data, clusterdata.p[pointIndex]);
                 if (!p) {
                     continue;
                 }
@@ -1548,7 +1548,7 @@ function checkLabelExists(labelList) {
             if (data.clusters.hasOwnProperty(cid)) {
                 var clusterdata = data.clusters[cid];
                 for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
-                    var p = findPoint(data, clusterdata.p[pointIndex]);
+                    var p = pointControls.findPoint(data, clusterdata.p[pointIndex]);
                     if (!p) {
                         continue;
                     }
@@ -2106,7 +2106,7 @@ function generateCheckList(list, initcolors) {
     var glyphList = [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var sprite = glyphsControls.getGlyphName(list[key]);
+        var sprite = glyphControls.getGlyphName(list[key]);
         if (sprite != null) {
             glyphList.push(key);
         } else {
@@ -2147,7 +2147,7 @@ function generateCheckList(list, initcolors) {
             } else {
                 $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
             }
-            var sprite = glyphsControls.getGlyphName(list[key]);
+            var sprite = glyphControls.getGlyphName(list[key]);
             var currentshape;
             if (changedGlyphs.hasOwnProperty(key)) {
                 currentshape = changedGlyphs[key];
@@ -2177,7 +2177,7 @@ function generateCheckList(list, initcolors) {
             } else {
                 tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
             }
-            var sprite = glyphsControls.getGlyphName(list[key]);
+            var sprite = glyphControls.getGlyphName(list[key]);
             tablerows += "<label class='color-box-label'>" + key + "</label> "
                 + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                 + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
@@ -2257,10 +2257,10 @@ function generateClusterList(list, initcolors) {
                 var colorWithouthHash = initcolors[key].replace(/#/g, '');
                 var sprite = null;
                 if (changedGlyphs.hasOwnProperty(key)) {
-                    sprite = glyphsControls.getFontIconByShape(changedGlyphs[key]);
+                    sprite = glyphControls.getFontIconByShape(changedGlyphs[key]);
                 } else{
                     if (list[key].size > 1) {
-                        sprite = glyphsControls.getFontIconByShape(list[key].shape);
+                        sprite = glyphControls.getFontIconByShape(list[key].shape);
                     }
                 }
                 // try to find the element first
@@ -2676,7 +2676,7 @@ function renderCustomCluster() {
         }
     }
 }
-var glyphsControls = {
+var glyphControls = {
     changeGlyph: function(id, shape){
         changedGlyphs[id] = shape;
         if (trajectoryData.trajectoryClusterIds.indexOf(id) < 0) {
@@ -2701,7 +2701,7 @@ var glyphsControls = {
             if (rows.hasOwnProperty(key)) {
                 var rowdata = rows[key];
                 var id = rowdata.id;
-                if (id != undefined || id != null) glyphsControls.changeSingleGlyphSize(id, size);
+                if (id != undefined || id != null) glyphControls.changeSingleGlyphSize(id, size);
             }
         }
         generateCheckList(sections, colorlist);
@@ -2787,13 +2787,21 @@ var glyphsControls = {
     }
 }
 
-function showSettings() {
-    settingOn = true;
-    generateCheckList(sections, colorlist);
+var pointControls = {
+    findPoint: function(data, key){
+        return data.points[key.toString()];
+    }
 }
 
-function hideSettings() {
-    settingOn = false;
+var settingsControls = {
+    showSettings: function(){
+        settingOn = true;
+        generateCheckList(sections, colorlist);
+    },
+    hideSettings: function(){
+        settingOn = false;
+    }
+
 }
 
 function addParticlesToScence() {
@@ -2836,9 +2844,6 @@ function maplabelstokeys(points) {
     }
 }
 
-function findPoint(data, key) {
-    return data.points[key.toString()];
-}
 
 function randomRBG() {
     return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
@@ -2898,7 +2903,7 @@ var controlBox = {
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
         gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphsControls.changeGlyphSize);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     setupGuiTimeSeries: function(){
@@ -2910,7 +2915,7 @@ var controlBox = {
         customContainer.appendChild(gui.domElement);
         gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
         gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphsControls.changeGlyphSize);
+        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){

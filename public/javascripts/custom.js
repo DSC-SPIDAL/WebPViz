@@ -93,7 +93,7 @@ $(function () {
 $(function () {
     $('#cluster_table_div').on('change','select',function() {
         var id = $(this).attr('id');
-        changeGlyph(id,$(this).val());
+        glyphControls.changeGlyph(id,$(this).val());
     });
 
     $('#cluster_table_div').on('keypress','input',function(e) {
@@ -101,7 +101,7 @@ $(function () {
             var id = $(this).attr('id');
             var key = $(this).attr('key');
             var value = $(this).val();
-            changeSingleGlyphSize(key,value);
+            glyphControls.changeSingleGlyphSize(key,value);
         }
     });
 
@@ -109,18 +109,18 @@ $(function () {
             var id = $(this).attr('id');
             var key = $(this).attr('key');
             var value = $(this).val();
-            changeSingleGlyphSize(key,value)
+            glyphControls.changeSingleGlyphSize(key,value)
     });
 
     $('#multirowsize').on('focusout',function() {
             var value = $(this).val();
-            changeMultipleGlyphSizes(value)
+            glyphControls.changeMultipleGlyphSizes(value)
     });
 
     $('#multirowsize').on('keypress', function(e) {
         if(e.which == 13){
             var value = $(this).val();
-            changeMultipleGlyphSizes(value)
+            glyphControls.changeMultipleGlyphSizes(value)
         }
     });
 });

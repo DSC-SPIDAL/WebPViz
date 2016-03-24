@@ -322,16 +322,16 @@
                 $('#settings-toggle').click(function () {
                     var settingsdiv = $("#settingDiv");
                     if(settingsdiv.hasClass("settinghidden")){
-                        showSettings();
+                        settingsControls.showSettings();
                         settingsdiv.removeClass("settinghidden");
                     }else{
                         settingsdiv.addClass("settinghidden");
-                        hideSettings();
+                       settingsControls.hideSettings();
                     }
                 });
 
                 $('#settings-div-close').click(function () {
-                    hideSettings();
+                    settingsControls.hideSettings();
 
                    var settingsdiv = $("#settingDiv");
 
