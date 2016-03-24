@@ -719,10 +719,10 @@ function intialSetup(settings, reinit) {
         allSettings['selected'] = 'original';
     }
 
-    controlers.pointsize = pointSize;
-    controlers.glyphsize = glyphSize;
-    controlers.delay = speed;
-    controlers.settings = allSettings.selected;
+    controlBox.pointsize = pointSize;
+    controlBox.glyphsize = glyphSize;
+    controlBox.delay = speed;
+    controlBox.settings = allSettings.selected;
 }
 
 function initPlotData() {
@@ -885,7 +885,7 @@ function generateGraph() {
         pointControls.changePointSize();
         reInitialize = false;
         animate();
-        saveAndVersionControls.savePlotSettings(controlers.settings);
+        saveAndVersionControls.savePlotSettings(controlBox.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
     });
@@ -1321,11 +1321,11 @@ function convertDataToThreeJsFormat(data) {
     particleSets[data.seq] = particles;
     for (var key in particles) {
         if (particles.hasOwnProperty(key)) {
-            if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+            if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {
                 if (sections[key].size == 1) {
-                    particles[key].material.size = (localSections[key].size / 200) * controlers.pointsize;
+                    particles[key].material.size = (localSections[key].size / 200) * controlBox.pointsize;
                 } else {
-                    particles[key].material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                    particles[key].material.size = (localSections[key].size / 200) * controlBox.glyphsize;
                 }
                 particles[key].material.needsUpdate = true;
             }
@@ -1714,17 +1714,17 @@ function updatePlot(index) {
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
 
-                if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {
                     if (sections[key].size == 1) {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlBox.pointsize;
                     } else {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                        currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
                     }
                     currentParticles[key].material.needsUpdate = true;
                 }
 
                 if(changedSizes.hasOwnProperty(key)){
-                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
+                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
                 }
 
                 if (clusterData.recoloredclusters.hasOwnProperty(key)) {
@@ -1784,7 +1784,7 @@ function updatePlot(index) {
         window.addEventListener('resize', events.onWindowResize, false);
         // render();
         $("#plot-title").text(fileNames[index]);
-        //savePlotSettings(controlers.settings);
+        //savePlotSettings(controlBox.settings);
         return true;
     } else {
         return false;
@@ -1815,7 +1815,7 @@ function playLoop() {
             }
         }
         playLoop();
-    }, controlers.delay);
+    }, controlBox.delay);
 }
 
 function initBufferAndLoad() {
@@ -1837,7 +1837,7 @@ function initBufferAndLoad() {
                 bufferLoop(null);
             }
         }
-    }, controlers.delay);
+    }, controlBox.delay);
 }
 
 function clearThreeJS(loadStartIndex, loadend) {
@@ -1926,12 +1926,12 @@ function bufferLoop(indx) {
     setTimeout(function () {
         var currentIndex = parseInt($("#plot-slider").prop("value"));
         var loadend = timeSeriesLength;
-        if (timeSeriesLength > currentIndex + controlers.loadSize) {
-            loadend = currentIndex + controlers.loadSize;
+        if (timeSeriesLength > currentIndex + controlBox.loadSize) {
+            loadend = currentIndex + controlBox.loadSize;
         }
         var loadStartIndex = 0;
-        if (currentIndex - controlers.loadSize > 0) {
-            loadStartIndex = currentIndex - controlers.loadSize;
+        if (currentIndex - controlBox.loadSize > 0) {
+            loadStartIndex = currentIndex - controlBox.loadSize;
         }
         clearThreeJS(loadStartIndex, loadend);
         loadPlotData(loadStartIndex, loadend);
@@ -1943,7 +1943,7 @@ function bufferLoop(indx) {
         }
         bufferLoop(indx);
 
-    }, controlers.delay * controlers.loadSize / 2);
+    }, controlBox.delay * controlBox.loadSize / 2);
 }
 
 function animateTimeSeriesPause() {
@@ -1954,15 +1954,6 @@ function resetSlider() {
     playStatus = playEnum.PAUSE;
     plotRangeSlider.update({from: 0});
 }
-
-var controlers = {
-    delay: 300,
-    pointsize: 1,
-    glyphsize: 1,
-    loadSize: 10,
-    maxPlotsStored: 20,
-    settings: "chrome"
-};
 
 var saveAndVersionControls = {
     savePlot: function(){
@@ -2013,7 +2004,7 @@ var saveAndVersionControls = {
     savePlotSettings: function(result){
         res = result;
         if (res) {
-            controlers.settings = result;
+            controlBox.settings = result;
             allSettings['tid'] = timeseriesId;
             allSettings['fid'] = resultSetId;
             var sett = allSettings.settings;
@@ -2023,10 +2014,10 @@ var saveAndVersionControls = {
             obj['camera'] = camera.toJSON();
             obj['tid'] = timeseriesId;
             obj['fid'] = resultSetId;
-            obj['pointSize'] = controlers.pointsize;
-            obj['glyphSize'] = controlers.glyphsize;
+            obj['pointSize'] = controlBox.pointsize;
+            obj['glyphSize'] = controlBox.glyphsize;
             obj['changedSizes'] = changedSizes;
-            obj['speed'] = controlers.delay;
+            obj['speed'] = controlBox.delay;
             obj['glyphs'] = changedGlyphs;
             obj['customclusters'] = clusterData.customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, 0);
@@ -2051,7 +2042,6 @@ var saveAndVersionControls = {
 
 }
 //Html Content Generators
-
 /**
  * Generates the Information box content
  */
@@ -2477,11 +2467,11 @@ var clusterControls = {
                     tempparticles = new THREE.Points(geometry[key], loadMatrial(sections[key].size, sections[key].shape, false, 1, false));
                 }
 
-                if (controlers.pointsize != 1 || controlers.glyphsize != 1) {
+                if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {
                     if (sections[key].size == 1) {
-                        tempparticles.material.size = (localSections[key].size / 200) * controlers.pointsize;
+                        tempparticles.material.size = (localSections[key].size / 200) * controlBox.pointsize;
                     } else {
-                        tempparticles.material.size = (localSections[key].size / 200) * controlers.glyphsize;
+                        tempparticles.material.size = (localSections[key].size / 200) * controlBox.glyphsize;
                     }
                     tempparticles.material.needsUpdate = true;
                 }
@@ -2506,7 +2496,7 @@ var glyphControls = {
     changeSingleGlyphSize: function(id, size){
         if (!currentParticles[id]) return;
 
-        currentParticles[id].material.size = (size / 200) * controlers.glyphsize;
+        currentParticles[id].material.size = (size / 200) * controlBox.glyphsize;
         currentParticles[id].material.needsUpdate = true;
         sections[id].size = size;
         changedSizes[id] = size;
@@ -2526,13 +2516,13 @@ var glyphControls = {
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
                 if (sections[key].size == 1) {
-                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlBox.pointsize;
                 } else {
-                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
                 }
 
                 if(changedSizes.hasOwnProperty(key)){
-                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlers.glyphsize;
+                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
                 }
 
                 currentParticles[key].material.needsUpdate = true;
@@ -2607,9 +2597,9 @@ var pointControls = {
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
                 if (sections[key].size == 1) {
-                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlBox.pointsize;
                 } else {
-                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
                 }
                 currentParticles[key].material.needsUpdate = true;
             }
@@ -2849,13 +2839,19 @@ var utilsControls = {
  */
 var controlBox = {
     gui: null,
+    delay: 300,
+    pointsize: 1,
+    glyphsize: 1,
+    loadSize: 10,
+    maxPlotsStored: 20,
+    settings: "chrome",
     settingsDat: null,
     updateSingleGui: function(){
         var kys = Object.keys(allSettings.settings);
         if (settingsDat) {
             gui.remove(settingsDat);
         }
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
+        settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
 
         for (var i in gui.__controllers) {
             gui.__controllers[i].updateDisplay();
@@ -2866,7 +2862,7 @@ var controlBox = {
         if (settingsDat) {
             gui.remove(settingsDat);
         }
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
+        settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
 
         for (var i in gui.__controllers) {
             gui.__controllers[i].updateDisplay();
@@ -2879,9 +2875,9 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(pointControls.changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
+        gui.add(controlBox, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     setupGuiTimeSeries: function(){
         if (plotInfo.infoPage) return;
@@ -2890,13 +2886,13 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-        gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
-        gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
-        settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
+        gui.add(controlBox, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
+        gui.add(controlBox, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){
-        allSettings.selected = controlers.settings;
+        allSettings.selected = controlBox.settings;
         reInitialize = true;
     }
 }
