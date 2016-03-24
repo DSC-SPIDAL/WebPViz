@@ -8,8 +8,7 @@
 $(function () {
 
     $('#sidebar-footer a').click(function () {
-        var $this = $(this);
-        resetView();
+        viewControls.resetView();
     });
 
     $('#sidebar-menu li').click(function () {
@@ -85,7 +84,7 @@ $(function () {
 
 $(function () {
     $('#color-palette-div').on('change','select',function() {
-        changeColorScheme($(this).val());
+        colorControls.changeColorScheme($(this).val());
     });
 
 });

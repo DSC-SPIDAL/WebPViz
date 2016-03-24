@@ -2319,180 +2319,10 @@ function hexToRgb(hex) {
     } : null;
 }
 
-//Control Utils
-
-function resetView() {
-    controls.reset();
-}
-
-
-function recolorSection(id, color, alpha) {
-    if (id == "cccolor") return;
-    if (id == "multi") {
-        recolorMultipleSections(color,alpha);
-        return;
-    }
-
-    colorlist[id] = color;
-    var opacity = Math.precision(alpha/255,3);
-
-    //remove the color jpicker binding
-    $("#cluster_table tbody > #" + id +" span.jPicker").remove();
-    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color);
-    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('alpha', alpha);
-    $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
-
-    //change to custom color scheme since a color change has been made
-    currentCustomColorScheme = colorlist;
-    if ($("#color-scheme").val() != "custom") {
-        $("#color-scheme").val('custom');
-    }
-
-    color = "#" + color;
-    var tempcolor = new THREE.Color(color);
-    trueColorList[id] = {
-        "r": tempcolor.toArray()[0] * 255,
-        "g": tempcolor.toArray()[1] * 255,
-        "b": tempcolor.toArray()[2] * 255,
-        "a": alpha
-    };
-    var colorattri = currentParticles[id].geometry.getAttribute('color');
-    if (colorattri) {
-        var colorsd = new Float32Array(colorattri.length);
-        for (var k = 0; k < colorattri.length / 3; k++) {
-            colorsd[k * 3 + 0] = tempcolor.r;
-            colorsd[k * 3 + 1] = tempcolor.g;
-            colorsd[k * 3 + 2] = tempcolor.b;
-        }
-    }
-    currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-    sections[id].color.a = alpha;
-    generateClusterList(sections, colorlist);
-
-    clusterData.recoloredclusters[id] = new THREE.Color(color);
-    clusterData.realpaedclusters[id] = alpha;
-    currentParticles[id].material.opacity = opacity;
-    currentParticles[id].material.transparent = true;
-    currentParticles[id].geometry.colorsNeedUpdate = true;
-    currentParticles[id].material.needsUpdate = true;
-
-}
-
-function recolorMultipleSections(color,alpha) {
-    var rows = $('#cluster_table tr.selected');
-    for (var key in rows) {
-        if (rows.hasOwnProperty(key)) {
-            var rowdata = rows[key]
-            var id = rowdata.id;
-            if (id != undefined || id != null) recolorSection(id, color,alpha);
-        }
-    }
-    generateCheckList(sections, colorlist);
-}
-
-/**
- * Changes the current color scheme of the cluster. Saves the Custom color scheme
- * @param scheme
- */
-function changeColorScheme(scheme) {
-    if (currentCustomColorScheme == null) {
-        currentCustomColorScheme = jQuery.extend({}, colorlist);
-    }
-
-    if (scheme == 'custom') {
-        colorlist = jQuery.extend({}, currentCustomColorScheme);
-        for (var key in currentParticles) {
-            if (currentParticles.hasOwnProperty(key)) {
-                var tempcolor = new THREE.Color("#" + colorlist[key]);
-                trueColorList[key] = {
-                    "r": tempcolor.toArray()[0] * 255,
-                    "g": tempcolor.toArray()[1] * 255,
-                    "b": tempcolor.toArray()[2] * 255
-                };
-
-                var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.count * 3);
-                for (var k = 0; k < colorattri.count; k++) {
-                    colorsd[k * 3 + 0] = tempcolor.r;
-                    colorsd[k * 3 + 1] = tempcolor.g;
-                    colorsd[k * 3 + 2] = tempcolor.b;
-                }
-                currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                clusterData.recoloredclusters[key] = tempcolor
-                currentParticles[key].geometry.colorsNeedUpdate = true;
-            }
-        }
-    } else if (scheme == 'rainbow' || scheme == 'rainbowrev') {
-        clusterCount = Object.keys(currentParticles).length;
-        var count;
-        if (scheme == 'rainbow') {
-            count = 0
-        } else {
-            count = clusterCount - 1;
-        }
-        for (var key in currentParticles) {
-            if (currentParticles.hasOwnProperty(key)) {
-                var tempcolor = new THREE.Color(colorControls.rainBowColors(count, clusterCount));
-                colorlist[key] = tempcolor.getHexString();
-                trueColorList[key] = {
-                    "r": tempcolor.toArray()[0] * 255,
-                    "g": tempcolor.toArray()[1] * 255,
-                    "b": tempcolor.toArray()[2] * 255
-                };
-
-                var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.count * 3);
-                for (var k = 0; k < colorattri.count; k++) {
-                    colorsd[k * 3 + 0] = tempcolor.r;
-                    colorsd[k * 3 + 1] = tempcolor.g;
-                    colorsd[k * 3 + 2] = tempcolor.b;
-                }
-                currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                clusterData.recoloredclusters[key] = tempcolor
-                currentParticles[key].geometry.colorsNeedUpdate = true;
-                if (scheme == 'rainbow') {
-                    count += 1;
-                } else {
-                    count -= 1;
-                }
-            }
-        }
-    }else {
-        var colorScheme = colorSchemes[scheme];
-        if (colorScheme == undefined || colorScheme == null) return
-
-        var colorSchemeLength = colorScheme.length;
-        var count = 0;
-        for (var key in currentParticles) {
-            if (currentParticles.hasOwnProperty(key)) {
-                colorlist[key] = colorScheme[count % colorSchemeLength].substring(1);
-                var tempcolor = new THREE.Color(colorScheme[count % colorSchemeLength]);
-                trueColorList[key] = {
-                    "r": tempcolor.toArray()[0] * 255,
-                    "g": tempcolor.toArray()[1] * 255,
-                    "b": tempcolor.toArray()[2] * 255
-                };
-
-                var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.count * 3);
-                for (var k = 0; k < colorattri.count; k++) {
-                    colorsd[k * 3 + 0] = tempcolor.r;
-                    colorsd[k * 3 + 1] = tempcolor.g;
-                    colorsd[k * 3 + 2] = tempcolor.b;
-                }
-                currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                clusterData.recoloredclusters[key] = tempcolor
-                currentParticles[key].geometry.colorsNeedUpdate = true;
-                count += 1;
-            }
-        }
-    }
-    generateCheckList(sections, colorlist);
-    generateClusterList(sections, colorlist);
-
-}
-
 var viewControls = {
+    resetView: function(){
+        controls.reset();
+    },
     addParticlesToScence: function(){
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
@@ -2815,6 +2645,165 @@ var colorControls = {
         var g = Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
         var b = Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
         return 'rgb(' + r + ',' + g + ',' + b + ')';
+
+    },
+    recolorSection: function(id, color, alpha){
+        if (id == "cccolor") return;
+        if (id == "multi") {
+            colorControls.recolorMultipleSections(color,alpha);
+            return;
+        }
+
+        colorlist[id] = color;
+        var opacity = Math.precision(alpha/255,3);
+
+        //remove the color jpicker binding
+        $("#cluster_table tbody > #" + id +" span.jPicker").remove();
+        $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('style', "background-color:#" + color);
+        $("#cluster_table > tbody > #" + id + " span#color-picker-addon").attr('alpha', alpha);
+        $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
+
+        //change to custom color scheme since a color change has been made
+        currentCustomColorScheme = colorlist;
+        if ($("#color-scheme").val() != "custom") {
+            $("#color-scheme").val('custom');
+        }
+
+        color = "#" + color;
+        var tempcolor = new THREE.Color(color);
+        trueColorList[id] = {
+            "r": tempcolor.toArray()[0] * 255,
+            "g": tempcolor.toArray()[1] * 255,
+            "b": tempcolor.toArray()[2] * 255,
+            "a": alpha
+        };
+        var colorattri = currentParticles[id].geometry.getAttribute('color');
+        if (colorattri) {
+            var colorsd = new Float32Array(colorattri.length);
+            for (var k = 0; k < colorattri.length / 3; k++) {
+                colorsd[k * 3 + 0] = tempcolor.r;
+                colorsd[k * 3 + 1] = tempcolor.g;
+                colorsd[k * 3 + 2] = tempcolor.b;
+            }
+        }
+        currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+        sections[id].color.a = alpha;
+        generateClusterList(sections, colorlist);
+
+        clusterData.recoloredclusters[id] = new THREE.Color(color);
+        clusterData.realpaedclusters[id] = alpha;
+        currentParticles[id].material.opacity = opacity;
+        currentParticles[id].material.transparent = true;
+        currentParticles[id].geometry.colorsNeedUpdate = true;
+        currentParticles[id].material.needsUpdate = true;
+
+    },
+    recolorMultipleSections: function(color,alpha){
+        var rows = $('#cluster_table tr.selected');
+        for (var key in rows) {
+            if (rows.hasOwnProperty(key)) {
+                var rowdata = rows[key]
+                var id = rowdata.id;
+                if (id != undefined || id != null) colorControls.recolorSection(id, color,alpha);
+            }
+        }
+        generateCheckList(sections, colorlist);
+    },
+    changeColorScheme: function(scheme){
+        if (currentCustomColorScheme == null) {
+            currentCustomColorScheme = jQuery.extend({}, colorlist);
+        }
+
+        if (scheme == 'custom') {
+            colorlist = jQuery.extend({}, currentCustomColorScheme);
+            for (var key in currentParticles) {
+                if (currentParticles.hasOwnProperty(key)) {
+                    var tempcolor = new THREE.Color("#" + colorlist[key]);
+                    trueColorList[key] = {
+                        "r": tempcolor.toArray()[0] * 255,
+                        "g": tempcolor.toArray()[1] * 255,
+                        "b": tempcolor.toArray()[2] * 255
+                    };
+
+                    var colorattri = currentParticles[key].geometry.getAttribute('color');
+                    var colorsd = new Float32Array(colorattri.count * 3);
+                    for (var k = 0; k < colorattri.count; k++) {
+                        colorsd[k * 3 + 0] = tempcolor.r;
+                        colorsd[k * 3 + 1] = tempcolor.g;
+                        colorsd[k * 3 + 2] = tempcolor.b;
+                    }
+                    currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+                    clusterData.recoloredclusters[key] = tempcolor
+                    currentParticles[key].geometry.colorsNeedUpdate = true;
+                }
+            }
+        } else if (scheme == 'rainbow' || scheme == 'rainbowrev') {
+            clusterCount = Object.keys(currentParticles).length;
+            var count;
+            if (scheme == 'rainbow') {
+                count = 0
+            } else {
+                count = clusterCount - 1;
+            }
+            for (var key in currentParticles) {
+                if (currentParticles.hasOwnProperty(key)) {
+                    var tempcolor = new THREE.Color(colorControls.rainBowColors(count, clusterCount));
+                    colorlist[key] = tempcolor.getHexString();
+                    trueColorList[key] = {
+                        "r": tempcolor.toArray()[0] * 255,
+                        "g": tempcolor.toArray()[1] * 255,
+                        "b": tempcolor.toArray()[2] * 255
+                    };
+
+                    var colorattri = currentParticles[key].geometry.getAttribute('color');
+                    var colorsd = new Float32Array(colorattri.count * 3);
+                    for (var k = 0; k < colorattri.count; k++) {
+                        colorsd[k * 3 + 0] = tempcolor.r;
+                        colorsd[k * 3 + 1] = tempcolor.g;
+                        colorsd[k * 3 + 2] = tempcolor.b;
+                    }
+                    currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+                    clusterData.recoloredclusters[key] = tempcolor
+                    currentParticles[key].geometry.colorsNeedUpdate = true;
+                    if (scheme == 'rainbow') {
+                        count += 1;
+                    } else {
+                        count -= 1;
+                    }
+                }
+            }
+        }else {
+            var colorScheme = colorSchemes[scheme];
+            if (colorScheme == undefined || colorScheme == null) return
+
+            var colorSchemeLength = colorScheme.length;
+            var count = 0;
+            for (var key in currentParticles) {
+                if (currentParticles.hasOwnProperty(key)) {
+                    colorlist[key] = colorScheme[count % colorSchemeLength].substring(1);
+                    var tempcolor = new THREE.Color(colorScheme[count % colorSchemeLength]);
+                    trueColorList[key] = {
+                        "r": tempcolor.toArray()[0] * 255,
+                        "g": tempcolor.toArray()[1] * 255,
+                        "b": tempcolor.toArray()[2] * 255
+                    };
+
+                    var colorattri = currentParticles[key].geometry.getAttribute('color');
+                    var colorsd = new Float32Array(colorattri.count * 3);
+                    for (var k = 0; k < colorattri.count; k++) {
+                        colorsd[k * 3 + 0] = tempcolor.r;
+                        colorsd[k * 3 + 1] = tempcolor.g;
+                        colorsd[k * 3 + 2] = tempcolor.b;
+                    }
+                    currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+                    clusterData.recoloredclusters[key] = tempcolor
+                    currentParticles[key].geometry.colorsNeedUpdate = true;
+                    count += 1;
+                }
+            }
+        }
+        generateCheckList(sections, colorlist);
+        generateClusterList(sections, colorlist);
 
     }
 

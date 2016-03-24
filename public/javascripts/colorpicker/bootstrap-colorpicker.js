@@ -745,7 +745,7 @@
                     'mousedown.colorpicker': this.hide
                 });
                 this.update();
-                recolorSection(this.input.attr('id'), this.getValue());
+                colorControls.recolorSection(this.input.attr('id'), this.getValue());
                 this.element.trigger({
                     type: 'hidePicker',
                     color: this.color

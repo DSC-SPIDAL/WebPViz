@@ -1531,7 +1531,7 @@
               {
                 commitColor.call($this);
                 var alpha = color.active.val('a');
-                recolorSection($this.attributes.key.value, $this.value,alpha);
+                colorControls.recolorSection($this.attributes.key.value, $this.value,alpha);
                 settings.window.expandable && hide.call($this);
                 $.isFunction(commitCallback) && commitCallback.call($this, color.active, okButton);
               },
