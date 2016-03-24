@@ -756,7 +756,7 @@ function generateGraph() {
         fileName = data.file;
         plotDesc = data.desc;
         uploader = data.uploader;
-        maplabelstokeys(data.points);
+        pointControls.maplabelstokeys(data.points);
         //temp only till data change
         var points = {};
         var pointcolors = {};
@@ -882,7 +882,7 @@ function generateGraph() {
 
         window.addEventListener('resize', events.onWindowResize, true);
         glyphControls.changeGlyphSize();
-        changePointSize();
+        pointControls.changePointSize();
         reInitialize = false;
         animate();
         savePlotSettings(controlers.settings);
@@ -1964,19 +1964,9 @@ var controlers = {
     settings: "chrome"
 };
 
-function changePointSize() {
-    for (var key in currentParticles) {
-        if (currentParticles.hasOwnProperty(key)) {
-            if (sections[key].size == 1) {
-                currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
-            } else {
-                currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
-            }
-            currentParticles[key].material.needsUpdate = true;
-        }
-    }
-}
+var saveAndVersionControls = {
 
+}
 function savePlot() {
     var res = false;
     $('#setting-exist')
@@ -2185,13 +2175,13 @@ function generateCheckList(list, initcolors) {
             if (sprite != null) {
                 tablerows += "<td class=' '><span>" + list[key].label + "</span>"
                     + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
-                    + "<option value='0'" + checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
-                    + "<option value='1'" + checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
-                    + "<option value='2'" + checkIfSelected("2", list[key].shape, key) + ">Star</option>"
-                    + "<option value='3'" + checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
-                    + "<option value='4'" + checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
-                    + "<option value='5'" + checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
-                    + "<option value='6'" + checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
+                    + "<option value='0'" + settingsControls.checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
+                    + "<option value='1'" + settingsControls.checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
+                    + "<option value='2'" + settingsControls.checkIfSelected("2", list[key].shape, key) + ">Star</option>"
+                    + "<option value='3'" + settingsControls.checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
+                    + "<option value='4'" + settingsControls.checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
+                    + "<option value='5'" + settingsControls.checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
+                    + "<option value='6'" + settingsControls.checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
                     + "</select>"+
                 "</td>";
 
@@ -2269,7 +2259,7 @@ function generateClusterList(list, initcolors) {
                             $("#pcs").text(list[key].label + ":" + list[key].length + "   ");
                             $("#pcs").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
                         } else {
-                            var rgb = hexToRgb("#" + colorWithouthHash);
+                            var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
                             var tex = "ffffff";
                             if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
                                 tex = "000000";
@@ -2291,7 +2281,7 @@ function generateClusterList(list, initcolors) {
                                 "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
                         }
                     } else {
-                        var rgb = hexToRgb("#" + colorWithouthHash);
+                        var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
                         var tex = "ffffff";
                         if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
                             tex = "000000";
@@ -2309,16 +2299,6 @@ function generateClusterList(list, initcolors) {
     }
     return grid;
 }
-
-function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
 var viewControls = {
     resetView: function(){
         controls.reset();
@@ -2627,8 +2607,31 @@ var glyphControls = {
     }
 }
 var pointControls = {
+    changePointSize: function(){
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                if (sections[key].size == 1) {
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.pointsize;
+                } else {
+                    currentParticles[key].material.size = (sections[key].size / 200) * controlers.glyphsize;
+                }
+                currentParticles[key].material.needsUpdate = true;
+            }
+        }
+    },
     findPoint: function(data, key){
         return data.points[key.toString()];
+    },
+    maplabelstokeys: function(points){
+        pointLabelxKey = {};
+        plotPoints = {};
+        for (var key in points) {
+            if (points.hasOwnProperty(key)) {
+                var p = points[key.toString()];
+                pointLabelxKey[p[3]] = key;
+                plotPoints[key] = [p[0], p[1], p[2]];
+            }
+        }
     }
 }
 var colorControls = {
@@ -2805,7 +2808,16 @@ var colorControls = {
         generateCheckList(sections, colorlist);
         generateClusterList(sections, colorlist);
 
+    },
+    hexToRgb: function(hex){
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
+
 
 }
 var settingsControls = {
@@ -2815,50 +2827,30 @@ var settingsControls = {
     },
     hideSettings: function(){
         settingOn = false;
-    }
-
-}
-
-function progress() {
-    var bar = 250;
-    bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
-    $("#bar").css({width: bar + "px"});
-}
-
-function checkIfSelected(key, shape, clusterkey) {
-    if (changedGlyphs.hasOwnProperty(clusterkey)) {
-        shape = changedGlyphs[clusterkey]
-    }
-    if (key == shape) {
-        return "selected"
-    } else {
-        return ""
-    }
-}
-
-
-function maplabelstokeys(points) {
-    pointLabelxKey = {};
-    plotPoints = {};
-    for (var key in points) {
-        if (points.hasOwnProperty(key)) {
-            var p = points[key.toString()];
-            pointLabelxKey[p[3]] = key;
-            plotPoints[key] = [p[0], p[1], p[2]];
+    },
+    checkIfSelected: function(key, shape, clusterkey){
+        if (changedGlyphs.hasOwnProperty(clusterkey)) {
+            shape = changedGlyphs[clusterkey]
+        }
+        if (key == shape) {
+            return "selected"
+        } else {
+            return ""
         }
     }
+
+
 }
-
-
-
-
+var utilsControls = {
+    progress: function () {
+        var bar = 250;
+        bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
+        $("#bar").css({width: bar + "px"});
+    }
+}
 /**
- * Used to create new cluster id's for custom clusters
- * @param clusterid
+ * Functions that are used by the control box to change settings of the plot such as point size, glyph size, etc
  */
-
-
-//Control Box Operations
 var controlBox = {
     gui: null,
     settingsDat: null,
@@ -2891,7 +2883,7 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(changePointSize);
+        gui.add(controlers, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlers, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
@@ -2903,7 +2895,7 @@ var controlBox = {
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
         gui.add(controlers, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-        gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(changePointSize);
+        gui.add(controlers, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlers, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlers, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
