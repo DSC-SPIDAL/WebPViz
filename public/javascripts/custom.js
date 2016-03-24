@@ -58,10 +58,10 @@ $(function () {
         var id = $(this).attr('id');
         if(id == "check-all"){
             $(".bulk_action input[name='table_records']").prop('checked', this.checked);
-            ((this.checked) ? addAllSections() : removeAllSection());
+            ((this.checked) ? viewControls.addAllSections() : viewControls.removeAllSection());
         }else{
             var rm = $(this).val();
-            ((this.checked) ? addSection(rm) : removeSection(rm));
+            ((this.checked) ? viewControls.addSection(rm) : viewControls.removeSection(rm));
 
         }
 

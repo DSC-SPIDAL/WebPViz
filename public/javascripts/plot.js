@@ -1083,7 +1083,7 @@ function convertDataToThreeJsFormat(data) {
                 clustercolor = trueColorList[clusterid];
             }
             if (clustercolor == null)
-                clustercolor = {"a": 255, "b": randomRBG(), "g": randomRBG(), "r": randomRBG()};
+                clustercolor = {"a": 255, "b": colorControls.randomRBG(), "g": colorControls.randomRBG(), "r": colorControls.randomRBG()};
 
             if (!geometry.hasOwnProperty(clusterid)) {
                 geometry[clusterid] = new THREE.BufferGeometry();
@@ -1346,9 +1346,7 @@ function createTrajectory() {
 
 var DESCENDER_ADJUST = 1.28;
 
-function getCanvasColor ( color ) {
-    return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
-}
+
 function updateTextSprite(message,x, y, z, sprite){
     var canvas = sprite.material.map.image;
     var context = canvas.getContext('2d');
@@ -1367,7 +1365,7 @@ function updateTextSprite(message,x, y, z, sprite){
     roundRect(context, cx - tx, cy + ty + 0.28 * 12,
         textWidth, 12 * DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
 
-    context.fillStyle = getCanvasColor(textColor);
+    context.fillStyle = colorControls.getCanvasColor(textColor);
     context.fillText(message, cx - tx, cy + ty);
     sprite.material.map.needsUpdate = true;
     sprite.position.set(x, y, z);
@@ -1465,7 +1463,7 @@ function makeTextSprite(message, x, y, z, parameters) {
         textWidth, fontsize * DESCENDER_ADJUST, radius, borderThickness, borderColor, fillColor);
 
     // text color.  Note that we have to do this AFTER the round-rect as it also uses the "fillstyle" of the canvas
-    context.fillStyle = getCanvasColor(textColor);
+    context.fillStyle = colorControls.getCanvasColor(textColor);
 
     context.fillText(message, cx - tx, cy + ty);
 
@@ -1524,12 +1522,12 @@ function makeTextSprite(message, x, y, z, parameters) {
 
      // if the fill color is defined, then fill it
      if (fillColor != undefined) {
-         ctx.fillStyle = getCanvasColor(fillColor);
+         ctx.fillStyle = colorControls.getCanvasColor(fillColor);
          ctx.fill();
      }
 
      if (borderThickness > 0 && borderColor != undefined) {
-         ctx.strokeStyle = getCanvasColor(borderColor);
+         ctx.strokeStyle = colorControls.getCanvasColor(borderColor);
          ctx.stroke();
      }
  }
@@ -2494,60 +2492,60 @@ function changeColorScheme(scheme) {
 
 }
 
-function removeSection(id) {
-    var seqId = scenes.currentSceneId();
-    scene3d.remove(currentParticles[id]);
-    if (renderObjects.lineSets[seqId]) {
-        if (renderObjects.lineSets[seqId][id]) {
-            scene3d.remove(renderObjects.lineSets[seqId][id]);
+var viewControls = {
+    removeSection: function(id){
+        var seqId = scenes.currentSceneId();
+        scene3d.remove(currentParticles[id]);
+        if (renderObjects.lineSets[seqId]) {
+            if (renderObjects.lineSets[seqId][id]) {
+                scene3d.remove(renderObjects.lineSets[seqId][id]);
+            }
         }
-    }
-    trajectoryData.removeSprites(scene3d, seqId, id);
-    clusterData.removedclusters[id] = id;
-}
-
-function removeAllSection() {
-    var seqId = scenes.currentSceneId();
-    clusterData.removedclusters = [];
-    for (var key in currentParticles) {
-        if (currentParticles.hasOwnProperty(key)) {
-            scene3d.remove(currentParticles[key]);
-            clusterData.removedclusters[key] = key;
-        }
-
-        if (renderObjects.lineSets[seqId][key]) {
-            scene3d.remove(renderObjects.lineSets[seqId][key]);
-        }
-
-        trajectoryData.removeSprites(scene3d, seqId, key);
-    }
-}
-function addAllSections() {
-    var seqId = scenes.currentSceneId();
-    for (var key in clusterData.removedclusters) {
-        if (clusterData.removedclusters.hasOwnProperty(key)) {
-            scene3d.add(currentParticles[key]);
-
-            if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
-                scene3d.add(renderObjects.lineSets[seqId][key]);
+        trajectoryData.removeSprites(scene3d, seqId, id);
+        clusterData.removedclusters[id] = id;
+    },
+    removeAllSection: function(){
+        var seqId = scenes.currentSceneId();
+        clusterData.removedclusters = [];
+        for (var key in currentParticles) {
+            if (currentParticles.hasOwnProperty(key)) {
+                scene3d.remove(currentParticles[key]);
+                clusterData.removedclusters[key] = key;
             }
 
-            trajectoryData.addSprites(scene3d, seqId, key);
-        }
-    }
-    clusterData.removedclusters = [];
-}
+            if (renderObjects.lineSets[seqId][key]) {
+                scene3d.remove(renderObjects.lineSets[seqId][key]);
+            }
 
-function addSection(id) {
-    var seqId = scenes.currentSceneId();
-    scene3d.add(currentParticles[id]);
-    if (trajectoryData.labelSets[seqId]) {
-        if (renderObjects.lineSets[seqId][id]) {
-            scene3d.add(renderObjects.lineSets[seqId][id]);
+            trajectoryData.removeSprites(scene3d, seqId, key);
         }
+    },
+    addAllSections: function(){
+        var seqId = scenes.currentSceneId();
+        for (var key in clusterData.removedclusters) {
+            if (clusterData.removedclusters.hasOwnProperty(key)) {
+                scene3d.add(currentParticles[key]);
+
+                if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
+                    scene3d.add(renderObjects.lineSets[seqId][key]);
+                }
+
+                trajectoryData.addSprites(scene3d, seqId, key);
+            }
+        }
+        clusterData.removedclusters = [];
+    },
+    addSection: function(id){
+        var seqId = scenes.currentSceneId();
+        scene3d.add(currentParticles[id]);
+        if (trajectoryData.labelSets[seqId]) {
+            if (renderObjects.lineSets[seqId][id]) {
+                scene3d.add(renderObjects.lineSets[seqId][id]);
+            }
+        }
+        trajectoryData.addSprites(scene3d, seqId, id);
+        delete clusterData.removedclusters[id];
     }
-    trajectoryData.addSprites(scene3d, seqId, id);
-    delete clusterData.removedclusters[id];
 }
 
 function addCustomCluster(isSingle) {
@@ -2792,7 +2790,15 @@ var pointControls = {
         return data.points[key.toString()];
     }
 }
+var colorControls = {
+    randomRBG: function () {
+        return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
+    },
+    getCanvasColor: function(color){
+        return "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
+    }
 
+}
 var settingsControls = {
     showSettings: function(){
         settingOn = true;
@@ -2845,9 +2851,7 @@ function maplabelstokeys(points) {
 }
 
 
-function randomRBG() {
-    return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
-}
+
 
 /**
  * Used to create new cluster id's for custom clusters
