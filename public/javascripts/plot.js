@@ -485,7 +485,7 @@ function initSlider() {
         hide_min_max: true,
         hide_from_to: true,
         onChange: function (data) {
-            updatePlot(data.from);
+            timeSeriesControls.updatePlot(data.from);
         }
     });
     plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
@@ -577,12 +577,6 @@ function animate() {
     }
 }
 
-function getCanvasSize() {
-    var canvasWidth = $('#canvas3d').width();
-    var canvasHeight = $('#canvas3d').height();
-    return [canvasWidth, canvasHeight];
-}
-
 //Init methods
 function setupThreeJs() {
     if (!plotInfo.infoPage) {
@@ -619,7 +613,7 @@ function setupThreeJs() {
     controls.rotateSpeed = 20.0;
     controls.dynamicDampingFactor = 0.3;
     mouse = new THREE.Vector2();
-    initColorSchemes();
+    colorControls.initColorSchemes();
     sprites["0"] = new THREE.TextureLoader().load(ImageEnum.DISC);
     sprites["1"] = new THREE.TextureLoader().load(ImageEnum.BALL);
     sprites["2"] = new THREE.TextureLoader().load(ImageEnum.STAR);
@@ -737,16 +731,6 @@ function initPlotData() {
     }
 }
 
-function initColorSchemes() {
-    colorSchemes['mathlab50'] = ["#ffffff", "#ff0000", "#00ff00", "#ff1ab9", "#ffd300", "#0084f6", "#008d46", "#a7613e", "#00fff6", "#3e7b8d", "#eda7ff", "#d3ff95", "#b94fff",
-        "#e51a58", "#848400", "#00ff95", "#ffedff", "#f68412", "#caff00", "#0035c1", "#ffca84", "#9e728d", "#4fb912", "#9ec1ff", "#959e7b", "#ff7bb0", "#9e0900", "#ffb9b9",
-        "#8461ca", "#9e0072", "#84dca7", "#ff00f6", "#00d3ff", "#ff7258", "#583e35", "#d3d3d3", "#dc61dc", "#6172b0", "#b9ca2c", "#545454", "#5800ca", "#95c1ca", "#d39e23",
-        "#84b058", "#e5edb9", "#f6d3ff", "#8d09a7", "#6a4f00", "#003e9e", "#7b3e7b"]
-    colorSchemes['colorbrewer9'] = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65428", "#f781bf", "#999999"]
-    colorSchemes['colorbrewerpaired12'] = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"]
-    colorSchemes['salsa17'] = ["#0000ff", "#ffaaff", "#aa5500", "#aa55ff", "#00ffdb", "#ffff7f", "#778899", "#55aa7f", "#49ff00", "#550000", "#dbff00", "#ffdb00", "#ff9200",
-        "#aaffff", "#ff0000", "#c0c0c0", "#ffffff"]
-}
 
 // Generates Single plot graphs
 function generateGraph() {
@@ -897,9 +881,9 @@ function generateTimeSeries(resultSets, reInit) {
     if (reInit) {
         clearThreeJS(timeSeriesLength, timeSeriesLength);
     }
-    initBufferAndLoad();
+    timeSeriesControls.initBufferAndLoad();
     if (!reInit) {
-        playLoop();
+        timeSeriesControls.playLoop();
     }
 }
 
@@ -1579,29 +1563,6 @@ function arrDiff(a1, a2) {
     return diff;
 }
 
-function loadPlotData(start, end) {
-    for (var i = start; i < end; i++) {
-        // check weather we already have a value
-        if (particleSets[i] || bufferRequestMade[i]) {
-            continue;
-        }
-        if (!publicUrl) {
-            clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
-        } else {
-            clusterUrl = "/public/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
-        }
-        bufferRequestMade[i] = true;
-        (function (i) {
-            $.getJSON(clusterUrl, function (data) {
-                // convertDataToThreeJsFormat(data);
-                dataSets[data.seq] = data;
-            }).fail(function () {
-                bufferRequestMade[i] = false;
-            });
-        })(i);
-    }
-}
-
 function loadMatrial(size, shape, isglyph, alpha, traj) {
     var sprite;
     if (!isglyph) {
@@ -1654,190 +1615,6 @@ function loadMatrial(size, shape, isglyph, alpha, traj) {
         opacity: opacity
     });
     return material;
-}
-
-/**
- * This function will try to render the plot with the index
- * If this plot is not loaded yet, it will simply do nothing.
- * It is the loading functions responsibility to load the data required
- * @param index
- */
-function updatePlot(index) {
-    if (index in dataSets && dataSets[index]) {
-        convertDataToThreeJsFormat(dataSets[index]);
-        // console.log("update plot: " + index);
-        for (var i = 0; i < index - 1; i++) {
-            var sc = scenes[i];
-
-            if (sc) {
-                $.each(sc.children, function(idx, obj) {
-                    if (obj !== undefined) {
-                        if (obj.geometry) {
-                            obj.geometry.dispose();
-                        }
-
-                        if (obj.material) {
-                            if (obj.material instanceof THREE.MeshFaceMaterial) {
-                                $.each(obj.material.materials, function(idx, o) {
-                                    o.dispose();
-                                });
-                            } else {
-                                obj.material.dispose();
-                            }
-                        }
-
-                        if (obj.dispose) {
-                            obj.dispose();
-                        }
-                    }
-                });
-
-                while (sc.children.length > 0) {
-                    sc.remove(sc.children[sc.children.length - 1]);
-                }
-            }
-            scenes[i] = null;
-        }
-
-        scene3d = new THREE.Scene();
-        toolTipLabels.initialized = false;
-        scenes.addScene(index, scene3d);
-
-        scene3d.add(camera);
-        scenes[index] = scene3d;
-        currentParticles = particleSets[index];
-        plotPoints = plotPointsSets[index];
-        pointLabelxKey = pointLabelxKeySets[index];
-        var localSection = sectionSets[index];
-        sections = localSection;
-        clusterControls.renderCustomCluster();
-        for (var key in currentParticles) {
-            if (currentParticles.hasOwnProperty(key)) {
-
-                if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {
-                    if (sections[key].size == 1) {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlBox.pointsize;
-                    } else {
-                        currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
-                    }
-                    currentParticles[key].material.needsUpdate = true;
-                }
-
-                if(changedSizes.hasOwnProperty(key)){
-                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
-                }
-
-                if (clusterData.recoloredclusters.hasOwnProperty(key)) {
-                    var tempcolor = clusterData.recoloredclusters[key];
-                    var colorattri = currentParticles[key].geometry.getAttribute('color');
-                    var colorsd = new Float32Array(colorattri.length);
-                    for (var k = 0; k < colorattri.length / 3; k++) {
-                        colorsd[k * 3 + 0] = tempcolor.r;
-                        colorsd[k * 3 + 1] = tempcolor.g;
-                        colorsd[k * 3 + 2] = tempcolor.b;
-                    }
-                    var opacity = Math.precision(trueColorList[key].a/255,2);
-                    if(clusterData.realpaedclusters.hasOwnProperty(key)){
-                        opacity = Math.precision(clusterData.realpaedclusters[key]/255,2)
-                    }
-                    currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                    currentParticles[key].geometry.colorsNeedUpdate = true;
-                    currentParticles[key].material.opacity = opacity;
-                    currentParticles[key].material.transparent = true;
-                    currentParticles[key].material.needsUpdate = true;
-
-                }
-
-                if (changedGlyphs.hasOwnProperty(key)) {
-                    if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
-                        currentParticles[key].material.map = sprites[changedGlyphs[key]];
-                    } else {
-                        currentParticles[key].material.map = trajSprites[changedGlyphs[key]];
-                    }
-                    currentParticles[key].material.needsUpdate = true;
-                }
-                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
-                    scene3d.add(currentParticles[key]);
-                }
-            }
-        }
-
-        trajectoryData.renderSprites(scene3d, index);
-
-        if (renderObjects.lineSets[index]) {
-            for (var cid in renderObjects.lineSets[index]) {
-                if (renderObjects.lineSets[index].hasOwnProperty(cid)) {
-                    if (!clusterData.removedclusters.hasOwnProperty(cid)) {
-                        scene3d.add(renderObjects.lineSets[index][cid]);
-                    }
-                }
-            }
-        }
-        // change only when the setting dispaly is on
-        if (settingOn) {
-            generateCheckList(sections, colorlist);
-        }
-        generateClusterList(sections, colorlist);
-        fileName = fileNames[index];
-        populatePlotInfo();
-        sections = localSection;
-        window.addEventListener('resize', events.onWindowResize, false);
-        // render();
-        $("#plot-title").text(fileNames[index]);
-        //savePlotSettings(controlBox.settings);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-
-
-function animateTimeSeriesPlay() {
-    playStatus = playEnum.PLAY;
-}
-
-function playLoop() {
-    var currentValue = parseInt($("#plot-slider").prop("value"));
-    var maxValue = timeSeriesLength - 1;
-    setTimeout(function () {
-        if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
-            if (updatePlot(currentValue + 1)) {
-                plotRangeSlider.update({from: currentValue + 1});
-                // render();
-            }
-        }
-
-        if (!(maxValue > currentValue && playStatus == playEnum.PLAY)) {
-            playStatus = playEnum.PAUSE;
-            if (maxValue == currentValue) {
-                $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
-            }
-        }
-        playLoop();
-    }, controlBox.delay);
-}
-
-function initBufferAndLoad() {
-    setTimeout(function () {
-        if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < MAX_PLOTS_STORED) {
-            if (timeSeriesLength > MAX_PLOTS_STORED) {
-                loadPlotData(0, MAX_PLOTS_STORED);
-            } else {
-                loadPlotData(0, timeSeriesLength);
-            }
-            initBufferAndLoad();
-        } else {
-            updatePlot(0);
-            reInitialize = false;
-            animate();
-            $("#progress").css({display: "none"});
-            if (!bufferLoopStarted) {
-                bufferLoopStarted = true;
-                bufferLoop(null);
-            }
-        }
-    }, controlBox.delay);
 }
 
 function clearThreeJS(loadStartIndex, loadend) {
@@ -1922,39 +1699,238 @@ function clearThreeJS(loadStartIndex, loadend) {
     scenes.clearScenes(loadend + 1, timeSeriesLength);
 }
 
-function bufferLoop(indx) {
-    setTimeout(function () {
-        var currentIndex = parseInt($("#plot-slider").prop("value"));
-        var loadend = timeSeriesLength;
-        if (timeSeriesLength > currentIndex + controlBox.loadSize) {
-            loadend = currentIndex + controlBox.loadSize;
-        }
-        var loadStartIndex = 0;
-        if (currentIndex - controlBox.loadSize > 0) {
-            loadStartIndex = currentIndex - controlBox.loadSize;
-        }
-        clearThreeJS(loadStartIndex, loadend);
-        loadPlotData(loadStartIndex, loadend);
-        if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
-            if (indx && indx != currentIndex) {
-                updatePlot(currentIndex);
-                currentPlotUpdated = true;
+var timeSeriesControls = {
+    resetSlider: function(){
+        playStatus = playEnum.PAUSE;
+        plotRangeSlider.update({from: 0});
+    },
+    playLoop: function(){
+        var currentValue = parseInt($("#plot-slider").prop("value"));
+        var maxValue = timeSeriesLength - 1;
+        setTimeout(function () {
+            if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
+                if (timeSeriesControls.updatePlot(currentValue + 1)) {
+                    plotRangeSlider.update({from: currentValue + 1});
+                    // render();
+                }
             }
+
+            if (!(maxValue > currentValue && playStatus == playEnum.PLAY)) {
+                playStatus = playEnum.PAUSE;
+                if (maxValue == currentValue) {
+                    $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
+                }
+            }
+            timeSeriesControls.playLoop();
+        }, controlBox.delay);
+    },
+    animateTimeSeriesPlay: function(){
+        playStatus = playEnum.PLAY;
+    },
+    animateTimeSeriesPause: function(){
+        playStatus = playEnum.PAUSE;
+    },
+    initBufferAndLoad: function(){
+        setTimeout(function () {
+            if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < MAX_PLOTS_STORED) {
+                if (timeSeriesLength > MAX_PLOTS_STORED) {
+                    timeSeriesControls.loadPlotData(0, MAX_PLOTS_STORED);
+                } else {
+                    timeSeriesControls.loadPlotData(0, timeSeriesLength);
+                }
+                timeSeriesControls.initBufferAndLoad();
+            } else {
+                timeSeriesControls.updatePlot(0);
+                reInitialize = false;
+                animate();
+                $("#progress").css({display: "none"});
+                if (!bufferLoopStarted) {
+                    bufferLoopStarted = true;
+                    timeSeriesControls.bufferLoop(null);
+                }
+            }
+        }, controlBox.delay);
+    },
+    bufferLoop: function(indx){
+        setTimeout(function () {
+            var currentIndex = parseInt($("#plot-slider").prop("value"));
+            var loadend = timeSeriesLength;
+            if (timeSeriesLength > currentIndex + controlBox.loadSize) {
+                loadend = currentIndex + controlBox.loadSize;
+            }
+            var loadStartIndex = 0;
+            if (currentIndex - controlBox.loadSize > 0) {
+                loadStartIndex = currentIndex - controlBox.loadSize;
+            }
+            clearThreeJS(loadStartIndex, loadend);
+            timeSeriesControls.loadPlotData(loadStartIndex, loadend);
+            if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
+                if (indx && indx != currentIndex) {
+                    timeSeriesControls.updatePlot(currentIndex);
+                    currentPlotUpdated = true;
+                }
+            }
+            timeSeriesControls.bufferLoop(indx);
+
+        }, controlBox.delay * controlBox.loadSize / 2);
+    },
+    /**
+     * This function will try to render the plot with the index
+     * If this plot is not loaded yet, it will simply do nothing.
+     * It is the loading functions responsibility to load the data required
+     * @param index
+     */
+    updatePlot: function(index){
+        if (index in dataSets && dataSets[index]) {
+            convertDataToThreeJsFormat(dataSets[index]);
+            // console.log("update plot: " + index);
+            for (var i = 0; i < index - 1; i++) {
+                var sc = scenes[i];
+
+                if (sc) {
+                    $.each(sc.children, function(idx, obj) {
+                        if (obj !== undefined) {
+                            if (obj.geometry) {
+                                obj.geometry.dispose();
+                            }
+
+                            if (obj.material) {
+                                if (obj.material instanceof THREE.MeshFaceMaterial) {
+                                    $.each(obj.material.materials, function(idx, o) {
+                                        o.dispose();
+                                    });
+                                } else {
+                                    obj.material.dispose();
+                                }
+                            }
+
+                            if (obj.dispose) {
+                                obj.dispose();
+                            }
+                        }
+                    });
+
+                    while (sc.children.length > 0) {
+                        sc.remove(sc.children[sc.children.length - 1]);
+                    }
+                }
+                scenes[i] = null;
+            }
+
+            scene3d = new THREE.Scene();
+            toolTipLabels.initialized = false;
+            scenes.addScene(index, scene3d);
+
+            scene3d.add(camera);
+            scenes[index] = scene3d;
+            currentParticles = particleSets[index];
+            plotPoints = plotPointsSets[index];
+            pointLabelxKey = pointLabelxKeySets[index];
+            var localSection = sectionSets[index];
+            sections = localSection;
+            clusterControls.renderCustomCluster();
+            for (var key in currentParticles) {
+                if (currentParticles.hasOwnProperty(key)) {
+
+                    if (controlBox.pointsize != 1 || controlBox.glyphsize != 1) {
+                        if (sections[key].size == 1) {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlBox.pointsize;
+                        } else {
+                            currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
+                        }
+                        currentParticles[key].material.needsUpdate = true;
+                    }
+
+                    if(changedSizes.hasOwnProperty(key)){
+                        currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
+                    }
+
+                    if (clusterData.recoloredclusters.hasOwnProperty(key)) {
+                        var tempcolor = clusterData.recoloredclusters[key];
+                        var colorattri = currentParticles[key].geometry.getAttribute('color');
+                        var colorsd = new Float32Array(colorattri.length);
+                        for (var k = 0; k < colorattri.length / 3; k++) {
+                            colorsd[k * 3 + 0] = tempcolor.r;
+                            colorsd[k * 3 + 1] = tempcolor.g;
+                            colorsd[k * 3 + 2] = tempcolor.b;
+                        }
+                        var opacity = Math.precision(trueColorList[key].a/255,2);
+                        if(clusterData.realpaedclusters.hasOwnProperty(key)){
+                            opacity = Math.precision(clusterData.realpaedclusters[key]/255,2)
+                        }
+                        currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
+                        currentParticles[key].geometry.colorsNeedUpdate = true;
+                        currentParticles[key].material.opacity = opacity;
+                        currentParticles[key].material.transparent = true;
+                        currentParticles[key].material.needsUpdate = true;
+
+                    }
+
+                    if (changedGlyphs.hasOwnProperty(key)) {
+                        if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
+                            currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                        } else {
+                            currentParticles[key].material.map = trajSprites[changedGlyphs[key]];
+                        }
+                        currentParticles[key].material.needsUpdate = true;
+                    }
+                    if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                        scene3d.add(currentParticles[key]);
+                    }
+                }
+            }
+
+            trajectoryData.renderSprites(scene3d, index);
+
+            if (renderObjects.lineSets[index]) {
+                for (var cid in renderObjects.lineSets[index]) {
+                    if (renderObjects.lineSets[index].hasOwnProperty(cid)) {
+                        if (!clusterData.removedclusters.hasOwnProperty(cid)) {
+                            scene3d.add(renderObjects.lineSets[index][cid]);
+                        }
+                    }
+                }
+            }
+            // change only when the setting dispaly is on
+            if (settingOn) {
+                generateCheckList(sections, colorlist);
+            }
+            generateClusterList(sections, colorlist);
+            fileName = fileNames[index];
+            populatePlotInfo();
+            sections = localSection;
+            window.addEventListener('resize', events.onWindowResize, false);
+            // render();
+            $("#plot-title").text(fileNames[index]);
+            //savePlotSettings(controlBox.settings);
+            return true;
+        } else {
+            return false;
         }
-        bufferLoop(indx);
-
-    }, controlBox.delay * controlBox.loadSize / 2);
+    },
+    loadPlotData: function(start, end){
+        for (var i = start; i < end; i++) {
+            // check weather we already have a value
+            if (particleSets[i] || bufferRequestMade[i]) {
+                continue;
+            }
+            if (!publicUrl) {
+                clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+            } else {
+                clusterUrl = "/public/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+            }
+            bufferRequestMade[i] = true;
+            (function (i) {
+                $.getJSON(clusterUrl, function (data) {
+                    // convertDataToThreeJsFormat(data);
+                    dataSets[data.seq] = data;
+                }).fail(function () {
+                    bufferRequestMade[i] = false;
+                });
+            })(i);
+        }
+    }
 }
-
-function animateTimeSeriesPause() {
-    playStatus = playEnum.PAUSE;
-}
-
-function resetSlider() {
-    playStatus = playEnum.PAUSE;
-    plotRangeSlider.update({from: 0});
-}
-
 var saveAndVersionControls = {
     savePlot: function(){
         var res = false;
@@ -2379,7 +2355,7 @@ var clusterControls = {
         customclusternotaddedtolist = true;
         if (!isSingle) {
             var currentValue = parseInt($("#plot-slider").prop("value"));
-            updatePlot(currentValue)
+            timeSeriesControls.updatePlot(currentValue)
         } else {
             clusterControls.renderCustomCluster();
             generateCheckList(sections, colorlist);
@@ -2698,6 +2674,16 @@ var colorControls = {
         }
         generateCheckList(sections, colorlist);
     },
+    initColorSchemes: function(){
+        colorSchemes['mathlab50'] = ["#ffffff", "#ff0000", "#00ff00", "#ff1ab9", "#ffd300", "#0084f6", "#008d46", "#a7613e", "#00fff6", "#3e7b8d", "#eda7ff", "#d3ff95", "#b94fff",
+            "#e51a58", "#848400", "#00ff95", "#ffedff", "#f68412", "#caff00", "#0035c1", "#ffca84", "#9e728d", "#4fb912", "#9ec1ff", "#959e7b", "#ff7bb0", "#9e0900", "#ffb9b9",
+            "#8461ca", "#9e0072", "#84dca7", "#ff00f6", "#00d3ff", "#ff7258", "#583e35", "#d3d3d3", "#dc61dc", "#6172b0", "#b9ca2c", "#545454", "#5800ca", "#95c1ca", "#d39e23",
+            "#84b058", "#e5edb9", "#f6d3ff", "#8d09a7", "#6a4f00", "#003e9e", "#7b3e7b"]
+        colorSchemes['colorbrewer9'] = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65428", "#f781bf", "#999999"]
+        colorSchemes['colorbrewerpaired12'] = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"]
+        colorSchemes['salsa17'] = ["#0000ff", "#ffaaff", "#aa5500", "#aa55ff", "#00ffdb", "#ffff7f", "#778899", "#55aa7f", "#49ff00", "#550000", "#dbff00", "#ffdb00", "#ff9200",
+            "#aaffff", "#ff0000", "#c0c0c0", "#ffffff"]
+    },
     changeColorScheme: function(scheme){
         if (currentCustomColorScheme == null) {
             currentCustomColorScheme = jQuery.extend({}, colorlist);
@@ -2832,6 +2818,11 @@ var utilsControls = {
         var bar = 250;
         bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
         $("#bar").css({width: bar + "px"});
+    },
+    getCanvasSize: function(){
+        var canvasWidth = $('#canvas3d').width();
+        var canvasHeight = $('#canvas3d').height();
+        return [canvasWidth, canvasHeight];
     }
 }
 /**

@@ -450,15 +450,15 @@
 
                     if (span.hasClass("glyphicon-play")) {
                         currentPlotUpdated = false;
-                        animateTimeSeriesPlay();
+                        timeSeriesControls.animateTimeSeriesPlay();
                         span.removeClass("glyphicon-play").addClass("glyphicon-pause");
                     } else if (span.hasClass("glyphicon-repeat")) {
                         currentPlotUpdated = false;
-                        resetSlider();
+                        timeSeriesControls.resetSlider();
                         span.removeClass("glyphicon-repeat").addClass("glyphicon-play");
                     } else {
                         currentPlotUpdated = false;
-                        animateTimeSeriesPause();
+                        timeSeriesControls.animateTimeSeriesPause();
                         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
                     }
                 });
@@ -479,7 +479,7 @@
                         }
                         plotRangeSlider.update({from: currentval});
                         currentPlotUpdated = false;
-                        updatePlot(currentval)
+                        timeSeriesControls.updatePlot(currentval)
                     }
                 });
 
@@ -490,7 +490,7 @@
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
                         plotRangeSlider.update({from: currentval});
-                        updatePlot(currentval);
+                        timeSeriesControls.updatePlot(currentval);
                         currentPlotUpdated = false;
                     }
                 });
