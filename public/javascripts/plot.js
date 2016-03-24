@@ -2411,15 +2411,16 @@ function changeColorScheme(scheme) {
                 };
 
                 var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.length);
-                for (var k = 0; k < colorattri.length / 3; k++) {
+                var colorsd = new Float32Array(colorattri.count * 3);
+                for (var k = 0; k < colorattri.count; k++) {
                     colorsd[k * 3 + 0] = tempcolor.r;
                     colorsd[k * 3 + 1] = tempcolor.g;
                     colorsd[k * 3 + 2] = tempcolor.b;
                 }
                 currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                 clusterData.recoloredclusters[key] = tempcolor
-                currentParticles[key].geometry.colorsNee}
+                currentParticles[key].geometry.colorsNeedUpdate = true;
+            }
         }
     } else if (scheme == 'rainbow' || scheme == 'rainbowrev') {
         clusterCount = Object.keys(currentParticles).length;
@@ -2440,8 +2441,8 @@ function changeColorScheme(scheme) {
                 };
 
                 var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.length);
-                for (var k = 0; k < colorattri.length / 3; k++) {
+                var colorsd = new Float32Array(colorattri.count * 3);
+                for (var k = 0; k < colorattri.count; k++) {
                     colorsd[k * 3 + 0] = tempcolor.r;
                     colorsd[k * 3 + 1] = tempcolor.g;
                     colorsd[k * 3 + 2] = tempcolor.b;
@@ -2473,8 +2474,8 @@ function changeColorScheme(scheme) {
                 };
 
                 var colorattri = currentParticles[key].geometry.getAttribute('color');
-                var colorsd = new Float32Array(colorattri.length);
-                for (var k = 0; k < colorattri.length / 3; k++) {
+                var colorsd = new Float32Array(colorattri.count * 3);
+                for (var k = 0; k < colorattri.count; k++) {
                     colorsd[k * 3 + 0] = tempcolor.r;
                     colorsd[k * 3 + 1] = tempcolor.g;
                     colorsd[k * 3 + 2] = tempcolor.b;
@@ -2520,7 +2521,7 @@ var viewControls = {
                 clusterData.removedclusters[key] = key;
             }
 
-            if (renderObjects.lineSets[seqId][key]) {
+            if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
                 scene3d.remove(renderObjects.lineSets[seqId][key]);
             }
 
