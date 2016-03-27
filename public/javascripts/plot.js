@@ -1,16 +1,11 @@
 /* varibles*/
 //Three js global varibles
 var camera;
-var container, stats;
 var scene3d;
 var publicUrl = false;
 // keep the settings object around
 var allSettings = {};
-var settingOn = false;
-
 // Color controls
-var colorlist = {};
-var trueColorList = {};
 var colorsLoaded = false;
 var colorSchemes = {};
 var currentCustomColorScheme = null;
@@ -198,8 +193,8 @@ function intialSetup(settings, reinit) {
                 if (colors.hasOwnProperty(key)) {
                     var clustercolor = colors[key];
                     if (clustercolor) {
-                        colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
-                        trueColorList[key] = clustercolor;
+                        colorControls.colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        colorControls.trueColorList[key] = clustercolor;
                     }
                 }
             }
@@ -792,12 +787,13 @@ var labelControls = {
 var threejsUtils = {
     renderer: null,
     controls: null,
+    stats: null,
     animate: function(){
         if (!reInitialize) {
             // console.log("Not re-init");
             requestAnimationFrame(threejsUtils.animate);
             threejsUtils.controls.update();
-            stats.update();
+            threejsUtils.stats.update();
             var camera = scene3d.getObjectByName('camera');
             threejsUtils.renderer.render(scene3d, camera);
         } else {
@@ -823,7 +819,7 @@ var threejsUtils = {
 
         //new THREE.Scene
         scene3d = new THREE.Scene();
-        stats = new Stats();
+        threejsUtils.stats = new Stats();
         //set the scene
         var canvas3d = $('#canvas3d');
         //new THREE.WebGLRenderer
@@ -960,12 +956,12 @@ var threejsUtils = {
                         clustercolor["g"] = clusterdata.r[2];
                         clustercolor["b"] = clusterdata.r[1];
                         clustercolor["a"] = clusterdata.r[0];
-                        trueColorList[clusterid] = clustercolor;
+                        colorControls.trueColorList[clusterid] = clustercolor;
                     } else {
-                        trueColorList[clusterid] = {};
+                        colorControls.trueColorList[clusterid] = {};
                     }
                 } else {
-                    clustercolor = trueColorList[clusterid];
+                    clustercolor = colorControls.trueColorList[clusterid];
                 }
                 if (clustercolor == null)
                     clustercolor = {"a": 255, "b": colorControls.randomRBG(), "g": colorControls.randomRBG(), "r": colorControls.randomRBG()};
@@ -975,8 +971,8 @@ var threejsUtils = {
                     particles[clusterid] = [];
                 }
 
-                if (!colorlist.hasOwnProperty(clusterid))
-                    colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                if (!colorControls.colorlist.hasOwnProperty(clusterid))
+                    colorControls.colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
 
                 var localSection = {
                     "length": clusterdata.p.length,
@@ -1052,8 +1048,8 @@ var threejsUtils = {
                             trajectoryData.trajectoryToClusterId[label.toUpperCase()] = currentHighestClusterId;
                         } else {
                             currentClusterId = trajectoryData.trajectoryToClusterId[label.toUpperCase()];
-                            if (trueColorList[currentClusterId]) {
-                                clustercolor = trueColorList[currentClusterId];
+                            if (colorControls.trueColorList[currentClusterId]) {
+                                clustercolor = colorControls.trueColorList[currentClusterId];
                             }
                             if (changedGlyphs[currentClusterId]) {
                                 shape = changedGlyphs[currentClusterId];
@@ -1085,9 +1081,9 @@ var threejsUtils = {
                         if (!sections.hasOwnProperty(currentClusterId)) {
                             sections[currentClusterId] = localSection;
                         }
-                        trueColorList[currentClusterId] = clustercolor;
-                        if (!colorlist.hasOwnProperty(currentClusterId)) {
-                            colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        colorControls.trueColorList[currentClusterId] = clustercolor;
+                        if (!colorControls.colorlist.hasOwnProperty(currentClusterId)) {
+                            colorControls.colorlist[currentClusterId] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
                         }
                         localSections[currentClusterId] = localSection;
                         var c = 0;
@@ -1348,12 +1344,12 @@ var SingleGraphControls = {
                             clustercolor["g"] = clusterdata.r[2];
                             clustercolor["b"] = clusterdata.r[1];
                             clustercolor["a"] = clusterdata.r[0];
-                            trueColorList[clusterid] = clustercolor;
+                            colorControls.trueColorList[clusterid] = clustercolor;
                         } else {
-                            trueColorList[clusterid] = {};
+                            colorControls.trueColorList[clusterid] = {};
                         }
                     } else {
-                        clustercolor = trueColorList[clusterid];
+                        clustercolor = colorControls.trueColorList[clusterid];
                     }
 
                     if (!sections.hasOwnProperty(clusterid)) {
@@ -1372,8 +1368,8 @@ var SingleGraphControls = {
                         geometry[clusterid] = new THREE.BufferGeometry();
                         currentParticles[clusterid] = [];
                     }
-                    if (!colorlist.hasOwnProperty(clusterid))
-                        colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                    if (!colorControls.colorlist.hasOwnProperty(clusterid))
+                        colorControls.colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
 
                     var positions = new Float32Array(clusterdata.p.length * 3);
                     var colorarray = new Float32Array(clusterdata.p.length * 3);
@@ -1443,7 +1439,7 @@ var SingleGraphControls = {
             if (linesegs) {
                 scene3d.add(linesegs);
             }
-            htmlGenerators.generateClusterList(sections, colorlist);
+            htmlGenerators.generateClusterList(sections, colorControls.colorlist);
             htmlGenerators.populatePlotInfo();
             var cls = $("#plot-clusters").isotope({
                 itemSelector: '.element-item',
@@ -1464,8 +1460,8 @@ var SingleGraphControls = {
     reInitGraph: function(){
         $("#progress").css({display: "block"});
         currentParticles = [];
-        colorlist = {};
-        trueColorList = {};
+        colorControls.colorlist = {};
+        colorControls.trueColorList = {};
         threejsUtils.setupThreeJs();
         intialSetup(allSettings, true);
         // initPlotData();
@@ -1540,8 +1536,8 @@ var timeSeriesControls = {
         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
         $("#progress").css({display: "block"});
         currentParticles = [];
-        colorlist = [];
-        trueColorList = [];
+        colorControls.colorlist = [];
+        colorControls.trueColorList = [];
         threejsUtils.setupThreeJs();
         intialSetup(allSettings, true);
         timeSeriesControls.initPlotData();
@@ -1699,7 +1695,7 @@ var timeSeriesControls = {
                             colorsd[k * 3 + 1] = tempcolor.g;
                             colorsd[k * 3 + 2] = tempcolor.b;
                         }
-                        var opacity = Math.precision(trueColorList[key].a/255,2);
+                        var opacity = Math.precision(colorControls.trueColorList[key].a/255,2);
                         if(clusterData.realpaedclusters.hasOwnProperty(key)){
                             opacity = Math.precision(clusterData.realpaedclusters[key]/255,2)
                         }
@@ -1737,10 +1733,10 @@ var timeSeriesControls = {
                 }
             }
             // change only when the setting dispaly is on
-            if (settingOn) {
-                htmlGenerators.generateCheckList(sections, colorlist);
+            if (settingsControls.settingOn) {
+                htmlGenerators.generateCheckList(sections, colorControls.colorlist);
             }
-            htmlGenerators.generateClusterList(sections, colorlist);
+            htmlGenerators.generateClusterList(sections, colorControls.colorlist);
             fileName = fileNames[index];
             htmlGenerators.populatePlotInfo();
             sections = localSection;
@@ -1975,7 +1971,7 @@ var saveAndVersionControls = {
             lookAtJson.x = lookAtVector.x;
             lookAtJson.y = lookAtVector.y;
             lookAtJson.z = lookAtVector.z;
-            obj['clusterColors'] = trueColorList;
+            obj['clusterColors'] = colorControls.trueColorList;
             obj['lookVector'] = lookAtJson;
             obj['cameraPosition'] = camera.position;
             obj['cameraup'] = camera.up;
@@ -2087,8 +2083,8 @@ var clusterControls = {
             timeSeriesControls.updatePlot(currentValue)
         } else {
             clusterControls.renderCustomCluster();
-            htmlGenerators.generateCheckList(sections, colorlist);
-            htmlGenerators.generateClusterList(sections, colorlist);
+            htmlGenerators.generateCheckList(sections, colorControls.colorlist);
+            htmlGenerators.generateClusterList(sections, colorControls.colorlist);
             viewControls.addParticlesToScence()
         }
     },
@@ -2107,16 +2103,16 @@ var clusterControls = {
                     particles[clusterid] = [];
                 }
 
-                if (!colorlist.hasOwnProperty(clusterid)) {
+                if (!colorControls.colorlist.hasOwnProperty(clusterid)) {
                     var tempcolor = new THREE.Color(clusterdata.c);
                     clustercolor = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
                         "b": tempcolor.toArray()[2] * 255
                     };
-                    colorlist[clusterid] = clusterdata.c.substring(1);
-                    if (!trueColorList.hasOwnProperty(clusterid)) {
-                        trueColorList[clusterid] = clustercolor;
+                    colorControls.colorlist[clusterid] = clusterdata.c.substring(1);
+                    if (!colorControls.trueColorList.hasOwnProperty(clusterid)) {
+                        colorControls.trueColorList[clusterid] = clustercolor;
                     }
                 }
 
@@ -2149,7 +2145,7 @@ var clusterControls = {
                     positions[k * 3 + 1] = p1;
                     positions[k * 3 + 2] = p2;
 
-                    var tempc = trueColorList[clusterid];
+                    var tempc = colorControls.trueColorList[clusterid];
                     tempcolor = new THREE.Color("rgb(" + tempc.r + "," + tempc.g + "," + tempc.b + ")");
 
                     colorarray[k * 3 + 0] = tempcolor.r;
@@ -2196,7 +2192,7 @@ var glyphControls = {
             currentParticles[id].material.map = trajSprites[shape];
         }
         currentParticles[id].material.needsUpdate = true;
-        htmlGenerators.generateClusterList(sections, colorlist);
+        htmlGenerators.generateClusterList(sections, colorControls.colorlist);
     },
     changeSingleGlyphSize: function(id, size){
         if (!currentParticles[id]) return;
@@ -2215,7 +2211,7 @@ var glyphControls = {
                 if (id != undefined || id != null) glyphControls.changeSingleGlyphSize(id, size);
             }
         }
-        htmlGenerators.generateCheckList(sections, colorlist);
+        htmlGenerators.generateCheckList(sections, colorControls.colorlist);
     },
     changeGlyphSize: function(){
         for (var key in currentParticles) {
@@ -2326,6 +2322,8 @@ var pointControls = {
     }
 }
 var colorControls = {
+    colorlist: {},
+    trueColorList: {},
     randomRBG: function () {
         return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
     },
@@ -2348,7 +2346,7 @@ var colorControls = {
             return;
         }
 
-        colorlist[id] = color;
+        colorControls.colorlist[id] = color;
         var opacity = Math.precision(alpha/255,3);
 
         //remove the color jpicker binding
@@ -2358,14 +2356,14 @@ var colorControls = {
         $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
 
         //change to custom color scheme since a color change has been made
-        currentCustomColorScheme = colorlist;
+        currentCustomColorScheme = colorControls.colorlist;
         if ($("#color-scheme").val() != "custom") {
             $("#color-scheme").val('custom');
         }
 
         color = "#" + color;
         var tempcolor = new THREE.Color(color);
-        trueColorList[id] = {
+        colorControls.trueColorList[id] = {
             "r": tempcolor.toArray()[0] * 255,
             "g": tempcolor.toArray()[1] * 255,
             "b": tempcolor.toArray()[2] * 255,
@@ -2382,7 +2380,7 @@ var colorControls = {
         }
         currentParticles[id].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
         sections[id].color.a = alpha;
-        htmlGenerators.generateClusterList(sections, colorlist);
+        htmlGenerators.generateClusterList(sections, colorControls.colorlist);
 
         clusterData.recoloredclusters[id] = new THREE.Color(color);
         clusterData.realpaedclusters[id] = alpha;
@@ -2401,7 +2399,7 @@ var colorControls = {
                 if (id != undefined || id != null) colorControls.recolorSection(id, color,alpha);
             }
         }
-        htmlGenerators.generateCheckList(sections, colorlist);
+        htmlGenerators.generateCheckList(sections, colorControls.colorlist);
     },
     initColorSchemes: function(){
         colorSchemes['mathlab50'] = ["#ffffff", "#ff0000", "#00ff00", "#ff1ab9", "#ffd300", "#0084f6", "#008d46", "#a7613e", "#00fff6", "#3e7b8d", "#eda7ff", "#d3ff95", "#b94fff",
@@ -2415,15 +2413,15 @@ var colorControls = {
     },
     changeColorScheme: function(scheme){
         if (currentCustomColorScheme == null) {
-            currentCustomColorScheme = jQuery.extend({}, colorlist);
+            currentCustomColorScheme = jQuery.extend({}, colorControls.colorlist);
         }
 
         if (scheme == 'custom') {
-            colorlist = jQuery.extend({}, currentCustomColorScheme);
+            colorControls.colorlist = jQuery.extend({}, currentCustomColorScheme);
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
-                    var tempcolor = new THREE.Color("#" + colorlist[key]);
-                    trueColorList[key] = {
+                    var tempcolor = new THREE.Color("#" + colorControls.colorlist[key]);
+                    colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
                         "b": tempcolor.toArray()[2] * 255
@@ -2452,8 +2450,8 @@ var colorControls = {
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     var tempcolor = new THREE.Color(colorControls.rainBowColors(count, clusterCount));
-                    colorlist[key] = tempcolor.getHexString();
-                    trueColorList[key] = {
+                    colorControls.colorlist[key] = tempcolor.getHexString();
+                    colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
                         "b": tempcolor.toArray()[2] * 255
@@ -2484,9 +2482,9 @@ var colorControls = {
             var count = 0;
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
-                    colorlist[key] = colorScheme[count % colorSchemeLength].substring(1);
+                    colorControls.colorlist[key] = colorScheme[count % colorSchemeLength].substring(1);
                     var tempcolor = new THREE.Color(colorScheme[count % colorSchemeLength]);
-                    trueColorList[key] = {
+                    colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
                         "b": tempcolor.toArray()[2] * 255
@@ -2506,8 +2504,8 @@ var colorControls = {
                 }
             }
         }
-        htmlGenerators.generateCheckList(sections, colorlist);
-        htmlGenerators.generateClusterList(sections, colorlist);
+        htmlGenerators.generateCheckList(sections, colorControls.colorlist);
+        htmlGenerators.generateClusterList(sections, colorControls.colorlist);
 
     },
     hexToRgb: function(hex){
@@ -2548,8 +2546,8 @@ var htmlGenerators = {
         if (plotInfo.infoPage) return;
 
         var keys = [];
-        for (var k in trueColorList) {
-            if (trueColorList.hasOwnProperty(k)) {
+        for (var k in colorControls.trueColorList) {
+            if (colorControls.trueColorList.hasOwnProperty(k)) {
                 keys.push(k);
             }
         }
@@ -2563,7 +2561,7 @@ var htmlGenerators = {
             if (sprite != null) {
                 glyphList.push(key);
             } else {
-                var aCol = trueColorList[key];
+                var aCol = colorControls.trueColorList[key];
                 if ($.isEmptyObject(aCol)) {
                     emptyList.push(key);
                 } else {
@@ -2608,7 +2606,7 @@ var htmlGenerators = {
                     currentshape = list[key].shape;
                 }
                 $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key]);
-                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a);
+                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', colorControls.trueColorList[key].a);
                 if(sprite != null){
                     $("#cluster_table > tbody > #" + key + " select").val(currentshape);
                     $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length);
@@ -2634,7 +2632,7 @@ var htmlGenerators = {
                 tablerows += "<label class='color-box-label'>" + key + "</label> "
                     + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
                     + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
-                    + "<span id='color-picker-addon' value='" + key + "' alpha='"+trueColorList[key].a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
+                    + "<span id='color-picker-addon' value='" + key + "' alpha='"+colorControls.trueColorList[key].a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
                     + "</div>"
                     + "</td>";
                 if (sprite != null) {
@@ -2683,8 +2681,8 @@ var htmlGenerators = {
         if (plotInfo.infoPage) return;
 
         var keys = [];
-        for (var k in trueColorList) {
-            if (trueColorList.hasOwnProperty(k)) {
+        for (var k in colorControls.trueColorList) {
+            if (colorControls.trueColorList.hasOwnProperty(k)) {
                 keys.push(k);
             }
         }
@@ -2693,7 +2691,7 @@ var htmlGenerators = {
         var nonEmptyList = [];
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
-            var aCol = trueColorList[key];
+            var aCol = colorControls.trueColorList[key];
             if ($.isEmptyObject(aCol)) {
                 emptyList.push(key);
             } else {
@@ -2765,12 +2763,13 @@ var htmlGenerators = {
     }
 }
 var settingsControls = {
+    settingOn: false,
     showSettings: function(){
-        settingOn = true;
-        htmlGenerators.generateCheckList(sections, colorlist);
+        settingsControls.settingOn = true;
+        htmlGenerators.generateCheckList(sections, colorControls.colorlist);
     },
     hideSettings: function(){
-        settingOn = false;
+        settingsControls.settingOn = false;
     },
     checkIfSelected: function(key, shape, clusterkey){
         if (changedGlyphs.hasOwnProperty(clusterkey)) {
