@@ -1,9 +1,6 @@
-//Constants
-var MAX_PLOTS_STORED = 20;
-
 /* varibles*/
 //Three js global varibles
-var camera, scene, renderer, controls, light;
+var camera;
 var container, stats;
 var scene3d;
 var publicUrl = false;
@@ -63,6 +60,164 @@ var pointSize = 1.0;
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
+
+
+var clusterData = {
+    customclusters: {},
+    removedclusters: [],
+    recoloredclusters: [],
+    realpaedclusters: []
+};
+
+var imageSaver = {
+    saveAsImage: function () {
+        var imgData, imgNode;
+        try {
+            var strMime = "image/png";
+            imgData = threejsUtils.renderer.domElement.toDataURL(strMime);
+            var strDownloadMime = "image/octet-stream";
+            //window.open( renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
+            this.saveFile(imgData.replace(strMime, strDownloadMime), fileName + "_" + new Date().format('isoDateTime') + ".png");
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+    },
+
+    saveFile: function (strData, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            document.body.appendChild(link); //Firefox requires the link to be in the body
+            link.download = filename;
+            link.href = strData;
+            link.click();
+            document.body.removeChild(link); //remove the link when done
+        } else {
+            location.replace(uri);
+        }
+    }
+};
+
+// raw data sets coming from back-end. these will be converted to threejs format
+var dataSets = {};
+
+var playEnum = {
+    INIT: "init",
+    PLAY: "play",
+    PAUSE: "pause"
+};
+var playStatus = playEnum.INIT;
+
+ImageEnum = {
+    BALL: "/assets/images/textures1/ball.png",
+    CUBE: "/assets/images/textures1/cube.png",
+    DISC: "/assets/images/textures1/disc.png",
+    STAR: "/assets/images/textures1/star.png",
+    PYRAMID: "/assets/images/textures1/pyramid.png",
+    CONE: "/assets/images/textures1/cone.png",
+    CYLINDER: "/assets/images/textures1/cylinder.png"
+};
+ImageTrajEnum = {
+    BALL: "/assets/images/textures1/traj/ball.png",
+    CUBE: "/assets/images/textures1/traj/cube.png",
+    DISC: "/assets/images/textures1/traj/disc.png",
+    STAR: "/assets/images/textures1/traj/star.png",
+    PYRAMID: "/assets/images/textures1/traj/pyramid.png",
+    CONE: "/assets/images/textures1/traj/cone.png",
+    CYLINDER: "/assets/images/textures1/traj/cylinder.png"
+};
+
+
+
+var totalItemsToLoad = 1;
+var itemsLoaded = 1;
+var reInitialize = false;
+
+function intialSetup(settings, reinit) {
+    colorsLoaded = false;
+    // check weather we have camera
+    if (settings) {
+        var sett;
+        if (settings.selected) {
+            if (settings.selected == "original" && !reinit) {
+                // clear the originals
+                settings.settings['original'] = {};
+                sett = settings.settings['original'];
+            } else {
+                // new settings
+                sett = settings.settings[settings.selected];
+            }
+            allSettings = settings;
+        } else {
+            allSettings['tid'] = timeseriesId;
+            allSettings['fid'] = resultSetId;
+            allSettings['settings'] = {};
+            allSettings['settings']['original'] = settings;
+            allSettings['selected'] = 'original';
+            sett = settings;
+        }
+
+        if (sett.glyphSize) {
+            glyphSize = sett.glyphSize;
+        }
+        if (sett.pointSize) {
+            pointSize = sett.pointSize;
+        }
+        if (sett.speed) {
+            speed = sett.speed;
+        }
+        if (sett.camera) {
+            var c = sett.camera;
+        }
+        if (sett.cameraup) {
+            var up = sett.cameraup;
+            camera.up.set(up.x, up.y, up.z);
+        }
+        if (sett.glyphs) {
+            changedGlyphs = sett.glyphs;
+        }
+        if (sett.changedSizes) {
+            changedSizes = sett.changedSizes;
+        }
+        if (sett.customclusters) {
+            clusterData.customclusters = sett.customclusters;
+        }
+        if (sett.camerastate) {
+            var cameraState = sett.camerastate;
+            camera.matrix.fromArray(JSON.parse(cameraState));
+            camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
+        }
+        if (sett.trajectoryData) {
+            trajectoryData.load(sett.trajectoryData);
+        }
+        camera.updateProjectionMatrix();
+        var colors = sett.clusterColors;
+        if (colors) {
+            for (var key in colors) {
+                if (colors.hasOwnProperty(key)) {
+                    var clustercolor = colors[key];
+                    if (clustercolor) {
+                        colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
+                        trueColorList[key] = clustercolor;
+                    }
+                }
+            }
+            colorsLoaded = true;
+        }
+    } else {
+        allSettings['tid'] = timeseriesId;
+        allSettings['fid'] = resultSetId;
+        allSettings['settings'] = {};
+        allSettings['settings']['original'] = {};
+        allSettings['selected'] = 'original';
+    }
+
+    controlBox.pointsize = pointSize;
+    controlBox.glyphsize = glyphSize;
+    controlBox.delay = speed;
+    controlBox.settings = allSettings.selected;
+}
 // static information about the plot
 var plotInfo = {
     infoPage: false,
@@ -79,14 +234,6 @@ var plotInfo = {
         this.isTimeSeries = isTimeSeries;
     }
 };
-
-var clusterData = {
-    customclusters: {},
-    removedclusters: [],
-    recoloredclusters: [],
-    realpaedclusters: []
-};
-
 // keeps track of the obects to render
 var renderObjects = {
     lineSets: {},
@@ -108,7 +255,6 @@ var renderObjects = {
         }
     }
 };
-
 var scenes = {
     scale: 1,
     sceneSequence: {},
@@ -129,7 +275,6 @@ var scenes = {
         return currentValue ? currentValue : 0;
     }
 };
-
 var events = {
     onKeyPress: function(event){
         if(event.ctrlKey){
@@ -138,8 +283,8 @@ var events = {
         }
     },
     onKeyUp: function(event){
-            window.removeEventListener('mousemove', events.onDocumentMouseMove)
-            toolTipLabels.clear();
+        window.removeEventListener('mousemove', events.onDocumentMouseMove)
+        toolTipLabels.clear();
     },
     onDocumentMouseMove: function(event){
         event.preventDefault();
@@ -165,10 +310,9 @@ var events = {
         }
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
+        threejsUtils.renderer.setSize(width, height);
     }
 }
-
 var toolTipLabels = {
     canvas: null,
     context: null,
@@ -389,7 +533,7 @@ var trajectoryData = {
         save['trajectoryLimit'] = this.trajectoryLimit;
         save['totalTrajectoryPoints'] = this.totalTrajectoryPoints;
         save['trajectoryPointSizeRatio'] = this.trajectoryPointSizeRatio;
-            // keep track of the cluster IDs created for the trajector
+        // keep track of the cluster IDs created for the trajector
         save['trajectoryToClusterId'] = this.trajectoryToClusterId;
         save['trajectoryStartLineWidth'] = this.trajectoryStartLineWidth;
         save['trajectoryClusterIds'] = this.trajectoryClusterIds;
@@ -415,286 +559,6 @@ var trajectoryData = {
         return currentHighestClusterId;
     }
 };
-
-var imageSaver = {
-    saveAsImage: function () {
-        var imgData, imgNode;
-        try {
-            var strMime = "image/png";
-            imgData = renderer.domElement.toDataURL(strMime);
-            var strDownloadMime = "image/octet-stream";
-            //window.open( renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
-            this.saveFile(imgData.replace(strMime, strDownloadMime), fileName + "_" + new Date().format('isoDateTime') + ".png");
-        } catch (e) {
-            console.log(e);
-            return;
-        }
-
-    },
-
-    saveFile: function (strData, filename) {
-        var link = document.createElement('a');
-        if (typeof link.download === 'string') {
-            document.body.appendChild(link); //Firefox requires the link to be in the body
-            link.download = filename;
-            link.href = strData;
-            link.click();
-            document.body.removeChild(link); //remove the link when done
-        } else {
-            location.replace(uri);
-        }
-    }
-};
-
-// raw data sets coming from back-end. these will be converted to threejs format
-var dataSets = {};
-
-var playEnum = {
-    INIT: "init",
-    PLAY: "play",
-    PAUSE: "pause"
-};
-var playStatus = playEnum.INIT;
-
-ImageEnum = {
-    BALL: "/assets/images/textures1/ball.png",
-    CUBE: "/assets/images/textures1/cube.png",
-    DISC: "/assets/images/textures1/disc.png",
-    STAR: "/assets/images/textures1/star.png",
-    PYRAMID: "/assets/images/textures1/pyramid.png",
-    CONE: "/assets/images/textures1/cone.png",
-    CYLINDER: "/assets/images/textures1/cylinder.png"
-};
-
-ImageTrajEnum = {
-    BALL: "/assets/images/textures1/traj/ball.png",
-    CUBE: "/assets/images/textures1/traj/cube.png",
-    DISC: "/assets/images/textures1/traj/disc.png",
-    STAR: "/assets/images/textures1/traj/star.png",
-    PYRAMID: "/assets/images/textures1/traj/pyramid.png",
-    CONE: "/assets/images/textures1/traj/cone.png",
-    CYLINDER: "/assets/images/textures1/traj/cylinder.png"
-};
-
-
-
-var totalItemsToLoad = 1;
-var itemsLoaded = 1;
-var reInitialize = false;
-
-function intialSetup(settings, reinit) {
-    colorsLoaded = false;
-    // check weather we have camera
-    if (settings) {
-        var sett;
-        if (settings.selected) {
-            if (settings.selected == "original" && !reinit) {
-                // clear the originals
-                settings.settings['original'] = {};
-                sett = settings.settings['original'];
-            } else {
-                // new settings
-                sett = settings.settings[settings.selected];
-            }
-            allSettings = settings;
-        } else {
-            allSettings['tid'] = timeseriesId;
-            allSettings['fid'] = resultSetId;
-            allSettings['settings'] = {};
-            allSettings['settings']['original'] = settings;
-            allSettings['selected'] = 'original';
-            sett = settings;
-        }
-
-        if (sett.glyphSize) {
-            glyphSize = sett.glyphSize;
-        }
-        if (sett.pointSize) {
-            pointSize = sett.pointSize;
-        }
-        if (sett.speed) {
-            speed = sett.speed;
-        }
-        if (sett.camera) {
-            var c = sett.camera;
-        }
-        if (sett.cameraup) {
-            var up = sett.cameraup;
-            camera.up.set(up.x, up.y, up.z);
-        }
-        if (sett.glyphs) {
-            changedGlyphs = sett.glyphs;
-        }
-        if (sett.changedSizes) {
-            changedSizes = sett.changedSizes;
-        }
-        if (sett.customclusters) {
-            clusterData.customclusters = sett.customclusters;
-        }
-        if (sett.camerastate) {
-            var cameraState = sett.camerastate;
-            camera.matrix.fromArray(JSON.parse(cameraState));
-            camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
-        }
-        if (sett.trajectoryData) {
-            trajectoryData.load(sett.trajectoryData);
-        }
-        camera.updateProjectionMatrix();
-        var colors = sett.clusterColors;
-        if (colors) {
-            for (var key in colors) {
-                if (colors.hasOwnProperty(key)) {
-                    var clustercolor = colors[key];
-                    if (clustercolor) {
-                        colorlist[key] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
-                        trueColorList[key] = clustercolor;
-                    }
-                }
-            }
-            colorsLoaded = true;
-        }
-    } else {
-        allSettings['tid'] = timeseriesId;
-        allSettings['fid'] = resultSetId;
-        allSettings['settings'] = {};
-        allSettings['settings']['original'] = {};
-        allSettings['selected'] = 'original';
-    }
-
-    controlBox.pointsize = pointSize;
-    controlBox.glyphsize = glyphSize;
-    controlBox.delay = speed;
-    controlBox.settings = allSettings.selected;
-}
-
-var edgeControls = {
-    drawEdges: function(edges, points, pointcolors){
-        if (edges == null || edges == undefined)
-            return;
-
-        var geometry = new THREE.BufferGeometry();
-        var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryData.trajectoryStartLineWidth});
-        var positions = [];
-        var colorarray = [];
-        for (var key in edges) {
-            if (edges.hasOwnProperty(key)) {
-                var edge = edges[key];
-                var vertices = edge.v;
-                var previousvertex = null;
-                var previouscolor = null;
-                var isFirst = true;
-                for (var i = 0; i < vertices.length; i++) {
-                    var verkey = vertices[i];
-                    var pointkey = verkey;
-                    var point = points[parseInt(pointkey)];
-                    var pointcolor = pointcolors[parseInt(pointkey)];
-                    var vertex = new THREE.Vector3(point[0], point[1], point[2]);
-                    if (previousvertex != null) {
-                        if (isFirst) {
-                            isFirst = false
-                        } else {
-                            colorarray.push(previouscolor.r);
-                            colorarray.push(previouscolor.g);
-                            colorarray.push(previouscolor.b);
-
-                            positions.push(previousvertex.x);
-                            positions.push(previousvertex.y);
-                            positions.push(previousvertex.z);
-                        }
-                    }
-                    positions.push(vertex.x);
-                    positions.push(vertex.y);
-                    positions.push(vertex.z);
-                    previousvertex = vertex;
-
-                    previouscolor = pointcolor;
-                    colorarray.push(pointcolor.r);
-                    colorarray.push(pointcolor.g);
-                    colorarray.push(pointcolor.b);
-                }
-            }
-        }
-
-
-        var positions32 = new Float32Array(positions.length);
-        var colorarray32 = new Float32Array(colorarray.length);
-        positions32.set(positions);
-        colorarray32.set(colorarray);
-        geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
-        geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-        //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
-        var linesegs = line = new THREE.LineSegments(geometry, material);
-        return linesegs;
-        //scene3d.add(linesegs)
-    },
-    drawEdges2: function(edges, points, pointcolors){
-        if (edges == null || edges == undefined)
-            return;
-
-        var lines = new THREE.Object3D();
-
-        var positions = [];
-        var colorarray = [];
-
-        for (var key in edges) {
-            if (edges.hasOwnProperty(key)) {
-                var edge = edges[key];
-                var vertices = edge.v;
-                var previousvertex = null;
-                var previouscolor = null;
-
-                if (!vertices || vertices.length <= 0) {
-                    return;
-                }
-
-                var width = (trajectoryData.trajectoryEndLineWidth - trajectoryData.trajectoryStartLineWidth) / vertices.length;
-                for (var i = 0; i < vertices.length; i++) {
-                    var pointkey = vertices[i];
-                    var point = points[parseInt(pointkey)];
-                    var pointcolor = pointcolors[parseInt(pointkey)];
-                    var vertex = new THREE.Vector3(point[0], point[1], point[2]);
-
-                    if (i >= 1) {
-                        colorarray.push(previouscolor.r);
-                        colorarray.push(previouscolor.g);
-                        colorarray.push(previouscolor.b);
-
-                        colorarray.push(pointcolor.r);
-                        colorarray.push(pointcolor.g);
-                        colorarray.push(pointcolor.b);
-
-                        positions.push(previousvertex.x);
-                        positions.push(previousvertex.y);
-                        positions.push(previousvertex.z);
-
-                        positions.push(vertex.x);
-                        positions.push(vertex.y);
-                        positions.push(vertex.z);
-
-                        var positions32 = new Float32Array(positions.length);
-                        var colorarray32 = new Float32Array(colorarray.length);
-                        positions32.set(positions);
-                        colorarray32.set(colorarray);
-
-                        var geometry = new THREE.BufferGeometry();
-                        var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryData.trajectoryStartLineWidth + i * width)});
-                        geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
-                        geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-                        //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
-                        var linesegs = new THREE.LineSegments(geometry, material);
-                        lines.add(linesegs);
-
-                        positions = [];
-                        colorarray = [];
-                    }
-                    previousvertex = vertex;
-                    previouscolor = pointcolor;
-                }
-            }
-        }
-        return lines;
-    }
-}
 var labelControls = {
     DESCENDER_ADJUST: 1.28,
     makeTextSprite: function(message, x, y, z, parameters){
@@ -926,14 +790,16 @@ var labelControls = {
     }
 }
 var threejsUtils = {
+    renderer: null,
+    controls: null,
     animate: function(){
         if (!reInitialize) {
             // console.log("Not re-init");
             requestAnimationFrame(threejsUtils.animate);
-            controls.update();
+            threejsUtils.controls.update();
             stats.update();
             var camera = scene3d.getObjectByName('camera');
-            renderer.render(scene3d, camera);
+            threejsUtils.renderer.render(scene3d, camera);
         } else {
             if (plotInfo.isTimeSeries) {
                 timeSeriesControls.reInitTimeSeries();
@@ -961,9 +827,9 @@ var threejsUtils = {
         //set the scene
         var canvas3d = $('#canvas3d');
         //new THREE.WebGLRenderer
-        renderer = new THREE.WebGLRenderer({canvas: canvas3d.get(0), antialias: true, preserveDrawingBuffer: true });
-        renderer.setSize(canvasWidth, canvasHeight);
-        renderer.setClearColor(0x121224, 1);
+        threejsUtils.renderer = new THREE.WebGLRenderer({canvas: canvas3d.get(0), antialias: true, preserveDrawingBuffer: true });
+        threejsUtils.renderer.setSize(canvasWidth, canvasHeight);
+        threejsUtils.renderer.setClearColor(0x121224, 1);
 
         //new THREE.PerspectiveCamera
         // cameraCenter = new THREE.Vector3(0, 0, 0);
@@ -972,10 +838,10 @@ var threejsUtils = {
         camera.position.set(1, 1, 1);
         //  camera.lookAt(cameraCenter);
         scene3d.add(camera);
-        controls = new THREE.TrackballControls(camera, renderer.domElement);
-        controls.staticMoving = true;
-        controls.rotateSpeed = 20.0;
-        controls.dynamicDampingFactor = 0.3;
+        threejsUtils.controls = new THREE.TrackballControls(camera, threejsUtils.renderer.domElement);
+        threejsUtils.controls.staticMoving = true;
+        threejsUtils.controls.rotateSpeed = 20.0;
+        threejsUtils.controls.dynamicDampingFactor = 0.3;
         mouse = new THREE.Vector2();
         colorControls.initColorSchemes();
         sprites["0"] = new THREE.TextureLoader().load(ImageEnum.DISC);
@@ -1609,6 +1475,7 @@ var SingleGraphControls = {
 
 }
 var timeSeriesControls = {
+    MAX_PLOTS_STORED: 20,
     initSlider: function(){
         $("#plot-slider").ionRangeSlider({
             grid: true,
@@ -1710,9 +1577,9 @@ var timeSeriesControls = {
     },
     initBufferAndLoad: function(){
         setTimeout(function () {
-            if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < MAX_PLOTS_STORED) {
-                if (timeSeriesLength > MAX_PLOTS_STORED) {
-                    timeSeriesControls.loadPlotData(0, MAX_PLOTS_STORED);
+            if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < timeSeriesControls.MAX_PLOTS_STORED) {
+                if (timeSeriesLength > timeSeriesControls.MAX_PLOTS_STORED) {
+                    timeSeriesControls.loadPlotData(0, timeSeriesControls.MAX_PLOTS_STORED);
                 } else {
                     timeSeriesControls.loadPlotData(0, timeSeriesLength);
                 }
@@ -1909,6 +1776,134 @@ var timeSeriesControls = {
         }
     }
 }
+var edgeControls = {
+    drawEdges: function(edges, points, pointcolors){
+        if (edges == null || edges == undefined)
+            return;
+
+        var geometry = new THREE.BufferGeometry();
+        var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryData.trajectoryStartLineWidth});
+        var positions = [];
+        var colorarray = [];
+        for (var key in edges) {
+            if (edges.hasOwnProperty(key)) {
+                var edge = edges[key];
+                var vertices = edge.v;
+                var previousvertex = null;
+                var previouscolor = null;
+                var isFirst = true;
+                for (var i = 0; i < vertices.length; i++) {
+                    var verkey = vertices[i];
+                    var pointkey = verkey;
+                    var point = points[parseInt(pointkey)];
+                    var pointcolor = pointcolors[parseInt(pointkey)];
+                    var vertex = new THREE.Vector3(point[0], point[1], point[2]);
+                    if (previousvertex != null) {
+                        if (isFirst) {
+                            isFirst = false
+                        } else {
+                            colorarray.push(previouscolor.r);
+                            colorarray.push(previouscolor.g);
+                            colorarray.push(previouscolor.b);
+
+                            positions.push(previousvertex.x);
+                            positions.push(previousvertex.y);
+                            positions.push(previousvertex.z);
+                        }
+                    }
+                    positions.push(vertex.x);
+                    positions.push(vertex.y);
+                    positions.push(vertex.z);
+                    previousvertex = vertex;
+
+                    previouscolor = pointcolor;
+                    colorarray.push(pointcolor.r);
+                    colorarray.push(pointcolor.g);
+                    colorarray.push(pointcolor.b);
+                }
+            }
+        }
+
+
+        var positions32 = new Float32Array(positions.length);
+        var colorarray32 = new Float32Array(colorarray.length);
+        positions32.set(positions);
+        colorarray32.set(colorarray);
+        geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
+        geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
+        //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+        var linesegs = line = new THREE.LineSegments(geometry, material);
+        return linesegs;
+        //scene3d.add(linesegs)
+    },
+    drawEdges2: function(edges, points, pointcolors){
+        if (edges == null || edges == undefined)
+            return;
+
+        var lines = new THREE.Object3D();
+
+        var positions = [];
+        var colorarray = [];
+
+        for (var key in edges) {
+            if (edges.hasOwnProperty(key)) {
+                var edge = edges[key];
+                var vertices = edge.v;
+                var previousvertex = null;
+                var previouscolor = null;
+
+                if (!vertices || vertices.length <= 0) {
+                    return;
+                }
+
+                var width = (trajectoryData.trajectoryEndLineWidth - trajectoryData.trajectoryStartLineWidth) / vertices.length;
+                for (var i = 0; i < vertices.length; i++) {
+                    var pointkey = vertices[i];
+                    var point = points[parseInt(pointkey)];
+                    var pointcolor = pointcolors[parseInt(pointkey)];
+                    var vertex = new THREE.Vector3(point[0], point[1], point[2]);
+
+                    if (i >= 1) {
+                        colorarray.push(previouscolor.r);
+                        colorarray.push(previouscolor.g);
+                        colorarray.push(previouscolor.b);
+
+                        colorarray.push(pointcolor.r);
+                        colorarray.push(pointcolor.g);
+                        colorarray.push(pointcolor.b);
+
+                        positions.push(previousvertex.x);
+                        positions.push(previousvertex.y);
+                        positions.push(previousvertex.z);
+
+                        positions.push(vertex.x);
+                        positions.push(vertex.y);
+                        positions.push(vertex.z);
+
+                        var positions32 = new Float32Array(positions.length);
+                        var colorarray32 = new Float32Array(colorarray.length);
+                        positions32.set(positions);
+                        colorarray32.set(colorarray);
+
+                        var geometry = new THREE.BufferGeometry();
+                        var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: (trajectoryData.trajectoryStartLineWidth + i * width)});
+                        geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
+                        geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
+                        //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                        var linesegs = new THREE.LineSegments(geometry, material);
+                        lines.add(linesegs);
+
+                        positions = [];
+                        colorarray = [];
+                    }
+                    previousvertex = vertex;
+                    previouscolor = pointcolor;
+                }
+            }
+        }
+        return lines;
+    }
+}
 var saveAndVersionControls = {
     savePlot: function(){
         var res = false;
@@ -1987,7 +1982,7 @@ var saveAndVersionControls = {
             obj['rotation'] = camera.rotation;
             obj['zoom'] = camera.zoom;
             obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
-            obj['controltarget'] = controls.target;
+            obj['controltarget'] = threejsUtils.controls.target;
             obj['trajectoryData'] = trajectoryData.createSave();
             sett[res] = obj;
         }
@@ -1995,252 +1990,9 @@ var saveAndVersionControls = {
 
 
 }
-var htmlGenerators = {
-    /**
-     * Generates the Information box content
-     */
-    populatePlotInfo: function(){
-        if (!plotInfo.infoPage) {
-            document.getElementById('plot-info-description').innerHTML = "<b>Name: " + plotInfo.artifactName + "</br>" + "<b>Frame: </b>" + fileName + "</br>" +
-                "<b>Desc: </b>" + plotInfo.desc + "</br>" +
-                "<b>Group: </b>" + plotInfo.group;
-        } else {
-            $("#np").text(Object.keys(plotPoints).length);
-            $("#nc").text(sections.length);
-            if (timeSeriesLength) {
-                $("#nf").text(timeSeriesLength)
-            }
-        }
-    },
-    /**
-     * Generate the check box list for clusters
-     * @param list sections
-     * @param initcolors color list
-     * @returns {string} generated check list in HTML
-     */
-    generateCheckList: function(list, initcolors){
-        if (plotInfo.infoPage) return;
-
-        var keys = [];
-        for (var k in trueColorList) {
-            if (trueColorList.hasOwnProperty(k)) {
-                keys.push(k);
-            }
-        }
-
-        var emptyList = [];
-        var nonEmptyList = [];
-        var glyphList = [];
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var sprite = glyphControls.getGlyphName(list[key]);
-            if (sprite != null) {
-                glyphList.push(key);
-            } else {
-                var aCol = trueColorList[key];
-                if ($.isEmptyObject(aCol)) {
-                    emptyList.push(key);
-                } else {
-                    nonEmptyList.push(key);
-                }
-            }
-
-        }
-
-        keys = glyphList.concat(nonEmptyList);
-        keys = keys.concat(emptyList);
-        var found = false;
-        var tabletop,tablerows,tableend
-
-        tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
-            + "<thead>"
-            + "<tr class='headings'>"
-            + "<th>"
-            + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
-            + "</th>"
-            + "<th class='column-title' >Label</th>"
-            + "<th class='column-title'>Cluster Count</th>"
-            + "</tr>"
-            + "</thead>"
-            + "<tbody>";
-
-        var ss = $("#cluster_table");
-        if($("#cluster_table").length && !customclusternotadded){
-            for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                if (!list[key]) continue;
-                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
-                    $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
-                } else {
-                    $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
-                }
-                var sprite = glyphControls.getGlyphName(list[key]);
-                var currentshape;
-                if (changedGlyphs.hasOwnProperty(key)) {
-                    currentshape = changedGlyphs[key];
-                }else{
-                    currentshape = list[key].shape;
-                }
-                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key]);
-                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a);
-                if(sprite != null){
-                    $("#cluster_table > tbody > #" + key + " select").val(currentshape);
-                    $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length);
-                    $("#cluster_table > tbody > #" + key + " td#cluster-size input").attr('value',list[key].size);
-                }else{
-                    $("#cluster_table > tbody > #" + key + " td#cluster-size label").text(list[key].length);
-                }
-            }
-            found =  true;
-        } else {
-            tablerows = "";
-            for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                if (!list[key]) continue;
-                tablerows += "<tr class='even pointer' id='" + key + "'>"
-                    + "<td class='a-center'>";
-                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
-                    tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
-                } else {
-                    tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
-                }
-                var sprite = glyphControls.getGlyphName(list[key]);
-                tablerows += "<label class='color-box-label'>" + key + "</label> "
-                    + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
-                    + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
-                    + "<span id='color-picker-addon' value='" + key + "' alpha='"+trueColorList[key].a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
-                    + "</div>"
-                    + "</td>";
-                if (sprite != null) {
-                    tablerows += "<td class=' '><span>" + list[key].label + "</span>"
-                        + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
-                        + "<option value='0'" + settingsControls.checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
-                        + "<option value='1'" + settingsControls.checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
-                        + "<option value='2'" + settingsControls.checkIfSelected("2", list[key].shape, key) + ">Star</option>"
-                        + "<option value='3'" + settingsControls.checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
-                        + "<option value='4'" + settingsControls.checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
-                        + "<option value='5'" + settingsControls.checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
-                        + "<option value='6'" + settingsControls.checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
-                        + "</select>"+
-                        "</td>";
-
-                    tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length
-                        + "</label><div class='glyph-size'><label class='glyph-size-label'>Size</label><input type='text' class='glyph-size-control' value='" + list[key].size + "' key='" + key + "' id='size-box" + key + "'></div>"
-                        + "</td>"
-                        + "</tr>";
-                } else {
-                    tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
-                    tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length + "</label></td>"
-                        + "</tr>";
-                }
-
-            }
-
-            tableend = "</tbody>"
-                + "</table>";
-            customclusternotadded = false;
-        }
-
-        if(!found){
-            document.getElementById('cluster_table_div').innerHTML = tabletop + tablerows + tableend;
-            enablesearch()
-        }
-        return tabletop + tablerows + tableend;
-    },
-    /**
-     * Geneates the cluster list
-     * @param list
-     * @param initcolors
-     * @returns {string} generated list in HTML
-     */
-    generateClusterList: function(list, initcolors){
-        if (plotInfo.infoPage) return;
-
-        var keys = [];
-        for (var k in trueColorList) {
-            if (trueColorList.hasOwnProperty(k)) {
-                keys.push(k);
-            }
-        }
-
-        var emptyList = [];
-        var nonEmptyList = [];
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var aCol = trueColorList[key];
-            if ($.isEmptyObject(aCol)) {
-                emptyList.push(key);
-            } else {
-                nonEmptyList.push(key);
-            }
-        }
-        var grid = "";
-        var found = false;
-        if (list && nonEmptyList.length < 50) {
-            for (var i = 0; i < nonEmptyList.length; i++) {
-                var key = nonEmptyList[i];
-                if (list.hasOwnProperty(key)) {
-                    var colorWithouthHash = initcolors[key].replace(/#/g, '');
-                    var sprite = null;
-                    if (changedGlyphs.hasOwnProperty(key)) {
-                        sprite = glyphControls.getFontIconByShape(changedGlyphs[key]);
-                    } else{
-                        if (list[key].size > 1) {
-                            sprite = glyphControls.getFontIconByShape(list[key].shape);
-                        }
-                    }
-                    // try to find the element first
-                    if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryData.trajectoryPointLabels.length == 0) {
-                        if ($("#plot-clusters > #" + key + " span").length) {
-                            if (sprite != null) {
-                                $("#pc" + key).css("background-color", "#ffffff");
-                                $("#pcs").text(list[key].label + ":" + list[key].length + "   ");
-                                $("#pcs").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
-                            } else {
-                                var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
-                                var tex = "ffffff";
-                                if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
-                                    tex = "000000";
-                                }
-                                $("#pc" + key).css("color", "#" + tex);
-                                $("#pcs" + key).css("background-color", "#" + colorWithouthHash);
-                                $("#pcs" + key).text(list[key].label + ":" + list[key].length);
-                            }
-                        }
-                        found = true;
-                    } else {
-                        found = false;
-                        if (sprite != null) {
-                            if (list[key]['traj']) {
-                                grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
-                                    "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'><i class='fa fa-ellipsis-h'></i>" + list[key].label + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
-                            } else {
-                                grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
-                                    "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
-                            }
-                        } else {
-                            var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
-                            var tex = "ffffff";
-                            if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
-                                tex = "000000";
-                            }
-                            grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
-                                "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "' id='pcs"+key+"'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
-                        }
-                    }
-                }
-            }
-        }
-        if (!found) {
-            document.getElementById('plot-clusters').innerHTML = grid;
-            customclusternotaddedtolist = false;
-        }
-        return grid;
-    }
-}
 var viewControls = {
     resetView: function(){
-        controls.reset();
+        threejsUtils.controls.reset();
     },
     addParticlesToScence: function(){
         for (var key in currentParticles) {
@@ -2768,6 +2520,249 @@ var colorControls = {
     }
 
 
+}
+var htmlGenerators = {
+    /**
+     * Generates the Information box content
+     */
+    populatePlotInfo: function(){
+        if (!plotInfo.infoPage) {
+            document.getElementById('plot-info-description').innerHTML = "<b>Name: " + plotInfo.artifactName + "</br>" + "<b>Frame: </b>" + fileName + "</br>" +
+                "<b>Desc: </b>" + plotInfo.desc + "</br>" +
+                "<b>Group: </b>" + plotInfo.group;
+        } else {
+            $("#np").text(Object.keys(plotPoints).length);
+            $("#nc").text(sections.length);
+            if (timeSeriesLength) {
+                $("#nf").text(timeSeriesLength)
+            }
+        }
+    },
+    /**
+     * Generate the check box list for clusters
+     * @param list sections
+     * @param initcolors color list
+     * @returns {string} generated check list in HTML
+     */
+    generateCheckList: function(list, initcolors){
+        if (plotInfo.infoPage) return;
+
+        var keys = [];
+        for (var k in trueColorList) {
+            if (trueColorList.hasOwnProperty(k)) {
+                keys.push(k);
+            }
+        }
+
+        var emptyList = [];
+        var nonEmptyList = [];
+        var glyphList = [];
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var sprite = glyphControls.getGlyphName(list[key]);
+            if (sprite != null) {
+                glyphList.push(key);
+            } else {
+                var aCol = trueColorList[key];
+                if ($.isEmptyObject(aCol)) {
+                    emptyList.push(key);
+                } else {
+                    nonEmptyList.push(key);
+                }
+            }
+
+        }
+
+        keys = glyphList.concat(nonEmptyList);
+        keys = keys.concat(emptyList);
+        var found = false;
+        var tabletop,tablerows,tableend
+
+        tabletop = "<table class='table table-striped table-bordered responsive-utilities jambo_table bulk_action' id='cluster_table'>"
+            + "<thead>"
+            + "<tr class='headings'>"
+            + "<th>"
+            + "<input type='checkbox' id='check-all' class='flat' checked> Cluster"
+            + "</th>"
+            + "<th class='column-title' >Label</th>"
+            + "<th class='column-title'>Cluster Count</th>"
+            + "</tr>"
+            + "</thead>"
+            + "<tbody>";
+
+        var ss = $("#cluster_table");
+        if($("#cluster_table").length && !customclusternotadded){
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (!list[key]) continue;
+                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                    $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
+                } else {
+                    $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
+                }
+                var sprite = glyphControls.getGlyphName(list[key]);
+                var currentshape;
+                if (changedGlyphs.hasOwnProperty(key)) {
+                    currentshape = changedGlyphs[key];
+                }else{
+                    currentshape = list[key].shape;
+                }
+                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('style', "background-color:#" + initcolors[key]);
+                $("#cluster_table > tbody > #" + key + " span#color-picker-addon").attr('alpha', trueColorList[key].a);
+                if(sprite != null){
+                    $("#cluster_table > tbody > #" + key + " select").val(currentshape);
+                    $("#cluster_table > tbody > #" + key + " td#cluster-size label#size-label").text(list[key].length);
+                    $("#cluster_table > tbody > #" + key + " td#cluster-size input").attr('value',list[key].size);
+                }else{
+                    $("#cluster_table > tbody > #" + key + " td#cluster-size label").text(list[key].length);
+                }
+            }
+            found =  true;
+        } else {
+            tablerows = "";
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (!list[key]) continue;
+                tablerows += "<tr class='even pointer' id='" + key + "'>"
+                    + "<td class='a-center'>";
+                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                    tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
+                } else {
+                    tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
+                }
+                var sprite = glyphControls.getGlyphName(list[key]);
+                tablerows += "<label class='color-box-label'>" + key + "</label> "
+                    + "<div class='input-group' style='width: 15px;height: 15px; display: inline-flex; float: right;padding-right: 20px;'>"
+                    + "<input value='" + initcolors[key] + "' class='form-control color-pic1' type='hidden' key='" + key + "' id='color-box" + key + "'>"
+                    + "<span id='color-picker-addon' value='" + key + "' alpha='"+trueColorList[key].a+"' class='color-picker-addon' style='background-color:#" + initcolors[key] + "'></span>"
+                    + "</div>"
+                    + "</td>";
+                if (sprite != null) {
+                    tablerows += "<td class=' '><span>" + list[key].label + "</span>"
+                        + "<select name='glyphs' class='select-glyph' id='" + key + "'>"
+                        + "<option value='0'" + settingsControls.checkIfSelected("0", list[key].shape, key) + ">Disc</option>"
+                        + "<option value='1'" + settingsControls.checkIfSelected("1", list[key].shape, key) + ">Ball</option>"
+                        + "<option value='2'" + settingsControls.checkIfSelected("2", list[key].shape, key) + ">Star</option>"
+                        + "<option value='3'" + settingsControls.checkIfSelected("3", list[key].shape, key) + ">Cube</option>"
+                        + "<option value='4'" + settingsControls.checkIfSelected("4", list[key].shape, key) + ">Pyramid</option>"
+                        + "<option value='5'" + settingsControls.checkIfSelected("5", list[key].shape, key) + ">Cone</option>"
+                        + "<option value='6'" + settingsControls.checkIfSelected("6", list[key].shape, key) + ">Cylinder</option>"
+                        + "</select>"+
+                        "</td>";
+
+                    tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length
+                        + "</label><div class='glyph-size'><label class='glyph-size-label'>Size</label><input type='text' class='glyph-size-control' value='" + list[key].size + "' key='" + key + "' id='size-box" + key + "'></div>"
+                        + "</td>"
+                        + "</tr>";
+                } else {
+                    tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
+                    tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length + "</label></td>"
+                        + "</tr>";
+                }
+
+            }
+
+            tableend = "</tbody>"
+                + "</table>";
+            customclusternotadded = false;
+        }
+
+        if(!found){
+            document.getElementById('cluster_table_div').innerHTML = tabletop + tablerows + tableend;
+            enablesearch()
+        }
+        return tabletop + tablerows + tableend;
+    },
+    /**
+     * Geneates the cluster list
+     * @param list
+     * @param initcolors
+     * @returns {string} generated list in HTML
+     */
+    generateClusterList: function(list, initcolors){
+        if (plotInfo.infoPage) return;
+
+        var keys = [];
+        for (var k in trueColorList) {
+            if (trueColorList.hasOwnProperty(k)) {
+                keys.push(k);
+            }
+        }
+
+        var emptyList = [];
+        var nonEmptyList = [];
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var aCol = trueColorList[key];
+            if ($.isEmptyObject(aCol)) {
+                emptyList.push(key);
+            } else {
+                nonEmptyList.push(key);
+            }
+        }
+        var grid = "";
+        var found = false;
+        if (list && nonEmptyList.length < 50) {
+            for (var i = 0; i < nonEmptyList.length; i++) {
+                var key = nonEmptyList[i];
+                if (list.hasOwnProperty(key)) {
+                    var colorWithouthHash = initcolors[key].replace(/#/g, '');
+                    var sprite = null;
+                    if (changedGlyphs.hasOwnProperty(key)) {
+                        sprite = glyphControls.getFontIconByShape(changedGlyphs[key]);
+                    } else{
+                        if (list[key].size > 1) {
+                            sprite = glyphControls.getFontIconByShape(list[key].shape);
+                        }
+                    }
+                    // try to find the element first
+                    if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryData.trajectoryPointLabels.length == 0) {
+                        if ($("#plot-clusters > #" + key + " span").length) {
+                            if (sprite != null) {
+                                $("#pc" + key).css("background-color", "#ffffff");
+                                $("#pcs").text(list[key].label + ":" + list[key].length + "   ");
+                                $("#pcs").append("<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#"+ colorWithouthHash +"'></i>");
+                            } else {
+                                var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
+                                var tex = "ffffff";
+                                if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                                    tex = "000000";
+                                }
+                                $("#pc" + key).css("color", "#" + tex);
+                                $("#pcs" + key).css("background-color", "#" + colorWithouthHash);
+                                $("#pcs" + key).text(list[key].label + ":" + list[key].length);
+                            }
+                        }
+                        found = true;
+                    } else {
+                        found = false;
+                        if (sprite != null) {
+                            if (list[key]['traj']) {
+                                grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
+                                    "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'><i class='fa fa-ellipsis-h'></i>" + list[key].label + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
+                            } else {
+                                grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #ffffff'>" +
+                                    "<p style='font-size: 0.8em'><span style='font-weight: bold' id='pcs" + key + "'>" + list[key].label + ":" + list[key].length + "<i class='demo-icon " + sprite + "' style='font-size: 1em; color:#" + colorWithouthHash + "'></i>" + "</span></p></div>"
+                            }
+                        } else {
+                            var rgb = colorControls.hexToRgb("#" + colorWithouthHash);
+                            var tex = "ffffff";
+                            if (rgb.r + rgb.g + rgb.b > (255 * 3 - (rgb.r + rgb.g + rgb.b))) {
+                                tex = "000000";
+                            }
+                            grid += "<div class='element-item transition metal' data-category='transition' id='pc" + key + "' style='background-color: #" + colorWithouthHash + " '>" +
+                                "<p style='font-size: 0.8em'><span style='font-weight: bold;color: #" + tex + "' id='pcs"+key+"'>" + list[key].label + ":" + list[key].length + "</span></p></div>"
+                        }
+                    }
+                }
+            }
+        }
+        if (!found) {
+            document.getElementById('plot-clusters').innerHTML = grid;
+            customclusternotaddedtolist = false;
+        }
+        return grid;
+    }
 }
 var settingsControls = {
     showSettings: function(){
