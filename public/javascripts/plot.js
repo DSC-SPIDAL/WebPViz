@@ -18,15 +18,10 @@ var changedGlyphs = {};
 var changedSizes ={};
 var customclusternotadded = false;
 var customclusternotaddedtolist = false;
-var pointLabelxKey = {};
-var pointLabelxKeySets = {};
-var maxClusterId = 0;
-var plotPointsSets = {};
-var plotPoints = {};
+
 
 var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
-var xmean = 0, ymean = 0, zmean = 0, cameraCenter, calculatedmeans = false;
-var mouse
+var xmean = 0, ymean = 0, zmean = 0, calculatedmeans = false;
 
 //Single Plot Varibles
 var clusterUrl;
@@ -255,8 +250,8 @@ var events = {
         var width =  canvas.width;
         var height =  canvas.height;
 
-        mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
-        mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
+        threejsUtils.mouse.x = ( (event.clientX - canvas.left) / width ) * 2 - 1;
+        threejsUtils.mouse.y = - ( (event.clientY - canvas.top ) / height ) * 2 + 1;
         toolTipLabels.update();
     },
     onWindowResize: function(){
@@ -299,7 +294,7 @@ var toolTipLabels = {
     update: function(){
         if(!toolTipLabels.initialized) return;
 
-        toolTipLabels.raycaster.setFromCamera(mouse,camera);
+        toolTipLabels.raycaster.setFromCamera(threejsUtils.mouse,camera);
         var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
 
         if(intersects.length > 0){
@@ -755,6 +750,7 @@ var threejsUtils = {
     controls: null,
     stats: null,
     reInitialize: false,
+    mouse: null,
     animate: function(){
         if (!threejsUtils.reInitialize) {
             // console.log("Not re-init");
@@ -805,7 +801,7 @@ var threejsUtils = {
         threejsUtils.controls.staticMoving = true;
         threejsUtils.controls.rotateSpeed = 20.0;
         threejsUtils.controls.dynamicDampingFactor = 0.3;
-        mouse = new THREE.Vector2();
+        threejsUtils.mouse = new THREE.Vector2();
         colorControls.initColorSchemes();
         sprites["0"] = new THREE.TextureLoader().load(ImageEnum.DISC);
         sprites["1"] = new THREE.TextureLoader().load(ImageEnum.BALL);
@@ -882,7 +878,7 @@ var threejsUtils = {
     convertDataToThreeJsFormat: function(data){
         particles = {};
         var plotPoints = {};
-        pointLabelxKey = {};
+        pointControls.pointLabelxKey = {};
         var geometry = {};
         var clusters = data.clusters;
         fileName = data.file;
@@ -980,7 +976,7 @@ var threejsUtils = {
                     // regular point
                     if (upperCaseTrajectoryPointLabels.indexOf(label.toUpperCase()) < 0) {
                         plotPoints[clusterdata.p[pointIndex]] = [p[0] * scenes.scale, p[1]*scenes.scale, p[2]*scenes.scale];
-                        pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
+                        pointControls.pointLabelxKey[p[3]] = clusterdata.p[pointIndex];
                         positionsArray.push(p0);
                         positionsArray.push(p1);
                         positionsArray.push(p2);
@@ -1181,8 +1177,8 @@ var threejsUtils = {
         }
 
 
-        plotPointsSets[data.seq] = plotPoints;
-        pointLabelxKeySets[data.seq] = pointLabelxKey;
+        pointControls.plotPointsSets[data.seq] = plotPoints;
+        pointControls.pointLabelxKeySets[data.seq] = pointControls.pointLabelxKey;
         sectionSets[data.seq] = localSections;
         timeSeriesControls.fileNames[data.seq] = data.file;
     },
@@ -1212,13 +1208,13 @@ var threejsUtils = {
                 delete dataSets[i];
                 // dataSets[i] = null;
             }
-            if (plotPointsSets[i]) {
-                delete plotPointsSets[i];
-                plotPointsSets[i] = null
+            if (pointControls.plotPointsSets[i]) {
+                delete pointControls.plotPointsSets[i];
+                pointControls.plotPointsSets[i] = null
             }
-            if (pointLabelxKeySets[i]) {
-                delete pointLabelxKeySets[i];
-                pointLabelxKeySets[i] = null
+            if (pointControls.pointLabelxKeySets[i]) {
+                delete pointControls.pointLabelxKeySets[i];
+                pointControls.pointLabelxKeySets[i] = null
             }
             if (sectionSets[i]) {
                 delete sectionSets[i];
@@ -1252,16 +1248,16 @@ var threejsUtils = {
                 delete dataSets[i];
                 // dataSets[i] = null;
             }
-            if (plotPointsSets[i]) {
-                delete plotPointsSets[i];
-                plotPointsSets[i] = null
+            if (pointControls.plotPointsSets[i]) {
+                delete pointControls.plotPointsSets[i];
+                pointControls.plotPointsSets[i] = null
             }
             if (sectionSets[i]) {
                 delete sectionSets[i];
             }
-            if (pointLabelxKeySets[i]) {
-                delete pointLabelxKeySets[i];
-                pointLabelxKeySets[i] = null
+            if (pointControls.pointLabelxKeySets[i]) {
+                delete pointControls.pointLabelxKeySets[i];
+                pointControls.pointLabelxKeySets[i] = null
             }
         }
         scenes.clearScenes(0, loadStartIndex);
@@ -1638,8 +1634,8 @@ var timeSeriesControls = {
             scene3d.add(camera);
             scenes[index] = scene3d;
             currentParticles = particleSets[index];
-            plotPoints = plotPointsSets[index];
-            pointLabelxKey = pointLabelxKeySets[index];
+            pointControls.plotPoints = pointControls.plotPointsSets[index];
+            pointControls.pointLabelxKey = pointControls.pointLabelxKeySets[index];
             var localSection = sectionSets[index];
             sections = localSection;
             clusterControls.renderCustomCluster();
@@ -2031,9 +2027,10 @@ var clusterControls = {
     removedclusters: [],
     recoloredclusters: [],
     realpaedclusters: [],
+    maxClusterId: 0,
     setMaxClusterId: function(clusterid){
-        if (clusterid > maxClusterId) {
-            maxClusterId = clusterid;
+        if (clusterid > clusterControls.maxClusterId) {
+            clusterControls.maxClusterId = clusterid;
         }
     },
     addCustomCluster: function(isSingle){
@@ -2044,7 +2041,7 @@ var clusterControls = {
         var points = ($('#ccpoints').val()).split(",");
 
         var p = points;
-        var clusterkey = maxClusterId + 1;
+        var clusterkey = clusterControls.maxClusterId + 1;
         clusterControls.setMaxClusterId(clusterkey);
         var cluster = {
             l: clusterLabel,
@@ -2111,8 +2108,8 @@ var clusterControls = {
                 var colorarray = new Float32Array(clusterdata.p.length * 3);
                 var sizes = new Float32Array(clusterdata.p.length);
                 for (var k = 0; k < clusterdata.p.length; k++) {
-                    var key = pointLabelxKey[clusterdata.p[k]];
-                    var p = plotPoints[key];
+                    var key = pointControls.pointLabelxKey[clusterdata.p[k]];
+                    var p = pointControls.plotPoints[key];
                     if (!p) {
                         continue;
                     }
@@ -2272,6 +2269,10 @@ var glyphControls = {
     }
 }
 var pointControls = {
+    plotPoints: {},
+    plotPointsSets: {},
+    pointLabelxKey: {},
+    pointLabelxKeySets: {},
     changePointSize: function(){
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
@@ -2288,13 +2289,13 @@ var pointControls = {
         return data.points[key.toString()];
     },
     maplabelstokeys: function(points){
-        pointLabelxKey = {};
-        plotPoints = {};
+        pointControls.pointLabelxKey = {};
+        pointControls.plotPoints = {};
         for (var key in points) {
             if (points.hasOwnProperty(key)) {
                 var p = points[key.toString()];
-                pointLabelxKey[p[3]] = key;
-                plotPoints[key] = [p[0], p[1], p[2]];
+                pointControls.pointLabelxKey[p[3]] = key;
+                pointControls.plotPoints[key] = [p[0], p[1], p[2]];
             }
         }
     }
@@ -2510,7 +2511,7 @@ var htmlGenerators = {
                 "<b>Desc: </b>" + plotInfo.desc + "</br>" +
                 "<b>Group: </b>" + plotInfo.group;
         } else {
-            $("#np").text(Object.keys(plotPoints).length);
+            $("#np").text(Object.keys(pointControls.plotPoints).length);
             $("#nc").text(sections.length);
             if (timeSeriesControls.timeSeriesLength) {
                 $("#nf").text(timeSeriesControls.timeSeriesLength)
