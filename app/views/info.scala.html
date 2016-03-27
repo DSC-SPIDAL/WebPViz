@@ -420,12 +420,12 @@
                     @if(!t.pub) {
                         $.getJSON("@routes.Application.getArtifact(t.id)", function (data) {
                             var resultSetUrl = "@routes.Application.getArtifact(t.id)";
-                            visualizeTimeSeries.visualizeTimeSeries(resultSetUrl, data, @t.id, false, true);
+                            timeSeriesControls.visualizeTimeSeries(resultSetUrl, data, @t.id, false, true);
                         });
                     } else {
                         $.getJSON("@routes.Application.getPublicArtifact(t.id)", function (data) {
                             var resultSetUrl = "@routes.Application.getPublicFile(t.id, 0)";
-                            visualizeTimeSeries.visualizeTimeSeries(resultSetUrl, data, @t.id, true, true);
+                            timeSeriesControls.visualizeTimeSeries(resultSetUrl, data, @t.id, true, true);
                         });
                     }
                 } else {
