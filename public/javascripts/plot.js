@@ -38,50 +38,10 @@ var uploader;
 
 var plotDesc;
 
-//Play controls
-var bufferLoopStarted = false;
-var plotRangeSlider = {};
-
-var bufferRequestMade = {};        // track the requests made to get data to be buffered
-var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
-
-
-
-
-var imageSaver = {
-    saveAsImage: function () {
-        var imgData, imgNode;
-        try {
-            var strMime = "image/png";
-            imgData = threejsUtils.renderer.domElement.toDataURL(strMime);
-            var strDownloadMime = "image/octet-stream";
-            //window.open( renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
-            this.saveFile(imgData.replace(strMime, strDownloadMime), fileName + "_" + new Date().format('isoDateTime') + ".png");
-        } catch (e) {
-            console.log(e);
-            return;
-        }
-
-    },
-
-    saveFile: function (strData, filename) {
-        var link = document.createElement('a');
-        if (typeof link.download === 'string') {
-            document.body.appendChild(link); //Firefox requires the link to be in the body
-            link.download = filename;
-            link.href = strData;
-            link.click();
-            document.body.removeChild(link); //remove the link when done
-        } else {
-            location.replace(uri);
-        }
-    }
-};
-
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
 
-var playEnum = {
+playEnum = {
     INIT: "init",
     PLAY: "play",
     PAUSE: "pause"
@@ -106,12 +66,6 @@ ImageTrajEnum = {
     CONE: "/assets/images/textures1/traj/cone.png",
     CYLINDER: "/assets/images/textures1/traj/cylinder.png"
 };
-
-
-
-var totalItemsToLoad = 1;
-var itemsLoaded = 1;
-var reInitialize = false;
 
 function intialSetup(settings, reinit) {
     colorControls.colorsLoaded = false;
@@ -194,6 +148,37 @@ function intialSetup(settings, reinit) {
 
     controlBox.settings = allSettings.selected;
 }
+
+var imageSaver = {
+    saveAsImage: function () {
+        var imgData, imgNode;
+        try {
+            var strMime = "image/png";
+            imgData = threejsUtils.renderer.domElement.toDataURL(strMime);
+            var strDownloadMime = "image/octet-stream";
+            //window.open( renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
+            this.saveFile(imgData.replace(strMime, strDownloadMime), fileName + "_" + new Date().format('isoDateTime') + ".png");
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+    },
+
+    saveFile: function (strData, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            document.body.appendChild(link); //Firefox requires the link to be in the body
+            link.download = filename;
+            link.href = strData;
+            link.click();
+            document.body.removeChild(link); //remove the link when done
+        } else {
+            location.replace(uri);
+        }
+    }
+};
+
 // static information about the plot
 var plotInfo = {
     infoPage: false,
@@ -769,8 +754,9 @@ var threejsUtils = {
     renderer: null,
     controls: null,
     stats: null,
+    reInitialize: false,
     animate: function(){
-        if (!reInitialize) {
+        if (!threejsUtils.reInitialize) {
             // console.log("Not re-init");
             requestAnimationFrame(threejsUtils.animate);
             threejsUtils.controls.update();
@@ -1202,8 +1188,8 @@ var threejsUtils = {
     },
     clearThreeJS: function(loadStartIndex, loadend){
         for (var i = 0; i < loadStartIndex; i++) {
-            if (bufferRequestMade[i]) {
-                delete bufferRequestMade[i];
+            if (timeSeriesControls.bufferRequestMade[i]) {
+                delete timeSeriesControls.bufferRequestMade[i];
             }
             if (particleSets[i]) {
                 var cp = particleSets[i];
@@ -1245,8 +1231,8 @@ var threejsUtils = {
         renderObjects.clearLines(0, loadStartIndex);
         renderObjects.clearLines(loadend + 1, timeSeriesControls.timeSeriesLength);
         for (var i = loadend + 1; i < timeSeriesControls.timeSeriesLength; i++) {
-            if (bufferRequestMade[i]) {
-                delete bufferRequestMade[i];
+            if (timeSeriesControls.bufferRequestMade[i]) {
+                delete timeSeriesControls.bufferRequestMade[i];
             }
             if (particleSets[i]) {
                 var cp = particleSets[i];
@@ -1431,10 +1417,10 @@ var SingleGraphControls = {
             window.addEventListener('resize', events.onWindowResize, true);
             glyphControls.changeGlyphSize();
             pointControls.changePointSize();
-            reInitialize = false;
+            threejsUtils.reInitialize = false;
             threejsUtils.animate();
             saveAndVersionControls.savePlotSettings(controlBox.settings);
-            itemsLoaded = totalItemsToLoad;
+            utilsControls.itemsLoaded = utilsControls.totalItemsToLoad;
             $("#progress").css({display: "none"});
         });
     },
@@ -1456,6 +1442,9 @@ var timeSeriesControls = {
     fileNames: {},
     resultSets: null,
     timeSeriesLength: null,
+    bufferLoopStarted: false,
+    bufferRequestMade: {}, // track the requests made to get data to be buffered
+    currentPlotUpdated: false, // make sure we don't render the same plot multiple times
     initSlider: function(){
         $("#plot-slider").ionRangeSlider({
             grid: true,
@@ -1468,14 +1457,14 @@ var timeSeriesControls = {
                 timeSeriesControls.updatePlot(data.from);
             }
         });
-        plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
+        timeSeriesControls.plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
     },
     resetSlider: function(){
         playStatus = playEnum.PAUSE;
-        plotRangeSlider.update({from: 0});
+        timeSeriesControls.plotRangeSlider.update({from: 0});
     },
     initPlotData: function(){
-        plotRangeSlider.update({max: timeSeriesControls.timeSeriesLength - 1, min: 0, from: 0});
+        timeSeriesControls.plotRangeSlider.update({max: timeSeriesControls.timeSeriesLength - 1, min: 0, from: 0});
         currentParticles = particleSets["0"];
         camera.lookAt(scene3d.position);
         camera.updateProjectionMatrix();
@@ -1515,7 +1504,7 @@ var timeSeriesControls = {
     },
     // we will move the time series to begining
     reInitTimeSeries: function(){
-        plotRangeSlider.update({from: 0});
+        timeSeriesControls.plotRangeSlider.update({from: 0});
         var span = $("#play-span");
         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
         $("#progress").css({display: "block"});
@@ -1535,7 +1524,7 @@ var timeSeriesControls = {
         setTimeout(function () {
             if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
                 if (timeSeriesControls.updatePlot(currentValue + 1)) {
-                    plotRangeSlider.update({from: currentValue + 1});
+                    timeSeriesControls.plotRangeSlider.update({from: currentValue + 1});
                     // render();
                 }
             }
@@ -1566,11 +1555,11 @@ var timeSeriesControls = {
                 timeSeriesControls.initBufferAndLoad();
             } else {
                 timeSeriesControls.updatePlot(0);
-                reInitialize = false;
+                threejsUtils.reInitialize = false;
                 threejsUtils.animate();
                 $("#progress").css({display: "none"});
-                if (!bufferLoopStarted) {
-                    bufferLoopStarted = true;
+                if (!timeSeriesControls.bufferLoopStarted) {
+                    timeSeriesControls.bufferLoopStarted = true;
                     timeSeriesControls.bufferLoop(null);
                 }
             }
@@ -1589,10 +1578,10 @@ var timeSeriesControls = {
             }
             threejsUtils.clearThreeJS(loadStartIndex, loadend);
             timeSeriesControls.loadPlotData(loadStartIndex, loadend);
-            if (playStatus == playEnum.PAUSE && !currentPlotUpdated) {
+            if (playStatus == playEnum.PAUSE && !timeSeriesControls.currentPlotUpdated) {
                 if (indx && indx != currentIndex) {
                     timeSeriesControls.updatePlot(currentIndex);
-                    currentPlotUpdated = true;
+                    timeSeriesControls.currentPlotUpdated = true;
                 }
             }
             timeSeriesControls.bufferLoop(indx);
@@ -1736,7 +1725,7 @@ var timeSeriesControls = {
     loadPlotData: function(start, end){
         for (var i = start; i < end; i++) {
             // check weather we already have a value
-            if (particleSets[i] || bufferRequestMade[i]) {
+            if (particleSets[i] || timeSeriesControls.bufferRequestMade[i]) {
                 continue;
             }
             if (!publicUrl) {
@@ -1744,13 +1733,13 @@ var timeSeriesControls = {
             } else {
                 clusterUrl = "/public/resultssetall/" + timeSeriesControls.resultSets[i].tId + "/file/" + timeSeriesControls.resultSets[i].id;
             }
-            bufferRequestMade[i] = true;
+            timeSeriesControls.bufferRequestMade[i] = true;
             (function (i) {
                 $.getJSON(clusterUrl, function (data) {
                     // convertDataToThreeJsFormat(data);
                     dataSets[data.seq] = data;
                 }).fail(function () {
-                    bufferRequestMade[i] = false;
+                    timeSeriesControls.bufferRequestMade[i] = false;
                 });
             })(i);
         }
@@ -2777,9 +2766,11 @@ var settingsControls = {
 
 }
 var utilsControls = {
+    totalItemsToLoad: 1,
+    itemsLoaded: 1,
     progress: function () {
         var bar = 250;
-        bar = Math.floor(bar * itemsLoaded / totalItemsToLoad);
+        bar = Math.floor(bar * utilsControls.itemsLoaded / utilsControls.totalItemsToLoad);
         $("#bar").css({width: bar + "px"});
     },
     getCanvasSize: function(){
@@ -2847,6 +2838,6 @@ var controlBox = {
     },
     settingChange: function(){
         allSettings.selected = controlBox.settings;
-        reInitialize = true;
+        threejsUtils.reInitialize = true;
     }
 }
