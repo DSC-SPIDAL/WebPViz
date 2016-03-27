@@ -3,6 +3,7 @@
 var camera;
 var scene3d;
 var publicUrl = false;
+
 // keep the settings object around
 var allSettings = {};
 
@@ -34,31 +35,18 @@ var timeseriesId;
 var fileName;
 var uploader;
 
-//Time Series Vars
-var fileNames = {};
-var resultSets;
 
-var timeSeriesLength;
 var plotDesc;
 
 //Play controls
 var bufferLoopStarted = false;
 var plotRangeSlider = {};
-var speed = 300;
-var glyphSize = 1.0;
-var pointSize = 1.0;
 
 var bufferRequestMade = {};        // track the requests made to get data to be buffered
 var currentPlotUpdated = false;    // make sure we don't render the same plot multiple times
 
 
 
-var clusterData = {
-    customclusters: {},
-    removedclusters: [],
-    recoloredclusters: [],
-    realpaedclusters: []
-};
 
 var imageSaver = {
     saveAsImage: function () {
@@ -150,13 +138,13 @@ function intialSetup(settings, reinit) {
         }
 
         if (sett.glyphSize) {
-            glyphSize = sett.glyphSize;
+            controlBox.glyphSize = sett.glyphSize;
         }
         if (sett.pointSize) {
-            pointSize = sett.pointSize;
+            controlBox.pointSize = sett.pointSize;
         }
         if (sett.speed) {
-            speed = sett.speed;
+            controlBox.delay = sett.speed;
         }
         if (sett.camera) {
             var c = sett.camera;
@@ -172,7 +160,7 @@ function intialSetup(settings, reinit) {
             changedSizes = sett.changedSizes;
         }
         if (sett.customclusters) {
-            clusterData.customclusters = sett.customclusters;
+            clusterControls.customclusters = sett.customclusters;
         }
         if (sett.camerastate) {
             var cameraState = sett.camerastate;
@@ -204,9 +192,6 @@ function intialSetup(settings, reinit) {
         allSettings['selected'] = 'original';
     }
 
-    controlBox.pointsize = pointSize;
-    controlBox.glyphsize = glyphSize;
-    controlBox.delay = speed;
     controlBox.settings = allSettings.selected;
 }
 // static information about the plot
@@ -429,7 +414,7 @@ var trajectoryData = {
             var spritesForSeq = this.labelSets[seq];
             for (var key in spritesForSeq) {
                 if (spritesForSeq.hasOwnProperty(key)) {
-                    if (!clusterData.removedclusters.hasOwnProperty(key)) {
+                    if (!clusterControls.removedclusters.hasOwnProperty(key)) {
                         var sprites = spritesForSeq[key];
                         for (var i = 0; i < sprites.length; i++) {
                             scene3d.add(sprites[i]);
@@ -931,7 +916,7 @@ var threejsUtils = {
 
         var pointPerElements = 1;
         if (trajectoryData.trajectoryLimit < 0) {
-            pointPerElements = Math.round(Math.ceil(timeSeriesLength / (trajectoryData.totalTrajectoryPoints+1)));
+            pointPerElements = Math.round(Math.ceil(timeSeriesControls.timeSeriesLength / (trajectoryData.totalTrajectoryPoints+1)));
         } else if (trajectoryData.totalTrajectoryPoints > trajectoryData.trajectoryLimit) {
             pointPerElements = 1;
         } else if (trajectoryData.totalTrajectoryPoints < trajectoryData.trajectoryLimit) {
@@ -1213,7 +1198,7 @@ var threejsUtils = {
         plotPointsSets[data.seq] = plotPoints;
         pointLabelxKeySets[data.seq] = pointLabelxKey;
         sectionSets[data.seq] = localSections;
-        fileNames[data.seq] = data.file;
+        timeSeriesControls.fileNames[data.seq] = data.file;
     },
     clearThreeJS: function(loadStartIndex, loadend){
         for (var i = 0; i < loadStartIndex; i++) {
@@ -1256,10 +1241,10 @@ var threejsUtils = {
 
         }
         trajectoryData.clearSprites(0, loadStartIndex);
-        trajectoryData.clearSprites(loadend + 1, timeSeriesLength);
+        trajectoryData.clearSprites(loadend + 1, timeSeriesControls.timeSeriesLength);
         renderObjects.clearLines(0, loadStartIndex);
-        renderObjects.clearLines(loadend + 1, timeSeriesLength);
-        for (var i = loadend + 1; i < timeSeriesLength; i++) {
+        renderObjects.clearLines(loadend + 1, timeSeriesControls.timeSeriesLength);
+        for (var i = loadend + 1; i < timeSeriesControls.timeSeriesLength; i++) {
             if (bufferRequestMade[i]) {
                 delete bufferRequestMade[i];
             }
@@ -1294,7 +1279,7 @@ var threejsUtils = {
             }
         }
         scenes.clearScenes(0, loadStartIndex);
-        scenes.clearScenes(loadend + 1, timeSeriesLength);
+        scenes.clearScenes(loadend + 1, timeSeriesControls.timeSeriesLength);
     }
 
 }
@@ -1468,6 +1453,9 @@ var SingleGraphControls = {
 }
 var timeSeriesControls = {
     MAX_PLOTS_STORED: 20,
+    fileNames: {},
+    resultSets: null,
+    timeSeriesLength: null,
     initSlider: function(){
         $("#plot-slider").ionRangeSlider({
             grid: true,
@@ -1487,7 +1475,7 @@ var timeSeriesControls = {
         plotRangeSlider.update({from: 0});
     },
     initPlotData: function(){
-        plotRangeSlider.update({max: timeSeriesLength - 1, min: 0, from: 0});
+        plotRangeSlider.update({max: timeSeriesControls.timeSeriesLength - 1, min: 0, from: 0});
         currentParticles = particleSets["0"];
         camera.lookAt(scene3d.position);
         camera.updateProjectionMatrix();
@@ -1505,20 +1493,20 @@ var timeSeriesControls = {
         publicUrl = pub;
         timeseriesId = id;
 
-        resultSets = artifact.files;
-        timeSeriesLength = resultSets.length;
+        timeSeriesControls.resultSets = artifact.files;
+        timeSeriesControls.timeSeriesLength = timeSeriesControls.resultSets.length;
 
         threejsUtils.setupThreeJs();
         $("#progress").css({display: "block"});
         intialSetup(artifact.settings, false);
         timeSeriesControls.initPlotData();
-        timeSeriesControls.generateTimeSeries(resultSets);
+        timeSeriesControls.generateTimeSeries(timeSeriesControls.resultSets);
         controlBox.setupGuiTimeSeries();
     },
     generateTimeSeries: function(resultSets, reInit){
         playStatus = playEnum.PAUSE;
         if (reInit) {
-            threejsUtils.clearThreeJS(timeSeriesLength, timeSeriesLength);
+            threejsUtils.clearThreeJS(timeSeriesControls.timeSeriesLength, timeSeriesControls.timeSeriesLength);
         }
         timeSeriesControls.initBufferAndLoad();
         if (!reInit) {
@@ -1538,12 +1526,12 @@ var timeSeriesControls = {
         intialSetup(allSettings, true);
         timeSeriesControls.initPlotData();
         controlBox.updateTimeSeriesGui();
-        timeSeriesControls.generateTimeSeries(resultSets, true);
+        timeSeriesControls.generateTimeSeries(timeSeriesControls.resultSets, true);
         //reInitialize = false;
     },
     playLoop: function(){
         var currentValue = parseInt($("#plot-slider").prop("value"));
-        var maxValue = timeSeriesLength - 1;
+        var maxValue = timeSeriesControls.timeSeriesLength - 1;
         setTimeout(function () {
             if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
                 if (timeSeriesControls.updatePlot(currentValue + 1)) {
@@ -1569,11 +1557,11 @@ var timeSeriesControls = {
     },
     initBufferAndLoad: function(){
         setTimeout(function () {
-            if (Object.keys(dataSets).length < timeSeriesLength && Object.keys(dataSets).length < timeSeriesControls.MAX_PLOTS_STORED) {
-                if (timeSeriesLength > timeSeriesControls.MAX_PLOTS_STORED) {
+            if (Object.keys(dataSets).length < timeSeriesControls.timeSeriesLength && Object.keys(dataSets).length < timeSeriesControls.MAX_PLOTS_STORED) {
+                if (timeSeriesControls.timeSeriesLength > timeSeriesControls.MAX_PLOTS_STORED) {
                     timeSeriesControls.loadPlotData(0, timeSeriesControls.MAX_PLOTS_STORED);
                 } else {
-                    timeSeriesControls.loadPlotData(0, timeSeriesLength);
+                    timeSeriesControls.loadPlotData(0, timeSeriesControls.timeSeriesLength);
                 }
                 timeSeriesControls.initBufferAndLoad();
             } else {
@@ -1591,8 +1579,8 @@ var timeSeriesControls = {
     bufferLoop: function(indx){
         setTimeout(function () {
             var currentIndex = parseInt($("#plot-slider").prop("value"));
-            var loadend = timeSeriesLength;
-            if (timeSeriesLength > currentIndex + controlBox.loadSize) {
+            var loadend = timeSeriesControls.timeSeriesLength;
+            if (timeSeriesControls.timeSeriesLength > currentIndex + controlBox.loadSize) {
                 loadend = currentIndex + controlBox.loadSize;
             }
             var loadStartIndex = 0;
@@ -1682,8 +1670,8 @@ var timeSeriesControls = {
                         currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
                     }
 
-                    if (clusterData.recoloredclusters.hasOwnProperty(key)) {
-                        var tempcolor = clusterData.recoloredclusters[key];
+                    if (clusterControls.recoloredclusters.hasOwnProperty(key)) {
+                        var tempcolor = clusterControls.recoloredclusters[key];
                         var colorattri = currentParticles[key].geometry.getAttribute('color');
                         var colorsd = new Float32Array(colorattri.length);
                         for (var k = 0; k < colorattri.length / 3; k++) {
@@ -1692,8 +1680,8 @@ var timeSeriesControls = {
                             colorsd[k * 3 + 2] = tempcolor.b;
                         }
                         var opacity = Math.precision(colorControls.trueColorList[key].a/255,2);
-                        if(clusterData.realpaedclusters.hasOwnProperty(key)){
-                            opacity = Math.precision(clusterData.realpaedclusters[key]/255,2)
+                        if(clusterControls.realpaedclusters.hasOwnProperty(key)){
+                            opacity = Math.precision(clusterControls.realpaedclusters[key]/255,2)
                         }
                         currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
                         currentParticles[key].geometry.colorsNeedUpdate = true;
@@ -1711,7 +1699,7 @@ var timeSeriesControls = {
                         }
                         currentParticles[key].material.needsUpdate = true;
                     }
-                    if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                    if (!(clusterControls.removedclusters.hasOwnProperty(key))) {
                         scene3d.add(currentParticles[key]);
                     }
                 }
@@ -1722,7 +1710,7 @@ var timeSeriesControls = {
             if (renderObjects.lineSets[index]) {
                 for (var cid in renderObjects.lineSets[index]) {
                     if (renderObjects.lineSets[index].hasOwnProperty(cid)) {
-                        if (!clusterData.removedclusters.hasOwnProperty(cid)) {
+                        if (!clusterControls.removedclusters.hasOwnProperty(cid)) {
                             scene3d.add(renderObjects.lineSets[index][cid]);
                         }
                     }
@@ -1733,12 +1721,12 @@ var timeSeriesControls = {
                 htmlGenerators.generateCheckList(sections, colorControls.colorlist);
             }
             htmlGenerators.generateClusterList(sections, colorControls.colorlist);
-            fileName = fileNames[index];
+            fileName = timeSeriesControls.fileNames[index];
             htmlGenerators.populatePlotInfo();
             sections = localSection;
             window.addEventListener('resize', events.onWindowResize, false);
             // render();
-            $("#plot-title").text(fileNames[index]);
+            $("#plot-title").text(timeSeriesControls.fileNames[index]);
             //savePlotSettings(controlBox.settings);
             return true;
         } else {
@@ -1752,9 +1740,9 @@ var timeSeriesControls = {
                 continue;
             }
             if (!publicUrl) {
-                clusterUrl = "/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+                clusterUrl = "/resultssetall/" + timeSeriesControls.resultSets[i].tId + "/file/" + timeSeriesControls.resultSets[i].id;
             } else {
-                clusterUrl = "/public/resultssetall/" + resultSets[i].tId + "/file/" + resultSets[i].id;
+                clusterUrl = "/public/resultssetall/" + timeSeriesControls.resultSets[i].tId + "/file/" + timeSeriesControls.resultSets[i].id;
             }
             bufferRequestMade[i] = true;
             (function (i) {
@@ -1960,7 +1948,7 @@ var saveAndVersionControls = {
             obj['changedSizes'] = changedSizes;
             obj['speed'] = controlBox.delay;
             obj['glyphs'] = changedGlyphs;
-            obj['customclusters'] = clusterData.customclusters;
+            obj['customclusters'] = clusterControls.customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, 0);
             lookAtVector.applyQuaternion(camera.quaternion);
             var lookAtJson = {};
@@ -2003,15 +1991,15 @@ var viewControls = {
             }
         }
         trajectoryData.removeSprites(scene3d, seqId, id);
-        clusterData.removedclusters[id] = id;
+        clusterControls.removedclusters[id] = id;
     },
     removeAllSection: function(){
         var seqId = scenes.currentSceneId();
-        clusterData.removedclusters = [];
+        clusterControls.removedclusters = [];
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
                 scene3d.remove(currentParticles[key]);
-                clusterData.removedclusters[key] = key;
+                clusterControls.removedclusters[key] = key;
             }
 
             if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
@@ -2023,8 +2011,8 @@ var viewControls = {
     },
     addAllSections: function(){
         var seqId = scenes.currentSceneId();
-        for (var key in clusterData.removedclusters) {
-            if (clusterData.removedclusters.hasOwnProperty(key)) {
+        for (var key in clusterControls.removedclusters) {
+            if (clusterControls.removedclusters.hasOwnProperty(key)) {
                 scene3d.add(currentParticles[key]);
 
                 if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
@@ -2034,7 +2022,7 @@ var viewControls = {
                 trajectoryData.addSprites(scene3d, seqId, key);
             }
         }
-        clusterData.removedclusters = [];
+        clusterControls.removedclusters = [];
     },
     addSection: function(id){
         var seqId = scenes.currentSceneId();
@@ -2045,10 +2033,15 @@ var viewControls = {
             }
         }
         trajectoryData.addSprites(scene3d, seqId, id);
-        delete clusterData.removedclusters[id];
+        delete clusterControls.removedclusters[id];
     }
 }
+
 var clusterControls = {
+    customclusters: {},
+    removedclusters: [],
+    recoloredclusters: [],
+    realpaedclusters: [],
     setMaxClusterId: function(clusterid){
         if (clusterid > maxClusterId) {
             maxClusterId = clusterid;
@@ -2071,7 +2064,7 @@ var clusterControls = {
             c: color,
             p: p
         };
-        clusterData.customclusters[clusterkey.toString()] = cluster;
+        clusterControls.customclusters[clusterkey.toString()] = cluster;
         customclusternotadded = true;
         customclusternotaddedtolist = true;
         if (!isSingle) {
@@ -2087,9 +2080,9 @@ var clusterControls = {
     renderCustomCluster: function(){
         var geometry = {};
         var localSections = [];
-        for (var cid in clusterData.customclusters) {
-            if (clusterData.customclusters.hasOwnProperty(cid)) {
-                var clusterdata = clusterData.customclusters[cid];
+        for (var cid in clusterControls.customclusters) {
+            if (clusterControls.customclusters.hasOwnProperty(cid)) {
+                var clusterdata = clusterControls.customclusters[cid];
                 var clusterid = parseInt(cid)
                 clusterControls.setMaxClusterId(clusterid);
                 var clustercolor;
@@ -2381,8 +2374,8 @@ var colorControls = {
         sections[id].color.a = alpha;
         htmlGenerators.generateClusterList(sections, colorControls.colorlist);
 
-        clusterData.recoloredclusters[id] = new THREE.Color(color);
-        clusterData.realpaedclusters[id] = alpha;
+        clusterControls.recoloredclusters[id] = new THREE.Color(color);
+        clusterControls.realpaedclusters[id] = alpha;
         currentParticles[id].material.opacity = opacity;
         currentParticles[id].material.transparent = true;
         currentParticles[id].geometry.colorsNeedUpdate = true;
@@ -2434,7 +2427,7 @@ var colorControls = {
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
                     currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                    clusterData.recoloredclusters[key] = tempcolor
+                    clusterControls.recoloredclusters[key] = tempcolor
                     currentParticles[key].geometry.colorsNeedUpdate = true;
                 }
             }
@@ -2464,7 +2457,7 @@ var colorControls = {
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
                     currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                    clusterData.recoloredclusters[key] = tempcolor
+                    clusterControls.recoloredclusters[key] = tempcolor
                     currentParticles[key].geometry.colorsNeedUpdate = true;
                     if (scheme == 'rainbow') {
                         count += 1;
@@ -2497,7 +2490,7 @@ var colorControls = {
                         colorsd[k * 3 + 2] = tempcolor.b;
                     }
                     currentParticles[key].geometry.addAttribute('color', new THREE.BufferAttribute(colorsd, 3));
-                    clusterData.recoloredclusters[key] = tempcolor
+                    clusterControls.recoloredclusters[key] = tempcolor
                     currentParticles[key].geometry.colorsNeedUpdate = true;
                     count += 1;
                 }
@@ -2530,8 +2523,8 @@ var htmlGenerators = {
         } else {
             $("#np").text(Object.keys(plotPoints).length);
             $("#nc").text(sections.length);
-            if (timeSeriesLength) {
-                $("#nf").text(timeSeriesLength)
+            if (timeSeriesControls.timeSeriesLength) {
+                $("#nf").text(timeSeriesControls.timeSeriesLength)
             }
         }
     },
@@ -2592,7 +2585,7 @@ var htmlGenerators = {
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
                 if (!list[key]) continue;
-                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                if (!(clusterControls.removedclusters.hasOwnProperty(key))) {
                     $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
                 } else {
                     $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
@@ -2622,7 +2615,7 @@ var htmlGenerators = {
                 if (!list[key]) continue;
                 tablerows += "<tr class='even pointer' id='" + key + "'>"
                     + "<td class='a-center'>";
-                if (!(clusterData.removedclusters.hasOwnProperty(key))) {
+                if (!(clusterControls.removedclusters.hasOwnProperty(key))) {
                     tablerows += "<input type='checkbox' class='flat' name='table_records' checked value='" + key + "'>";
                 } else {
                     tablerows += "<input type='checkbox' class='flat' name='table_records' value='" + key + "'>";
@@ -2847,9 +2840,9 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlBox, 'delay', 10.0, 2000.0, speed).name("Play Delay(ms)");
-        gui.add(controlBox, 'pointsize', 0.001, 5.0, pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
-        gui.add(controlBox, 'glyphsize', 0.001, 5.0, glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(controlBox, 'delay', 10.0, 2000.0, controlBox.delay).name("Play Delay(ms)");
+        gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){
