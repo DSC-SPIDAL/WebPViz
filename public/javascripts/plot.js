@@ -5,10 +5,6 @@ var scene3d;
 var publicUrl = false;
 // keep the settings object around
 var allSettings = {};
-// Color controls
-var colorsLoaded = false;
-var colorSchemes = {};
-var currentCustomColorScheme = null;
 
 // Particle
 var sections = [], particles = [], currentParticles = [];
@@ -130,7 +126,7 @@ var itemsLoaded = 1;
 var reInitialize = false;
 
 function intialSetup(settings, reinit) {
-    colorsLoaded = false;
+    colorControls.colorsLoaded = false;
     // check weather we have camera
     if (settings) {
         var sett;
@@ -198,7 +194,7 @@ function intialSetup(settings, reinit) {
                     }
                 }
             }
-            colorsLoaded = true;
+            colorControls.colorsLoaded = true;
         }
     } else {
         allSettings['tid'] = timeseriesId;
@@ -949,7 +945,7 @@ var threejsUtils = {
                 var clusterid = parseInt(cid);
                 clusterControls.setMaxClusterId(clusterid);
                 var clustercolor;
-                if (!colorsLoaded) {
+                if (!colorControls.colorsLoaded) {
                     clustercolor = {"r": 0, "g": 0, "b": 0, "a": 255};
                     if (clusterdata.r) {
                         clustercolor["r"] = clusterdata.r[3];
@@ -1337,7 +1333,7 @@ var SingleGraphControls = {
                     var clusterid = parseInt(cid);
                     clusterControls.setMaxClusterId(clusterid);
                     var clustercolor;
-                    if (!colorsLoaded) {
+                    if (!colorControls.colorsLoaded) {
                         clustercolor = {"r": 255, "g": 255, "b": 255, "a": 255};
                         if (clusterdata.r) {
                             clustercolor["r"] = clusterdata.r[3];
@@ -2324,6 +2320,9 @@ var pointControls = {
 var colorControls = {
     colorlist: {},
     trueColorList: {},
+    colorsLoaded: false,
+    colorSchemes: {},
+    currentCustomColorScheme: null,
     randomRBG: function () {
         return (Math.floor(Math.random() * (255 - 0 + 1)) + 0);
     },
@@ -2356,7 +2355,7 @@ var colorControls = {
         $("#cluster_table > tbody > #" + id + " span#color-picker-addon").removeClass('settinghidden');
 
         //change to custom color scheme since a color change has been made
-        currentCustomColorScheme = colorControls.colorlist;
+        colorControls.currentCustomColorScheme = colorControls.colorlist;
         if ($("#color-scheme").val() != "custom") {
             $("#color-scheme").val('custom');
         }
@@ -2402,22 +2401,22 @@ var colorControls = {
         htmlGenerators.generateCheckList(sections, colorControls.colorlist);
     },
     initColorSchemes: function(){
-        colorSchemes['mathlab50'] = ["#ffffff", "#ff0000", "#00ff00", "#ff1ab9", "#ffd300", "#0084f6", "#008d46", "#a7613e", "#00fff6", "#3e7b8d", "#eda7ff", "#d3ff95", "#b94fff",
+        colorControls.colorSchemes['mathlab50'] = ["#ffffff", "#ff0000", "#00ff00", "#ff1ab9", "#ffd300", "#0084f6", "#008d46", "#a7613e", "#00fff6", "#3e7b8d", "#eda7ff", "#d3ff95", "#b94fff",
             "#e51a58", "#848400", "#00ff95", "#ffedff", "#f68412", "#caff00", "#0035c1", "#ffca84", "#9e728d", "#4fb912", "#9ec1ff", "#959e7b", "#ff7bb0", "#9e0900", "#ffb9b9",
             "#8461ca", "#9e0072", "#84dca7", "#ff00f6", "#00d3ff", "#ff7258", "#583e35", "#d3d3d3", "#dc61dc", "#6172b0", "#b9ca2c", "#545454", "#5800ca", "#95c1ca", "#d39e23",
             "#84b058", "#e5edb9", "#f6d3ff", "#8d09a7", "#6a4f00", "#003e9e", "#7b3e7b"]
-        colorSchemes['colorbrewer9'] = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65428", "#f781bf", "#999999"]
-        colorSchemes['colorbrewerpaired12'] = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"]
-        colorSchemes['salsa17'] = ["#0000ff", "#ffaaff", "#aa5500", "#aa55ff", "#00ffdb", "#ffff7f", "#778899", "#55aa7f", "#49ff00", "#550000", "#dbff00", "#ffdb00", "#ff9200",
+        colorControls.colorSchemes['colorbrewer9'] = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65428", "#f781bf", "#999999"]
+        colorControls.colorSchemes['colorbrewerpaired12'] = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"]
+        colorControls.colorSchemes['salsa17'] = ["#0000ff", "#ffaaff", "#aa5500", "#aa55ff", "#00ffdb", "#ffff7f", "#778899", "#55aa7f", "#49ff00", "#550000", "#dbff00", "#ffdb00", "#ff9200",
             "#aaffff", "#ff0000", "#c0c0c0", "#ffffff"]
     },
     changeColorScheme: function(scheme){
-        if (currentCustomColorScheme == null) {
-            currentCustomColorScheme = jQuery.extend({}, colorControls.colorlist);
+        if (colorControls.currentCustomColorScheme == null) {
+            colorControls.currentCustomColorScheme = jQuery.extend({}, colorControls.colorlist);
         }
 
         if (scheme == 'custom') {
-            colorControls.colorlist = jQuery.extend({}, currentCustomColorScheme);
+            colorControls.colorlist = jQuery.extend({}, colorControls.currentCustomColorScheme);
             for (var key in currentParticles) {
                 if (currentParticles.hasOwnProperty(key)) {
                     var tempcolor = new THREE.Color("#" + colorControls.colorlist[key]);
@@ -2475,7 +2474,7 @@ var colorControls = {
                 }
             }
         }else {
-            var colorScheme = colorSchemes[scheme];
+            var colorScheme = colorControls.colorSchemes[scheme];
             if (colorScheme == undefined || colorScheme == null) return
 
             var colorSchemeLength = colorScheme.length;
