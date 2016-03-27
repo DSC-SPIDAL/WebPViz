@@ -409,12 +409,12 @@
                 @if(!pub) {
                 $.getJSON("@routes.Application.getArtifact(timeSeriesId)", function (data) {
                     var resultSetUrl = "@routes.Application.getArtifact(timeSeriesId)";
-                    visualizeTimeSeries(resultSetUrl, data, @timeSeriesId, false);
+                    timeSeriesControls.visualizeTimeSeries(resultSetUrl, data, @timeSeriesId, false);
                 });
                 } else {
                     $.getJSON("@routes.Application.getPublicArtifact(timeSeriesId)", function (data) {
                     var resultSetUrl = "@routes.Application.getPublicFile(timeSeriesId, 0)";
-                    visualizeTimeSeries(resultSetUrl, data, @timeSeriesId, true);
+                        timeSeriesControls.visualizeTimeSeries(resultSetUrl, data, @timeSeriesId, true);
                 });
                 }
             }

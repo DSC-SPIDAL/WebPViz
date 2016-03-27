@@ -482,71 +482,6 @@ var totalItemsToLoad = 1;
 var itemsLoaded = 1;
 var reInitialize = false;
 
-//Plot functions - These are the methods that are first called when a plot is generated
-function visualize(resultSetUrl, artifact, fid, tid, info) {
-    timeSeriesControls.initSlider();
-    info = typeof info !== 'undefined' ? info : false;
-    plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, false);
-    clusterUrl = resultSetUrl;
-    resultSetId = fid;
-    timeseriesId = tid;
-    threejsUtils.setupThreeJs();
-    $("#progress").css({display: "block"});
-    intialSetup(artifact.settings, false);
-    generateGraph();
-    controlBox.setupGuiSingle();
-}
-
-
-function visualizeTimeSeries(resultSetUrl, artifact, id, pub, info) {
-    timeSeriesControls.initSlider();
-    info = typeof info !== 'undefined' ? info : false;
-    plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, true);
-    clusterUrl = resultSetUrl;
-    publicUrl = pub;
-    timeseriesId = id;
-
-    resultSets = artifact.files;
-    timeSeriesLength = resultSets.length;
-
-    threejsUtils.setupThreeJs();
-    $("#progress").css({display: "block"});
-    intialSetup(artifact.settings, false);
-    timeSeriesControls.initPlotData();
-    generateTimeSeries(resultSets);
-    controlBox.setupGuiTimeSeries();
-}
-
-// we will move the time series to begining
-function reInitGraph() {
-    $("#progress").css({display: "block"});
-    currentParticles = [];
-    colorlist = {};
-    trueColorList = {};
-    threejsUtils.setupThreeJs();
-    intialSetup(allSettings, true);
-    // initPlotData();
-    generateGraph();
-    controlBox.updateSingleGui();
-}
-
-function animate() {
-    if (!reInitialize) {
-        // console.log("Not re-init");
-        requestAnimationFrame(animate);
-        controls.update();
-        stats.update();
-        var camera = scene3d.getObjectByName('camera');
-        renderer.render(scene3d, camera);
-    } else {
-        if (plotInfo.isTimeSeries) {
-            timeSeriesControls.reInitTimeSeries();
-        } else {
-            reInitGraph();
-        }
-    }
-}
-
 function intialSetup(settings, reinit) {
     colorsLoaded = false;
     // check weather we have camera
@@ -768,7 +703,7 @@ function generateGraph() {
         glyphControls.changeGlyphSize();
         pointControls.changePointSize();
         reInitialize = false;
-        animate();
+        threejsUtils.animate();
         saveAndVersionControls.savePlotSettings(controlBox.settings);
         itemsLoaded = totalItemsToLoad;
         $("#progress").css({display: "none"});
@@ -1145,6 +1080,22 @@ var labelControls = {
     }
 }
 var threejsUtils = {
+    animate: function(){
+        if (!reInitialize) {
+            // console.log("Not re-init");
+            requestAnimationFrame(threejsUtils.animate);
+            controls.update();
+            stats.update();
+            var camera = scene3d.getObjectByName('camera');
+            renderer.render(scene3d, camera);
+        } else {
+            if (plotInfo.isTimeSeries) {
+                timeSeriesControls.reInitTimeSeries();
+            } else {
+                SingleGraphControls.reInitGraph();
+            }
+        }
+    },
     setupThreeJs: function(){
         if (!plotInfo.infoPage) {
             var height = window.innerHeight - 57 - 40 - 40 - 11;
@@ -1643,6 +1594,33 @@ var threejsUtils = {
     }
 
 }
+var SingleGraphControls = {
+    visualize: function(resultSetUrl, artifact, fid, tid, info){
+        timeSeriesControls.initSlider();
+        info = typeof info !== 'undefined' ? info : false;
+        plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, false);
+        clusterUrl = resultSetUrl;
+        resultSetId = fid;
+        timeseriesId = tid;
+        threejsUtils.setupThreeJs();
+        $("#progress").css({display: "block"});
+        intialSetup(artifact.settings, false);
+        generateGraph();
+        controlBox.setupGuiSingle();
+    },
+    reInitGraph: function(){
+        $("#progress").css({display: "block"});
+        currentParticles = [];
+        colorlist = {};
+        trueColorList = {};
+        threejsUtils.setupThreeJs();
+        intialSetup(allSettings, true);
+        // initPlotData();
+        generateGraph();
+        controlBox.updateSingleGui();
+    }
+
+}
 var timeSeriesControls = {
     initSlider: function(){
         $("#plot-slider").ionRangeSlider({
@@ -1672,6 +1650,24 @@ var timeSeriesControls = {
                 scene3d.add(currentParticles[key]);
             }
         }
+    },
+    visualizeTimeSeries: function(resultSetUrl, artifact, id, pub, info){
+        timeSeriesControls.initSlider();
+        info = typeof info !== 'undefined' ? info : false;
+        plotInfo.updateInfo(info, artifact.name, artifact.desc, artifact.group, true);
+        clusterUrl = resultSetUrl;
+        publicUrl = pub;
+        timeseriesId = id;
+
+        resultSets = artifact.files;
+        timeSeriesLength = resultSets.length;
+
+        threejsUtils.setupThreeJs();
+        $("#progress").css({display: "block"});
+        intialSetup(artifact.settings, false);
+        timeSeriesControls.initPlotData();
+        generateTimeSeries(resultSets);
+        controlBox.setupGuiTimeSeries();
     },
     // we will move the time series to begining
     reInitTimeSeries: function(){
@@ -1727,7 +1723,7 @@ var timeSeriesControls = {
             } else {
                 timeSeriesControls.updatePlot(0);
                 reInitialize = false;
-                animate();
+                threejsUtils.animate();
                 $("#progress").css({display: "none"});
                 if (!bufferLoopStarted) {
                     bufferLoopStarted = true;

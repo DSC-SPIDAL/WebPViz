@@ -225,12 +225,12 @@
             @if(!pub) {
                 $.getJSON("@routes.Application.getArtifact(timeSerisId)", function (data) {
                     var resultSetUrl = "@routes.Application.getFile(timeSerisId, resultSetId)";
-                    visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
+                    SingleGraphControls.visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
                 });
             } else {
                 $.getJSON("@routes.Application.getPublicArtifact(timeSerisId)", function (data) {
                 var resultSetUrl = "@routes.Application.getPublicFile(timeSerisId, resultSetId)";
-                visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
+                SingleGraphControls.visualize(resultSetUrl, data, @resultSetId, @timeSerisId);
             });
             }
             $("#settingsModal").draggable({
