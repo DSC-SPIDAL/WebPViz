@@ -21,6 +21,7 @@ var trajSprites = {};
 var particleSets = {};
 var sectionSets = {};
 
+//Graph data
 var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
 var xmean = 0, ymean = 0, zmean = 0, calculatedmeans = false;
 
