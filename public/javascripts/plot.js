@@ -11,34 +11,26 @@ var plotDesc;
 // keep the settings object around
 var allSettings = {};
 
+// raw data sets coming from back-end. these will be converted to threejs format
+var dataSets = {};
+
 // Particle
 var sections = [], particles = [], currentParticles = [];
 var sprites = {};
 var trajSprites = {};
 var particleSets = {};
 var sectionSets = {};
-var changedGlyphs = {};
-var changedSizes ={};
-var customclusternotadded = false;
-var customclusternotaddedtolist = false;
-
 
 var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
 var xmean = 0, ymean = 0, zmean = 0, calculatedmeans = false;
 
-//Single Plot Varibles
 
-
-
-// raw data sets coming from back-end. these will be converted to threejs format
-var dataSets = {};
 
 playEnum = {
     INIT: "init",
     PLAY: "play",
     PAUSE: "pause"
 };
-var playStatus = playEnum.INIT;
 
 ImageEnum = {
     BALL: "/assets/images/textures1/ball.png",
@@ -100,10 +92,10 @@ function intialSetup(settings, reinit) {
             threejsUtils.camera.up.set(up.x, up.y, up.z);
         }
         if (sett.glyphs) {
-            changedGlyphs = sett.glyphs;
+            glyphControls.changedGlyphs = sett.glyphs;
         }
         if (sett.changedSizes) {
-            changedSizes = sett.changedSizes;
+            glyphControls.changedSizes = sett.changedSizes;
         }
         if (sett.customclusters) {
             clusterControls.customclusters = sett.customclusters;
@@ -1012,8 +1004,8 @@ var threejsUtils = {
                             if (colorControls.trueColorList[currentClusterId]) {
                                 clustercolor = colorControls.trueColorList[currentClusterId];
                             }
-                            if (changedGlyphs[currentClusterId]) {
-                                shape = changedGlyphs[currentClusterId];
+                            if (glyphControls.changedGlyphs[currentClusterId]) {
+                                shape = glyphControls.changedGlyphs[currentClusterId];
                             }
                             if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
                                 trajectoryData.trajectoryClusterIds.push(currentClusterId+"");
@@ -1387,8 +1379,8 @@ var SingleGraphControls = {
                 if (geometry.hasOwnProperty(key)) {
                     geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                     currentParticles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
-                    if (changedGlyphs.hasOwnProperty(key)) {
-                        currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                    if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
+                        currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
                         currentParticles[key].material.needsUpdate = true;
                     }
                 }
@@ -1439,6 +1431,7 @@ var timeSeriesControls = {
     bufferLoopStarted: false,
     bufferRequestMade: {}, // track the requests made to get data to be buffered
     currentPlotUpdated: false, // make sure we don't render the same plot multiple times
+    playStatus: playEnum.INIT,
     initSlider: function(){
         $("#plot-slider").ionRangeSlider({
             grid: true,
@@ -1454,7 +1447,7 @@ var timeSeriesControls = {
         timeSeriesControls.plotRangeSlider = $("#plot-slider").data("ionRangeSlider");
     },
     resetSlider: function(){
-        playStatus = playEnum.PAUSE;
+        timeSeriesControls.playStatus = playEnum.PAUSE;
         timeSeriesControls.plotRangeSlider.update({from: 0});
     },
     initPlotData: function(){
@@ -1487,7 +1480,7 @@ var timeSeriesControls = {
         controlBox.setupGuiTimeSeries();
     },
     generateTimeSeries: function(resultSets, reInit){
-        playStatus = playEnum.PAUSE;
+        timeSeriesControls.playStatus = playEnum.PAUSE;
         if (reInit) {
             threejsUtils.clearThreeJS(timeSeriesControls.timeSeriesLength, timeSeriesControls.timeSeriesLength);
         }
@@ -1516,15 +1509,15 @@ var timeSeriesControls = {
         var currentValue = parseInt($("#plot-slider").prop("value"));
         var maxValue = timeSeriesControls.timeSeriesLength - 1;
         setTimeout(function () {
-            if (particleSets[currentValue] && playStatus == playEnum.PLAY) {
+            if (particleSets[currentValue] && timeSeriesControls.playStatus == playEnum.PLAY) {
                 if (timeSeriesControls.updatePlot(currentValue + 1)) {
                     timeSeriesControls.plotRangeSlider.update({from: currentValue + 1});
                     // render();
                 }
             }
 
-            if (!(maxValue > currentValue && playStatus == playEnum.PLAY)) {
-                playStatus = playEnum.PAUSE;
+            if (!(maxValue > currentValue && timeSeriesControls.playStatus == playEnum.PLAY)) {
+                timeSeriesControls.playStatus = playEnum.PAUSE;
                 if (maxValue == currentValue) {
                     $('#play-span').removeClass("glyphicon-pause").addClass("glyphicon-repeat");
                 }
@@ -1533,10 +1526,10 @@ var timeSeriesControls = {
         }, controlBox.delay);
     },
     animateTimeSeriesPlay: function(){
-        playStatus = playEnum.PLAY;
+        timeSeriesControls.playStatus = playEnum.PLAY;
     },
     animateTimeSeriesPause: function(){
-        playStatus = playEnum.PAUSE;
+        timeSeriesControls.playStatus = playEnum.PAUSE;
     },
     initBufferAndLoad: function(){
         setTimeout(function () {
@@ -1572,7 +1565,7 @@ var timeSeriesControls = {
             }
             threejsUtils.clearThreeJS(loadStartIndex, loadend);
             timeSeriesControls.loadPlotData(loadStartIndex, loadend);
-            if (playStatus == playEnum.PAUSE && !timeSeriesControls.currentPlotUpdated) {
+            if (timeSeriesControls.playStatus == playEnum.PAUSE && !timeSeriesControls.currentPlotUpdated) {
                 if (indx && indx != currentIndex) {
                     timeSeriesControls.updatePlot(currentIndex);
                     timeSeriesControls.currentPlotUpdated = true;
@@ -1649,8 +1642,8 @@ var timeSeriesControls = {
                         currentParticles[key].material.needsUpdate = true;
                     }
 
-                    if(changedSizes.hasOwnProperty(key)){
-                        currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
+                    if(glyphControls.changedSizes.hasOwnProperty(key)){
+                        currentParticles[key].material.size = (glyphControls.changedSizes[key] / 200) * controlBox.glyphsize;
                     }
 
                     if (clusterControls.recoloredclusters.hasOwnProperty(key)) {
@@ -1674,11 +1667,11 @@ var timeSeriesControls = {
 
                     }
 
-                    if (changedGlyphs.hasOwnProperty(key)) {
+                    if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
                         if (trajectoryData.trajectoryClusterIds.indexOf(key) < 0) {
-                            currentParticles[key].material.map = sprites[changedGlyphs[key]];
+                            currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
                         } else {
-                            currentParticles[key].material.map = trajSprites[changedGlyphs[key]];
+                            currentParticles[key].material.map = trajSprites[glyphControls.changedGlyphs[key]];
                         }
                         currentParticles[key].material.needsUpdate = true;
                     }
@@ -1927,9 +1920,9 @@ var saveAndVersionControls = {
             obj['fid'] = resultSetId;
             obj['pointSize'] = controlBox.pointsize;
             obj['glyphSize'] = controlBox.glyphsize;
-            obj['changedSizes'] = changedSizes;
+            obj['changedSizes'] = glyphControls.changedSizes;
             obj['speed'] = controlBox.delay;
-            obj['glyphs'] = changedGlyphs;
+            obj['glyphs'] = glyphControls.changedGlyphs;
             obj['customclusters'] = clusterControls.customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, 0);
             lookAtVector.applyQuaternion(threejsUtils.camera.quaternion);
@@ -2024,6 +2017,8 @@ var clusterControls = {
     recoloredclusters: [],
     realpaedclusters: [],
     maxClusterId: 0,
+    customclusternotadded: false,
+    customclusternotaddedtolist: false,
     setMaxClusterId: function(clusterid){
         if (clusterid > clusterControls.maxClusterId) {
             clusterControls.maxClusterId = clusterid;
@@ -2047,8 +2042,8 @@ var clusterControls = {
             p: p
         };
         clusterControls.customclusters[clusterkey.toString()] = cluster;
-        customclusternotadded = true;
-        customclusternotaddedtolist = true;
+        clusterControls.customclusternotadded = true;
+        clusterControls.customclusternotaddedtolist = true;
         if (!isSingle) {
             var currentValue = parseInt($("#plot-slider").prop("value"));
             timeSeriesControls.updatePlot(currentValue)
@@ -2155,8 +2150,10 @@ var clusterControls = {
 
 }
 var glyphControls = {
+    changedGlyphs: {},
+    changedSizes: {},
     changeGlyph: function(id, shape){
-        changedGlyphs[id] = shape;
+        glyphControls.changedGlyphs[id] = shape;
         if (trajectoryData.trajectoryClusterIds.indexOf(id) < 0) {
             currentParticles[id].material.map = sprites[shape];
         } else {
@@ -2171,7 +2168,7 @@ var glyphControls = {
         currentParticles[id].material.size = (size / 200) * controlBox.glyphsize;
         currentParticles[id].material.needsUpdate = true;
         sections[id].size = size;
-        changedSizes[id] = size;
+        glyphControls.changedSizes[id] = size;
     },
     changeMultipleGlyphSizes: function(size){
         var rows = $('#cluster_table tr.selected');
@@ -2193,8 +2190,8 @@ var glyphControls = {
                     currentParticles[key].material.size = (sections[key].size / 200) * controlBox.glyphsize;
                 }
 
-                if(changedSizes.hasOwnProperty(key)){
-                    currentParticles[key].material.size = (changedSizes[key] / 200) * controlBox.glyphsize;
+                if(glyphControls.changedSizes.hasOwnProperty(key)){
+                    currentParticles[key].material.size = (glyphControls.changedSizes[key] / 200) * controlBox.glyphsize;
                 }
 
                 currentParticles[key].material.needsUpdate = true;
@@ -2567,7 +2564,7 @@ var htmlGenerators = {
             + "<tbody>";
 
         var ss = $("#cluster_table");
-        if($("#cluster_table").length && !customclusternotadded){
+        if($("#cluster_table").length && !clusterControls.customclusternotadded){
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
                 if (!list[key]) continue;
@@ -2578,8 +2575,8 @@ var htmlGenerators = {
                 }
                 var sprite = glyphControls.getGlyphName(list[key]);
                 var currentshape;
-                if (changedGlyphs.hasOwnProperty(key)) {
-                    currentshape = changedGlyphs[key];
+                if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
+                    currentshape = glyphControls.changedGlyphs[key];
                 }else{
                     currentshape = list[key].shape;
                 }
@@ -2640,7 +2637,7 @@ var htmlGenerators = {
 
             tableend = "</tbody>"
                 + "</table>";
-            customclusternotadded = false;
+            clusterControls.customclusternotadded = false;
         }
 
         if(!found){
@@ -2684,15 +2681,15 @@ var htmlGenerators = {
                 if (list.hasOwnProperty(key)) {
                     var colorWithouthHash = initcolors[key].replace(/#/g, '');
                     var sprite = null;
-                    if (changedGlyphs.hasOwnProperty(key)) {
-                        sprite = glyphControls.getFontIconByShape(changedGlyphs[key]);
+                    if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
+                        sprite = glyphControls.getFontIconByShape(glyphControls.changedGlyphs[key]);
                     } else{
                         if (list[key].size > 1) {
                             sprite = glyphControls.getFontIconByShape(list[key].shape);
                         }
                     }
                     // try to find the element first
-                    if ($("#plot-clusters > #" + key).length && !customclusternotaddedtolist && trajectoryData.trajectoryPointLabels.length == 0) {
+                    if ($("#plot-clusters > #" + key).length && !clusterControls.customclusternotaddedtolist && trajectoryData.trajectoryPointLabels.length == 0) {
                         if ($("#plot-clusters > #" + key + " span").length) {
                             if (sprite != null) {
                                 $("#pc" + key).css("background-color", "#ffffff");
@@ -2735,7 +2732,7 @@ var htmlGenerators = {
         }
         if (!found) {
             document.getElementById('plot-clusters').innerHTML = grid;
-            customclusternotaddedtolist = false;
+            clusterControls.customclusternotaddedtolist = false;
         }
         return grid;
     }
@@ -2750,8 +2747,8 @@ var settingsControls = {
         settingsControls.settingOn = false;
     },
     checkIfSelected: function(key, shape, clusterkey){
-        if (changedGlyphs.hasOwnProperty(clusterkey)) {
-            shape = changedGlyphs[clusterkey]
+        if (glyphControls.changedGlyphs.hasOwnProperty(clusterkey)) {
+            shape = glyphControls.changedGlyphs[clusterkey]
         }
         if (key == shape) {
             return "selected"
