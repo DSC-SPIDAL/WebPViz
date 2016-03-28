@@ -1,15 +1,18 @@
 /* varibles*/
 //Three js global varibles
-var camera;
-var scene3d;
 var publicUrl = false;
+var clusterUrl;
+var resultSetId;
+var timeseriesId;
+var fileName;
+var uploader;
+var plotDesc;
 
 // keep the settings object around
 var allSettings = {};
 
 // Particle
 var sections = [], particles = [], currentParticles = [];
-
 var sprites = {};
 var trajSprites = {};
 var particleSets = {};
@@ -24,14 +27,8 @@ var xmeantotal = 0, ymeantotal = 0, zmeantotal = 0;
 var xmean = 0, ymean = 0, zmean = 0, calculatedmeans = false;
 
 //Single Plot Varibles
-var clusterUrl;
-var resultSetId;
-var timeseriesId;
-var fileName;
-var uploader;
 
 
-var plotDesc;
 
 // raw data sets coming from back-end. these will be converted to threejs format
 var dataSets = {};
@@ -100,7 +97,7 @@ function intialSetup(settings, reinit) {
         }
         if (sett.cameraup) {
             var up = sett.cameraup;
-            camera.up.set(up.x, up.y, up.z);
+            threejsUtils.camera.up.set(up.x, up.y, up.z);
         }
         if (sett.glyphs) {
             changedGlyphs = sett.glyphs;
@@ -113,13 +110,13 @@ function intialSetup(settings, reinit) {
         }
         if (sett.camerastate) {
             var cameraState = sett.camerastate;
-            camera.matrix.fromArray(JSON.parse(cameraState));
-            camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
+            threejsUtils.camera.matrix.fromArray(JSON.parse(cameraState));
+            threejsUtils.camera.matrix.decompose(threejsUtils.camera.position, threejsUtils.camera.quaternion, threejsUtils.camera.scale);
         }
         if (sett.trajectoryData) {
             trajectoryData.load(sett.trajectoryData);
         }
-        camera.updateProjectionMatrix();
+        threejsUtils.camera.updateProjectionMatrix();
         var colors = sett.clusterColors;
         if (colors) {
             for (var key in colors) {
@@ -201,7 +198,7 @@ var renderObjects = {
                 for (var key in this.lineSets[i]){
                     if (this.lineSets[i].hasOwnProperty(key)) {
                         var line = this.lineSets[i][key];
-                        scene3d.remove(line);
+                        threejsUtils.scene3d.remove(line);
                     }
                 }
             }
@@ -264,8 +261,8 @@ var events = {
             width = (window.innerWidth -30)/2 -30;
             height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
         }
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+        threejsUtils.camera.aspect = width / height;
+        threejsUtils.camera.updateProjectionMatrix();
         threejsUtils.renderer.setSize(width, height);
     }
 }
@@ -286,7 +283,7 @@ var toolTipLabels = {
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = toolTipLabels.sprite.material.map;
         toolTipLabels.context.clearRect(0,0,256,128);
-        scene3d.add(toolTipLabels.sprite);
+        threejsUtils.scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
         toolTipLabels.raycaster.params.Points.threshold = toolTipLabels.calculateThreshhold();
         toolTipLabels.initialized = true;
@@ -294,8 +291,8 @@ var toolTipLabels = {
     update: function(){
         if(!toolTipLabels.initialized) return;
 
-        toolTipLabels.raycaster.setFromCamera(threejsUtils.mouse,camera);
-        var intersects = toolTipLabels.raycaster.intersectObjects(scene3d.children);
+        toolTipLabels.raycaster.setFromCamera(threejsUtils.mouse,threejsUtils.camera);
+        var intersects = toolTipLabels.raycaster.intersectObjects(threejsUtils.scene3d.children);
 
         if(intersects.length > 0){
             var labelposition = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
@@ -438,7 +435,7 @@ var trajectoryData = {
                     if (spritesForSeq.hasOwnProperty(key)) {
                         var sprites = spritesForSeq[key];
                         for (var j = 0; j < sprites.length; j++) {
-                            scene3d.remove(sprites[j]);
+                            threejsUtils.scene3d.remove(sprites[j]);
                         }
                     }
                 }
@@ -751,14 +748,15 @@ var threejsUtils = {
     stats: null,
     reInitialize: false,
     mouse: null,
+    camera: null,
     animate: function(){
         if (!threejsUtils.reInitialize) {
             // console.log("Not re-init");
             requestAnimationFrame(threejsUtils.animate);
             threejsUtils.controls.update();
             threejsUtils.stats.update();
-            var camera = scene3d.getObjectByName('camera');
-            threejsUtils.renderer.render(scene3d, camera);
+            var tempCamera = threejsUtils.scene3d.getObjectByName('camera');
+            threejsUtils.renderer.render(threejsUtils.scene3d, tempCamera);
         } else {
             if (plotInfo.isTimeSeries) {
                 timeSeriesControls.reInitTimeSeries();
@@ -781,7 +779,7 @@ var threejsUtils = {
         var canvasHeight = $('#canvas3d').height();
 
         //new THREE.Scene
-        scene3d = new THREE.Scene();
+        threejsUtils.scene3d = new THREE.Scene();
         threejsUtils.stats = new Stats();
         //set the scene
         var canvas3d = $('#canvas3d');
@@ -792,12 +790,12 @@ var threejsUtils = {
 
         //new THREE.PerspectiveCamera
         // cameraCenter = new THREE.Vector3(0, 0, 0);
-        camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
-        camera.name = 'camera';
-        camera.position.set(1, 1, 1);
+        threejsUtils.camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
+        threejsUtils.camera.name = 'camera';
+        threejsUtils.camera.position.set(1, 1, 1);
         //  camera.lookAt(cameraCenter);
-        scene3d.add(camera);
-        threejsUtils.controls = new THREE.TrackballControls(camera, threejsUtils.renderer.domElement);
+        threejsUtils.scene3d.add(threejsUtils.camera);
+        threejsUtils.controls = new THREE.TrackballControls(threejsUtils.camera, threejsUtils.renderer.domElement);
         threejsUtils.controls.staticMoving = true;
         threejsUtils.controls.rotateSpeed = 20.0;
         threejsUtils.controls.dynamicDampingFactor = 0.3;
@@ -1382,8 +1380,8 @@ var SingleGraphControls = {
             xmeantotal = xmeantotal / clusterCount;
             ymeantotal = ymeantotal / clusterCount;
             zmeantotal = zmeantotal / clusterCount;
-            scene3d = new THREE.Scene();
-            scene3d.add(camera);
+            threejsUtils.scene3d = new THREE.Scene();
+            threejsUtils.scene3d.add(threejsUtils.camera);
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
@@ -1400,7 +1398,7 @@ var SingleGraphControls = {
             viewControls.addParticlesToScence();
             var linesegs = edgeControls.drawEdges(data.edges, points, pointcolors);
             if (linesegs) {
-                scene3d.add(linesegs);
+                threejsUtils.scene3d.add(linesegs);
             }
             htmlGenerators.generateClusterList(sections, colorControls.colorlist);
             htmlGenerators.populatePlotInfo();
@@ -1462,11 +1460,11 @@ var timeSeriesControls = {
     initPlotData: function(){
         timeSeriesControls.plotRangeSlider.update({max: timeSeriesControls.timeSeriesLength - 1, min: 0, from: 0});
         currentParticles = particleSets["0"];
-        camera.lookAt(scene3d.position);
-        camera.updateProjectionMatrix();
+        threejsUtils.camera.lookAt(threejsUtils.scene3d.position);
+        threejsUtils.camera.updateProjectionMatrix();
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
-                scene3d.add(currentParticles[key]);
+                threejsUtils.scene3d.add(currentParticles[key]);
             }
         }
     },
@@ -1627,12 +1625,12 @@ var timeSeriesControls = {
                 scenes[i] = null;
             }
 
-            scene3d = new THREE.Scene();
+            threejsUtils.scene3d = new THREE.Scene();
             toolTipLabels.initialized = false;
-            scenes.addScene(index, scene3d);
+            scenes.addScene(index, threejsUtils.scene3d);
 
-            scene3d.add(camera);
-            scenes[index] = scene3d;
+            threejsUtils.scene3d.add(threejsUtils.camera);
+            scenes[index] = threejsUtils.scene3d;
             currentParticles = particleSets[index];
             pointControls.plotPoints = pointControls.plotPointsSets[index];
             pointControls.pointLabelxKey = pointControls.pointLabelxKeySets[index];
@@ -1685,18 +1683,18 @@ var timeSeriesControls = {
                         currentParticles[key].material.needsUpdate = true;
                     }
                     if (!(clusterControls.removedclusters.hasOwnProperty(key))) {
-                        scene3d.add(currentParticles[key]);
+                        threejsUtils.scene3d.add(currentParticles[key]);
                     }
                 }
             }
 
-            trajectoryData.renderSprites(scene3d, index);
+            trajectoryData.renderSprites(threejsUtils.scene3d, index);
 
             if (renderObjects.lineSets[index]) {
                 for (var cid in renderObjects.lineSets[index]) {
                     if (renderObjects.lineSets[index].hasOwnProperty(cid)) {
                         if (!clusterControls.removedclusters.hasOwnProperty(cid)) {
-                            scene3d.add(renderObjects.lineSets[index][cid]);
+                            threejsUtils.scene3d.add(renderObjects.lineSets[index][cid]);
                         }
                     }
                 }
@@ -1799,7 +1797,7 @@ var edgeControls = {
         //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
         var linesegs = line = new THREE.LineSegments(geometry, material);
         return linesegs;
-        //scene3d.add(linesegs)
+        //threejsUtils.scene3d.add(linesegs)
     },
     drawEdges2: function(edges, points, pointcolors){
         if (edges == null || edges == undefined)
@@ -1923,9 +1921,8 @@ var saveAndVersionControls = {
             allSettings['fid'] = resultSetId;
             var sett = allSettings.settings;
             allSettings['selected'] = res;
-            var c = camera.toJSON();
             var obj = {};
-            obj['camera'] = camera.toJSON();
+            obj['camera'] = threejsUtils.camera.toJSON();
             obj['tid'] = timeseriesId;
             obj['fid'] = resultSetId;
             obj['pointSize'] = controlBox.pointsize;
@@ -1935,18 +1932,18 @@ var saveAndVersionControls = {
             obj['glyphs'] = changedGlyphs;
             obj['customclusters'] = clusterControls.customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, 0);
-            lookAtVector.applyQuaternion(camera.quaternion);
+            lookAtVector.applyQuaternion(threejsUtils.camera.quaternion);
             var lookAtJson = {};
             lookAtJson.x = lookAtVector.x;
             lookAtJson.y = lookAtVector.y;
             lookAtJson.z = lookAtVector.z;
             obj['clusterColors'] = colorControls.trueColorList;
             obj['lookVector'] = lookAtJson;
-            obj['cameraPosition'] = camera.position;
-            obj['cameraup'] = camera.up;
-            obj['rotation'] = camera.rotation;
-            obj['zoom'] = camera.zoom;
-            obj['camerastate'] = JSON.stringify(camera.matrix.toArray());
+            obj['cameraPosition'] = threejsUtils.camera.position;
+            obj['cameraup'] = threejsUtils.camera.up;
+            obj['rotation'] = threejsUtils.camera.rotation;
+            obj['zoom'] = threejsUtils.camera.zoom;
+            obj['camerastate'] = JSON.stringify(threejsUtils.camera.matrix.toArray());
             obj['controltarget'] = threejsUtils.controls.target;
             obj['trajectoryData'] = trajectoryData.createSave();
             sett[res] = obj;
@@ -1962,20 +1959,20 @@ var viewControls = {
     addParticlesToScence: function(){
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
-                scene3d.remove(currentParticles[key]);
-                scene3d.add(currentParticles[key]);
+                threejsUtils.scene3d.remove(currentParticles[key]);
+                threejsUtils.scene3d.add(currentParticles[key]);
             }
         }
     },
     removeSection: function(id){
         var seqId = scenes.currentSceneId();
-        scene3d.remove(currentParticles[id]);
+        threejsUtils.scene3d.remove(currentParticles[id]);
         if (renderObjects.lineSets[seqId]) {
             if (renderObjects.lineSets[seqId][id]) {
-                scene3d.remove(renderObjects.lineSets[seqId][id]);
+                threejsUtils.scene3d.remove(renderObjects.lineSets[seqId][id]);
             }
         }
-        trajectoryData.removeSprites(scene3d, seqId, id);
+        trajectoryData.removeSprites(threejsUtils.scene3d, seqId, id);
         clusterControls.removedclusters[id] = id;
     },
     removeAllSection: function(){
@@ -1983,45 +1980,44 @@ var viewControls = {
         clusterControls.removedclusters = [];
         for (var key in currentParticles) {
             if (currentParticles.hasOwnProperty(key)) {
-                scene3d.remove(currentParticles[key]);
+                threejsUtils.scene3d.remove(currentParticles[key]);
                 clusterControls.removedclusters[key] = key;
             }
 
             if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
-                scene3d.remove(renderObjects.lineSets[seqId][key]);
+                threejsUtils.scene3d.remove(renderObjects.lineSets[seqId][key]);
             }
 
-            trajectoryData.removeSprites(scene3d, seqId, key);
+            trajectoryData.removeSprites(threejsUtils.scene3d, seqId, key);
         }
     },
     addAllSections: function(){
         var seqId = scenes.currentSceneId();
         for (var key in clusterControls.removedclusters) {
             if (clusterControls.removedclusters.hasOwnProperty(key)) {
-                scene3d.add(currentParticles[key]);
+                threejsUtils.scene3d.add(currentParticles[key]);
 
                 if (renderObjects.lineSets[seqId] && renderObjects.lineSets[seqId][key]) {
-                    scene3d.add(renderObjects.lineSets[seqId][key]);
+                    threejsUtils.scene3d.add(renderObjects.lineSets[seqId][key]);
                 }
 
-                trajectoryData.addSprites(scene3d, seqId, key);
+                trajectoryData.addSprites(threejsUtils.scene3d, seqId, key);
             }
         }
         clusterControls.removedclusters = [];
     },
     addSection: function(id){
         var seqId = scenes.currentSceneId();
-        scene3d.add(currentParticles[id]);
+        threejsUtils.scene3d.add(currentParticles[id]);
         if (trajectoryData.labelSets[seqId]) {
             if (renderObjects.lineSets[seqId][id]) {
-                scene3d.add(renderObjects.lineSets[seqId][id]);
+                threejsUtils.scene3d.add(renderObjects.lineSets[seqId][id]);
             }
         }
-        trajectoryData.addSprites(scene3d, seqId, id);
+        trajectoryData.addSprites(threejsUtils.scene3d, seqId, id);
         delete clusterControls.removedclusters[id];
     }
 }
-
 var clusterControls = {
     customclusters: {},
     removedclusters: [],

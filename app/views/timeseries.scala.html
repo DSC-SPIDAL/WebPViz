@@ -277,41 +277,41 @@
                     var span = $("#play-span");
 
                     if (span.hasClass("glyphicon-play")) {
-                        currentPlotUpdated = false;
+                        timeSeriesControls.currentPlotUpdated = false;
                         timeSeriesControls.animateTimeSeriesPlay();
                         span.removeClass("glyphicon-play").addClass("glyphicon-pause");
                     } else if (span.hasClass("glyphicon-repeat")) {
-                        currentPlotUpdated = false;
+                        timeSeriesControls.currentPlotUpdated = false;
                         timeSeriesControls.resetSlider();
                         span.removeClass("glyphicon-repeat").addClass("glyphicon-play");
                     } else {
-                        currentPlotUpdated = false;
+                        timeSeriesControls.currentPlotUpdated = false;
                         timeSeriesControls.animateTimeSeriesPause();
                         span.removeClass("glyphicon-pause").addClass("glyphicon-play");
                     }
                 });
 
                 $('#slider-step-backward').click(function () {
-                    var currentval = plotRangeSlider.result.from - 1;
+                    var currentval = timeSeriesControls.plotRangeSlider.result.from - 1;
                     if ((currentval > 0) && playStatus == playEnum.PAUSE) {
                         if($("#play-span").hasClass("glyphicon-repeat")){
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
-                        plotRangeSlider.update({from: currentval});
-                        currentPlotUpdated = false;
+                        timeSeriesControls.plotRangeSlider.update({from: currentval});
+                        timeSeriesControls.currentPlotUpdated = false;
                         timeSeriesControls.updatePlot(currentval)
                     }
                 });
 
                 $('#slider-step-forward').click(function () {
-                    var currentval = plotRangeSlider.result.from + 1;
-                    if ((currentval < timeSeriesLength) && playStatus == playEnum.PAUSE){
+                    var currentval = timeSeriesControls.plotRangeSlider.result.from + 1;
+                    if ((currentval < timeSeriesControls.timeSeriesLength) && playStatus == playEnum.PAUSE){
                         if($("#play-span").hasClass("glyphicon-repeat")){
                             $("#play-span").removeClass("glyphicon-repeat").addClass("glyphicon-play");
                         }
-                        plotRangeSlider.update({from: currentval});
+                        timeSeriesControls.plotRangeSlider.update({from: currentval});
                         timeSeriesControls.updatePlot(currentval)
-                        currentPlotUpdated = false;
+                        timeSeriesControls.currentPlotUpdated = false;
                     }
                 });
 
