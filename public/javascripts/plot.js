@@ -2075,7 +2075,8 @@ var clusterControls = {
                     clustercolor = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
-                        "b": tempcolor.toArray()[2] * 255
+                        "b": tempcolor.toArray()[2] * 255,
+                        "a": 255
                     };
                     colorControls.colorlist[clusterid] = clusterdata.c.substring(1);
                     if (!colorControls.trueColorList.hasOwnProperty(clusterid)) {
