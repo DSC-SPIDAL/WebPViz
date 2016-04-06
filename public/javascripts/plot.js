@@ -1365,6 +1365,7 @@ var SingleGraphControls = {
 
                     var positions = new Float32Array(clusterdata.p.length * 3);
                     var colorarray = new Float32Array(clusterdata.p.length * 3);
+                    var labelArray = [];
                     var sizes = new Float32Array(clusterdata.p.length);
                     xmean = 0;
                     ymean = 0;
@@ -1377,10 +1378,11 @@ var SingleGraphControls = {
                         var p0 = parseFloat(p[0]);
                         var p1 = parseFloat(p[1]);
                         var p2 = parseFloat(p[2]);
+                        var label = p[3];
                         positions[k * 3 + 0] = p0;
                         positions[k * 3 + 1] = p1;
                         positions[k * 3 + 2] = p2;
-
+                        labelArray.push(label);
                         xmean += p0;
                         ymean += p1;
                         zmean += p2;
@@ -1400,6 +1402,7 @@ var SingleGraphControls = {
                     zmean = zmean / clusterdata.p.length;
                     geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                     geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
+                    geometry[clusterid].addAttribute('labels', new THREE.BufferAttribute(labelArray, 1));
                     geometry[clusterid].name = clusterdata.l;
                     xmeantotal += xmean;
                     ymeantotal += ymean;
