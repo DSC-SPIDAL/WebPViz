@@ -61,17 +61,24 @@ THREE.Line.prototype.raycast = ( function () {
 
 					interRay.applyMatrix4( this.matrixWorld ); //Move back to world space for distance calculation
 
-					//var distance = raycaster.ray.origin.distanceTo( interRay );
+					var distance = raycaster.ray.origin.distanceTo( interRay );
+					var point = raycaster.ray.at( distance )
 
+					var dx = point.x - vStart.x;
+					var dy = point.y - vStart.y;
+					var dz = point.z - vStart.z;
+
+					var distancetoStart = Math.sqrt( dx * dx + dy * dy + dz * dz )
 					//if ( distance < raycaster.near || distance > raycaster.far ) continue;
 
 					intersects.push( {
 
-						distance: distSq,
+						distance: distancetoStart,
 						//distanceTo: distance,
 						// What do we want? intersection point on the ray or on the segment??
 						// point: raycaster.ray.at( distance ),
 						point: interSegment.clone().applyMatrix4( this.matrixWorld ),
+						originalPoint: positions,
 						index: i,
 						face: null,
 						faceIndex: null,
@@ -95,16 +102,23 @@ THREE.Line.prototype.raycast = ( function () {
 					interRay.applyMatrix4( this.matrixWorld ); //Move back to world space for distance calculation
 
 					var distance = raycaster.ray.origin.distanceTo( interRay );
+					var point = raycaster.ray.at( distance )
 
-					if ( distance < raycaster.near || distance > raycaster.far ) continue;
+					var dx = point.x - vStart.x;
+					var dy = point.y - vStart.y;
+					var dz = point.z - vStart.z;
+
+					var distancetoStart = Math.sqrt( dx * dx + dy * dy + dz * dz )
+					//if ( distance < raycaster.near || distance > raycaster.far ) continue;
 
 					intersects.push( {
 
-						distance: distSq,
-						distanceTo: distance,
+						distance: distancetoStart,
+						//distanceTo: distance,
 						// What do we want? intersection point on the ray or on the segment??
 						// point: raycaster.ray.at( distance ),
 						point: interSegment.clone().applyMatrix4( this.matrixWorld ),
+						originalPoint: positions,
 						index: i,
 						face: null,
 						faceIndex: null,

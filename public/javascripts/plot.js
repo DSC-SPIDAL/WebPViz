@@ -1809,7 +1809,7 @@ var edgeControls = {
                             positions.push(previousvertex.x);
                             positions.push(previousvertex.y);
                             positions.push(previousvertex.z);
-                            labelarray.push(labels[parseInt(pointkey)]);
+                            labelarray.push(previouslabel);
                         }
                     }
                     positions.push(vertex.x);
