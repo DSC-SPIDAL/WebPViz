@@ -67,6 +67,7 @@ THREE.Points.prototype.raycast = ( function () {
 					distance: Math.sqrt( rayPointDistanceSq ),
 					distanceToRay: Math.sqrt( rayPointDistanceSq ),
 					point: intersectPoint.clone(),
+					originalpoint: point.clone(),
 					index: index,
 					face: null,
 					object: object

@@ -291,9 +291,28 @@ var toolTipLabels = {
             var labelposition = toolTipLabels.raycaster.ray.origin.add(toolTipLabels.raycaster.ray.direction.multiplyScalar(.5))
             toolTipLabels.sprite.position.set(labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z);
             if(toolTipLabels.intersected != intersects[0].object){
+                var tempcount = 0;
                 toolTipLabels.intersected = intersects[0].object;
+                while(!(toolTipLabels.intersected instanceof THREE.Points) && !(toolTipLabels.intersected instanceof THREE.LineSegments)){
+                    tempcount += 1;
+                    if(intersects[tempcount]){
+                        toolTipLabels.intersected = intersects[tempcount].object;
+                    }else{
+                        toolTipLabels.intersected = null;
+                        toolTipLabels.context.clearRect(0,0,256,128);
+                        toolTipLabels.texture.needsUpdate = true;
+                        return
+                    }
+                }
+                var index = intersects[0].index;
+                var label = null;
+                if(toolTipLabels.intersected.geometry.attributes.labels != undefined && toolTipLabels.intersected.geometry.attributes.labels.array != undefined) label = toolTipLabels.intersected.geometry.attributes.labels.array[index];
                 if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
-                    labelControls.updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                    if(label == undefined || label == null){
+                        labelControls.updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                    }else{
+                        labelControls.updateTextSprite(label, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
+                    }
                 }else if(toolTipLabels.intersected.geometry.name == ""){
                     toolTipLabels.intersected = null;
                     toolTipLabels.context.clearRect(0,0,256,128);
@@ -953,6 +972,7 @@ var threejsUtils = {
 
                 var positionsArray = [];
                 var colorArray = [];
+                var labelArray = [];
                 for (var pointIndex = 0; pointIndex < clusterdata.p.length; pointIndex++) {
                     var p = pointControls.findPoint(data, clusterdata.p[pointIndex]);
                     if (!p) {
@@ -971,6 +991,7 @@ var threejsUtils = {
                         positionsArray.push(p0);
                         positionsArray.push(p1);
                         positionsArray.push(p2);
+                        labelArray.push(label)
                         if (!calculatedmeans) {
                             xmean += p0;
                             ymean += p1;
@@ -1045,6 +1066,7 @@ var threejsUtils = {
                         var startingIndex = 0;
                         var positionTrajecArray = [];
                         var colorTrajectArray = [];
+                        var labelTrajectArray = [];
                         var positionTrajecLabelArray = [];
                         var startingColor = Color.rgb(clustercolor.r, clustercolor.g, clustercolor.b);
                         var hsl = startingColor.hslData();
@@ -1076,6 +1098,7 @@ var threejsUtils = {
                                 colorTrajectArray.push(clustercolor.r);
                                 colorTrajectArray.push(clustercolor.g);
                                 colorTrajectArray.push(clustercolor.b);
+                                labelTrajectArray.push("Asd")
                                 c++;
                             }
 
@@ -1096,6 +1119,8 @@ var threejsUtils = {
 
                         geometry[currentClusterId].addAttribute('position', new THREE.BufferAttribute(positionsTrajec, 3));
                         geometry[currentClusterId].addAttribute('color', new THREE.BufferAttribute(colorsTrajec, 3));
+                        geometry[currentClusterId].addAttribute('labels', new THREE.BufferAttribute(labelTrajectArray, 1));
+                        geometry[currentClusterId].name = "Trajactory";
 
                         trajectoryData.makeSprites(positionTrajecLabelArray, {a:clustercolor.a, r: clustercolor.r, g: clustercolor.g, b: clustercolor.b}, data.seq, currentClusterId);
 
@@ -1123,10 +1148,13 @@ var threejsUtils = {
                 }
                 var positions32 = new Float32Array(positionsArray.length);
                 var colors32 = new Float32Array(colorArray.length);
+              //  var label32 = new Float32Array(labelArray.length);
                 positions32.set(positionsArray);
                 colors32.set(colorArray);
+               // label32.set(labelArray);
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions32, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colors32, 3));
+                geometry[clusterid].addAttribute('labels', new THREE.BufferAttribute(labelArray, 1));
                 geometry[clusterid].name = clusterdata.l;
 
             }
@@ -1742,6 +1770,7 @@ var edgeControls = {
         var material = new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, linewidth: trajectoryData.trajectoryStartLineWidth});
         var positions = [];
         var colorarray = [];
+        var labelarray = [];
         for (var key in edges) {
             if (edges.hasOwnProperty(key)) {
                 var edge = edges[key];
@@ -1777,6 +1806,7 @@ var edgeControls = {
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
+                    labelarray.push("edge");
                 }
             }
         }
@@ -1788,6 +1818,8 @@ var edgeControls = {
         colorarray32.set(colorarray);
         geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
         geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
+        geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
+        geometry.name = "Trajactory"
         //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
         var linesegs = line = new THREE.LineSegments(geometry, material);
         return linesegs;
