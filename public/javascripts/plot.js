@@ -307,7 +307,7 @@ var toolTipLabels = {
                 var index = intersects[tempcount].index;
                 var label = null;
                 if(toolTipLabels.intersected.geometry.attributes.labels != undefined && toolTipLabels.intersected.geometry.attributes.labels.array != undefined) label = toolTipLabels.intersected.geometry.attributes.labels.array[index];
-                if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
+                if (label != null || (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != "")){
                     if(label == undefined || label == null){
                         labelControls.updateTextSprite(toolTipLabels.intersected.geometry.name, labelposition.x + toolTipLabels.raycaster.ray.direction.x *.08 ,labelposition.y + toolTipLabels.raycaster.ray.direction.y *.08,labelposition.z, toolTipLabels.sprite)
                     }else{
@@ -1787,6 +1787,7 @@ var edgeControls = {
                 var vertices = edge.v;
                 var previousvertex = null;
                 var previouscolor = null;
+                var previouslabel = null;
                 var isFirst = true;
                 for (var i = 0; i < vertices.length; i++) {
                     var verkey = vertices[i];
@@ -1805,6 +1806,7 @@ var edgeControls = {
                             positions.push(previousvertex.x);
                             positions.push(previousvertex.y);
                             positions.push(previousvertex.z);
+                            labelarray.push(labels[parseInt(pointkey)]);
                         }
                     }
                     positions.push(vertex.x);
@@ -1813,10 +1815,11 @@ var edgeControls = {
                     previousvertex = vertex;
 
                     previouscolor = pointcolor;
+                    previouslabel = labels[parseInt(pointkey)]
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
-                    labelarray.push("edge");
+                    labelarray.push(labels[parseInt(pointkey)]);
                 }
             }
         }
@@ -1828,7 +1831,7 @@ var edgeControls = {
         colorarray32.set(colorarray);
         geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
         geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-       // geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
+        geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
         //geometry.name = "Edge"
         //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
         var linesegs = line = new THREE.LineSegments(geometry, material);
