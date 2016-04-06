@@ -304,7 +304,7 @@ var toolTipLabels = {
                         return
                     }
                 }
-                var index = intersects[0].index;
+                var index = intersects[tempcount].index;
                 var label = null;
                 if(toolTipLabels.intersected.geometry.attributes.labels != undefined && toolTipLabels.intersected.geometry.attributes.labels.array != undefined) label = toolTipLabels.intersected.geometry.attributes.labels.array[index];
                 if (toolTipLabels.intersected.geometry.name != null && toolTipLabels.intersected.geometry.name != ""){
@@ -351,6 +351,7 @@ var trajectoryData = {
     totalLabels: 10,
     textLabelSize:.5,
     trajectoryPointLabels: [],
+    trajectoryFileNames: {},
     trajectoryPoints: {},
     trajectoryLimit: -1,
     totalTrajectoryPoints: 50,
@@ -480,6 +481,7 @@ var trajectoryData = {
         this.trajectoryLimit = save['trajectoryLimit'];
         this.totalTrajectoryPoints = save['totalTrajectoryPoints'];
         this.trajectoryPointSizeRatio = save['trajectoryPointSizeRatio'];
+        //this.trajectoryFileNames = save['trajectoryFileNames'];
         if (save['trajectoryToClusterId']) {
             this.trajectoryToClusterId = save['trajectoryToClusterId'];
         }
@@ -502,6 +504,7 @@ var trajectoryData = {
         save['trajectoryToClusterId'] = this.trajectoryToClusterId;
         save['trajectoryStartLineWidth'] = this.trajectoryStartLineWidth;
         save['trajectoryClusterIds'] = this.trajectoryClusterIds;
+        //save['trajectoryFileNames'] = this.trajectoryFileNames;
         return save;
     },
 
@@ -1006,11 +1009,13 @@ var threejsUtils = {
                         var trajectoryEdgePointcolors = {};
                         var trajectoryEdgeIndex = 0;
                         var trajectoryEdges = {};
+                        var trajectoryLabels = {};
                         // we will create a separate point list for trajectories of each cluster id
                         var trajectoryPointIndex = 0;
 
                         // trajectory point
                         var trajectoryList = trajectoryData.trajectoryPoints[label];
+                        var trajectoryLabellist = trajectoryData.trajectoryFileNames[label];
                         var edge = {};
                         var edgeVerteces = [];
                         var currentClusterId = 0;
@@ -1036,9 +1041,12 @@ var threejsUtils = {
 
                         if (!trajectoryList) {
                             trajectoryList = [];
+                            trajectoryLabellist = [];
                             trajectoryData.trajectoryPoints[label] = trajectoryList;
+                            trajectoryData.trajectoryFileNames[label] = trajectoryLabellist;
                         }
                         trajectoryList.push({p:p, c:clustercolor});
+                        trajectoryLabellist.push(fileName.substring(0,fileName.indexOf(".")))
                         if (!geometry.hasOwnProperty(currentClusterId)) {
                             geometry[currentClusterId] = new THREE.BufferGeometry();
                             particles[currentClusterId] = [];
@@ -1082,6 +1090,7 @@ var threejsUtils = {
                                 startingIndex = z;
                             }
                             var tp = trajectoryList[z];
+                            var trafilename = trajectoryLabellist[z];
                             if (!tp) {
                                 continue;
                             }
@@ -1098,7 +1107,7 @@ var threejsUtils = {
                                 colorTrajectArray.push(clustercolor.r);
                                 colorTrajectArray.push(clustercolor.g);
                                 colorTrajectArray.push(clustercolor.b);
-                                labelTrajectArray.push("Asd")
+                                labelTrajectArray.push(trafilename)
                                 c++;
                             }
 
@@ -1108,6 +1117,7 @@ var threejsUtils = {
 
                             trajectoryEdgePoints[trajectoryPointIndex] = [pp0, pp1, pp2];
                             trajectoryEdgePointcolors[trajectoryPointIndex] =  new THREE.Color("rgb(" + newRgb[0] + "," + newRgb[1] + "," + newRgb[2] + ")");
+                            trajectoryLabels[trajectoryPointIndex] = trafilename;
                             edgeVerteces.push(trajectoryPointIndex);
 
                             trajectoryPointIndex++;
@@ -1126,13 +1136,15 @@ var threejsUtils = {
 
                         trajectoryEdgePoints[trajectoryPointIndex] = [p0, p1, p2];
                         trajectoryEdgePointcolors[trajectoryPointIndex] = tempcolor;
+                        trajectoryLabels[trajectoryPointIndex] = fileName.substring(0,fileName.indexOf("."));
+
                         edgeVerteces.push(trajectoryPointIndex + "");
                         trajectoryPointIndex++;
                         edge['v'] = edgeVerteces;
                         trajectoryEdges[trajectoryEdgeIndex] = edge;
                         trajectoryEdgeIndex++;
 
-                        var traj = edgeControls.drawEdges(trajectoryEdges, trajectoryEdgePoints, trajectoryEdgePointcolors);
+                        var traj = edgeControls.drawEdges(trajectoryEdges, trajectoryEdgePoints, trajectoryEdgePointcolors,trajectoryLabels);
                         trajectoryEdgesForSeq[currentClusterId] = traj;
                     }
                 }
@@ -1148,10 +1160,8 @@ var threejsUtils = {
                 }
                 var positions32 = new Float32Array(positionsArray.length);
                 var colors32 = new Float32Array(colorArray.length);
-              //  var label32 = new Float32Array(labelArray.length);
                 positions32.set(positionsArray);
                 colors32.set(colorArray);
-               // label32.set(labelArray);
                 geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions32, 3));
                 geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colors32, 3));
                 geometry[clusterid].addAttribute('labels', new THREE.BufferAttribute(labelArray, 1));
@@ -1762,7 +1772,7 @@ var timeSeriesControls = {
     }
 }
 var edgeControls = {
-    drawEdges: function(edges, points, pointcolors){
+    drawEdges: function(edges, points, pointcolors,labels){
         if (edges == null || edges == undefined)
             return;
 
@@ -1818,8 +1828,8 @@ var edgeControls = {
         colorarray32.set(colorarray);
         geometry.addAttribute('position', new THREE.BufferAttribute(positions32, 3));
         geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
-        geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
-        geometry.name = "Trajactory"
+       // geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
+        //geometry.name = "Edge"
         //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
         var linesegs = line = new THREE.LineSegments(geometry, material);
         return linesegs;
