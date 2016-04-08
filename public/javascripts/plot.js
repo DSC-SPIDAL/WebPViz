@@ -1053,7 +1053,7 @@ var threejsUtils = {
                         }
                         // we will add some extra points to cluster
                         localSection = {
-                            "length": clusterdata.p.length,
+                            "length": trajectoryData.trajectoryPoints[label].length,
                             "size": trajectoryData.trajectoryPointSizeRatio,
                             "shape": shape,
                             "visible": clusterdata.v,
