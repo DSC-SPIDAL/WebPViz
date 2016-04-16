@@ -222,15 +222,37 @@ var scenes = {
     }
 };
 var events = {
+    CTRLpressed: false,
+    Shiftpressed: false,
     onKeyPress: function(event){
-        if(event.ctrlKey){
+        if(event.keyCode == 17){
             if(!toolTipLabels.initialized) toolTipLabels.initialize();
             window.addEventListener('mousemove', events.onDocumentMouseMove, false)
+            events.CTRLpressed = true;
         }
+        if(event.keyCode == 16){
+            events.Shiftpressed = true;
+        }
+        if(event.keyCode == 88 && events.Shiftpressed){
+            console.log("x")
+        }
+        if(event.keyCode == 89 && events.Shiftpressed){
+            console.log("y")
+        }
+        if(event.keyCode == 90 && events.Shiftpressed){
+            console.log("z")
+        }
+
     },
     onKeyUp: function(event){
-        window.removeEventListener('mousemove', events.onDocumentMouseMove)
-        toolTipLabels.clear();
+        if(event.keyCode == 17) {
+            window.removeEventListener('mousemove', events.onDocumentMouseMove)
+            toolTipLabels.clear();
+            events.CTRLpressed = true;
+        }
+        if(event.keyCode == 16){
+            events.Shiftpressed = false;
+        }
     },
     onDocumentMouseMove: function(event){
         event.preventDefault();
