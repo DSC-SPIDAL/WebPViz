@@ -2031,9 +2031,8 @@ var saveAndVersionControls = {
             sett[res] = obj;
         }
     }
-
-
 }
+
 var viewControls = {
     resetView: function(){
         threejsUtils.controls.reset();
@@ -2239,6 +2238,62 @@ var clusterControls = {
 
 
 }
+
+var axisControls = {
+    axisAdded: false,
+    axis: null,
+    axisLength:.2,
+    onOffAxis: function() {
+        if (!this.axisAdded) {
+            this.addAxis();
+            this.axisAdded = true;
+        } else if (this.axisAdded && this.axis) {
+            threejsUtils.scene3d.remove(this.axis);
+            this.axisAdded = false;
+        }
+    },
+
+    changeAxis: function() {
+        if (axisControls.axisAdded && axisControls.axis) {
+            threejsUtils.scene3d.remove(axisControls.axis);
+            axisControls.addAxis();
+        }
+    },
+
+    addAxis: function() {
+        var length = this.axisLength / 10;
+        var axes = new THREE.Object3D();
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z
+        axes.add(this.buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z
+        threejsUtils.scene3d.add(axes);
+        this.axis = axes;
+    },
+
+    buildAxis: function( src, dst, colorHex, dashed ) {
+        var geom = new THREE.Geometry(),
+            mat;
+
+        if(dashed) {
+            mat = new THREE.LineDashedMaterial({ linewidth: 3, color: colorHex, dashSize: 3, gapSize: 3 });
+        } else {
+            mat = new THREE.LineBasicMaterial({ linewidth: 3, color: colorHex });
+        }
+
+        geom.vertices.push( src.clone() );
+        geom.vertices.push( dst.clone() );
+        geom.computeLineDistances(); // This one is SUPER important, otherwise dashed lines will appear as simple plain lines
+
+        var axis = new THREE.Line( geom, mat, THREE.LinePieces );
+
+        return axis;
+
+    },
+}
+
 var glyphControls = {
     changedGlyphs: {},
     changedSizes: {},
@@ -2872,6 +2927,7 @@ var controlBox = {
     pointsize: 1,
     glyphsize: 1,
     loadSize: 10,
+    axisLength:.2,
     maxPlotsStored: 20,
     settings: "chrome",
     settingsDat: null,
@@ -2919,6 +2975,7 @@ var controlBox = {
         gui.add(controlBox, 'delay', 10.0, 2000.0, controlBox.delay).name("Play Delay(ms)");
         gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(axisControls, 'axisLength', 0.001, 2.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){
