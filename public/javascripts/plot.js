@@ -234,13 +234,13 @@ var events = {
             events.Shiftpressed = true;
         }
         if(event.keyCode == 88 && events.Shiftpressed){
-            console.log("x")
+            threejsUtils.rotateCameraonAxis("x",10);
         }
         if(event.keyCode == 89 && events.Shiftpressed){
-            console.log("y")
+            threejsUtils.rotateCameraonAxis("y",10);
         }
         if(event.keyCode == 90 && events.Shiftpressed){
-            console.log("z")
+            threejsUtils.rotateCameraonAxis("z",10);
         }
 
     },
@@ -1313,6 +1313,24 @@ var threejsUtils = {
         }
         scenes.clearScenes(0, loadStartIndex);
         scenes.clearScenes(loadend + 1, timeSeriesControls.timeSeriesLength);
+    },
+    rotateCameraonAxis: function(axisname,amount){
+        var quaternion = new THREE.Quaternion();
+        if(axisname == "x"){
+            quaternion.setFromAxisAngle( new THREE.Vector3(1,0,0), amount*Math.PI/180 );
+            this.camera.position.applyQuaternion(quaternion)
+            this.camera.up.applyQuaternion( quaternion );
+        }
+        if(axisname == "y"){
+            quaternion.setFromAxisAngle( new THREE.Vector3(0,1,0), amount*Math.PI/180 );
+            this.camera.position.applyQuaternion(quaternion)
+            this.camera.up.applyQuaternion( quaternion );
+        }
+        if(axisname == "z"){
+            quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
+            this.camera.position.applyQuaternion(quaternion)
+            this.camera.up.applyQuaternion( quaternion );
+        }
     }
 
 }
