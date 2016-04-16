@@ -77,10 +77,10 @@ function intialSetup(settings, reinit) {
         }
 
         if (sett.glyphSize) {
-            controlBox.glyphSize = sett.glyphSize;
+            controlBox.glyphsize = sett.glyphSize;
         }
         if (sett.pointSize) {
-            controlBox.pointSize = sett.pointSize;
+            controlBox.pointsize = sett.pointSize;
         }
         if (sett.speed) {
             controlBox.delay = sett.speed;
@@ -1995,7 +1995,7 @@ var saveAndVersionControls = {
             }
         });
     },
-    savePlotSettings: function(result){
+        savePlotSettings: function(result){
         res = result;
         if (res) {
             controlBox.settings = result;
@@ -2904,10 +2904,11 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlBox, 'pointsize', 0.001, 5.0, 1.0).name("Point Size").onFinishChange(pointControls.changePointSize);
-        gui.add(controlBox, 'glyphsize', 0.001, 5.0, 1.0).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
+
     setupGuiTimeSeries: function(){
         if (plotInfo.infoPage) return;
 
@@ -2916,8 +2917,8 @@ var controlBox = {
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
         gui.add(controlBox, 'delay', 10.0, 2000.0, controlBox.delay).name("Play Delay(ms)");
-        gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointSize).name("Point Size").onFinishChange(pointControls.changePointSize);
-        gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphSize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
     settingChange: function(){
