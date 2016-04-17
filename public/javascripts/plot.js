@@ -2962,6 +2962,7 @@ var controlBox = {
         customContainer.appendChild(gui.domElement);
         gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(axisControls, 'axisLength', 0.001, 2.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
 
