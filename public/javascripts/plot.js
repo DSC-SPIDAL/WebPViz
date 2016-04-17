@@ -242,6 +242,12 @@ var events = {
         if(event.keyCode == 90 && events.Shiftpressed){
             threejsUtils.rotateCameraonAxis("z",10);
         }
+        if(event.keyCode == 72 && events.Shiftpressed){
+            threejsUtils.rotateCameraonAxis("h",10);
+        }
+        if(event.keyCode == 86 && events.Shiftpressed){
+            threejsUtils.rotateCameraonAxis("v",10);
+        }
 
     },
     onKeyUp: function(event){
@@ -1327,6 +1333,19 @@ var threejsUtils = {
             this.camera.up.applyQuaternion( quaternion );
         }
         if(axisname == "z"){
+            quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
+            this.camera.position.applyQuaternion(quaternion)
+            this.camera.up.applyQuaternion( quaternion );
+        }
+        if(axisname == "v"){
+            var raycaster = new THREE.Raycaster();
+            toolTipLabels.raycaster.setFromCamera(threejsUtils.mouse,threejsUtils.camera);
+
+            quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
+            this.camera.position.applyQuaternion(quaternion)
+            this.camera.up.applyQuaternion( quaternion );
+        }
+        if(axisname == "h"){
             quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
             this.camera.position.applyQuaternion(quaternion)
             this.camera.up.applyQuaternion( quaternion );
@@ -2861,6 +2880,19 @@ var utilsControls = {
         var canvasWidth = $('#canvas3d').width();
         var canvasHeight = $('#canvas3d').height();
         return [canvasWidth, canvasHeight];
+    },
+    getCanvasCenterCordinates: function(){
+        var cordinates = new THREE.Vector2();
+        var canvas = document.getElementById("canvas3d").getBoundingClientRect();
+        var widthcenter =  canvas.width/2;
+        var heightcenter =  canvas.height/2;
+
+        widthcenter = widthcenter + canvas.left;
+        heightcenter = heightcenter + canvas.top;
+        cordinates.x = widthcenter;
+        cordinates.y = heightcenter;
+        return cordinates;
+
     }
 }
 /**
