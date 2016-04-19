@@ -1320,6 +1320,16 @@ var threejsUtils = {
         scenes.clearScenes(0, loadStartIndex);
         scenes.clearScenes(loadend + 1, timeSeriesControls.timeSeriesLength);
     },
+    ConvertMouseCordintestoXY: function(pageX,pageY){
+        var vector = new THREE.Vector2();
+        var canvas = document.getElementById("canvas3d").getBoundingClientRect();
+        vector.set(
+            ( ( pageX -canvas.width * 0.5 - canvas.left ) / ( canvas.width * 0.5 ) ),
+            ( ( canvas.height + 2 * ( canvas.top - pageY ) ) / canvas.width ) // screen.width intentional
+        );
+
+        return vector;
+    },
     rotateCameraonAxis: function(axisname,amount){
         var quaternion = new THREE.Quaternion();
         if(axisname == "x"){
@@ -1337,16 +1347,39 @@ var threejsUtils = {
             this.camera.position.applyQuaternion(quaternion)
             this.camera.up.applyQuaternion( quaternion );
         }
-        if(axisname == "v"){
-            var raycaster = new THREE.Raycaster();
-            toolTipLabels.raycaster.setFromCamera(threejsUtils.mouse,threejsUtils.camera);
+        if(axisname == "v" || axisname == "h"){
+            var cordinatesFrom = utilsControls.getCanvasCenterCordinates();
+            var vFrom =  threejsUtils.ConvertMouseCordintestoXY(cordinatesFrom.x,cordinatesFrom.y)
+            var vTo;
 
-            quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
-            this.camera.position.applyQuaternion(quaternion)
-            this.camera.up.applyQuaternion( quaternion );
-        }
-        if(axisname == "h"){
-            quaternion.setFromAxisAngle( new THREE.Vector3(0,0,1), amount*Math.PI/180 );
+            if(axisname == "v"){
+                vTo = threejsUtils.ConvertMouseCordintestoXY(cordinatesFrom.x,cordinatesFrom.y+10)
+            }else{
+                vTo = threejsUtils.ConvertMouseCordintestoXY(cordinatesFrom.x+10,cordinatesFrom.y)
+            }
+
+
+
+            var axis = new THREE.Vector3();
+            var eyeDirection = new THREE.Vector3();
+            var objectUpDirection = new THREE.Vector3();
+            var objectSidewaysDirection = new THREE.Vector3();
+            var moveDirection = new THREE.Vector3();
+            var eye = new THREE.Vector3();
+
+            moveDirection.set( vFrom.x - vFrom.x, vTo.y - vTo.y, 0 );
+            eye.copy( this.camera.position );
+            eyeDirection.copy( eye ).normalize();
+            objectUpDirection.copy(  this.camera.up ).normalize();
+            objectSidewaysDirection.crossVectors( objectUpDirection, eyeDirection ).normalize();
+
+            objectUpDirection.setLength( vTo.y - vFrom.y );
+            objectSidewaysDirection.setLength( vTo.x - vFrom.x );
+
+            moveDirection.copy( objectUpDirection.add( objectSidewaysDirection ) );
+            axis.crossVectors( moveDirection, eye ).normalize();
+            quaternion.setFromAxisAngle( axis,  amount*Math.PI/180 );
+
             this.camera.position.applyQuaternion(quaternion)
             this.camera.up.applyQuaternion( quaternion );
         }
