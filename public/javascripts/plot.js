@@ -1357,9 +1357,7 @@ var threejsUtils = {
             }else{
                 vTo = threejsUtils.ConvertMouseCordintestoXY(cordinatesFrom.x+10,cordinatesFrom.y)
             }
-
-
-
+            
             var axis = new THREE.Vector3();
             var eyeDirection = new THREE.Vector3();
             var objectUpDirection = new THREE.Vector3();
