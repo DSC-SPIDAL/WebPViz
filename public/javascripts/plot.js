@@ -785,6 +785,7 @@ var labelControls = {
         return diff;
     }
 }
+
 var threejsUtils = {
     renderer: null,
     controls: null,
@@ -792,6 +793,7 @@ var threejsUtils = {
     reInitialize: false,
     mouse: null,
     camera: null,
+    effect: null,
     animate: function(){
         if (!threejsUtils.reInitialize) {
             // console.log("Not re-init");
@@ -799,7 +801,8 @@ var threejsUtils = {
             threejsUtils.controls.update();
             threejsUtils.stats.update();
             var tempCamera = threejsUtils.scene3d.getObjectByName('camera');
-            threejsUtils.renderer.render(threejsUtils.scene3d, tempCamera);
+            threejsUtils.effect.render(threejsUtils.scene3d, tempCamera);
+            // threejsUtils.renderer.render(threejsUtils.scene3d, tempCamera);
         } else {
             if (plotInfo.isTimeSeries) {
                 timeSeriesControls.reInitTimeSeries();
@@ -809,13 +812,17 @@ var threejsUtils = {
         }
     },
     setupThreeJs: function(){
+        var width = 0;
+        var height = 0;
         if (!plotInfo.infoPage) {
-            var height = window.innerHeight - 57 - 40 - 40 - 11;
-            $('#canvas3d').width(window.innerWidth - 30);
+            height = window.innerHeight - 57 - 40 - 40 - 11;
+            width = window.innerWidth - 30;
+            $('#canvas3d').width(width);
             $('#canvas3d').height(height);
         } else {
-            var height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
-            $('#canvas3d').width((window.innerWidth - 30)/2 -30);
+            height = (window.innerHeight - 57 - 40 - 40 - 11)/2;
+            width = (window.innerWidth - 30)/2 -30;
+            $('#canvas3d').width(width);
             $('#canvas3d').height(height);
         }
         var canvasWidth = $('#canvas3d').width();
@@ -835,7 +842,7 @@ var threejsUtils = {
         // cameraCenter = new THREE.Vector3(0, 0, 0);
         threejsUtils.camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 0.1, 10000);
         threejsUtils.camera.name = 'camera';
-        threejsUtils.camera.position.set(1, 1, 1);
+        threejsUtils.camera.position.set(10, 10, 10);
         //  camera.lookAt(cameraCenter);
         threejsUtils.scene3d.add(threejsUtils.camera);
         threejsUtils.controls = new THREE.TrackballControls(threejsUtils.camera, threejsUtils.renderer.domElement);
@@ -859,10 +866,28 @@ var threejsUtils = {
         trajSprites["4"] = new THREE.TextureLoader().load(ImageTrajEnum.PYRAMID);
         trajSprites["5"] = new THREE.TextureLoader().load(ImageTrajEnum.CONE);
         trajSprites["6"] = new THREE.TextureLoader().load(ImageTrajEnum.CYLINDER);
+
+        threejsUtils.effect = new THREE.StereoEffect( threejsUtils.renderer );
+        threejsUtils.effect.eyeSeparation = 1;
+        threejsUtils.effect.setSize( width, height );
+
         window.addEventListener('resize', events.onWindowResize, false);
         window.addEventListener( 'keydown', events.onKeyPress, false );
         window.addEventListener( 'keyup', events.onKeyUp, false );
+        // window.addEventListener('deviceorientation', this.setOrientationControls, true);
     },
+
+    setOrientationControls: function(e) {
+        if (!e.alpha) {
+            return;
+        }
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
+        // element.addEventListener('click', fullscreen, false);
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+    },
+
     loadMatrial: function(size, shape, isglyph, alpha, traj){
         var sprite;
         if (!isglyph) {
