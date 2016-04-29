@@ -1911,13 +1911,15 @@ var edgeControls = {
                     previouscolor = pointcolor;
                     if (labels && labels.length > number) {
                         previouslabel = labels[number];
+                        labelarray.push(labels[number]);
                     } else {
                         previouslabel = "";
+                        labelarray.push("");
                     }
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
-                    labelarray.push(labels[number]);
+
                 }
             }
         }
