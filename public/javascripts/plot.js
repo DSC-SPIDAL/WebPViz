@@ -1509,7 +1509,7 @@ var SingleGraphControls = {
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                    geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
+                    // geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                     currentParticles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                     if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
                         currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
@@ -1933,7 +1933,7 @@ var edgeControls = {
         geometry.addAttribute('color', new THREE.BufferAttribute(colorarray32, 3));
         geometry.addAttribute('labels', new THREE.BufferAttribute(labelarray, 1));
         //geometry.name = "Edge"
-        //geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
+        // geometry.translate(-xmeantotal, -ymeantotal, -zmeantotal);
         var linesegs = line = new THREE.LineSegments(geometry, material);
         return linesegs;
         //threejsUtils.scene3d.add(linesegs)
