@@ -1885,8 +1885,9 @@ var edgeControls = {
                 for (var i = 0; i < vertices.length; i++) {
                     var verkey = vertices[i];
                     var pointkey = verkey;
-                    var point = points[parseInt(pointkey)];
-                    var pointcolor = pointcolors[parseInt(pointkey)];
+                    var number = parseInt(pointkey);
+                    var point = points[number];
+                    var pointcolor = pointcolors[number];
                     var vertex = new THREE.Vector3(point[0], point[1], point[2]);
                     if (previousvertex != null) {
                         if (isFirst) {
@@ -1908,11 +1909,15 @@ var edgeControls = {
                     previousvertex = vertex;
 
                     previouscolor = pointcolor;
-                    previouslabel = labels[parseInt(pointkey)]
+                    if (labels.length > number) {
+                        previouslabel = labels[number];
+                    } else {
+                        previouslabel = "";
+                    }
                     colorarray.push(pointcolor.r);
                     colorarray.push(pointcolor.g);
                     colorarray.push(pointcolor.b);
-                    labelarray.push(labels[parseInt(pointkey)]);
+                    labelarray.push(labels[number]);
                 }
             }
         }
