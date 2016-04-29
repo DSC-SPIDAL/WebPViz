@@ -1909,7 +1909,7 @@ var edgeControls = {
                     previousvertex = vertex;
 
                     previouscolor = pointcolor;
-                    if (labels.length > number) {
+                    if (labels && labels.length > number) {
                         previouslabel = labels[number];
                     } else {
                         previouslabel = "";
