@@ -248,6 +248,9 @@ var events = {
         if(event.keyCode == 86 && events.Shiftpressed){
             threejsUtils.rotateCameraonAxis("v",10);
         }
+        if(event.keyCode == 79 && events.Shiftpressed){
+            threejsUtils.rotateCameraonAxis("o",10);
+        }
 
     },
     onKeyUp: function(event){
@@ -1347,7 +1350,7 @@ var threejsUtils = {
             this.camera.position.applyQuaternion(quaternion)
             this.camera.up.applyQuaternion( quaternion );
         }
-        if(axisname == "v" || axisname == "h"){
+        if(axisname == "v" || axisname == "h" || axisname == "o"){
             var cordinatesFrom = utilsControls.getCanvasCenterCordinates();
             var vFrom =  threejsUtils.ConvertMouseCordintestoXY(cordinatesFrom.x,cordinatesFrom.y)
             var vTo;
@@ -1376,7 +1379,11 @@ var threejsUtils = {
 
             moveDirection.copy( objectUpDirection.add( objectSidewaysDirection ) );
             axis.crossVectors( moveDirection, eye ).normalize();
-            quaternion.setFromAxisAngle( axis,  amount*Math.PI/180 );
+            if(axisname == "o"){
+                quaternion.setFromAxisAngle( eyeDirection,  amount*Math.PI/180 );
+            }else{
+                quaternion.setFromAxisAngle( axis,  amount*Math.PI/180 );
+            }
 
             this.camera.position.applyQuaternion(quaternion)
             this.camera.up.applyQuaternion( quaternion );
