@@ -164,12 +164,12 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart resultSet = body.getFile("file");
+        Http.MultipartFormData.FilePart<java.io.File> resultSet = body.getFile("file");
         String originalFileName = resultSet.getFilename();
         String name = resultSet.getFile().getName();
-        String[] desc = body.asFormUrlEncoded().get("desc");
-        String[] grp = body.asFormUrlEncoded().get("group");
-        String[] fromGroupForm = body.asFormUrlEncoded().get("from_group");
+        String[] desc = (String[])body.asFormUrlEncoded().get("desc");
+        String[] grp = (String[])body.asFormUrlEncoded().get("group");
+        String[] fromGroupForm = (String[])body.asFormUrlEncoded().get("from_group");
 
         String description = "No description";
         String group = Constants.Group.DEFAULT_GROUP;
