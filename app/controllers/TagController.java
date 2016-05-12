@@ -13,7 +13,7 @@ import play.mvc.Security;
 
 public class TagController extends Controller {
 
-    public static Result getAllTags() {
+    public Result getAllTags() {
         User loggedInUser = User.findByEmail(request().username());
         String tags = null;
         if(loggedInUser == null){
@@ -29,7 +29,7 @@ public class TagController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result createTag() {
+    public Result createTag() {
 
         String tagname, description, category, fromGroup;
         ArtifactDAO db = ArtifactDAO.getInstance();
@@ -48,7 +48,7 @@ public class TagController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result addTag(int artifactId) {
+    public Result addTag(int artifactId) {
         JsonNode json = request().body().asJson();
         String tagname = json.get(Constants.Tags.NAME).asText();
         String category = json.get(Constants.Tags.CATEGORY).asText();
@@ -57,14 +57,14 @@ public class TagController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result removeTag(int artifactId) {
+    public Result removeTag(int artifactId) {
         JsonNode json = request().body().asJson();
         String tagname = json.get(Constants.Tags.NAME).asText();
         TagsDAO.removeTag(artifactId,tagname);
         return ok("{status: 'success'}").as("application/json");
     }
 
-    public static Result getTags(int artifactId) {
+    public Result getTags(int artifactId) {
         String tags = TagsDAO.getTags(artifactId);
         if (tags != null) {
             return ok(tags).as("application/json");

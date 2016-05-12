@@ -22,7 +22,7 @@ public class GroupController extends Controller {
     );
 
     @Security.Authenticated(Secured.class)
-    public static Result groups() {
+    public Result groups() {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
@@ -30,7 +30,7 @@ public class GroupController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result newGroup() {
+    public Result newGroup() {
         DynamicForm form = Form.form().bindFromRequest();
 
         String name, description, fromGroup;
@@ -58,7 +58,7 @@ public class GroupController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result updateGroup() {
+    public Result updateGroup() {
         DynamicForm form = Form.form().bindFromRequest();
 
         String name, description, fromGroup = null, pub;
@@ -93,7 +93,7 @@ public class GroupController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result removeGroup(String name) {
+    public Result removeGroup(String name) {
         ArtifactDAO db = ArtifactDAO.getInstance();
         User loggedInUser = User.findByEmail(request().username());
 

@@ -11,7 +11,7 @@ import play.mvc.Security;
 public class CommentController extends Controller {
 
     @Security.Authenticated(Secured.class)
-    public static Result addComment() {
+    public Result addComment() {
         User loggedInUser = User.findByEmail(request().username());
 
         JsonNode json = request().body().asJson();
@@ -23,7 +23,7 @@ public class CommentController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result getComments(int artifactId) {
+    public Result getComments(int artifactId) {
         User loggedInUser = User.findByEmail(request().username());
         String comment = CommentDAO.getComments(artifactId, loggedInUser.email);
         if (comment != null) {
@@ -34,14 +34,14 @@ public class CommentController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result removeComment(int artifactId, String id) {
+    public Result removeComment(int artifactId, String id) {
         User loggedInUser = User.findByEmail(request().username());
         CommentDAO.deleteComment(artifactId, loggedInUser.email, id);
         return ok("{status: 'success'}").as("application/json");
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result updateComment(int artifactId, String id, String comment) {
+    public Result updateComment(int artifactId, String id, String comment) {
         User loggedInUser = User.findByEmail(request().username());
         CommentDAO.updateComment(artifactId, loggedInUser.email, id, comment);
         return ok("{status: 'success'}").as("application/json");

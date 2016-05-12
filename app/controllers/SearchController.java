@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SearchController extends Controller {
     @Security.Authenticated(Secured.class)
-    public static Result searchArtifactsByTag(String tagname) {
+    public Result searchArtifactsByTag(String tagname) {
         User loggedInUser = User.findByEmail(request().username());
         List<TimeSeries> taggedtimeseries = null;
         String[] tagslist;
@@ -35,7 +35,7 @@ public class SearchController extends Controller {
         }
     }
 
-    public static Result searchArtifactsByTagPublic(String tagname) {
+    public Result searchArtifactsByTagPublic(String tagname) {
         User loggedInUser = null;
         List<TimeSeries> taggedtimeseries = null;
         String[] tagslist;

@@ -11,7 +11,7 @@ import play.mvc.Security;
 
 public class ExperimentController extends Controller {
     @Security.Authenticated(Secured.class)
-    public static Result getExperiment(int artifactId) {
+    public Result getExperiment(int artifactId) {
         User loggedInUser = User.findByEmail(request().username());
         String comment = ExperimentDAO.getExperiment(artifactId, loggedInUser.email);
         if (comment != null) {
@@ -22,7 +22,7 @@ public class ExperimentController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public static Result updateExperiment() {
+    public Result updateExperiment() {
         User loggedInUser = User.findByEmail(request().username());
         JsonNode json = request().body().asJson();
         JsonNode expNode = json.get(Constants.Experiment.EXP);

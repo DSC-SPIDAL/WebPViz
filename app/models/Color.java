@@ -1,9 +1,6 @@
 package models;
 
-import play.db.ebean.Model;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.avaje.ebean.Model;
 
 public class Color extends Model {
     public int a;

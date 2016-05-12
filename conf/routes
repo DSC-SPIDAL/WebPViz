@@ -92,4 +92,3 @@ GET         /artifact/:id/comment               controllers.CommentController.ge
 
 GET         /search/bytag/:tag                  controllers.SearchController.searchArtifactsByTag(tag: String)
 GET         /public/search/bytag/:tag           controllers.SearchController.searchArtifactsByTagPublic(tag: String)
-
