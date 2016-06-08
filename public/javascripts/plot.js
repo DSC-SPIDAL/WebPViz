@@ -251,6 +251,9 @@ var events = {
         if(event.keyCode == 79 && events.Shiftpressed){
             threejsUtils.rotateCameraonAxis("o",10);
         }
+        if(event.keyCode == 50){
+            threejsUtils.setTo2D();
+        }
 
     },
     onKeyUp: function(event){
@@ -868,6 +871,9 @@ var threejsUtils = {
     },
     loadMatrial: function(size, shape, isglyph, alpha, traj){
         var sprite;
+
+        if(size == 0) size = 1;
+
         if (!isglyph) {
             sprite = null;
         }
@@ -1332,6 +1338,9 @@ var threejsUtils = {
         );
 
         return vector;
+    },
+    setTo2D: function(){
+        this.camera.position.set(0, 0, 1);
     },
     rotateCameraonAxis: function(axisname,amount){
         var quaternion = new THREE.Quaternion();
@@ -3037,7 +3046,7 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlBox, 'pointsize', 0.001, 5.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'pointsize', 0.001, 20.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         gui.add(axisControls, 'axisLength', 0.001, 2.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
