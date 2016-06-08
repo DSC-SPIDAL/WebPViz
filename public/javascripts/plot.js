@@ -233,28 +233,28 @@ var events = {
         if(event.keyCode == 16){
             events.Shiftpressed = true;
         }
-        if(event.keyCode == 88 && events.Shiftpressed){
+        if(event.keyCode == 88 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("x",10);
         }
-        if(event.keyCode == 89 && events.Shiftpressed){
+        if(event.keyCode == 89 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("y",10);
         }
-        if(event.keyCode == 90 && events.Shiftpressed){
+        if(event.keyCode == 90 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("z",10);
         }
-        if(event.keyCode == 72 && events.Shiftpressed){
+        if(event.keyCode == 72 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("h",10);
         }
-        if(event.keyCode == 86 && events.Shiftpressed){
+        if(event.keyCode == 86 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("v",10);
         }
-        if(event.keyCode == 79 && events.Shiftpressed){
+        if(event.keyCode == 79 && event.shiftKey){
             threejsUtils.rotateCameraonAxis("o",10);
         }
-        if(event.keyCode == 50 && events.Shiftpressed){
+        if(event.keyCode == 50 && event.shiftKey){
             threejsUtils.setTo2D();
         }
-        if(event.keyCode == 51 && events.Shiftpressed){
+        if(event.keyCode == 51 && event.shiftKey){
             threejsUtils.setTo3D();
         }
 
@@ -870,6 +870,7 @@ var threejsUtils = {
         trajSprites["6"] = new THREE.TextureLoader().load(ImageTrajEnum.CYLINDER);
         window.addEventListener('resize', events.onWindowResize, false);
         window.addEventListener( 'keydown', events.onKeyPress, false );
+        window.addEventListener( 'keyup', events.onKeyUp, false );
         window.addEventListener( 'keyup', events.onKeyUp, false );
     },
     loadMatrial: function(size, shape, isglyph, alpha, traj){
