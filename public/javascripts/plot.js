@@ -1345,14 +1345,12 @@ var threejsUtils = {
     setTo2D: function(){
         this.camera.position.set(0, 0, 1);
         this.controls.noRotate = true;
-        this.controls.panSpeed = 2;
         this.controls.flipStateToPan();
 
     },
     setTo3D: function(){
         this.camera.position.set(0, 0, 1);
         this.controls.noRotate = false;
-        this.controls.panSpeed = 0.3;
         this.controls.flipStateToRotate();
 
     },
@@ -2510,6 +2508,15 @@ var pointControls = {
             }
         }
     },
+    changeRotateSpeed: function(){
+        threejsUtils.controls.rotateSpeed = controlBox.rotateSpeed;
+    },
+    changePanSpeed: function(){
+        threejsUtils.controls.panSpeed = controlBox.panSpeed;
+    },
+    changeZoomSpeed: function(){
+        threejsUtils.controls.zoomSpeed = controlBox.zoomSpeed;
+    },
     findPoint: function(data, key){
         return data.points[key.toString()];
     },
@@ -3024,6 +3031,9 @@ var utilsControls = {
 var controlBox = {
     gui: null,
     delay: 300,
+    rotateSpeed: 20.0,
+    panSpeed: 0.3,
+    zoomSpeed: 1.2,
     pointsize: 1,
     glyphsize: 1,
     loadSize: 10,
@@ -3062,6 +3072,9 @@ var controlBox = {
         customContainer.appendChild(gui.domElement);
         gui.add(controlBox, 'pointsize', 0.001, 20.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
+        gui.add(controlBox, 'rotateSpeed', 0.1, 50.0, controlBox.rotateSpeed).name("Rotate Speed").onFinishChange(pointControls.changeRotateSpeed);
+        gui.add(controlBox, 'zoomSpeed', 1, 10.0, controlBox.zoomSpeed).name("Zoom Speed").onFinishChange(pointControls.changeZoomSpeed);
+        gui.add(controlBox, 'panSpeed', 0.1, 20.0, controlBox.panSpeed).name("Pan Speed").onFinishChange(pointControls.changePanSpeed);
         gui.add(axisControls, 'axisLength', 0.001, 2.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
