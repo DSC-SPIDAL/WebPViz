@@ -251,10 +251,10 @@ var events = {
         if(event.keyCode == 79 && events.Shiftpressed){
             threejsUtils.rotateCameraonAxis("o",10);
         }
-        if(event.keyCode == 50){
+        if(event.keyCode == 50 && events.Shiftpressed){
             threejsUtils.setTo2D();
         }
-        if(event.keyCode == 51){
+        if(event.keyCode == 51 && events.Shiftpressed){
             threejsUtils.setTo3D();
         }
 
