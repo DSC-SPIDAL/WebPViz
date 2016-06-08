@@ -254,6 +254,9 @@ var events = {
         if(event.keyCode == 50){
             threejsUtils.setTo2D();
         }
+        if(event.keyCode == 51){
+            threejsUtils.setTo3D();
+        }
 
     },
     onKeyUp: function(event){
@@ -1341,6 +1344,17 @@ var threejsUtils = {
     },
     setTo2D: function(){
         this.camera.position.set(0, 0, 1);
+        this.controls.noRotate = true;
+        this.controls.panSpeed = 2;
+        this.controls.flipStateToPan();
+
+    },
+    setTo3D: function(){
+        this.camera.position.set(0, 0, 1);
+        this.controls.noRotate = false;
+        this.controls.panSpeed = 0.3;
+        this.controls.flipStateToRotate();
+
     },
     rotateCameraonAxis: function(axisname,amount){
         var quaternion = new THREE.Quaternion();
