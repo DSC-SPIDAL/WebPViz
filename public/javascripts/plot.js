@@ -123,6 +123,13 @@ function intialSetup(settings, reinit) {
             }
             colorControls.colorsLoaded = true;
         }
+        if(sett.mode){
+            threejsUtils.mode = sett.mode
+            if(threejsUtils.mode == "2d"){
+                threejsUtils.controls.noRotate = true;
+                threejsUtils.controls.flipStateToPan();
+            }
+        }
     } else {
         allSettings['tid'] = timeseriesId;
         allSettings['fid'] = resultSetId;
@@ -801,6 +808,7 @@ var threejsUtils = {
     reInitialize: false,
     mouse: null,
     camera: null,
+    mode: "3d",
     animate: function(){
         if (!threejsUtils.reInitialize) {
             // console.log("Not re-init");
@@ -1344,13 +1352,13 @@ var threejsUtils = {
         return vector;
     },
     setTo2D: function(){
-        this.camera.position.set(0, 0, 1);
+        this.mode = "2d";
+        this.camera.position.set(0, 0, this.camera.position.z);
         this.controls.noRotate = true;
         this.controls.flipStateToPan();
-
     },
     setTo3D: function(){
-        this.camera.position.set(0, 0, 1);
+        this.mode = "3d";
         this.controls.noRotate = false;
         this.controls.flipStateToRotate();
 
@@ -2098,6 +2106,7 @@ var saveAndVersionControls = {
             obj['changedSizes'] = glyphControls.changedSizes;
             obj['speed'] = controlBox.delay;
             obj['glyphs'] = glyphControls.changedGlyphs;
+            obj['mode'] = threejsUtils.mode;
             obj['customclusters'] = clusterControls.customclusters;
             var lookAtVector = new THREE.Vector3(0, 0, 0);
             lookAtVector.applyQuaternion(threejsUtils.camera.quaternion);
@@ -3071,7 +3080,7 @@ var controlBox = {
         gui = new dat.GUI({autoPlace: false});
         var customContainer = document.getElementById('plot-controls');
         customContainer.appendChild(gui.domElement);
-        gui.add(controlBox, 'pointsize', 0.001, 20.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
+        gui.add(controlBox, 'pointsize', 0.001, 200.0, controlBox.pointsize).name("Point Size").onFinishChange(pointControls.changePointSize);
         gui.add(controlBox, 'glyphsize', 0.001, 5.0, controlBox.glyphsize).name("Glyph Size").onFinishChange(glyphControls.changeGlyphSize);
         gui.add(controlBox, 'rotateSpeed', 0.1, 50.0, controlBox.rotateSpeed).name("Rotate Speed").onFinishChange(pointControls.changeRotateSpeed);
         gui.add(controlBox, 'zoomSpeed', 1, 10.0, controlBox.zoomSpeed).name("Zoom Speed").onFinishChange(pointControls.changeZoomSpeed);
