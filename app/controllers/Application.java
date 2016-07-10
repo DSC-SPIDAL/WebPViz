@@ -82,7 +82,8 @@ public class Application extends Controller {
         ArtifactDAO db = ArtifactDAO.getInstance();
 
         User loggedInUser = User.findByEmail(request().username());
-        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false,false,null,null, false, "Dashboard"));
+        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.email),
+            GroupsDAO.allGroups(loggedInUser.email), false,false,null,null, false, "Dashboard"));
     }
 
 
@@ -93,7 +94,8 @@ public class Application extends Controller {
         if (email != null) {
             loggedInUser = User.findByEmail(email);
         }
-        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(null), GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
+        return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(null),
+            GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
     }
 
     @Security.Authenticated(Secured.class)
@@ -103,9 +105,11 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
         Group g = new Group(loggedInUser.email, group);
         if (GroupsDAO.groupExists(g)) {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, false, null, group, false, "Dashboard"));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, loggedInUser.email),
+                GroupsDAO.allGroups(loggedInUser.email), true, false, null, group, false, "Dashboard"));
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(loggedInUser.email),
+                GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
     }
 
@@ -138,9 +142,11 @@ public class Application extends Controller {
             loggedInUser = User.findByEmail(email);
         }
         if (GroupsDAO.groupExists(g)) {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, null), GroupsDAO.allGroups(null), true, false, null, group, true, "Public"));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(g, null),
+                GroupsDAO.allGroups(null), true, false, null, group, true, "Public"));
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(null), GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
+            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(null),
+                GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
         }
     }
 
@@ -194,12 +200,17 @@ public class Application extends Controller {
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
-            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Failed to read zip file.",
+                db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email),
+                false, false, null, null, false, "Dashboard"));
         }
         if (fromGroupForm == null) {
             return GO_DASHBOARD;
         } else {
-            return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, group), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, false, null, group, false, "Dashboard"));
+            return ok(dashboard.render(loggedInUser, false, null,
+                db.timeSeriesList(new Group(loggedInUser.email, group),
+                    loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email),
+                true, false, null, group, false, "Dashboard"));
         }
     }
 
@@ -213,7 +224,9 @@ public class Application extends Controller {
         User loggedInUser = User.findByEmail(request().username());
 
         if (form.data().size() == 0) {
-            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Update parameters should be present",
+                db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email),
+                false, false, null, null, false, "Dashboard"));
         }
         id = form.get("id");
         name = form.get("name");
@@ -247,12 +260,16 @@ public class Application extends Controller {
                     TimeSeries t = db.timeSeries(oldGroup.id, loggedInUser.email);
                     return ok(info.render(loggedInUser, t, GroupsDAO.allGroups(loggedInUser.email)));
                 } else {
-                    return ok(dashboard.render(loggedInUser, false, null, db.timeSeriesList(new Group(loggedInUser.email, group), loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), true, false, null, group, false, "Dashboard"));
+                    return ok(dashboard.render(loggedInUser, false, null,
+                        db.timeSeriesList(new Group(loggedInUser.email, group), loggedInUser.email),
+                        GroupsDAO.allGroups(loggedInUser.email), true, false, null, group, false, "Dashboard"));
                 }
             }
         } else {
             //
-            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Update non-existing file",
+                db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email),
+                false, false, null, null, false, "Dashboard"));
         }
     }
 
@@ -284,7 +301,9 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name, false));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.",
+                db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email),
+                false, false, null, null, false, "Dashboard"));
         }
     }
 
@@ -310,7 +329,8 @@ public class Application extends Controller {
         if (r != null) {
             return ok(resultset.render(loggedInUser, r.id, timeSeriesId, r.name, true));
         } else {
-            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.", db.timeSeriesList(null), GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
+            return badRequest(dashboard.render(loggedInUser, true, "Plot cannot be found.",
+                db.timeSeriesList(null), GroupsDAO.allGroups(null), false, false, null, null, true, "Public"));
         }
     }
 

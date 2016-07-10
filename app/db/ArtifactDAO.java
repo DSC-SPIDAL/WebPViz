@@ -53,12 +53,161 @@ public class ArtifactDAO {
 
         String resultSetName = pvizName + "/";
         // insert the file content to the files collection
-        insertXMLFile(0, resultSetName, description, uploader, new FileInputStream(file), timeSeriesId, 0L, pvizName);
+        // lets try to load as a XML
+        try {
+            XMLLoader.load(new FileInputStream(file));
+            // ok this is XML
+            insertXMLFile(0, resultSetName, description, uploader, new FileInputStream(file), timeSeriesId, 0L, pvizName);
+        } catch (Exception e) {
+            // this is not XML
+            insertTextFile(0, resultSetName, description, uploader, new FileInputStream(file), timeSeriesId, 0L, pvizName);
+        }
+
         Document resultSet = createResultSet(0, resultSetName, description, dateString, uploader, timeSeriesId, 0, pvizName);
         List<Document> emptyResultSets = new ArrayList<Document>();
         emptyResultSets.add(resultSet);
         mainDoc.append(Constants.Artifact.FILES, emptyResultSets);
         con.artifactCol.insertOne(mainDoc);
+    }
+
+    private List<PVizPoint> getPointsFromTextFile(InputStream file) {
+        List<PVizPoint> points = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file))) {
+            String line;
+            int i = 0;
+            while ((line = br.readLine()) != null) {
+                String[] split = line.split("\\s+");
+                if (split.length == 5) {
+                    PVizPoint point = new PVizPoint(i++, 1, "None", new Location(split[1], split[2], split[3]));
+                    points.add(point);
+                } else if (split.length == 3){
+                    PVizPoint point = new PVizPoint(i++, 1, "None", new Location(split[0], split[1], split[2]));
+                    points.add(point);
+                }
+            }
+        } catch (IOException e) {
+            Logger.error("Failed to read the file", e);
+        }
+        return points;
+    }
+
+  /**
+   * Insert a text file. Text files doesn't have clusters or edges. They only have points.
+   * @param id id
+   * @param name name
+   * @param description description
+   * @param uploader uploader
+   * @param file file
+   * @param parent parent
+   * @param sequenceNumber sequence number
+   * @param originalFileName original file name
+   * @throws Exception
+   */
+    private void insertTextFile(int id, String name, String description, String uploader, InputStream file,
+                                int parent, Long sequenceNumber, String originalFileName) throws Exception {
+        MongoConnection con = MongoConnection.getInstance();
+        // maximum number of points per file
+        final int maxPointsPerFile = 100000;
+        Map<Integer, Integer> clusterPointCount = new HashMap<>();
+        Document rootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+
+        // traverse through the clusters and create the cluster list
+        Map<Integer, Document> clusterDBObjectList = new HashMap<Integer, Document>();
+        Document c = new Document();
+        c.put(Constants.Cluster.KEY, 1);
+        c.put(Constants.Cluster.LABEL, "Default");
+        c.put(Constants.Cluster.SIZE, 1);
+        c.put(Constants.Cluster.VISIBILE, 1);
+        clusterDBObjectList.put(1, c);
+
+        // now traverse through the points and create the point list
+        List<PVizPoint> points = getPointsFromTextFile(file);
+        // point key for each cluster
+        Map<Integer, List<Integer>> pointsForClusters = new HashMap<Integer, List<Integer>>();
+        Map<String, List<String>> pointList = new HashMap<>();
+        for (PVizPoint point : points) {
+            int clusterkey = point.getClusterkey();
+            int pointKey = point.getKey();
+            List<Integer> clusterPoints = pointsForClusters.get(clusterkey);
+            if (clusterPoints == null) {
+                clusterPoints = new ArrayList<Integer>();
+                pointsForClusters.put(clusterkey, clusterPoints);
+            }
+            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(),point.getLabel());
+            // add the key to cluster and point to point list
+            clusterPoints.add(pointKey);
+            pointList.put(Integer.toString(pointKey), pointDBObject);
+        }
+
+        Iterator<Map.Entry<Integer, List<Integer>>> entries = pointsForClusters.entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry<Integer, List<Integer>> e = entries.next();
+            if (e.getValue() != null && e.getValue().size() > 0) {
+                Document clusterDBObject = clusterDBObjectList.get(e.getKey());
+                clusterDBObject.append(Constants.Cluster.POINTS, e.getValue());
+                clusterPointCount.put(e.getKey(), e.getValue().size());
+            } else {
+                Logger.info("Remove: " + e.getKey());
+                entries.remove();
+            }
+        }
+
+        // remove the clusters without any points
+        for(Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Integer, Document> entry = it.next();
+            if (!pointsForClusters.containsKey(entry.getKey())) {
+                it.remove();
+            }
+        }
+
+        // add the point key list to clusters
+        for (Map.Entry<Integer, List<Integer>> e : pointsForClusters.entrySet()) {
+            Document clusterDocument = clusterDBObjectList.get(e.getKey());
+            clusterDocument.append(Constants.Cluster.POINTS, e.getValue());
+        }
+
+        // add each cluster to clusters object
+        // we are going to create separate docs when total number of points exceeds
+        int count = 0;
+        Map<String, Document> currentClusterList = new HashMap<>();
+        for (Map.Entry<Integer, Document> e : clusterDBObjectList.entrySet()) {
+            count += clusterPointCount.get(e.getKey());
+            currentClusterList.put(Integer.toString(e.getKey()), e.getValue());
+            if (count > maxPointsPerFile) {
+                count = 0;
+                Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+                preRootObject.append(Constants.File.CLUSTERS, currentClusterList);
+                con.filesCol.insertOne(preRootObject);
+                currentClusterList = new HashMap<>();
+                Logger.info("Breaking file clusters: " + originalFileName);
+            }
+        }
+        // we will add the remainder or the whole list, if we didn't exceed the max number
+        if (currentClusterList.size() > 0) {
+            rootObject.append(Constants.File.CLUSTERS, currentClusterList);
+        }
+
+        count = 0;
+        Map<String, List<String>> currentPointList = new HashMap<>();
+        for (Map.Entry<String, List<String>> e : pointList.entrySet()) {
+            currentPointList.put(e.getKey(), e.getValue());
+            count++;
+            if (count > maxPointsPerFile) {
+                count = 0;
+                Document preRootObject = createRootFileObject(id, name, description, uploader, parent, sequenceNumber, originalFileName);
+                preRootObject.append(Constants.File.POINTS, currentPointList);
+                con.filesCol.insertOne(preRootObject);
+                currentPointList = new HashMap<>();
+                Logger.info("Breaking file points: " + originalFileName);
+            }
+        }
+        // we will add the remainder or the whole list, if we didn't exceed the max number
+        if (currentPointList.size() > 0) {
+            rootObject.append(Constants.File.POINTS, currentPointList);
+        }
+
+        con.filesCol.insertOne(rootObject);
+        Logger.info("Inserted document: " + originalFileName);
     }
 
     /**
