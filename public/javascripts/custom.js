@@ -75,6 +75,7 @@ $(function () {
         }
         var key = $(this).attr('value');
         var alpha = $(this).attr('alpha');
+        if(alpha == "undefined") alpha = 255;
         var id = "#color-box"+key
         $(id).jPicker();
         var match = $.grep($.jPicker.List, function(e) { return e.id == id.substr(1) });

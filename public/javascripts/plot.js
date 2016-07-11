@@ -2648,7 +2648,8 @@ var colorControls = {
                     colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
-                        "b": tempcolor.toArray()[2] * 255
+                        "b": tempcolor.toArray()[2] * 255,
+                        "a": 255
                     };
 
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -2678,7 +2679,8 @@ var colorControls = {
                     colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
-                        "b": tempcolor.toArray()[2] * 255
+                        "b": tempcolor.toArray()[2] * 255,
+                        "a": 255
                     };
 
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
@@ -2711,7 +2713,8 @@ var colorControls = {
                     colorControls.trueColorList[key] = {
                         "r": tempcolor.toArray()[0] * 255,
                         "g": tempcolor.toArray()[1] * 255,
-                        "b": tempcolor.toArray()[2] * 255
+                        "b": tempcolor.toArray()[2] * 255,
+                        "a": 255
                     };
 
                     var colorattri = currentParticles[key].geometry.getAttribute('color');
