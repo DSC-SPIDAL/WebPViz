@@ -83,6 +83,9 @@ public class ArtifactDAO {
                 } else if (split.length == 3){
                     PVizPoint point = new PVizPoint(i++, 1, "None", new Location(split[0], split[1], split[2]));
                     points.add(point);
+                } else if(split.length == 6){
+                    PVizPoint point = new PVizPoint(i++, Integer.valueOf(split[4]), split[5], new Location(split[1], split[2], split[3]));
+                    points.add(point);
                 }
             }
         } catch (IOException e) {
@@ -113,20 +116,33 @@ public class ArtifactDAO {
 
         // traverse through the clusters and create the cluster list
         Map<Integer, Document> clusterDBObjectList = new HashMap<Integer, Document>();
-        Document c = new Document();
-        c.put(Constants.Cluster.KEY, 1);
-        c.put(Constants.Cluster.LABEL, "Default");
-        c.put(Constants.Cluster.SIZE, 1);
-        c.put(Constants.Cluster.VISIBILE, 1);
-        clusterDBObjectList.put(1, c);
+//        Document c = new Document();
+//        c.put(Constants.Cluster.KEY, 1);
+//        c.put(Constants.Cluster.LABEL, "Default");
+//        c.put(Constants.Cluster.SIZE, 1);
+//        c.put(Constants.Cluster.VISIBILE, 1);
 
         // now traverse through the points and create the point list
         List<PVizPoint> points = getPointsFromTextFile(file);
         // point key for each cluster
         Map<Integer, List<Integer>> pointsForClusters = new HashMap<Integer, List<Integer>>();
         Map<String, List<String>> pointList = new HashMap<>();
+        int tempcount = 0;
         for (PVizPoint point : points) {
+
+            tempcount++;
             int clusterkey = point.getClusterkey();
+            if(!clusterDBObjectList.containsKey(clusterkey)){
+                Document tempcluster = new Document();
+                tempcluster.put(Constants.Cluster.KEY, clusterkey);
+                tempcluster.put(Constants.Cluster.LABEL, clusterkey);
+                tempcluster.put(Constants.Cluster.SIZE, 1);
+                tempcluster.put(Constants.Cluster.VISIBILE, 1);
+                tempcluster.put(Constants.Cluster.SHAPE, 3);
+                tempcluster.put(Constants.Cluster.COLOR, color(255,255,255,255));
+                clusterDBObjectList.put(clusterkey, tempcluster);
+            }
+
             int pointKey = point.getKey();
             List<Integer> clusterPoints = pointsForClusters.get(clusterkey);
             if (clusterPoints == null) {
