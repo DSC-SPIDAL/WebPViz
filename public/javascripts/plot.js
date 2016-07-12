@@ -2880,7 +2880,10 @@ var htmlGenerators = {
                         + "</td>"
                         + "</tr>";
                 } else {
-                    tablerows += "<td class=' '><span>" + list[key].label + "</span></td>";
+                    tablerows += "<td class=' '><span>" + list[key].label + "</span>"
+                        + "<input type='checkbox' class='make-glyph' id='makeglyph" + key + "'>"
+                        + "<label class='make-glyph-label'>  Glyph</label>"
+                        + "</td>";
                     tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length + "</label></td>"
                         + "</tr>";
                 }
