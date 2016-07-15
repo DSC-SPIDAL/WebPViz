@@ -58,10 +58,12 @@ $(function () {
         if(id == "check-all"){
             $(".bulk_action input[name='table_records']").prop('checked', this.checked);
             ((this.checked) ? viewControls.addAllSections() : viewControls.removeAllSection());
+        }else if(id != undefined && id.indexOf("makeglyph") > -1){
+            var key = $(this).attr('key');
+            if(this.checked) glyphControls.addGlyphToSection(key);
         }else{
             var rm = $(this).val();
             ((this.checked) ? viewControls.addSection(rm) : viewControls.removeSection(rm));
-
         }
 
     });

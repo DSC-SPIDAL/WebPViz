@@ -1490,6 +1490,7 @@ var SingleGraphControls = {
                     if (!colorControls.colorlist.hasOwnProperty(clusterid))
                         colorControls.colorlist[clusterid] = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")").getHexString();
 
+
                     var positions = new Float32Array(clusterdata.p.length * 3);
                     var colorarray = new Float32Array(clusterdata.p.length * 3);
                     var labelArray = [];
@@ -1551,6 +1552,9 @@ var SingleGraphControls = {
                     if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
                         currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
                         currentParticles[key].material.needsUpdate = true;
+                    }
+                    if(glyphControls.changedSizes.hasOwnProperty(key)){
+                        currentParticles[key].material.size = (glyphControls.changedSizes[key] / 200) * controlBox.glyphsize;
                     }
                 }
             }
@@ -2499,6 +2503,20 @@ var glyphControls = {
             }
         }
         return glyph;
+    },
+    addGlyphToSection: function(key){
+        glyphControls.changedSizes[key] = 3;
+        sections[key].size = 3;
+        clusterControls.customclusternotadded = true;
+        clusterControls.customclusternotaddedtolist = true;
+        htmlGenerators.generateCheckList(sections, colorControls.colorlist);
+        glyphControls.changedSizes[key] = 3;
+        sections[key].size = 3;
+        htmlGenerators.generateClusterList(sections, colorControls.colorlist);
+        currentParticles[key].material.map = sprites[sections[key].shape];
+        currentParticles[key].material.size = (3 / 200) * controlBox.glyphsize;
+        currentParticles[key].material.needsUpdate = true;
+
     }
 }
 var pointControls = {
@@ -2821,9 +2839,9 @@ var htmlGenerators = {
                 var key = keys[i];
                 if (!list[key]) continue;
                 if (!(clusterControls.removedclusters.hasOwnProperty(key))) {
-                    $("#cluster_table tbody > #" + key + " input:checkbox").prop('checked', true);
+                    $("#cluster_table tbody > #" + key + " td.a-center input:checkbox").prop('checked', true);
                 } else {
-                    $("#cluster_table > tbody > #" + key + " input:checkbox").prop('checked', false);
+                    $("#cluster_table > tbody > #" + key + " td.a-center input:checkbox").prop('checked', false);
                 }
                 var sprite = glyphControls.getGlyphName(list[key]);
                 var currentshape;
@@ -2881,7 +2899,7 @@ var htmlGenerators = {
                         + "</tr>";
                 } else {
                     tablerows += "<td class=' '><span>" + list[key].label + "</span>"
-                        + "<input type='checkbox' class='make-glyph' id='makeglyph" + key + "'>"
+                        + "<input type='checkbox' class='make-glyph' id='makeglyph" + key + "' key='" + key + "'>"
                         + "<label class='make-glyph-label'>  Glyph</label>"
                         + "</td>";
                     tablerows += "<td class='l1' id='cluster-size'><label id='size-label'>" + list[key].length + "</label></td>"
