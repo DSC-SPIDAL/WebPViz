@@ -1552,9 +1552,13 @@ var SingleGraphControls = {
                     if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
                         currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
                         currentParticles[key].material.needsUpdate = true;
+                        sections[key].shape = glyphControls.changedGlyphs[key];
                     }
                     if(glyphControls.changedSizes.hasOwnProperty(key)){
                         currentParticles[key].material.size = (glyphControls.changedSizes[key] / 200) * controlBox.glyphsize;
+                        currentParticles[key].material.needsUpdate = true;
+                        sections[key].size = glyphControls.changedSizes[key];
+
                     }
                 }
             }
@@ -2511,6 +2515,7 @@ var glyphControls = {
         clusterControls.customclusternotaddedtolist = true;
         htmlGenerators.generateCheckList(sections, colorControls.colorlist);
         glyphControls.changedSizes[key] = 3;
+        glyphControls.changedGlyphs[key] = sections[key].shape
         sections[key].size = 3;
         htmlGenerators.generateClusterList(sections, colorControls.colorlist);
         currentParticles[key].material.map = sprites[sections[key].shape];
