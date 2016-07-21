@@ -646,25 +646,27 @@ public class ArtifactDAO {
         }
 
         //Calculate Stats and append
-        double[] means = new double[3];
-        int count = 0;
-        JsonParser jsonParser = new JsonParser();
-        JsonArray jsonArray = null;
+        if(fid == 0){
+            double[] means = new double[3];
+            int count = 0;
+            JsonParser jsonParser = new JsonParser();
+            JsonArray jsonArray = null;
 
-        for (Object point : points.values()) {
-            jsonArray = (JsonArray) jsonParser.parse(point.toString());
-            means[0] += jsonArray.get(0).getAsDouble();
-            means[1] += jsonArray.get(1).getAsDouble();
-            means[2] += jsonArray.get(2).getAsDouble();
-            count++;
+            for (Object point : points.values()) {
+                jsonArray = (JsonArray) jsonParser.parse(point.toString());
+                means[0] += jsonArray.get(0).getAsDouble();
+                means[1] += jsonArray.get(1).getAsDouble();
+                means[2] += jsonArray.get(2).getAsDouble();
+                count++;
+            }
+
+            means[0] = means[0]/count;
+            means[1] = means[1]/count;
+            means[2] = means[2]/count;
+
+            stats.put("means",means);
+            mainDoc.append(Constants.File.STATS,stats);
         }
-
-        means[0] = means[0]/count;
-        means[1] = means[1]/count;
-        means[2] = means[2]/count;
-
-        stats.put("means",means);
-        mainDoc.append(Constants.File.STATS,stats);
         String serialize = JSON.serialize(mainDoc);
         Logger.info("Retreived document with tid: " + tid + " fid: " + fid);
         return serialize;

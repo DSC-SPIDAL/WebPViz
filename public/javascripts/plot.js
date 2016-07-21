@@ -2277,7 +2277,6 @@ var clusterControls = {
 
                 var positions = new Float32Array(clusterdata.p.length * 3);
                 var colorarray = new Float32Array(clusterdata.p.length * 3);
-                var sizes = new Float32Array(clusterdata.p.length);
                 for (var k = 0; k < clusterdata.p.length; k++) {
                     var key = pointControls.pointLabelxKey[clusterdata.p[k]];
                     var p = pointControls.plotPoints[key];
