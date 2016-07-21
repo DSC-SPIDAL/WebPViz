@@ -314,12 +314,12 @@ var toolTipLabels = {
     initialized: false,
 
     initialize: function(){
-        var parameters = {'scale':0.05,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
+        var parameters = {'scale':0.10,'fillColor':{r: 255, g: 255, b: 255, a: .5}}
         toolTipLabels.sprite =  labelControls.makeTextSprite("",0.05, 0.03, -.121,parameters);
         toolTipLabels.canvas = toolTipLabels.sprite.material.map.image;
         toolTipLabels.context = toolTipLabels.canvas.getContext('2d');
         toolTipLabels.texture = toolTipLabels.sprite.material.map;
-        toolTipLabels.context.clearRect(0,0,256,128);
+        toolTipLabels.context.clearRect(0,0,256,256);
         threejsUtils.scene3d.add(toolTipLabels.sprite);
         toolTipLabels.raycaster = new THREE.Raycaster();
         toolTipLabels.raycaster.params.Points.threshold = toolTipLabels.calculateThreshhold();
@@ -343,7 +343,7 @@ var toolTipLabels = {
                         toolTipLabels.intersected = intersects[tempcount].object;
                     }else{
                         toolTipLabels.intersected = null;
-                        toolTipLabels.context.clearRect(0,0,256,128);
+                        toolTipLabels.context.clearRect(0,0,256,256);
                         toolTipLabels.texture.needsUpdate = true;
                         return
                     }
@@ -359,13 +359,13 @@ var toolTipLabels = {
                     }
                 }else if(toolTipLabels.intersected.geometry.name == ""){
                     toolTipLabels.intersected = null;
-                    toolTipLabels.context.clearRect(0,0,256,128);
+                    toolTipLabels.context.clearRect(0,0,256,256);
                     toolTipLabels.texture.needsUpdate = true;
                 }
             }
         }else{
             toolTipLabels.intersected = null;
-            toolTipLabels.context.clearRect(0,0,256,128);
+            toolTipLabels.context.clearRect(0,0,256,256);
             toolTipLabels.texture.needsUpdate = true;
         }
 
@@ -697,15 +697,18 @@ var labelControls = {
 
         var metrics = context.measureText(message);
         var textWidth = metrics.width;
-
+        if(textWidth > canvas.width){
+            canvas.width = textWidth*1.2;
+        }
         var cx = canvas.width / 2;
         var cy = canvas.height / 2;
         var tx = textWidth / 2.0;
         var ty = 12 / 2.0;
+
         var fillColor = {r: 255, g: 255, b: 255, a: .7};
         var borderColor = {r: 255, g: 0, b: 0, a: 1.0};
         var textColor = {r: 0, g: 0, b: 0, a: 1.0};
-        context.clearRect(0,0,256,128);
+        context.clearRect(0,0,256,256);
         labelControls.roundRect(context, cx - tx, cy + ty + 0.28 * 12,
             textWidth, 12 * labelControls.DESCENDER_ADJUST, 6, 1, borderColor, fillColor);
 
