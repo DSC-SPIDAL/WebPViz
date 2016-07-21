@@ -26,6 +26,7 @@ public class Constants {
         public static final String CLUSTERS = "clusters";
         public static final String EDGES = "edges";
         public static final String POINTS = "points";
+        public static final String STATS = "stats";
         public static final String TIME_SERIES_ID_FIELD = "tId";
     }
 

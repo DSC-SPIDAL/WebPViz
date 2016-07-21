@@ -1,5 +1,7 @@
 package db;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import com.mongodb.BasicDBList;
 import com.mongodb.client.FindIterable;
 import com.mongodb.util.JSON;
@@ -10,6 +12,8 @@ import models.xml.*;
 import org.apache.commons.io.FilenameUtils;
 import org.bson.Document;
 import play.Logger;
+import scala.util.parsing.json.JSONArray;
+import scala.util.parsing.json.JSONArray$;
 
 import java.io.*;
 import java.text.ParseException;
@@ -611,6 +615,7 @@ public class ArtifactDAO {
         Map<String, Object> clusters = new HashMap<>();
         Map<String, Object> edges = new HashMap<>();
         Map<String, Object> points = new HashMap<>();
+        Map<String, Object> stats = new HashMap<>();
         for (Document d : iterable) {
             Object clusterObjects = d.get(Constants.File.CLUSTERS);
             if (clusterObjects instanceof Document) {
@@ -639,9 +644,29 @@ public class ArtifactDAO {
         } else {
             mainDoc.append(Constants.File.POINTS, points);
         }
+
+        //Calculate Stats and append
+        double[] means = new double[3];
+        int count = 0;
+        JsonParser jsonParser = new JsonParser();
+        JsonArray jsonArray = null;
+
+        for (Object point : points.values()) {
+            jsonArray = (JsonArray) jsonParser.parse(point.toString());
+            means[0] += jsonArray.get(0).getAsDouble();
+            means[1] += jsonArray.get(1).getAsDouble();
+            means[2] += jsonArray.get(2).getAsDouble();
+            count++;
+        }
+
+        means[0] = means[0]/count;
+        means[1] = means[1]/count;
+        means[2] = means[2]/count;
+
+        stats.put("means",means);
+        mainDoc.append(Constants.File.STATS,stats);
         String serialize = JSON.serialize(mainDoc);
         Logger.info("Retreived document with tid: " + tid + " fid: " + fid);
-        // System.out.println(serialize);
         return serialize;
     }
 

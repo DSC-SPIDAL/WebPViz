@@ -1445,6 +1445,8 @@ var SingleGraphControls = {
             fileName = data.file;
             plotDesc = data.desc;
             uploader = data.uploader;
+            stats = data.stats;
+            means = stats.means;
             pointControls.maplabelstokeys(data.points);
             //temp only till data change
             var points = {};
@@ -1497,26 +1499,19 @@ var SingleGraphControls = {
                     var positions = new Float32Array(clusterdata.p.length * 3);
                     var colorarray = new Float32Array(clusterdata.p.length * 3);
                     var labelArray = [];
-                    var sizes = new Float32Array(clusterdata.p.length);
-                    xmean = 0;
-                    ymean = 0;
-                    zmean = 0;
                     for (var k = 0; k < clusterdata.p.length; k++) {
                         var p = pointControls.findPoint(data, clusterdata.p[k]);
                         if (!p) {
                             continue;
                         }
-                        var p0 = parseFloat(p[0]);
-                        var p1 = parseFloat(p[1]);
-                        var p2 = parseFloat(p[2]);
+                        var p0 = parseFloat(p[0]) - means[0];
+                        var p1 = parseFloat(p[1]) - means[1];
+                        var p2 = parseFloat(p[2]) - means[2];
                         var label = p[3];
                         positions[k * 3 + 0] = p0;
                         positions[k * 3 + 1] = p1;
                         positions[k * 3 + 2] = p2;
                         labelArray.push(label);
-                        xmean += p0;
-                        ymean += p1;
-                        zmean += p2;
 
                         var tempcolor = new THREE.Color("rgb(" + clustercolor.r + "," + clustercolor.g + "," + clustercolor.b + ")");
                         colorarray[k * 3 + 0] = tempcolor.r;
@@ -1528,29 +1523,19 @@ var SingleGraphControls = {
                         pointcolors[clusterdata.p[k]] = tempcolor;
                     }
 
-                    xmean = xmean / clusterdata.p.length;
-                    ymean = ymean / clusterdata.p.length;
-                    zmean = zmean / clusterdata.p.length;
                     geometry[clusterid].addAttribute('position', new THREE.BufferAttribute(positions, 3));
                     geometry[clusterid].addAttribute('color', new THREE.BufferAttribute(colorarray, 3));
                     geometry[clusterid].addAttribute('labels', new THREE.BufferAttribute(labelArray, 1));
                     geometry[clusterid].name = clusterdata.l;
-                    xmeantotal += xmean;
-                    ymeantotal += ymean;
-                    zmeantotal += zmean;
 
                 }
             }
 
-            xmeantotal = xmeantotal / clusterCount;
-            ymeantotal = ymeantotal / clusterCount;
-            zmeantotal = zmeantotal / clusterCount;
             threejsUtils.scene3d = new THREE.Scene();
             threejsUtils.scene3d.add(threejsUtils.camera);
 
             for (var key in geometry) {
                 if (geometry.hasOwnProperty(key)) {
-                     geometry[key].translate(-xmeantotal, -ymeantotal, -zmeantotal);
                     currentParticles[key] = new THREE.Points(geometry[key], threejsUtils.loadMatrial(sections[key].size, sections[key].shape, false,sections[key].color.a, false));
                     if (glyphControls.changedGlyphs.hasOwnProperty(key)) {
                         currentParticles[key].material.map = sprites[glyphControls.changedGlyphs[key]];
