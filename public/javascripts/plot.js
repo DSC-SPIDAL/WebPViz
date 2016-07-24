@@ -106,6 +106,9 @@ function intialSetup(settings, reinit) {
             threejsUtils.camera.matrix.fromArray(JSON.parse(cameraState));
             threejsUtils.camera.matrix.decompose(threejsUtils.camera.position, threejsUtils.camera.quaternion, threejsUtils.camera.scale);
         }
+        if(sett.cameratarget){
+            threejsUtils.controls.target.set(sett.cameratarget.x,sett.cameratarget.y,sett.cameratarget.z)
+        }
         if (sett.trajectoryData) {
             trajectoryData.load(sett.trajectoryData);
         }
@@ -1356,7 +1359,8 @@ var threejsUtils = {
     },
     setTo2D: function(){
         this.mode = "2d";
-        this.camera.position.set(0, 0, this.camera.position.z);
+        this.camera.up.set(0,1,0)
+        this.controls.target.set(this.camera.position.x, this.camera.position.y,0)
         this.controls.noRotate = true;
         this.controls.flipStateToPan();
     },
@@ -2113,6 +2117,7 @@ var saveAndVersionControls = {
             obj['clusterColors'] = colorControls.trueColorList;
             obj['lookVector'] = lookAtJson;
             obj['cameraPosition'] = threejsUtils.camera.position;
+            obj['cameratarget'] = threejsUtils.controls.target;
             obj['cameraup'] = threejsUtils.camera.up;
             obj['rotation'] = threejsUtils.camera.rotation;
             obj['zoom'] = threejsUtils.camera.zoom;
@@ -3063,7 +3068,7 @@ var controlBox = {
     pointsize: 1,
     glyphsize: 1,
     loadSize: 10,
-    axisLength:.2,
+    axisLength:2000,
     maxPlotsStored: 20,
     settings: "chrome",
     settingsDat: null,
@@ -3101,7 +3106,7 @@ var controlBox = {
         gui.add(controlBox, 'rotateSpeed', 0.1, 50.0, controlBox.rotateSpeed).name("Rotate Speed").onFinishChange(pointControls.changeRotateSpeed);
         gui.add(controlBox, 'zoomSpeed', 1, 10.0, controlBox.zoomSpeed).name("Zoom Speed").onFinishChange(pointControls.changeZoomSpeed);
         gui.add(controlBox, 'panSpeed', 0.1, 20.0, controlBox.panSpeed).name("Pan Speed").onFinishChange(pointControls.changePanSpeed);
-        gui.add(axisControls, 'axisLength', 0.001, 2.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
+        gui.add(axisControls, 'axisLength', 200, 2000.0, controlBox.glyphsize).name("Axis Length").onFinishChange(axisControls.changeAxis);
         settingsDat = gui.add(controlBox, 'settings', kys).name("Settings").onFinishChange(controlBox.settingChange);
     },
 
