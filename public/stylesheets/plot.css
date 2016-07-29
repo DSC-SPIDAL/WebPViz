@@ -30,6 +30,49 @@
     color: #ffffff;
 }
 
+.scale-x-single {
+    position: absolute;
+    left: 23px;
+    bottom: 90px;
+    width: 2px;
+    height: 70px;
+    background: red;
+    z-index:2100;
+    display: none;
+
+}
+
+.scale-y-single {
+    position: absolute;
+    left: 23px;
+    bottom: 90px;
+    width: 200px;
+    height: 2px;
+    background: red;
+    z-index:2100;
+    display: none;
+
+}
+
+.scale-x-single-label {
+    position: absolute;
+    left: 20px;
+    bottom: 82px;
+    color: red;
+    z-index:2100;
+    display: none;
+}
+
+.scale-y-single-label {
+    position: absolute;
+    left: 23px;
+    bottom: 90px;
+    color: red;
+    z-index:2100;
+    display: none;
+
+}
+
 .plot-controls{
     position: absolute;
     right: 20px;

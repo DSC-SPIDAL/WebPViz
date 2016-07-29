@@ -213,7 +213,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 	this.zoomCamera = function () {
 
 		var factor;
-
+		if(threejsUtils.mode == "2d") viewControls.drawScales();
 		if ( _state === STATE.TOUCH_ZOOM_PAN ) {
 
 			factor = _touchZoomDistanceStart / _touchZoomDistanceEnd;

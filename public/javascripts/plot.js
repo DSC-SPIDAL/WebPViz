@@ -267,6 +267,9 @@ var events = {
         if(event.keyCode == 51 && event.shiftKey){
             threejsUtils.setTo3D();
         }
+        if(event.keyCode == 83 && event.shiftKey){
+            viewControls.drawScales();
+        }
 
     },
     onKeyUp: function(event){
@@ -1358,6 +1361,15 @@ var threejsUtils = {
 
         return vector;
     },
+    convertWorldCordToScreenord: function(positionVector){
+        var canvas = document.getElementById("canvas3d").getBoundingClientRect();
+        var widthHalf = canvas.width / 2, heightHalf = canvas.height / 2;
+
+        positionVector.project(threejsUtils.camera);
+        positionVector.x = ( positionVector.x * widthHalf ) + widthHalf;
+        positionVector.y = - ( positionVector.y * heightHalf ) + heightHalf;
+        return positionVector
+    },
     setTo2D: function(){
         this.mode = "2d";
         this.camera.up.set(0,1,0)
@@ -1369,6 +1381,10 @@ var threejsUtils = {
         this.mode = "3d";
         this.controls.noRotate = false;
         this.controls.flipStateToRotate();
+        $('#scales-x').show();
+        $('#scales-y').show();
+        $('#scale-x-single-label').show();
+        $('#scale-y-single-label').show();
 
     },
     rotateCameraonAxis: function(axisname,amount){
@@ -1578,6 +1594,9 @@ var SingleGraphControls = {
             saveAndVersionControls.savePlotSettings(controlBox.settings);
             utilsControls.itemsLoaded = utilsControls.totalItemsToLoad;
             $("#progress").css({display: "none"});
+            if(threejsUtils.mode == "2d"){
+                viewControls.drawScales();
+            }
         });
     },
     reInitGraph: function(){
@@ -2131,6 +2150,9 @@ var saveAndVersionControls = {
 }
 
 var viewControls = {
+    positionVectorCenter: null,
+    positionVectorX: null,
+    positionVectorY: null,
     resetView: function(){
         threejsUtils.controls.reset();
     },
@@ -2213,6 +2235,45 @@ var viewControls = {
         }catch(err){
             return false;
         }
+
+    },
+    drawScales: function(){
+        var child = threejsUtils.scene3d.children[0];
+        var count = 1;
+        while(!(child instanceof THREE.Points)){
+            if(count >= threejsUtils.scene3d.children.length){
+                break;
+            }
+
+            child = threejsUtils.scene3d.children[count];
+            count = count + 1;
+        }
+        var x = child.geometry.attributes.position.array[0];
+        var y = child.geometry.attributes.position.array[1];
+        var z = child.geometry.attributes.position.array[2];
+        var positionVectorCenter = new THREE.Vector3(x,y,z);
+        var positionVectorX = new THREE.Vector3(x+1,y,z);
+        var positionVectorY = new THREE.Vector3(x,y+1,z);
+
+        threejsUtils.convertWorldCordToScreenord(positionVectorCenter)
+        threejsUtils.convertWorldCordToScreenord(positionVectorX)
+        threejsUtils.convertWorldCordToScreenord(positionVectorY)
+
+        var scalex = Math.abs(positionVectorCenter.x - positionVectorX.x);
+        var scaley = Math.abs(positionVectorCenter.y - positionVectorY.y);
+
+        $('#scales-x').css('height', scaley + 'px');
+        $('#scales-y').css('width', scalex + 'px');
+
+        $('#scale-x-single-label').css('left', (scalex + 10 + 23) + 'px');
+        $('#scale-y-single-label').css('bottom', (scaley + 10 + 90) + 'px');
+
+        $('#scales-x').show();
+        $('#scales-y').show();
+
+        $('#scale-x-single-label').show();
+        $('#scale-y-single-label').show();
+
 
     }
 }
