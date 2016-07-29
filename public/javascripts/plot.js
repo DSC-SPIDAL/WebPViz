@@ -1582,13 +1582,13 @@ var SingleGraphControls = {
     },
     reInitGraph: function(){
         $("#progress").css({display: "block"});
-        //currentParticles = [];
-        //colorControls.colorlist = {};
-        //colorControls.trueColorList = {};
-        //threejsUtils.setupThreeJs();
+        currentParticles = [];
+        colorControls.colorlist = {};
+        colorControls.trueColorList = {};
+        threejsUtils.setupThreeJs();
         intialSetup(allSettings, true);
         // initPlotData();
-      //  SingleGraphControls.generateGraph();
+        SingleGraphControls.generateGraph();
         controlBox.updateSingleGui();
     }
 
