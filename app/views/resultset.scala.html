@@ -36,6 +36,7 @@
                         <span class="glyphicon glyphicon-th-list"></span>
                     </button>
                     <button id="custom-clusters" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="Custom Clusters" data-toggle="modal" data-target="#cluster-modal"  data-toggle="tooltip" data-placement="bottom" title="Create Custom Clusters"><span class="glyphicon glyphicon-th"></span></button>
+                    <button id="view-state" type="button" class="btn btn-default btn-circle margin-left-five" aria-label="View State Pan Zoom" data-toggle="modal" data-target="#view-settings-modal"  data-toggle="tooltip" data-placement="bottom" title="View State Pan Zoom"><span class="glyphicon glyphicon-map-marker"></span></button>
                 </div>
             </div>
         </div>
@@ -175,6 +176,35 @@
 
         </div>
     </div>
+
+    <div id="view-settings-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">View/Update Pan-Zoom</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="cluster-label">Current Values</label>
+                            <textarea type="text" class="form-control" id="cwcopy" placeholder="Current Pan Zoom Values"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="points">Update Pan Zoom<span id="uverror" class="uverror-class"></span>
+                            </label>
+                            <textarea type="text" class="form-control" id="cwupdate" placeholder="Enter pan zoom values"></textarea>
+                        </div>
+                        <button type="submit" id="updateviewsettings" class="btn btn-default btn-success">Update</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"  class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <script>
     $(function(){
         $('#multirowcolor').jPicker({
@@ -192,6 +222,33 @@
             e.preventDefault();
             clusterControls.addCustomCluster(true);
             $('#cluster-modal').modal('hide');
+        });
+
+        $("#updateviewsettings").on("click", function(e) {
+            e.preventDefault();
+            var updateString = $("#cwupdate").val()
+            if(updateString == null || updateString == "" || updateString == undefined){
+                $('#uverror').text("  - please enter update JSON");
+            }else{
+                $('#uverror').text("");
+                var updated = viewControls.changeFocus(updateString);
+                if(updated){
+                    $('#view-settings-modal').modal('hide');
+                }else{
+                    $('#uverror').text("  - please enter valid update JSON");
+                }
+            }
+
+        });
+
+        $("#view-settings-modal").on("show.bs.modal", function(){
+            console.log("shown")
+            var panzoom = {}
+            panzoom['target'] = threejsUtils.controls.target;
+            panzoom['position'] = threejsUtils.camera.position;
+            panzoom['mode'] = threejsUtils.mode;
+
+            $("#cwcopy").val(JSON.stringify(panzoom));
         });
     });
     </script>

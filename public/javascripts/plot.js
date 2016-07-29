@@ -812,6 +812,7 @@ var threejsUtils = {
     controls: null,
     stats: null,
     reInitialize: false,
+    loadFromSave:false,
     mouse: null,
     camera: null,
     mode: "3d",
@@ -1581,13 +1582,13 @@ var SingleGraphControls = {
     },
     reInitGraph: function(){
         $("#progress").css({display: "block"});
-        currentParticles = [];
-        colorControls.colorlist = {};
-        colorControls.trueColorList = {};
-        threejsUtils.setupThreeJs();
+        //currentParticles = [];
+        //colorControls.colorlist = {};
+        //colorControls.trueColorList = {};
+        //threejsUtils.setupThreeJs();
         intialSetup(allSettings, true);
         // initPlotData();
-        SingleGraphControls.generateGraph();
+      //  SingleGraphControls.generateGraph();
         controlBox.updateSingleGui();
     }
 
@@ -2193,6 +2194,26 @@ var viewControls = {
         }
         trajectoryData.addSprites(threejsUtils.scene3d, seqId, id);
         delete clusterControls.removedclusters[id];
+    },
+    changeFocus: function(panzoomJson){
+        try{
+            var panzoomObj = JSON.parse(panzoomJson);
+            var target = panzoomObj.target;
+            var position = panzoomObj.position;
+            var mode = panzoomObj.mode;
+            threejsUtils.controls.target.set(target.x,target.y,target.z)
+            threejsUtils.camera.position.set(position.x,position.y,position.z)
+
+            if(mode == "2d"){
+                threejsUtils.setTo2D()
+            }else if(mode == "3d"){
+                threejsUtils.setTo3D()
+            }
+            return true;
+        }catch(err){
+            return false;
+        }
+
     }
 }
 var clusterControls = {
@@ -3126,5 +3147,6 @@ var controlBox = {
     settingChange: function(){
         allSettings.selected = controlBox.settings;
         threejsUtils.reInitialize = true;
+        threejsUtils.loadFromSave = true;
     }
 }
