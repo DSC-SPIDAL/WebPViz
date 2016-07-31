@@ -1605,6 +1605,7 @@ var SingleGraphControls = {
         colorControls.colorlist = {};
         colorControls.trueColorList = {};
         threejsUtils.setupThreeJs();
+        toolTipLabels.initialized = false;
         intialSetup(allSettings, true);
         // initPlotData();
         SingleGraphControls.generateGraph();
