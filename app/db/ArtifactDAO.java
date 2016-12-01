@@ -139,7 +139,12 @@ public class ArtifactDAO {
             if(!clusterDBObjectList.containsKey(clusterkey)){
                 Document tempcluster = new Document();
                 tempcluster.put(Constants.Cluster.KEY, clusterkey);
-                tempcluster.put(Constants.Cluster.LABEL, clusterkey);
+                if(point.getLabel() != null && point.getLabel() != "None" && point.getLabel() != "" && point.getLabel() != " "){
+                    tempcluster.put(Constants.Cluster.LABEL, point.getLabel());
+                }else{
+                    tempcluster.put(Constants.Cluster.LABEL, clusterkey);
+                }
+
                 tempcluster.put(Constants.Cluster.SIZE, 1);
                 tempcluster.put(Constants.Cluster.VISIBILE, 1);
                 tempcluster.put(Constants.Cluster.SHAPE, 3);
