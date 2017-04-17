@@ -170,7 +170,7 @@ public class Application extends Controller {
      */
     public static Result uploadDAPWC() throws IOException{
         ArtifactDAO db = ArtifactDAO.getInstance();
-        String groupName = "DAPWCTempCOllection";
+        String groupName = "DAPWCTempCollection";
         String useremail = "webplotviziu";
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart resultSet = body.getFile("file");
