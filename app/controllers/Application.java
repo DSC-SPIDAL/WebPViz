@@ -165,6 +165,15 @@ public class Application extends Controller {
         return GO_DASHBOARD;
     }
 
+    /**
+     * This is a temp method used for a proof of concept of DAPWC automation
+     */
+    public static Result uploadDAPWC() throws IOException{
+        String groupName = "DAPWCTempCOllection";
+        String useremail = "webplotviziu";
+        
+    }
+
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {
         ArtifactDAO db = ArtifactDAO.getInstance();

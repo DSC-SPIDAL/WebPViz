@@ -93,3 +93,8 @@ GET         /artifact/:id/comment               controllers.CommentController.ge
 GET         /search/bytag/:tag                  controllers.SearchController.searchArtifactsByTag(tag: String)
 GET         /public/search/bytag/:tag           controllers.SearchController.searchArtifactsByTagPublic(tag: String)
 
+#special set of rest commands used for DAPWC test, these need to be modified to allow proper security
+
+POST        /groups/public/dapwc/create                      controllers.GroupController.dapwcGroup()
+POST        /upload/public/dapwc                            controllers.Application.upload()
+

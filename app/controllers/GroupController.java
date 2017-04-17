@@ -56,6 +56,20 @@ public class GroupController extends Controller {
             return badRequest(dashboard.render(loggedInUser, true, "Existing group", db.timeSeriesList(loggedInUser.email), GroupsDAO.allGroups(loggedInUser.email), false, false, null, null, false, "Dashboard"));
         }
     }
+    /**
+     * This is a temp method used for a proof of concept of DAPWC automation
+     */
+    public static Result dapwcGroup(){
+        String name = "DAPWCTempCOllection";
+        String useremail = "webplotviziu";
+        Group group = new Group(useremail, name);
+        if (GroupsDAO.groupExists(group)) {
+            return ok("{status: 'exists'}").as("application/json");
+        }else{
+            GroupsDAO.insertGroup(new Group(useremail, name, "Temp Collection used to upload plot files from DAPWC automation run"));
+            return ok("{status: 'created'}").as("application/json");
+        }
+    }
 
     @Security.Authenticated(Secured.class)
     public static Result updateGroup() {
