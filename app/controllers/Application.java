@@ -187,7 +187,7 @@ public class Application extends Controller {
             if (isZipped) {
                 db.insertZipFile(originalFileName, description, useremail, file, groupName);
             } else {
-                db.insertSingleFile(originalFileName, description, useremail, file, groupName);
+                db.insertSingleFile(originalFileName, description, useremail, file, groupName, true);
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);
@@ -228,7 +228,7 @@ public class Application extends Controller {
             if (isZipped) {
                 db.insertZipFile(originalFileName, description, loggedInUser.email, file, group);
             } else {
-                db.insertSingleFile(originalFileName, description, loggedInUser.email, file, group);
+                db.insertSingleFile(originalFileName, description, loggedInUser.email, file, group, false);
             }
         } catch (Exception e) {
             Logger.error("Failed to create time series from zip", e);

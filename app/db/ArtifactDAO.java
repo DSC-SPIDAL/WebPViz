@@ -39,7 +39,7 @@ public class ArtifactDAO {
      * @param file the actual file
      * @throws Exception  if the file cannot be inserted
      */
-    public void insertSingleFile(String pvizName, String description, String uploader, File file, String group) throws Exception {
+    public void insertSingleFile(String pvizName, String description, String uploader, File file, String group, boolean isPublic) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
         String dateString = format.format(new Date());
         int timeSeriesId = Math.abs(new Random().nextInt());
@@ -51,6 +51,7 @@ public class ArtifactDAO {
         mainDoc.append(Constants.Artifact.DATE_CREATION_FIELD, dateString);
         mainDoc.append(Constants.Artifact.STATUS_FIELD, "active");
         mainDoc.append(Constants.Artifact.GROUP_FIELD, group);
+        mainDoc.append(Constants.Artifact.PUBLIC, isPublic);
         mainDoc.append(Constants.Artifact.VERSION, 1);
         mainDoc.append(Constants.Artifact.TYPE, Constants.ArtifactType.PLOTVIZ);
 
