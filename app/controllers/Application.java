@@ -168,11 +168,34 @@ public class Application extends Controller {
     /**
      * This is a temp method used for a proof of concept of DAPWC automation
      */
-//    public static Result uploadDAPWC() throws IOException{
-//        String groupName = "DAPWCTempCOllection";
-//        String useremail = "webplotviziu";
-//
-//    }
+    public static Result uploadDAPWC() throws IOException{
+        ArtifactDAO db = ArtifactDAO.getInstance();
+        String groupName = "DAPWCTempCOllection";
+        String useremail = "webplotviziu";
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart resultSet = body.getFile("file");
+        String originalFileName = resultSet.getFilename();
+        String[] desc = body.asFormUrlEncoded().get("desc");
+        String description = "";
+        if (desc.length >= 1) {
+            description = desc[0];
+        }
+        File file = resultSet.getFile();
+        Logger.info(String.format("User %s uploaded a new result of name %s", useremail, originalFileName));
+        boolean isZipped = new ZipInputStream(new FileInputStream(file)).getNextEntry() != null;
+        try {
+            if (isZipped) {
+                db.insertZipFile(originalFileName, description, useremail, file, groupName);
+            } else {
+                db.insertSingleFile(originalFileName, description, useremail, file, groupName);
+            }
+        } catch (Exception e) {
+            Logger.error("Failed to create time series from zip", e);
+            return badRequest("{status: 'error'}").as("application/json");
+        }
+
+        return ok("{status: 'uploaded'}").as("application/json");
+    }
 
     @Security.Authenticated(Secured.class)
     public static Result upload() throws IOException {

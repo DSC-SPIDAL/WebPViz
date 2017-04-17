@@ -96,5 +96,6 @@ GET         /public/search/bytag/:tag           controllers.SearchController.sea
 #special set of rest commands used for DAPWC test, these need to be modified to allow proper security
 
 POST        /groups/public/dapwc/create                      controllers.GroupController.dapwcGroup()
-POST        /upload/public/dapwc                            controllers.Application.upload()
+POST        /upload/public/dapwc                            controllers.Application.uploadDAPWC()
+#DELETE        /delete/public/dapwc                            controllers.Application.uploadDAPWC()
 
