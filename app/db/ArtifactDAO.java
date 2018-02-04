@@ -658,7 +658,11 @@ public class ArtifactDAO {
             JsonArray jsonArray = null;
 
             for (Object point : points.values()) {
-                jsonArray = (JsonArray) jsonParser.parse(point.toString());
+                String temp = point.toString();
+                temp = temp.replaceAll(";","");
+                temp = temp.replaceAll("size=","_");
+                temp = temp.replaceAll("=","_");
+                jsonArray = (JsonArray) jsonParser.parse(temp);
                 means[0] += jsonArray.get(0).getAsDouble();
                 means[1] += jsonArray.get(1).getAsDouble();
                 means[2] += jsonArray.get(2).getAsDouble();
