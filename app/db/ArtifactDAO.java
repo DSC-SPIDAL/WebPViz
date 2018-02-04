@@ -659,7 +659,11 @@ public class ArtifactDAO {
             JsonArray jsonArray = null;
 
             for (Object point : points.values()) {
-                jsonArray = (JsonArray) jsonParser.parse(point.toString());
+                String temp = point.toString();
+                temp = temp.replaceAll(";","");
+                temp = temp.replaceAll("size=","_");
+                temp = temp.replaceAll("=","_");
+                jsonArray = (JsonArray) jsonParser.parse(temp);
                 means[0] += jsonArray.get(0).getAsDouble();
                 means[1] += jsonArray.get(1).getAsDouble();
                 means[2] += jsonArray.get(2).getAsDouble();
@@ -669,7 +673,7 @@ public class ArtifactDAO {
             means[0] = means[0]/count;
             means[1] = means[1]/count;
             means[2] = means[2]/count;
-
+            System.out.println();
             stats.put("means",means);
             mainDoc.append(Constants.File.STATS,stats);
         }
