@@ -33,11 +33,12 @@ public class ArtifactDAO {
 
     /**
      * Insert a single fie pviz file or a txt file
-     * @param pvizName name of the uploaded file
+     *
+     * @param pvizName    name of the uploaded file
      * @param description description of the file
-     * @param uploader the uploader name
-     * @param file the actual file
-     * @throws Exception  if the file cannot be inserted
+     * @param uploader    the uploader name
+     * @param file        the actual file
+     * @throws Exception if the file cannot be inserted
      */
     public void insertSingleFile(String pvizName, String description, String uploader, File file, String group, boolean isPublic) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
@@ -85,10 +86,13 @@ public class ArtifactDAO {
                 if (split.length == 5) {
                     PVizPoint point = new PVizPoint(i++, 1, "None", new Location(split[1], split[2], split[3]));
                     points.add(point);
-                } else if (split.length == 3){
+                } else if (split.length == 4) {
+                    PVizPoint point = new PVizPoint(i++, Integer.valueOf(split[3]), "None", new Location(split[1], split[2], "0.0"));
+                    points.add(point);
+                } else if (split.length == 3) {
                     PVizPoint point = new PVizPoint(i++, 1, "None", new Location(split[0], split[1], split[2]));
                     points.add(point);
-                } else if(split.length == 6){
+                } else if (split.length == 6) {
                     PVizPoint point = new PVizPoint(i++, Integer.valueOf(split[4]), split[5], new Location(split[1], split[2], split[3]));
                     points.add(point);
                 }
@@ -99,18 +103,19 @@ public class ArtifactDAO {
         return points;
     }
 
-  /**
-   * Insert a text file. Text files doesn't have clusters or edges. They only have points.
-   * @param id id
-   * @param name name
-   * @param description description
-   * @param uploader uploader
-   * @param file file
-   * @param parent parent
-   * @param sequenceNumber sequence number
-   * @param originalFileName original file name
-   * @throws Exception
-   */
+    /**
+     * Insert a text file. Text files doesn't have clusters or edges. They only have points.
+     *
+     * @param id               id
+     * @param name             name
+     * @param description      description
+     * @param uploader         uploader
+     * @param file             file
+     * @param parent           parent
+     * @param sequenceNumber   sequence number
+     * @param originalFileName original file name
+     * @throws Exception
+     */
     private void insertTextFile(int id, String name, String description, String uploader, InputStream file,
                                 int parent, Long sequenceNumber, String originalFileName) throws Exception {
         MongoConnection con = MongoConnection.getInstance();
@@ -137,19 +142,19 @@ public class ArtifactDAO {
 
             tempcount++;
             int clusterkey = point.getClusterkey();
-            if(!clusterDBObjectList.containsKey(clusterkey)){
+            if (!clusterDBObjectList.containsKey(clusterkey)) {
                 Document tempcluster = new Document();
                 tempcluster.put(Constants.Cluster.KEY, clusterkey);
-                if(point.getLabel() != null && point.getLabel() != "None" && point.getLabel() != "" && point.getLabel() != " "){
+                if (point.getLabel() != null && point.getLabel() != "None" && point.getLabel() != "" && point.getLabel() != " ") {
                     tempcluster.put(Constants.Cluster.LABEL, point.getLabel());
-                }else{
+                } else {
                     tempcluster.put(Constants.Cluster.LABEL, clusterkey);
                 }
 
                 tempcluster.put(Constants.Cluster.SIZE, 1);
                 tempcluster.put(Constants.Cluster.VISIBILE, 1);
                 tempcluster.put(Constants.Cluster.SHAPE, 3);
-                tempcluster.put(Constants.Cluster.COLOR, color(255,255,255,255));
+                tempcluster.put(Constants.Cluster.COLOR, color(255, 255, 255, 255));
                 clusterDBObjectList.put(clusterkey, tempcluster);
             }
 
@@ -159,7 +164,7 @@ public class ArtifactDAO {
                 clusterPoints = new ArrayList<Integer>();
                 pointsForClusters.put(clusterkey, clusterPoints);
             }
-            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(),point.getLabel());
+            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(), point.getLabel());
             // add the key to cluster and point to point list
             clusterPoints.add(pointKey);
             pointList.put(Integer.toString(pointKey), pointDBObject);
@@ -179,7 +184,7 @@ public class ArtifactDAO {
         }
 
         // remove the clusters without any points
-        for(Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Integer, Document> entry = it.next();
             if (!pointsForClusters.containsKey(entry.getKey())) {
                 it.remove();
@@ -238,6 +243,7 @@ public class ArtifactDAO {
 
     /**
      * Delete the time series files
+     *
      * @param timeSeriesId delete the file
      * @return true if delete successful
      */
@@ -250,10 +256,11 @@ public class ArtifactDAO {
 
     /**
      * Insert a zip file containing the time series files
-     * @param pvizName name of the uploaded plotviz file
+     *
+     * @param pvizName    name of the uploaded plotviz file
      * @param description description
-     * @param uploader the uploader id
-     * @param fileName file name
+     * @param uploader    the uploader id
+     * @param fileName    file name
      * @throws Exception if an error happens while inserting
      */
     public void insertZipFile(String pvizName, String description, String uploader, File fileName, String group) throws Exception {
@@ -416,7 +423,7 @@ public class ArtifactDAO {
                 clusterPoints = new ArrayList<Integer>();
                 pointsForClusters.put(clusterkey, clusterPoints);
             }
-            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(),point.getLabel());
+            List<String> pointDBObject = createPoint(point.getLocation().getX(), point.getLocation().getY(), point.getLocation().getZ(), point.getLabel());
             // add the key to cluster and point to point list
             clusterPoints.add(pointKey);
             pointList.put(Integer.toString(pointKey), pointDBObject);
@@ -436,7 +443,7 @@ public class ArtifactDAO {
         }
 
         // remove the clusters without any points
-        for(Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<Integer, Document>> it = clusterDBObjectList.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Integer, Document> entry = it.next();
             if (!pointsForClusters.containsKey(entry.getKey())) {
                 it.remove();
@@ -530,12 +537,13 @@ public class ArtifactDAO {
 
     /**
      * Constructs the root cluster object
-     * @param id id
-     * @param name name
-     * @param description description
-     * @param uploader user
-     * @param parent the big file
-     * @param sequenceNumber sequence
+     *
+     * @param id               id
+     * @param name             name
+     * @param description      description
+     * @param uploader         user
+     * @param parent           the big file
+     * @param sequenceNumber   sequence
      * @param originalFileName original file
      * @return document
      */
@@ -553,6 +561,7 @@ public class ArtifactDAO {
 
     /**
      * Create a point document
+     *
      * @param x
      * @param y
      * @param z
@@ -625,12 +634,12 @@ public class ArtifactDAO {
         for (Document d : iterable) {
             Object clusterObjects = d.get(Constants.File.CLUSTERS);
             if (clusterObjects instanceof Document) {
-                clusters.putAll((Document)clusterObjects);
+                clusters.putAll((Document) clusterObjects);
             }
 
             Object edgeObjects = d.get(Constants.File.EDGES);
             if (edgeObjects instanceof Document) {
-                edges.putAll((Document)edgeObjects);
+                edges.putAll((Document) edgeObjects);
             }
             Object pointObjects = d.get(Constants.File.POINTS);
             if (pointObjects instanceof Document) {
@@ -652,7 +661,7 @@ public class ArtifactDAO {
         }
 
         //Calculate Stats and append
-        if(fid == 0){
+        if (fid == 0) {
             double[] means = new double[3];
             int count = 0;
             JsonParser jsonParser = new JsonParser();
@@ -660,9 +669,9 @@ public class ArtifactDAO {
 
             for (Object point : points.values()) {
                 String temp = point.toString();
-                temp = temp.replaceAll(";","");
-                temp = temp.replaceAll("size=","_");
-                temp = temp.replaceAll("=","_");
+                temp = temp.replaceAll(";", "");
+                temp = temp.replaceAll("size=", "_");
+                temp = temp.replaceAll("=", "_");
                 jsonArray = (JsonArray) jsonParser.parse(temp);
                 means[0] += jsonArray.get(0).getAsDouble();
                 means[1] += jsonArray.get(1).getAsDouble();
@@ -670,12 +679,12 @@ public class ArtifactDAO {
                 count++;
             }
 
-            means[0] = means[0]/count;
-            means[1] = means[1]/count;
-            means[2] = means[2]/count;
+            means[0] = means[0] / count;
+            means[1] = means[1] / count;
+            means[2] = means[2] / count;
             System.out.println();
-            stats.put("means",means);
-            mainDoc.append(Constants.File.STATS,stats);
+            stats.put("means", means);
+            mainDoc.append(Constants.File.STATS, stats);
         }
         String serialize = JSON.serialize(mainDoc);
         Logger.info("Retreived document with tid: " + tid + " fid: " + fid);
@@ -690,7 +699,7 @@ public class ArtifactDAO {
         for (Document d : iterable) {
             Object clusterObjects = d.get(Constants.File.CLUSTERS);
             if (clusterObjects instanceof List) {
-                for (Object c : (List)clusterObjects) {
+                for (Object c : (List) clusterObjects) {
                     Document clusterDocument = (Document) c;
                     Cluster cluster = new Cluster();
                     cluster.resultSet = fid;
@@ -714,7 +723,7 @@ public class ArtifactDAO {
     private Color color(Object document) {
         if (document instanceof List && ((List) document).size() >= 4) {
             List colors = (List) document;
-            return new Color((Integer)colors.get(0), (Integer)colors.get(1), (Integer)colors.get(2), (Integer)colors.get(3));
+            return new Color((Integer) colors.get(0), (Integer) colors.get(1), (Integer) colors.get(2), (Integer) colors.get(3));
         }
         return null;
     }
@@ -751,7 +760,7 @@ public class ArtifactDAO {
         for (Document document : iterable) {
             Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject instanceof List) {
-                for (Object documentObject : (List)resultSetsObject) {
+                for (Object documentObject : (List) resultSetsObject) {
                     Document resultDocument = (Document) documentObject;
                     int fId = (Integer) resultDocument.get(Constants.Artifact.ID_FIELD);
                     ResultSet resultSet = new ResultSet();
@@ -784,7 +793,7 @@ public class ArtifactDAO {
         for (Document document : iterable) {
             Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject instanceof List) {
-                for (Object documentObject : (List)resultSetsObject) {
+                for (Object documentObject : (List) resultSetsObject) {
                     Document resultDocument = (Document) documentObject;
                     ResultSet resultSet = new ResultSet();
                     try {
@@ -859,7 +868,7 @@ public class ArtifactDAO {
             }
             Object resultSetsObject = document.get(Constants.Artifact.FILES);
             if (resultSetsObject != null && resultSetsObject instanceof List) {
-                if (((List)resultSetsObject).size() > 1) {
+                if (((List) resultSetsObject).size() > 1) {
                     timeSeries.t = "T";
                 } else {
                     timeSeries.t = "S";
@@ -921,7 +930,7 @@ public class ArtifactDAO {
                 e.printStackTrace();
             }
             if (resultSetsObject != null && resultSetsObject instanceof List) {
-                if (((List)resultSetsObject).size() > 1) {
+                if (((List) resultSetsObject).size() > 1) {
                     timeSeries.t = "T";
                 } else {
                     timeSeries.t = "S";
